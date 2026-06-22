@@ -65,24 +65,24 @@ async function ingestBlock(chainId, url, blk) {
     }
   });
 
-  db.writeBlockBundle({ block, txns: txnRows, logs: logRows, transfers: xferRows, tokens: tokenRows });
+  await db.writeBlockBundle({ block, txns: txnRows, logs: logRows, transfers: xferRows, tokens: tokenRows });
 }
 
 async function ingestNetwork(net) {
   const { chainId, rpc: url } = net;
   const head = hexToInt(await rpc(url, "eth_blockNumber"));
   if (!Number.isFinite(head)) return null;
-  let last = db.getSyncState(chainId);
+  let last = await db.getSyncState(chainId);
   if (last >= head) return null;
 
   // Reorg guard: if our stored tip hash no longer matches the chain, re-anchor a few blocks back.
   if (last >= 0) {
     const onchain = await rpc(url, "eth_getBlockByNumber", ["0x" + last.toString(16), false]).catch(() => null);
-    const stored = db.blockHashAt(chainId, last);
+    const stored = await db.blockHashAt(chainId, last);
     if (onchain && stored && lc(onchain.hash) !== lc(stored)) {
       const back = Math.max(0, last - REORG_DEPTH);
-      db.rollbackFrom(chainId, back);
-      db.setSyncState(chainId, back - 1);
+      await db.rollbackFrom(chainId, back);
+      await db.setSyncState(chainId, back - 1);
       last = back - 1;
     }
   }
@@ -93,14 +93,14 @@ async function ingestNetwork(net) {
     const blk = await rpc(url, "eth_getBlockByNumber", ["0x" + n.toString(16), true]).catch(() => null);
     if (!blk) break;
     await ingestBlock(chainId, url, blk);
-    db.setSyncState(chainId, n);
+    await db.setSyncState(chainId, n);
   }
   return { chainId, from, to, head };
 }
 
 let timer = null;
-export function startIngest() {
-  db.open();
+export async function startIngest() {
+  await db.init();
   const nets = enabledNetworks();
   if (!nets.length) {
     console.log("[ingest] no networks with an RPC wired — nothing to index");

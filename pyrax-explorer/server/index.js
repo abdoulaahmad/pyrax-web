@@ -22,8 +22,6 @@ import { startIngest } from "./ingest.js";
 import { verifyContract } from "./verify.js";
 import { PORT, HOST, ALLOW_ORIGIN, NETWORKS, enabledNetworks } from "./config.js";
 
-db.open();
-
 const CORS = {
   "access-control-allow-origin": ALLOW_ORIGIN,
   "access-control-allow-methods": "GET,POST,OPTIONS",
@@ -67,13 +65,13 @@ const server = createServer(async (req, res) => {
     const chainId = Number(m[1]);
     const rest = m[2];
 
-    if (rest === "stats") return json(res, 200, db.stats(chainId));
-    if (rest === "blocks") return json(res, 200, db.latestBlocks(chainId, limit, offset));
-    if (rest === "txs") return json(res, 200, db.latestTxs(chainId, limit, offset));
-    if (rest === "tokens") return json(res, 200, db.listTokens(chainId, limit, offset));
-    if (rest === "contracts") return json(res, 200, db.listContracts(chainId, limit, offset));
+    if (rest === "stats") return json(res, 200, await db.stats(chainId));
+    if (rest === "blocks") return json(res, 200, await db.latestBlocks(chainId, limit, offset));
+    if (rest === "txs") return json(res, 200, await db.latestTxs(chainId, limit, offset));
+    if (rest === "tokens") return json(res, 200, await db.listTokens(chainId, limit, offset));
+    if (rest === "contracts") return json(res, 200, await db.listContracts(chainId, limit, offset));
     if (rest === "logs")
-      return json(res, 200, db.logsQuery(chainId, {
+      return json(res, 200, await db.logsQuery(chainId, {
         address: sp.get("address"), topic0: sp.get("topic0"),
         fromBlock: num(sp.get("fromBlock"), NaN), toBlock: num(sp.get("toBlock"), NaN), limit, offset,
       }));
@@ -81,27 +79,32 @@ const server = createServer(async (req, res) => {
     let mm;
     if ((mm = rest.match(/^block\/(.+)$/))) {
       const key = decodeURIComponent(mm[1]);
-      const blk = /^0x/i.test(key) ? db.blockByHash(chainId, key) : db.blockByNumber(chainId, Number(key));
+      const blk = /^0x/i.test(key) ? await db.blockByHash(chainId, key) : await db.blockByNumber(chainId, Number(key));
       if (!blk) return bad(res, 404, "block not found");
-      return json(res, 200, { ...blk, txns: db.txsInBlock(chainId, blk.number) });
+      return json(res, 200, { ...blk, txns: await db.txsInBlock(chainId, blk.number) });
     }
     if ((mm = rest.match(/^tx\/(0x[0-9a-fA-F]{64})$/))) {
-      const tx = db.txByHash(chainId, mm[1]);
+      const tx = await db.txByHash(chainId, mm[1]);
       if (!tx) return bad(res, 404, "tx not found");
       return json(res, 200, tx);
     }
     if ((mm = rest.match(/^address\/(0x[0-9a-fA-F]{40})$/))) {
       const a = mm[1];
-      return json(res, 200, {
-        address: a.toLowerCase(),
-        txCount: db.txCountByAddress(chainId, a),
-        txns: db.txsByAddress(chainId, a, limit, offset),
-        transfers: db.transfersByAddress(chainId, a, limit, offset),
-      });
+      const [txCount, txns, transfers] = await Promise.all([
+        db.txCountByAddress(chainId, a),
+        db.txsByAddress(chainId, a, limit, offset),
+        db.transfersByAddress(chainId, a, limit, offset),
+      ]);
+      return json(res, 200, { address: a.toLowerCase(), txCount, txns, transfers });
     }
-    if ((mm = rest.match(/^token\/(0x[0-9a-fA-F]{40})$/)))
-      return json(res, 200, { token: db.tokenInfo(chainId, mm[1]) ?? null, transfers: db.transfersByToken(chainId, mm[1], limit, offset) });
-    if ((mm = rest.match(/^contract\/(0x[0-9a-fA-F]{40})$/))) return json(res, 200, db.contractGet(chainId, mm[1]) ?? null);
+    if ((mm = rest.match(/^token\/(0x[0-9a-fA-F]{40})$/))) {
+      const [token, transfers] = await Promise.all([
+        db.tokenInfo(chainId, mm[1]),
+        db.transfersByToken(chainId, mm[1], limit, offset),
+      ]);
+      return json(res, 200, { token: token ?? null, transfers });
+    }
+    if ((mm = rest.match(/^contract\/(0x[0-9a-fA-F]{40})$/))) return json(res, 200, (await db.contractGet(chainId, mm[1])) ?? null);
 
     if (rest === "verify" && req.method === "POST") {
       const body = JSON.parse((await readBody(req)) || "{}");
@@ -115,7 +118,15 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, HOST, () => {
-  console.log(`[api] pyrax-explorer indexer listening on http://${HOST}:${PORT}`);
-  startIngest();
-});
+// Create the schema, THEN serve + start ingesting.
+db.init()
+  .then(() =>
+    server.listen(PORT, HOST, () => {
+      console.log(`[api] pyrax-explorer indexer listening on http://${HOST}:${PORT}`);
+      startIngest();
+    }),
+  )
+  .catch((e) => {
+    console.error("[api] failed to initialize the database:", e?.message ?? e);
+    process.exit(1);
+  });

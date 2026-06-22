@@ -59,8 +59,9 @@ services:
       RECEIPT_CONCURRENCY: "1"
       INGEST_INTERVAL_MS: "8000"
       ALLOW_ORIGIN: "https://explorer.pyraxchain.com"
-    volumes:
-      - explorer_data:/data
+      # DigitalOcean Managed PostgreSQL (the indexer is now stateless — re-indexable).
+      DATABASE_URL: "${DATABASE_URL_EXPLORER:?set DATABASE_URL_EXPLORER in .env}"
+      DATABASE_CA: "${DATABASE_CA:-}"
 
   peer-directory:
     image: ghcr.io/pyrax-network/pyrax-web-peer-directory:${TAG:-latest}
@@ -104,4 +105,3 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-  explorer_data:

@@ -95,6 +95,6 @@ export async function verifyContract(chainId, body) {
     constructor_args: body.constructorArgs || null,
     verified_at: Math.floor(Date.now() / 1000),
   };
-  db.contractPut(rec);
+  await db.contractPut(rec);
   return { ok: true, address: rec.address, name: contractName, compiler: compilerVersion };
 }

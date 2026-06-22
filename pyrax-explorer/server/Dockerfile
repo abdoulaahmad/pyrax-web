@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LicenseRef-PYRAX-Proprietary
-# PYRAX Explorer indexer — Node 24. better-sqlite3 ships linux-x64 prebuilds (no compile); solc is
-# pure JS. If a future base lacks a prebuild, add: RUN apt-get update && apt-get install -y --no-install-recommends python3 build-essential
+# PYRAX Explorer indexer — Node 24. State lives in DigitalOcean Managed PostgreSQL
+# (DATABASE_URL); `pg` + `solc` are pure JS, so there is no native build step.
 FROM node:24-slim
 WORKDIR /app
 
@@ -11,9 +11,7 @@ COPY . .
 
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
-    PORT=8788 \
-    DATA_DIR=/data
-VOLUME ["/data"]
+    PORT=8788
 EXPOSE 8788
 
 CMD ["node", "index.js"]

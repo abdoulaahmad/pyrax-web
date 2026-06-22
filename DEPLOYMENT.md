@@ -100,4 +100,4 @@ Push to `main` → CI rebuilds the changed images, pushes to GHCR, and rolls the
 
 ## Notes
 - **Explorer indexer is throttled** (`INGEST_BATCH=2`, `RECEIPT_CONCURRENCY=1`, `INGEST_INTERVAL_MS=8000`) so reading the node's public RPC can't starve block production. When the nodes droplet is back, move the indexer there (localhost to the node) and drop the throttle.
-- The indexer's SQLite lives in the `explorer_data` volume; wipe it (`docker compose down && docker volume rm pyrax-web_explorer_data`) if the chain is re-genesised.
+- **State is in DO Managed Postgres** (`team_pyrax` + `explorer` databases) — both containers are now stateless. The indexer is re-buildable from chain; to re-index after a re-genesis, truncate its tables (`psql "$DATABASE_URL_EXPLORER" -c 'TRUNCATE blocks,txns,logs,transfers,tokens,sync_state;'`). team-pyrax's whitelist/roles are durable + backed up by the managed cluster.

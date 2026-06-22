@@ -14,7 +14,12 @@ export const NETWORKS = {
 
 export const PORT = Number(process.env.PORT ?? 8788);
 export const HOST = process.env.HOST ?? "0.0.0.0";
-export const DATA_DIR = process.env.DATA_DIR ?? "./data";
+
+// DigitalOcean Managed PostgreSQL. Production = the cluster's VPC connection string
+// (…?sslmode=require); local dev defaults to a throwaway local Postgres.
+export const DATABASE_URL = process.env.DATABASE_URL ?? "postgres://postgres:dev@localhost:5544/explorer";
+export const DATABASE_SSL = /sslmode=require/i.test(DATABASE_URL) || process.env.DATABASE_SSL === "1";
+export const DATABASE_CA = process.env.DATABASE_CA ?? ""; // optional PEM to verify the DB server cert
 
 // Ingest cadence + bounds (kept modest so a public node isn't hammered).
 export const INGEST_INTERVAL_MS = Number(process.env.INGEST_INTERVAL_MS ?? 4000);
