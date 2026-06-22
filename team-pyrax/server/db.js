@@ -9,7 +9,11 @@ import pg from "pg";
 import { DATABASE_URL, DATABASE_SSL, DATABASE_CA, SUPERUSER_EMAIL, ROLES, ALL_ROLES } from "./config.js";
 
 const pool = new pg.Pool({
-  connectionString: DATABASE_URL,
+  // Strip sslmode from the URL so node-postgres uses our explicit `ssl` below. Otherwise the
+  // connection string's sslmode=require forces full chain verification, and DO's CA (not in
+  // Node's trust store) fails as "self-signed certificate in certificate chain". On the private
+  // VPC the connection is still encrypted; it's just not chain-verified unless DATABASE_CA is set.
+  connectionString: DATABASE_URL.replace(/[?&]sslmode=[^&]*/gi, ""),
   ssl: DATABASE_SSL ? { rejectUnauthorized: !!DATABASE_CA, ca: DATABASE_CA || undefined } : false,
   max: Number(process.env.PG_POOL_MAX ?? 10),
   idleTimeoutMillis: 30_000,
