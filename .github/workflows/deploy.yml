@@ -39,6 +39,9 @@ jobs:
           - name: peer-directory
             file: pyrax-peer-directory/Dockerfile
             context: .
+          - name: team-pyrax
+            file: team-pyrax/Dockerfile
+            context: team-pyrax
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -80,20 +83,32 @@ jobs:
         # to the remote via `envs`. GitHub masks them in logs; nothing secret is committed.
         env:
           PYRAX_DIRECTORY_SECRET: ${{ secrets.PYRAX_DIRECTORY_SECRET }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          SPACES_KEY: ${{ secrets.SPACES_KEY }}
+          SPACES_SECRET: ${{ secrets.SPACES_SECRET }}
           GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
           GHCR_USER: ${{ secrets.GHCR_USER }}
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
-          envs: PYRAX_DIRECTORY_SECRET,GHCR_PULL_TOKEN,GHCR_USER
+          envs: PYRAX_DIRECTORY_SECRET,SESSION_SECRET,BREVO_API_KEY,SPACES_KEY,SPACES_SECRET,GHCR_PULL_TOKEN,GHCR_USER
           script: |
             set -euo pipefail
             cd /opt/pyrax-web
-            # Write the directory secret straight from the org secret into a root-only .env (umask 077).
-            # Never committed, never echoed; the peer-directory container reads it via compose.
+            # Write every app secret from GitHub secrets into a root-only .env (umask 077). Never
+            # committed, never echoed; compose injects them per-service. Optional ones default to empty,
+            # and each service degrades gracefully (peer-directory needs PYRAX_DIRECTORY_SECRET; team-pyrax
+            # falls back to an ephemeral session key / log-only email / public downloads when unset).
             umask 077
-            printf 'PYRAX_DIRECTORY_SECRET=%s\n' "$PYRAX_DIRECTORY_SECRET" > .env
+            {
+              printf 'PYRAX_DIRECTORY_SECRET=%s\n' "${PYRAX_DIRECTORY_SECRET:-}"
+              printf 'SESSION_SECRET=%s\n' "${SESSION_SECRET:-}"
+              printf 'BREVO_API_KEY=%s\n' "${BREVO_API_KEY:-}"
+              printf 'SPACES_KEY=%s\n' "${SPACES_KEY:-}"
+              printf 'SPACES_SECRET=%s\n' "${SPACES_SECRET:-}"
+            } > .env
             # Authenticate to private GHCR via stdin, roll out, then drop the cached credential so no
             # registry token is left at rest on the droplet.
             printf '%s' "$GHCR_PULL_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin

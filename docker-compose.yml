@@ -23,6 +23,7 @@ services:
       - explorer-web
       - explorer-indexer
       - peer-directory
+      - team-pyrax
 
   website:
     image: ghcr.io/pyrax-network/pyrax-web-website:${TAG:-latest}
@@ -72,7 +73,35 @@ services:
       TRUST_PROXY: "1"
       PYRAX_DIRECTORY_SECRET: "${PYRAX_DIRECTORY_SECRET:?set PYRAX_DIRECTORY_SECRET in .env}"
 
+  # Gated internal team portal (magic-link auth + RBAC). The Node server serves the
+  # SPA + the API on :8790; SQLite (whitelist/roles/sessions) lives in the data volume.
+  # Non-secret config is set here; secrets come from /opt/pyrax-web/.env (written by CI
+  # from GitHub secrets). Missing secrets degrade gracefully (no presign / log-only email).
+  team-pyrax:
+    image: ghcr.io/pyrax-network/pyrax-web-team-pyrax:${TAG:-latest}
+    build:
+      context: ./team-pyrax
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PUBLIC_URL: "https://team-pyrax.pyraxchain.com"
+      OTA_BASE: "https://updates.pyraxchain.com"
+      BREVO_SENDER_EMAIL: "noreply@pyraxchain.com"
+      BREVO_SENDER_NAME: "PYRAX Team"
+      # DO Spaces (used only when the creds below are set -> presigned, gated downloads).
+      SPACES_REGION: "${SPACES_REGION:-nyc3}"
+      SPACES_BUCKET: "${SPACES_BUCKET:-pyrax-updates}"
+      TRUST_PROXY: "1"
+      # --- secrets (from .env; empty -> graceful fallback) ---
+      SESSION_SECRET: "${SESSION_SECRET:-}"
+      BREVO_API_KEY: "${BREVO_API_KEY:-}"
+      SPACES_KEY: "${SPACES_KEY:-}"
+      SPACES_SECRET: "${SPACES_SECRET:-}"
+    volumes:
+      - team_pyrax_data:/data
+
 volumes:
   caddy_data:
   caddy_config:
   explorer_data:
+  team_pyrax_data:
