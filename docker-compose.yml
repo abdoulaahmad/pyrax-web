@@ -62,6 +62,7 @@ services:
       # DigitalOcean Managed PostgreSQL (the indexer is now stateless — re-indexable).
       DATABASE_URL: "${DATABASE_URL_EXPLORER:?set DATABASE_URL_EXPLORER in .env}"
       DATABASE_CA: "${DATABASE_CA:-}"
+      PG_POOL_MAX: "8"
 
   peer-directory:
     image: ghcr.io/pyrax-network/pyrax-web-peer-directory:${TAG:-latest}
@@ -101,6 +102,7 @@ services:
       # DigitalOcean Managed PostgreSQL (state lives here — the container is stateless).
       DATABASE_URL: "${DATABASE_URL_TEAM_PYRAX:?set DATABASE_URL_TEAM_PYRAX in .env}"
       DATABASE_CA: "${DATABASE_CA:-}"
+      PG_POOL_MAX: "5" # keep team-pyrax + explorer pools under the cluster's connection cap
 
 volumes:
   caddy_data:

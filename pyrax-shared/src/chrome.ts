@@ -264,6 +264,7 @@ function footerHtml(): string {
           { label: "AMA & FAQ", href: "/company.html#ama" },
           { label: "Brand", href: "/company.html#brand" },
           { label: "Contact", href: `mailto:${SITE.email}` },
+          { label: "Web Portal Login", href: "https://team-pyrax.pyraxchain.com" },
         ])}
       </div>
       <hr class="hairline my-10" />
