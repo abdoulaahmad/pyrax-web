@@ -16,12 +16,14 @@ ssh -o IdentitiesOnly=yes -i "$env:USERPROFILE\.ssh\pyrax_new" root@64.227.8.153
 # install Docker + compose plugin
 curl -fsSL https://get.docker.com | sh
 
-# stack dir + secret file
+# stack dir only — the secret file is written by CI from the org secret (see §2), not by hand
 mkdir -p /opt/pyrax-web && cd /opt/pyrax-web
-printf 'PYRAX_DIRECTORY_SECRET=%s\n' "$(openssl rand -hex 32)" > .env   # must match the apps' secret
-chmod 600 .env
 ```
-> The `PYRAX_DIRECTORY_SECRET` must be the SAME value the desktop apps sign announces with. If they already have one, paste that exact value instead of generating a new one.
+> `PYRAX_DIRECTORY_SECRET` is a GitHub **org secret**. The deploy workflow writes `/opt/pyrax-web/.env`
+> from it on every deploy — root-only (`umask 077`), never committed, masked in logs — so you never
+> create it by hand. It must match what the apps sign announces with, so **build the apps with the same
+> value** (their build CI can read the same org secret). Manual first run before the deploy secrets are
+> wired: `umask 077; printf 'PYRAX_DIRECTORY_SECRET=%s\n' '<org value>' > .env`.
 
 Copy `docker-compose.yml` + `Caddyfile` into `/opt/pyrax-web` (CI does this automatically; for a manual first run, `scp` them up).
 
@@ -61,7 +63,7 @@ ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443/tcp && ufw --force enable
    - `DROPLET_HOST` = `64.227.8.153`
    - `DROPLET_USER` = `root`
 
-**Full secret list:** `GHCR_PULL_TOKEN`, `GHCR_USER`, `DROPLET_SSH_KEY`, `DROPLET_HOST`, `DROPLET_USER`.
+**Full secret list:** `PYRAX_DIRECTORY_SECRET` (org-level — already set), `GHCR_PULL_TOKEN`, `GHCR_USER`, `DROPLET_SSH_KEY`, `DROPLET_HOST`, `DROPLET_USER`. Ensure the org secret's **Repository access** includes `pyrax-web` (org → Settings → Secrets → Actions → the secret → Repository access), or the deploy job receives an empty value.
 
 ---
 

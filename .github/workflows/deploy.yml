@@ -74,16 +74,30 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           source: "docker-compose.yml,Caddyfile"
           target: "/opt/pyrax-web"
-      - name: Pull + roll out
+      - name: Provision secret + pull + roll out
         uses: appleboy/ssh-action@v1.2.0
+        # Secrets are passed as masked env vars (NOT interpolated into the script text), then forwarded
+        # to the remote via `envs`. GitHub masks them in logs; nothing secret is committed.
+        env:
+          PYRAX_DIRECTORY_SECRET: ${{ secrets.PYRAX_DIRECTORY_SECRET }}
+          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+          GHCR_USER: ${{ secrets.GHCR_USER }}
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
+          envs: PYRAX_DIRECTORY_SECRET,GHCR_PULL_TOKEN,GHCR_USER
           script: |
-            set -e
+            set -euo pipefail
             cd /opt/pyrax-web
-            echo "${{ secrets.GHCR_PULL_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
+            # Write the directory secret straight from the org secret into a root-only .env (umask 077).
+            # Never committed, never echoed; the peer-directory container reads it via compose.
+            umask 077
+            printf 'PYRAX_DIRECTORY_SECRET=%s\n' "$PYRAX_DIRECTORY_SECRET" > .env
+            # Authenticate to private GHCR via stdin, roll out, then drop the cached credential so no
+            # registry token is left at rest on the droplet.
+            printf '%s' "$GHCR_PULL_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
             docker compose pull
             docker compose up -d --remove-orphans
+            docker logout ghcr.io || true
             docker image prune -f
