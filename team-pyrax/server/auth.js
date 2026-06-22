@@ -47,13 +47,13 @@ export function isValidEmail(rawEmail) {
  *  or null if the address is invalid, not whitelisted, or over the rate cap. The
  *  HTTP layer MUST respond identically whether this returns null or a token, so an
  *  attacker can't probe which addresses are whitelisted. */
-export function issueMagicToken(rawEmail) {
+export async function issueMagicToken(rawEmail) {
   const email = isValidEmail(rawEmail);
   if (!email) return null;
-  if (!Users.byEmail(email)) return null; // not whitelisted
-  if (Tokens.recentCountForEmail(email, MAGIC_TTL_MS) >= MAGIC_MAX_PER_WINDOW) return null;
+  if (!(await Users.byEmail(email))) return null; // not whitelisted
+  if ((await Tokens.recentCountForEmail(email, MAGIC_TTL_MS)) >= MAGIC_MAX_PER_WINDOW) return null;
   const raw = randToken();
-  Tokens.create(hmac(raw), email, now() + MAGIC_TTL_MS);
+  await Tokens.create(hmac(raw), email, now() + MAGIC_TTL_MS);
   return { raw, email };
 }
 
@@ -61,31 +61,31 @@ export const magicLinkUrl = (raw) => `${PUBLIC_URL}/auth/callback?token=${encode
 
 /** Consume a magic token and return the matching user, or null. Single-use + TTL
  *  are enforced atomically in the store. */
-export function consumeMagicToken(raw) {
+export async function consumeMagicToken(raw) {
   if (typeof raw !== "string" || raw.length < 16 || raw.length > 256) return null;
-  const row = Tokens.consume(hmac(raw));
+  const row = await Tokens.consume(hmac(raw));
   if (!row) return null;
   return Users.byEmail(row.email); // null if de-whitelisted between request and click
 }
 
 // --- sessions ---------------------------------------------------------------
 
-export function startSession(userId) {
+export async function startSession(userId) {
   const raw = randToken();
-  Sessions.create(hmac(raw), userId, now() + SESSION_TTL_MS);
-  Users.touchLogin(userId);
+  await Sessions.create(hmac(raw), userId, now() + SESSION_TTL_MS);
+  await Users.touchLogin(userId);
   return raw;
 }
 
-export function sessionUser(rawSid) {
+export async function sessionUser(rawSid) {
   if (typeof rawSid !== "string" || !rawSid) return null;
-  const row = Sessions.get(hmac(rawSid));
+  const row = await Sessions.get(hmac(rawSid));
   if (!row) return null;
   return Users.byId(row.user_id);
 }
 
-export function endSession(rawSid) {
-  if (typeof rawSid === "string" && rawSid) Sessions.destroy(hmac(rawSid));
+export async function endSession(rawSid) {
+  if (typeof rawSid === "string" && rawSid) await Sessions.destroy(hmac(rawSid));
 }
 
 // --- RBAC -------------------------------------------------------------------

@@ -20,7 +20,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join, normalize, extname } from "node:path";
 
 import { PORT, PUBLIC_URL, MODULES, ROLES, TRUST_PROXY, SESSION_SECRET_IS_EPHEMERAL, BREVO_API_KEY } from "./config.js";
-import { Tokens, Sessions } from "./db.js";
+import { init as initDb, Tokens, Sessions } from "./db.js";
 import {
   issueMagicToken,
   magicLinkUrl,
@@ -185,7 +185,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   const rawSid = rawSidFromReq(req);
-  const user = sessionUser(rawSid); // null when signed out / expired
+  const user = await sessionUser(rawSid); // null when signed out / expired
 
   // guards ------------------------------------------------------------------
   const requireUser = () => {
@@ -224,7 +224,7 @@ const server = http.createServer(async (req, res) => {
       } catch {
         return json(res, 400, { error: "invalid json" });
       }
-      const issued = issueMagicToken(email);
+      const issued = await issueMagicToken(email);
       if (issued) {
         // Best-effort send; never reveal success/failure to the client (anti-enum).
         sendMagicLink(issued.email, magicLinkUrl(issued.raw)).catch((e) =>
@@ -236,15 +236,15 @@ const server = http.createServer(async (req, res) => {
 
     // --- auth: consume the magic link (top-level navigation from the email) ---
     if (method === "GET" && path === "/auth/callback") {
-      const u = consumeMagicToken(url.searchParams.get("token") ?? "");
+      const u = await consumeMagicToken(url.searchParams.get("token") ?? "");
       if (!u) return redirect(res, "/?error=link");
-      const sid = startSession(u.id);
+      const sid = await startSession(u.id);
       return redirect(res, "/", { "Set-Cookie": sessionCookie(sid) });
     }
 
     // --- auth: sign out ---
     if (method === "POST" && path === "/api/auth/logout") {
-      endSession(rawSid);
+      await endSession(rawSid);
       return json(res, 200, { ok: true }, { "Set-Cookie": clearCookie() });
     }
 
@@ -277,13 +277,13 @@ const server = http.createServer(async (req, res) => {
     // --- user management ---
     if (path === "/api/admin/users" && method === "GET") {
       if (!requireRole(ROLES.USER_ADMIN)) return;
-      const r = listUsers(user);
+      const r = await listUsers(user);
       return json(res, r.status, r.body);
     }
     if (path === "/api/admin/users" && method === "POST") {
       if (!requireRole(ROLES.USER_ADMIN) || !requireMutation()) return;
       const body = JSON.parse((await readBody(req).catch(() => "{}")) || "{}");
-      const r = addUser(user, body);
+      const r = await addUser(user, body);
       return json(res, r.status, r.body);
     }
     {
@@ -291,13 +291,13 @@ const server = http.createServer(async (req, res) => {
       if (mr && method === "POST") {
         if (!requireRole(ROLES.USER_ADMIN) || !requireMutation()) return;
         const body = JSON.parse((await readBody(req).catch(() => "{}")) || "{}");
-        const r = setRoles(user, mr[1], body);
+        const r = await setRoles(user, mr[1], body);
         return json(res, r.status, r.body);
       }
       const md = /^\/api\/admin\/users\/(\d+)\/delete$/.exec(path);
       if (md && method === "POST") {
         if (!requireRole(ROLES.USER_ADMIN) || !requireMutation()) return;
-        const r = removeUser(user, md[1]);
+        const r = await removeUser(user, md[1]);
         return json(res, r.status, r.body);
       }
     }
@@ -322,10 +322,16 @@ if (RUN_DIRECTLY) {
   }
   // periodic cleanup of expired tokens + sessions
   setInterval(() => {
-    Tokens.sweep();
-    Sessions.sweep();
+    Tokens.sweep().catch(() => {});
+    Sessions.sweep().catch(() => {});
   }, 5 * 60 * 1000).unref();
-  server.listen(PORT, () => console.log(`team-pyrax on http://0.0.0.0:${PORT} (origin ${PUBLIC_URL})`));
+  // Create the schema + seed the superuser, THEN start serving.
+  initDb()
+    .then(() => server.listen(PORT, () => console.log(`team-pyrax on http://0.0.0.0:${PORT} (origin ${PUBLIC_URL})`)))
+    .catch((e) => {
+      console.error("[team-pyrax] failed to initialize the database:", e?.message ?? e);
+      process.exit(1);
+    });
 }
 
 export { server };

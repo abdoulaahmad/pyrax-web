@@ -64,12 +64,14 @@ ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443/tcp && ufw --force enable
    - `DROPLET_USER` = `root`
 
 ### (c) team-pyrax secrets (the gated team portal)
-The deploy workflow writes these from GitHub secrets into the droplet's root-only `.env`; each one degrades gracefully if unset, so the stack still comes up.
+The deploy workflow writes these from GitHub secrets into the droplet's root-only `.env`.
+- `DATABASE_URL_TEAM_PYRAX` **(required)** — the DO Managed Postgres **VPC (private)** connection string for the `team_pyrax` database (`postgresql://…@private-…nyc1.db.ondigitalocean.com:25061/team_pyrax?sslmode=require`). The container is stateless; the whitelist/roles/sessions live here. team-pyrax won't start without it.
+- `DATABASE_URL_EXPLORER` **(required for the explorer)** — same, for the `explorer` database.
 - `SESSION_SECRET` **(set this)** — pepper for hashing sign-in tokens/sessions + CSRF. Generate with `openssl rand -hex 32`. Unset → an ephemeral per-boot key (every restart invalidates sessions + pending links).
 - `BREVO_API_KEY` — Brevo transactional-email key for the magic links. Unset → links are written to the container log instead of emailed (sign-in still works for debugging).
 - `SPACES_KEY` / `SPACES_SECRET` — DigitalOcean Spaces creds so downloads are served as short-lived **presigned** URLs. Unset → downloads redirect to the public OTA CDN (`updates.pyraxchain.com`). The bucket/region default to `pyrax-updates`/`nyc3` in `docker-compose.yml` — confirm they match your Spaces.
 
-**Full secret list:** `PYRAX_DIRECTORY_SECRET` (org-level — already set), `SESSION_SECRET`, `BREVO_API_KEY`, `SPACES_KEY`, `SPACES_SECRET`, `GHCR_PULL_TOKEN`, `GHCR_USER`, `DROPLET_SSH_KEY`, `DROPLET_HOST`, `DROPLET_USER`. Ensure the org secret's **Repository access** includes `pyrax-web` (org → Settings → Secrets → Actions → the secret → Repository access), or the deploy job receives an empty value.
+**Full secret list:** `PYRAX_DIRECTORY_SECRET` (org-level — already set), `DATABASE_URL_TEAM_PYRAX`, `DATABASE_URL_EXPLORER`, `SESSION_SECRET`, `BREVO_API_KEY`, `SPACES_KEY`, `SPACES_SECRET`, `GHCR_PULL_TOKEN`, `GHCR_USER`, `DROPLET_SSH_KEY`, `DROPLET_HOST`, `DROPLET_USER`. Ensure the org secret's **Repository access** includes `pyrax-web` (org → Settings → Secrets → Actions → the secret → Repository access), or the deploy job receives an empty value.
 
 ---
 

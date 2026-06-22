@@ -16,7 +16,7 @@
     "node": ">=24.0.0"
   },
   "dependencies": {
-    "better-sqlite3": "^12.2.0"
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.1",
@@ -28,8 +28,7 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild",
-      "@tailwindcss/oxide",
-      "better-sqlite3"
+      "@tailwindcss/oxide"
     ]
   }
 }

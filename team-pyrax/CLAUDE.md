@@ -12,11 +12,12 @@ grow — add a module by adding a role to `ROLES`/`MODULES` and a view in `main.
 
 ## Layout
 
-- `server/` — the Node service (one process serves the SPA `dist/` + the API on
-  `:8790`). Runtime dep: `better-sqlite3`. Files:
+- `server/` — the Node service (one stateless process serves the SPA `dist/` + the
+  API on `:8790`). Runtime dep: `pg` (DigitalOcean Managed PostgreSQL). Files:
   - `config.js` — all config + the role/module catalogue. Secrets from env only.
-  - `db.js` — SQLite schema (users/whitelist, magic_tokens, sessions); seeds the
-    hardcoded superuser idempotently and force-keeps it `superuser`.
+  - `db.js` — the `pg` Pool + Postgres schema (users/whitelist, magic_tokens,
+    sessions). All access is async; `init()` creates the schema + idempotently seeds
+    the hardcoded superuser (force-keeps it `superuser`) and MUST be awaited on boot.
   - `auth.js` — magic-link issue/consume, sessions, RBAC (`hasRole`), CSRF, cookies.
     Tokens + session ids are stored only as HMACs; comparisons are constant-time.
   - `email.js` — Brevo transactional send (no SDK). Logs the link if no API key.
@@ -45,8 +46,12 @@ grow — add a module by adding a role to `ROLES`/`MODULES` and a view in `main.
 
 ## Gotchas
 
-- Secrets degrade gracefully: no `SESSION_SECRET` → ephemeral key (sessions reset on
-  restart); no `BREVO_API_KEY` → links logged, not mailed; no Spaces creds →
+- `DATABASE_URL` is **required** (the only non-graceful secret) — `init()` fails fast
+  and the process exits if it can't reach Postgres. Local dev defaults to a local
+  Postgres on `:5544` (`docker run … postgres:16`). On the DO VPC, TLS is encrypted
+  but unverified unless `DATABASE_CA` (PEM) is supplied.
+- Other secrets degrade gracefully: no `SESSION_SECRET` → ephemeral key (sessions
+  reset on restart); no `BREVO_API_KEY` → links logged, not mailed; no Spaces creds →
   downloads fall back to the public OTA URL. Set them in production.
 - The CLI download needs `updates.pyraxchain.com/cli/manifest.json`
   (`{ version, files: { win, mac, linux } }`); until it exists the CLI tile shows

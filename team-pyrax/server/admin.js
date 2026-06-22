@@ -46,23 +46,24 @@ const publicUser = (u) => ({
   lastLogin: u.lastLogin,
 });
 
-export function listUsers(actor) {
+export async function listUsers(actor) {
   const roles = assignableRolesFor(actor).map((r) => ({ key: r, ...ROLE_META[r] }));
-  return { status: 200, body: { users: Users.all().map(publicUser), assignableRoles: roles } };
+  const users = (await Users.all()).map(publicUser);
+  return { status: 200, body: { users, assignableRoles: roles } };
 }
 
-export function addUser(actor, body) {
+export async function addUser(actor, body) {
   const email = isValidEmail(body?.email);
   if (!email) return { status: 400, body: { error: `Enter a valid @${EMAIL_DOMAIN} email address.` } };
-  if (Users.byEmail(email)) return { status: 409, body: { error: "That teammate is already on the whitelist." } };
+  if (await Users.byEmail(email)) return { status: 409, body: { error: "That teammate is already on the whitelist." } };
   const roles = sanitizeRoles(actor, body?.roles ?? []);
   if (roles === null) return { status: 403, body: { error: "You can't assign one or more of those roles." } };
-  Users.add(email, roles, actor.email);
-  return { status: 201, body: { user: publicUser(Users.byEmail(email)) } };
+  await Users.add(email, roles, actor.email);
+  return { status: 201, body: { user: publicUser(await Users.byEmail(email)) } };
 }
 
-export function setRoles(actor, targetId, body) {
-  const target = Users.byId(Number(targetId));
+export async function setRoles(actor, targetId, body) {
+  const target = await Users.byId(Number(targetId));
   if (!target) return { status: 404, body: { error: "No such user." } };
   if (target.email === SUPERUSER_EMAIL) return { status: 403, body: { error: "The superuser's roles can't be changed." } };
   const roles = sanitizeRoles(actor, body?.roles ?? []);
@@ -70,15 +71,15 @@ export function setRoles(actor, targetId, body) {
   // A non-superuser actor must not strip a role they couldn't grant (e.g. silently
   // dropping someone's user-admin); preserve roles outside their authority.
   const preserved = target.roles.filter((r) => !assignableRolesFor(actor).includes(r) && r !== ROLES.SUPERUSER);
-  Users.setRoles(target.id, [...new Set([...preserved, ...roles])]);
-  return { status: 200, body: { user: publicUser(Users.byId(target.id)) } };
+  await Users.setRoles(target.id, [...new Set([...preserved, ...roles])]);
+  return { status: 200, body: { user: publicUser(await Users.byId(target.id)) } };
 }
 
-export function removeUser(actor, targetId) {
-  const target = Users.byId(Number(targetId));
+export async function removeUser(actor, targetId) {
+  const target = await Users.byId(Number(targetId));
   if (!target) return { status: 404, body: { error: "No such user." } };
   if (target.email === SUPERUSER_EMAIL) return { status: 403, body: { error: "The superuser can't be removed." } };
   if (target.id === actor.id) return { status: 403, body: { error: "You can't remove your own account." } };
-  Users.remove(target.id); // cascades their sessions — access is revoked immediately
+  await Users.remove(target.id); // cascades their sessions — access is revoked immediately
   return { status: 200, body: { ok: true } };
 }

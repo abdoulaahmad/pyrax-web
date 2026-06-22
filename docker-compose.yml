@@ -97,11 +97,11 @@ services:
       BREVO_API_KEY: "${BREVO_API_KEY:-}"
       SPACES_KEY: "${SPACES_KEY:-}"
       SPACES_SECRET: "${SPACES_SECRET:-}"
-    volumes:
-      - team_pyrax_data:/data
+      # DigitalOcean Managed PostgreSQL (state lives here — the container is stateless).
+      DATABASE_URL: "${DATABASE_URL_TEAM_PYRAX:?set DATABASE_URL_TEAM_PYRAX in .env}"
+      DATABASE_CA: "${DATABASE_CA:-}"
 
 volumes:
   caddy_data:
   caddy_config:
   explorer_data:
-  team_pyrax_data:

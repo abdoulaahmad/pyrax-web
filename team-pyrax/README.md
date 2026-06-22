@@ -7,7 +7,8 @@ installers for Windows, macOS and Linux) and **User Management** (whitelist
 `@pyraxchain.com` teammates and assign their module roles). It's built to grow:
 new modules are just a new role + a new tile.
 
-One Node process serves the built SPA **and** the API; state lives in SQLite.
+One (stateless) Node process serves the built SPA **and** the API; state lives in
+DigitalOcean Managed PostgreSQL.
 
 ## Access model
 
@@ -46,8 +47,10 @@ exists.
 
 ```bash
 pnpm install
-# terminal 1 — the API server (writes ./team-pyrax.db; logs the magic link when
-# BREVO_API_KEY is unset, so you can sign in locally without Brevo):
+# a throwaway local Postgres (the default DATABASE_URL points at :5544):
+docker run -d --name tp-pg -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=team_pyrax -p 5544:5432 postgres:16
+# terminal 1 — the API server (creates the schema + superuser on boot; logs the magic
+# link when BREVO_API_KEY is unset, so you can sign in locally without Brevo):
 PUBLIC_URL=http://localhost:8790 pnpm start
 # terminal 2 — the Vite dev server (proxies /api + /auth to :8790):
 pnpm dev
@@ -64,6 +67,7 @@ workflow into the droplet's root-only `.env`:
 
 | Secret | Purpose |
 | --- | --- |
+| `DATABASE_URL` | DO Managed Postgres connection string (the cluster's VPC URL; **required**) |
 | `SESSION_SECRET` | pepper for hashing tokens/sessions + CSRF (set it — else sessions reset on restart) |
 | `BREVO_API_KEY` | Brevo transactional sends (unset → links are logged, not emailed) |
 | `SPACES_KEY` / `SPACES_SECRET` | DO Spaces presign creds (unset → downloads use the public OTA URL) |

@@ -87,13 +87,15 @@ jobs:
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           SPACES_KEY: ${{ secrets.SPACES_KEY }}
           SPACES_SECRET: ${{ secrets.SPACES_SECRET }}
+          DATABASE_URL_TEAM_PYRAX: ${{ secrets.DATABASE_URL_TEAM_PYRAX }}
+          DATABASE_URL_EXPLORER: ${{ secrets.DATABASE_URL_EXPLORER }}
           GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
           GHCR_USER: ${{ secrets.GHCR_USER }}
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
-          envs: PYRAX_DIRECTORY_SECRET,SESSION_SECRET,BREVO_API_KEY,SPACES_KEY,SPACES_SECRET,GHCR_PULL_TOKEN,GHCR_USER
+          envs: PYRAX_DIRECTORY_SECRET,SESSION_SECRET,BREVO_API_KEY,SPACES_KEY,SPACES_SECRET,DATABASE_URL_TEAM_PYRAX,DATABASE_URL_EXPLORER,GHCR_PULL_TOKEN,GHCR_USER
           script: |
             set -euo pipefail
             cd /opt/pyrax-web
@@ -108,6 +110,8 @@ jobs:
               printf 'BREVO_API_KEY=%s\n' "${BREVO_API_KEY:-}"
               printf 'SPACES_KEY=%s\n' "${SPACES_KEY:-}"
               printf 'SPACES_SECRET=%s\n' "${SPACES_SECRET:-}"
+              printf 'DATABASE_URL_TEAM_PYRAX=%s\n' "${DATABASE_URL_TEAM_PYRAX:-}"
+              printf 'DATABASE_URL_EXPLORER=%s\n' "${DATABASE_URL_EXPLORER:-}"
             } > .env
             # Authenticate to private GHCR via stdin, roll out, then drop the cached credential so no
             # registry token is left at rest on the droplet.

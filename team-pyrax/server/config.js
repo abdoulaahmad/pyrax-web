@@ -104,9 +104,21 @@ export const PRODUCTS = Object.freeze([
   { key: "cli", name: "PYRAX CLI", tagline: "Headless node installer for servers", feed: "cli", kind: "manifest" },
 ]);
 
+// --- database (DigitalOcean Managed PostgreSQL) -----------------------------
+
+/** Postgres connection string. In production this is the cluster's VPC (private)
+ *  URL (`...?sslmode=require`), injected by the deploy. Local dev defaults to a
+ *  throwaway local Postgres (see README). */
+export const DATABASE_URL = process.env.DATABASE_URL ?? "postgres://postgres:dev@localhost:5544/team_pyrax";
+
+/** TLS to the DB: DO requires it (sslmode=require). When DATABASE_CA is provided
+ *  the server cert is verified; otherwise the connection is encrypted but not
+ *  verified (acceptable on a private VPC, where there is no MITM surface). */
+export const DATABASE_SSL = /sslmode=require/i.test(DATABASE_URL) || process.env.DATABASE_SSL === "1";
+export const DATABASE_CA = process.env.DATABASE_CA ?? ""; // PEM of DO's CA cert (optional)
+
 // --- runtime ----------------------------------------------------------------
 
 export const PORT = Number(process.env.PORT ?? 8790);
-export const DATA_DIR = process.env.DATA_DIR ?? ".";
 /** Honour X-Forwarded-For only behind a known proxy (Caddy sets it). */
 export const TRUST_PROXY = process.env.TRUST_PROXY === "1" || process.env.TRUST_PROXY === "true";
