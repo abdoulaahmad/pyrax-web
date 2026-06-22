@@ -4,7 +4,7 @@
 // REST SMTP endpoint with the api-key header; no SDK. If BREVO_API_KEY is unset
 // (local dev) the link is logged instead so sign-in still works.
 
-import { BREVO_API_KEY, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME } from "./config.js";
+import { BREVO_API_KEY, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME, EMAIL_LOGO_URL } from "./config.js";
 
 const BREVO_ENDPOINT = "https://api.brevo.com/v3/smtp/email";
 
@@ -50,7 +50,8 @@ function htmlBody(url) {
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#050609;padding:32px 16px">
     <tr><td align="center">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#0c0e16;border:1px solid #232838;border-radius:16px;overflow:hidden">
-        <tr><td style="padding:28px 32px 8px">
+        <tr><td style="padding:26px 32px 8px">
+          <img src="${EMAIL_LOGO_URL}" alt="PYRAX" width="40" height="40" style="display:block;border:0;margin-bottom:10px" />
           <div style="font-family:Sora,Inter,Arial,sans-serif;font-weight:800;font-size:18px;letter-spacing:.04em;color:#f5a623">PYRAX&nbsp;TEAM</div>
         </td></tr>
         <tr><td style="padding:8px 32px 4px;font-family:Sora,Inter,Arial,sans-serif;font-size:22px;font-weight:700;color:#f7f9fd">Sign in</td></tr>
