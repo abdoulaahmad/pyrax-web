@@ -114,5 +114,13 @@ jobs:
             printf '%s' "$GHCR_PULL_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
             docker compose pull
             docker compose up -d --remove-orphans
+            # Caddy bind-mounts the Caddyfile, so `up -d` does NOT restart it when only the Caddyfile
+            # changed (e.g. a new subdomain route). Restart Caddy only when its content changed, so new
+            # routes load + their certs provision automatically — no manual reload, no blip on no-op deploys.
+            if [ "$(sha256sum Caddyfile | cut -d' ' -f1)" != "$(cat .caddyfile.sha 2>/dev/null || true)" ]; then
+              echo "Caddyfile changed — restarting Caddy to load new routes"
+              docker compose restart caddy
+              sha256sum Caddyfile | cut -d' ' -f1 > .caddyfile.sha
+            fi
             docker logout ghcr.io || true
             docker image prune -f
