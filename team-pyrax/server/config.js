@@ -69,10 +69,11 @@ export const BREVO_API_KEY = process.env.BREVO_API_KEY ?? "";
 export const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL ?? `noreply@${EMAIL_DOMAIN}`;
 export const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME ?? "PYRAX Team";
 
-/** Brand logo shown in transactional emails — a PNG (email clients block SVG), hosted on
- *  the public Spaces CDN. Override with EMAIL_LOGO_URL once a custom assets domain exists. */
+/** Brand logo shown in transactional emails — the horizontal wordmark rasterized to a
+ *  PNG (email clients block SVG), hosted on the public Spaces CDN. Override with
+ *  EMAIL_LOGO_URL once a custom assets domain exists. */
 export const EMAIL_LOGO_URL =
-  process.env.EMAIL_LOGO_URL ?? "https://pyrax-assets.nyc3.cdn.digitaloceanspaces.com/email/pyrax-logo.png";
+  process.env.EMAIL_LOGO_URL ?? "https://pyrax-assets.nyc3.cdn.digitaloceanspaces.com/email/logo-horizontal.png";
 
 // --- downloads (DigitalOcean Spaces OTA feed) -------------------------------
 
