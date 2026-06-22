@@ -1,0 +1,17 @@
+node_modules/
+**/node_modules/
+**/dist/
+**/.vite/
+**/*.tsbuildinfo
+**/build.log
+**/*.log
+# explorer indexer local DB
+**/server/data/
+**/data/*.db*
+# secrets — never commit
+.env
+**/.env
+*.pem
+# os
+.DS_Store
+Thumbs.db

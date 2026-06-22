@@ -1,0 +1,27 @@
+{
+  "name": "pyrax-website",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PYRAX + NEURAX marketing website (pyraxchain.com): a shielded-by-default Layer-1 blockchain powering a local-first decentralized AI. Multi-page, configless Tailwind v4, mega menu.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/node": "^24.0.0",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^5.6.0",
+    "vite": "^6.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "@tailwindcss/oxide"]
+  }
+}

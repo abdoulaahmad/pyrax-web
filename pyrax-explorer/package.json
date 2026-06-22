@@ -1,0 +1,24 @@
+{
+  "name": "pyrax-explorer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PYRAX Block Explorer (explorer.pyraxchain.com): a full-featured, multi-network block explorer — blocks, transactions, accounts, tokens, logs, contracts + source verification — reading live from the network-selector's chosen JSON-RPC plus an indexer backend. Configless Tailwind v4 + Vite 6, shared PYRAX chrome (@pyrax/shared).",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/node": "^20.14.0",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^5.6.0",
+    "vite": "^6.0.0"
+  }
+}

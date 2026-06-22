@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: LicenseRef-PYRAX-Proprietary
+#
+# Automatic-HTTPS reverse proxy for the PYRAX peer-directory. Caddy fetches and
+# renews the TLS certificate for {$DIRECTORY_DOMAIN} via ACME (HTTP-01), so ports
+# 80 + 443 must be reachable from the internet and the domain's A record must
+# point at this droplet (Cloudflare: "DNS only" / grey cloud).
+
+{$DIRECTORY_DOMAIN} {
+	encode zstd gzip
+	# The directory streams live updates over Server-Sent Events. Caddy's
+	# reverse_proxy streams responses (no response buffering) by default, so SSE
+	# works without extra config.
+	reverse_proxy directory:8787
+}

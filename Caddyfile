@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: LicenseRef-PYRAX-Proprietary
+# Reverse proxy + automatic HTTPS for all PYRAX websites on the websites droplet (64.227.8.153).
+# Caddy provisions Let's Encrypt certs automatically the first time each domain resolves here —
+# so you only need to point DNS at this droplet and it "just works".
+{
+	email info@pyraxchain.com
+}
+
+# --- marketing site (apex) + www redirect ---
+pyraxchain.com {
+	reverse_proxy website:80
+}
+www.pyraxchain.com {
+	redir https://pyraxchain.com{uri} permanent
+}
+
+# --- nodes / status + run-a-node ---
+nodes.pyraxchain.com {
+	reverse_proxy nodes-website:80
+}
+
+# --- block explorer: /api/* -> indexer, everything else -> static frontend ---
+explorer.pyraxchain.com {
+	@api path /api/*
+	handle @api {
+		reverse_proxy explorer-indexer:8788
+	}
+	handle {
+		reverse_proxy explorer-web:80
+	}
+}
+
+# --- peer directory: the zero-dep Node server serves both the UI and the /api + SSE stream ---
+# (no `encode` here — SSE must stream unbuffered; the server sets its own headers.)
+peers.pyraxchain.com {
+	reverse_proxy peer-directory:8787
+}

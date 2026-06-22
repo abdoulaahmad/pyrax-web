@@ -1,0 +1,11 @@
+# Keep build contexts lean + reproducible — installs happen fresh inside each image.
+**/node_modules
+**/dist
+**/.git
+**/_git_history_backup
+**/data
+**/*.log
+**/.vite
+**/*.tsbuildinfo
+**/.env
+.github

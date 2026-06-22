@@ -1,0 +1,137 @@
+/* SPDX-License-Identifier: LicenseRef-PYRAX-Proprietary */
+/* Whitepaper page — styling for the rendered Markdown (.wp-prose) + the layout.
+   Uses the global theme tokens defined in src/styles.css. */
+
+.wp-content {
+  display: grid;
+  gap: 2rem;
+}
+@media (min-width: 1024px) {
+  .wp-content {
+    grid-template-columns: 15rem minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* Sticky table of contents */
+.wp-toc {
+  position: sticky;
+  top: 6rem;
+  align-self: start;
+  border: 1px solid var(--color-line);
+  border-radius: 0.9rem;
+  background: var(--color-surface);
+  padding: 1rem 1.1rem;
+  font-size: 0.85rem;
+  max-height: calc(100vh - 8rem);
+  overflow-y: auto;
+}
+.wp-toc-title {
+  font-weight: 700;
+  color: var(--color-ink);
+  margin-bottom: 0.55rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.wp-toc ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.32rem; }
+.wp-toc a { color: var(--color-muted); text-decoration: none; line-height: 1.35; display: block; }
+.wp-toc a:hover { color: var(--color-brand-soft); }
+
+/* Version toggle */
+.wp-toggle {
+  display: inline-flex;
+  gap: 0.2rem;
+  padding: 0.22rem;
+  border: 1px solid var(--color-line);
+  border-radius: 0.7rem;
+  background: var(--color-surface);
+}
+.wp-tab {
+  padding: 0.4rem 0.95rem;
+  border: 0;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.wp-tab:hover { color: var(--color-ink); }
+.wp-tab.is-active { background: var(--color-brand); color: #0b0b0e; }
+
+/* Rendered prose */
+.wp-prose {
+  max-width: 52rem;
+  color: var(--color-ink);
+  line-height: 1.72;
+  font-size: 0.97rem;
+}
+.wp-prose h1 { font-size: 2rem; font-weight: 800; line-height: 1.15; margin: 0 0 1rem; }
+.wp-prose h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 2.6rem 0 0.85rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--color-line);
+  scroll-margin-top: 6rem;
+}
+.wp-prose h3 { font-size: 1.18rem; font-weight: 700; margin: 1.9rem 0 0.6rem; scroll-margin-top: 6rem; }
+.wp-prose h4 { font-size: 1.02rem; font-weight: 700; margin: 1.4rem 0 0.5rem; }
+.wp-prose p { margin: 0 0 1rem; color: var(--color-muted); }
+.wp-prose strong { color: var(--color-ink); font-weight: 700; }
+.wp-prose a { color: var(--color-brand-soft); text-decoration: underline; text-underline-offset: 2px; }
+.wp-prose ul, .wp-prose ol { margin: 0 0 1.1rem; padding-left: 1.35rem; color: var(--color-muted); display: grid; gap: 0.38rem; }
+.wp-prose li { padding-left: 0.15rem; }
+.wp-prose li::marker { color: var(--color-brand-soft); }
+.wp-prose blockquote {
+  margin: 0 0 1.1rem;
+  padding: 0.7rem 1rem;
+  border-left: 3px solid var(--color-brand);
+  background: color-mix(in oklab, var(--color-brand) 7%, transparent);
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: var(--color-muted);
+}
+.wp-prose hr { border: 0; border-top: 1px solid var(--color-line); margin: 2.2rem 0; }
+.wp-prose code {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.1rem 0.36rem;
+  border-radius: 0.35rem;
+  color: var(--color-bolt-bright);
+}
+.wp-code {
+  margin: 0 0 1.3rem;
+  padding: 1rem 1.1rem;
+  background: #0a0c12;
+  border: 1px solid var(--color-line);
+  border-radius: 0.7rem;
+  overflow-x: auto;
+}
+.wp-code code {
+  background: none;
+  padding: 0;
+  color: #cfd6e6;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  white-space: pre;
+}
+.wp-table-wrap { overflow-x: auto; margin: 0 0 1.3rem; border: 1px solid var(--color-line); border-radius: 0.7rem; }
+.wp-prose table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+.wp-prose th, .wp-prose td { text-align: left; padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--color-line); vertical-align: top; }
+.wp-prose th { color: var(--color-ink); font-weight: 700; background: var(--color-surface); }
+.wp-prose tbody tr:last-child td { border-bottom: 0; }
+
+/* Print → a clean PDF: drop the chrome, toggle and TOC; black ink on white. */
+@media print {
+  #header, #footer, .wp-toggle, #wp-print, #wp-blurb, .wp-toc { display: none !important; }
+  .wp-content { display: block !important; }
+  .wp-prose { max-width: none; color: #111; }
+  .wp-prose p, .wp-prose li, .wp-prose td, .wp-prose blockquote { color: #1a1a1a; }
+  .wp-prose strong, .wp-prose th { color: #000; }
+  .wp-prose h2 { page-break-after: avoid; }
+  .wp-code, .wp-table-wrap, .wp-prose blockquote { page-break-inside: avoid; }
+  .wp-prose a { color: #000 !important; text-decoration: none; }
+}

@@ -1,0 +1,65 @@
+# SPDX-License-Identifier: LicenseRef-PYRAX-Proprietary
+# Production stack for the PYRAX websites droplet (64.227.8.153).
+# Images are pulled from PRIVATE GHCR; Caddy terminates TLS + routes the four domains.
+#   docker compose pull && docker compose up -d
+name: pyrax-web
+
+x-registry: &registry ghcr.io/pyrax-network
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - website
+      - nodes-website
+      - explorer-web
+      - explorer-indexer
+      - peer-directory
+
+  website:
+    image: ghcr.io/pyrax-network/pyrax-web-website:${TAG:-latest}
+    restart: unless-stopped
+
+  nodes-website:
+    image: ghcr.io/pyrax-network/pyrax-web-nodes-website:${TAG:-latest}
+    restart: unless-stopped
+
+  explorer-web:
+    image: ghcr.io/pyrax-network/pyrax-web-explorer:${TAG:-latest}
+    restart: unless-stopped
+
+  explorer-indexer:
+    image: ghcr.io/pyrax-network/pyrax-web-explorer-indexer:${TAG:-latest}
+    restart: unless-stopped
+    environment:
+      # THROTTLED ingest from the node's PUBLIC RPC so it can never starve the block producer
+      # (the earlier stall). Gentle batch + single receipt fetch + slow tick.
+      RPC_881109: "https://sidn-rpc.pyraxchain.com:8811"
+      INGEST_BATCH: "2"
+      RECEIPT_CONCURRENCY: "1"
+      INGEST_INTERVAL_MS: "8000"
+      ALLOW_ORIGIN: "https://explorer.pyraxchain.com"
+    volumes:
+      - explorer_data:/data
+
+  peer-directory:
+    image: ghcr.io/pyrax-network/pyrax-web-peer-directory:${TAG:-latest}
+    restart: unless-stopped
+    environment:
+      SITE_ORIGIN: "https://peers.pyraxchain.com"
+      TRUST_PROXY: "1"
+      # Shared HMAC secret — must match what the PYRAX apps sign announces with. Set in .env (chmod 600).
+      PYRAX_DIRECTORY_SECRET: "${PYRAX_DIRECTORY_SECRET:?set PYRAX_DIRECTORY_SECRET in .env}"
+
+volumes:
+  caddy_data:
+  caddy_config:
+  explorer_data:

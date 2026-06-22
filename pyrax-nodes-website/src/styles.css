@@ -1,0 +1,7 @@
+/* SPDX-License-Identifier: LicenseRef-PYRAX-Proprietary */
+/* Nodes-site entry stylesheet. Tailwind + the shared PYRAX brand/chrome design system (one source of
+   truth in @pyrax/shared, so this site can't drift). The @source registers the external chrome so
+   Tailwind generates its utility classes. Add any nodes-specific styles below. */
+@import "tailwindcss";
+@import "../../pyrax-shared/src/styles.css";
+@source "../../pyrax-shared/src";

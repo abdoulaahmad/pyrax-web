@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: LicenseRef-PYRAX-Proprietary
+# PYRAX Explorer indexer. Bound to loopback — Caddy reverse-proxies /api/* to it (see DEPLOYMENT/05).
+services:
+  indexer:
+    build: .
+    image: pyrax-explorer-indexer:latest
+    container_name: pyrax-explorer-indexer
+    restart: unless-stopped
+    environment:
+      - PORT=8788
+      - HOST=0.0.0.0
+      - DATA_DIR=/data
+      - ALLOW_ORIGIN=https://explorer.pyraxchain.com
+      # Per-network RPCs the indexer ingests. Only wired networks are indexed.
+      - RPC_881109=https://sidn-rpc.pyraxchain.com:8811
+      # - RPC_710823=   # Devnet2  (set at launch)
+      # - RPC_104928=   # Testnet  (set at launch)
+      # - RPC_563821=   # Mainnet  (set only after the external audit gate)
+    volumes:
+      - explorer-data:/data
+    ports:
+      - "127.0.0.1:8788:8788"
+
+volumes:
+  explorer-data:
