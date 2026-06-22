@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: LicenseRef-PYRAX-Proprietary
 # Production stack for the PYRAX websites droplet (64.227.8.153).
-# Images are pulled from PRIVATE GHCR; Caddy terminates TLS + routes the four domains.
-#   docker compose pull && docker compose up -d
+# Each service has BOTH `image:` (CI pulls these from private GHCR) and `build:` (the droplet can build
+# locally from source when the registry isn't wired yet). Caddy terminates TLS + routes the 4 domains.
+#   first launch on the droplet:  docker compose build && docker compose up -d
+#   CI updates:                    docker compose pull  && docker compose up -d
 name: pyrax-web
-
-x-registry: &registry ghcr.io/pyrax-network
 
 services:
   caddy:
@@ -26,22 +26,33 @@ services:
 
   website:
     image: ghcr.io/pyrax-network/pyrax-web-website:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: pyrax-website/Dockerfile
     restart: unless-stopped
 
   nodes-website:
     image: ghcr.io/pyrax-network/pyrax-web-nodes-website:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: pyrax-nodes-website/Dockerfile
     restart: unless-stopped
 
   explorer-web:
     image: ghcr.io/pyrax-network/pyrax-web-explorer:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: pyrax-explorer/Dockerfile
     restart: unless-stopped
 
   explorer-indexer:
     image: ghcr.io/pyrax-network/pyrax-web-explorer-indexer:${TAG:-latest}
+    build:
+      context: ./pyrax-explorer/server
+      dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      # THROTTLED ingest from the node's PUBLIC RPC so it can never starve the block producer
-      # (the earlier stall). Gentle batch + single receipt fetch + slow tick.
+      # THROTTLED ingest from the node's PUBLIC RPC so it can never starve the block producer.
       RPC_881109: "https://sidn-rpc.pyraxchain.com:8811"
       INGEST_BATCH: "2"
       RECEIPT_CONCURRENCY: "1"
@@ -52,11 +63,13 @@ services:
 
   peer-directory:
     image: ghcr.io/pyrax-network/pyrax-web-peer-directory:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: pyrax-peer-directory/Dockerfile
     restart: unless-stopped
     environment:
       SITE_ORIGIN: "https://peers.pyraxchain.com"
       TRUST_PROXY: "1"
-      # Shared HMAC secret — must match what the PYRAX apps sign announces with. Set in .env (chmod 600).
       PYRAX_DIRECTORY_SECRET: "${PYRAX_DIRECTORY_SECRET:?set PYRAX_DIRECTORY_SECRET in .env}"
 
 volumes:
