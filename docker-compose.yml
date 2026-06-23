@@ -113,18 +113,56 @@ services:
       DATABASE_CA: "${DATABASE_CA:-}"
       PG_POOL_MAX: "5" # keep team-pyrax + explorer pools under the cluster's connection cap
 
+  # Internal write-capable full node for chain 881109 (Internal Devnet 1.0). It PEERS
+  # with the public seed/producer (204.48.16.184:30303) over the p2p mesh, syncs the
+  # chain, and — crucially — SEALS the transactions submitted to it via RPC. A node only
+  # gossips sealed BLOCKS to peers (it never re-broadcasts raw txs), so a non-sealing
+  # follower's writes would never confirm; therefore this node runs `--role full` and
+  # seals its own submitted txs, then GhostDAG merges its blocks with the producer's and
+  # the two converge (the proven late-join scenario — no freeze). Its RPC is write-capable
+  # (NO --rpc-public) and is NEVER published to the host: only the relay + faucet reach it
+  # over the compose network at http://node:8545. The public seed's RPC stays read-only.
+  # No directory announce — this is a private follower, not a publicly listed node. The
+  # node image is built + pushed by pyrax-core (rpc-node-image.yml) and carries the uniform
+  # genesis that pre-funds the marketing + faucet accounts.
+  node:
+    image: ghcr.io/pyrax-network/pyrax-node:latest
+    restart: unless-stopped
+    command:
+      - "--network"
+      - "internal-devnet-simulated"
+      - "--datadir"
+      - "/home/pyrax/pyrax-data"
+      - "--rpc-bind"
+      - "0.0.0.0" # in-container only; :8545 is NOT published to the host
+      - "--rpc-port"
+      - "8545"
+      - "--p2p-port"
+      - "30303"
+      - "--rpc-cors"
+      - "*"
+      - "--role"
+      - "full" # MUST seal — it confirms the relay/faucet txs it receives via RPC
+      - "--peer"
+      - "/ip4/204.48.16.184/tcp/30303/p2p/12D3KooWHSmqDsAjYSQgFXXJNeBpvi3i2jt3sxxXAzbikWBDcs5H"
+    volumes:
+      - node_data:/home/pyrax/pyrax-data
+
   # On-chain events relayer (`pyrax relay`): team-pyrax logins + curated app
   # notifications become gas-only event txs on the newest live network. team-pyrax
   # reaches it internally at http://relay:8799 (RELAY_BASE). Idle until
   # PYRAX_RELAY_SECRET + PYRAX_KEY_PASSPHRASE are set (see relay/entrypoint.sh); on
-  # first real start it auto-creates a spender key per network (logs the addresses
-  # to fund). Keystore + relay state persist in the data volume.
+  # start it imports the genesis-funded MARKETING spender (Anvil #1) — no funding tx
+  # needed. It signs gas-only event txs and submits them to the internal write node
+  # (relay.json -> http://node:8545). Keystore + relay state persist in the data volume.
   relay:
     image: ghcr.io/pyrax-network/pyrax-web-relay:${TAG:-latest}
     build:
       context: .
       dockerfile: relay/Dockerfile
     restart: unless-stopped
+    depends_on:
+      - node
     environment:
       PYRAX_HOME: /data
       PYRAX_RELAY_SECRET: "${PYRAX_RELAY_SECRET:-}"
@@ -142,10 +180,13 @@ services:
       context: .
       dockerfile: faucet/Dockerfile
     restart: unless-stopped
+    depends_on:
+      - node
     environment:
       PYRAX_HOME: /data
       PYRAX_KEY_PASSPHRASE: "${PYRAX_KEY_PASSPHRASE:-}"
-      FAUCET_RPC: "${FAUCET_RPC:-https://sidn-rpc.pyraxchain.com:8811}"
+      # Dispense through the internal WRITE-capable node (the public seed RPC is read-only).
+      FAUCET_RPC: "${FAUCET_RPC:-http://node:8545}"
       FAUCET_NETWORK: "${FAUCET_NETWORK:-Internal Devnet 1.0}"
       FAUCET_DRIP_ASH: "${FAUCET_DRIP_ASH:-100000000000000000000}" # 100 PYRX
       FAUCET_WINDOW_H: "${FAUCET_WINDOW_H:-12}"
@@ -155,5 +196,6 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  node_data:
   relay_data:
   faucet_data:

@@ -19,6 +19,7 @@ import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 
 const RPC = process.env.FAUCET_RPC || "";
+const KEY = process.env.FAUCET_KEY || "faucet-op"; // keystore key name (genesis-funded Anvil #2)
 const DRIP = (process.env.FAUCET_DRIP_ASH || "100000000000000000000").trim(); // 100 PYRX
 const WINDOW_MS = Number(process.env.FAUCET_WINDOW_H || 12) * 3600 * 1000;
 const NETWORK = process.env.FAUCET_NETWORK || "the test network";
@@ -70,7 +71,7 @@ function drip(address) {
   // Sign + submit via the bundled CLI using the faucet keystore key.
   const r = spawnSync(
     "pyrax",
-    ["wallet", "send", address, DRIP, "--from", "faucet", "--rpc-url", RPC],
+    ["wallet", "send", address, DRIP, "--from", KEY, "--rpc-url", RPC],
     { env: process.env, encoding: "utf8", timeout: 30000 },
   );
   const out = `${r.stdout || ""}${r.stderr || ""}`;
