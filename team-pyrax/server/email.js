@@ -88,13 +88,13 @@ export function renderEmail({
           <tr><td align="center" style="padding:30px 36px 4px;text-align:center;">
             <!--[if mso]>
             <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${esc(ctaUrl)}" style="height:52px;v-text-anchor:middle;width:300px;" arcsize="24%" strokecolor="#fcd03d" fillcolor="#f58622">
-              <v:fill type="gradient" color="#fcd03d" color2="#ef5e24" angle="90"/>
+              <v:fill type="gradient" color="#fcd03d" color2="#d75427" angle="90"/>
               <w:anchorlock/>
               <center style="color:#1a0f02;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">${esc(ctaLabel)} &#8594;</center>
             </v:roundrect>
             <![endif]-->
             <!--[if !mso]><!-->
-            <a href="${esc(ctaUrl)}" target="_blank" style="display:inline-block;padding:16px 40px;border-radius:13px;background-color:#f58622;background-image:linear-gradient(100deg,#fcd03d 0%,#f5921e 50%,#ef5e24 100%);box-shadow:0 0 0 1px rgba(252,208,61,0.45),0 16px 36px -8px rgba(245,134,34,0.7);font-family:${BODY};font-size:15px;font-weight:700;letter-spacing:0.01em;color:#1a0f02;text-decoration:none;">${esc(ctaLabel)} &nbsp;&rarr;</a>
+            <a href="${esc(ctaUrl)}" target="_blank" style="display:inline-block;padding:16px 40px;border-radius:11px;background-color:#f58622;background-image:linear-gradient(100deg,#fcd03d 0%,#f58622 58%,#d75427 100%);box-shadow:0 0 0 1px rgba(252,208,61,0.35),0 12px 30px -10px rgba(245,134,34,0.8);font-family:${BODY};font-size:15px;font-weight:700;letter-spacing:0.01em;color:#1a0f02;text-decoration:none;">${esc(ctaLabel)} &nbsp;&rarr;</a>
             <!--<![endif]-->
           </td></tr>`
       : "";
@@ -146,10 +146,9 @@ export function renderEmail({
         <img src="${esc(EMAIL_LOGO_URL)}" alt="PYRAX" width="190" style="display:block;border:0;outline:none;text-decoration:none;width:190px;max-width:62%;height:auto;margin:0 auto;">
       </td></tr>
 
-      <tr><td bgcolor="#0b0d15" style="background-color:#0b0d15;border:1px solid #262c3d;border-radius:18px;box-shadow:0 40px 80px -36px rgba(0,0,0,0.9);">
+      <tr><td bgcolor="#0c0e16" style="background-color:#0c0e16;background-image:linear-gradient(180deg,#0f121b 0%,#0a0c12 100%);border:1px solid #1d2330;border-radius:16px;box-shadow:inset 0 1px 0 0 rgba(255,255,255,0.05), 0 36px 72px -30px rgba(0,0,0,0.92);">
         <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
-          <tr><td style="height:3px;line-height:3px;font-size:0;background-color:#f58622;background-image:linear-gradient(90deg,#fcd03d 0%,#f58622 40%,#d75427 64%,#3981c0 100%);">&nbsp;</td></tr>
-          <tr><td class="px" align="center" style="padding:40px 40px 0;text-align:center;">
+          <tr><td class="px" align="center" style="padding:46px 40px 0;text-align:center;">
             ${
               eyebrow
                 ? `<span style="display:inline-block;padding:5px 12px;border:1px solid #303852;border-radius:999px;background-color:#141824;font-family:${BODY};font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#f5a623;">${esc(eyebrow)}</span>`

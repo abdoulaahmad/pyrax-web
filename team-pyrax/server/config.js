@@ -78,7 +78,7 @@ export const EMAIL_LOGO_URL =
 /** The dark fire/blue glow field behind transactional emails (matches the site hero),
  *  hosted on the Spaces CDN. Applied via CSS + a VML background so it renders in Outlook. */
 export const EMAIL_BG_URL =
-  process.env.EMAIL_BG_URL ?? "https://pyrax-assets.nyc3.cdn.digitaloceanspaces.com/email/email-bg.png";
+  process.env.EMAIL_BG_URL ?? "https://pyrax-assets.nyc3.digitaloceanspaces.com/email/email-bg.png";
 
 // --- downloads (DigitalOcean Spaces OTA feed) -------------------------------
 
