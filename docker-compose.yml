@@ -102,6 +102,10 @@ services:
       BREVO_API_KEY: "${BREVO_API_KEY:-}"
       SPACES_KEY: "${SPACES_KEY:-}"
       SPACES_SECRET: "${SPACES_SECRET:-}"
+      # On-chain events relayer (`pyrax relay`): a login emits a gas-only event tx.
+      # Empty -> graceful no-op (logins still work). Both must be set to enable.
+      RELAY_BASE: "${RELAY_BASE:-}"
+      PYRAX_RELAY_SECRET: "${PYRAX_RELAY_SECRET:-}"
       # DigitalOcean Managed PostgreSQL (state lives here — the container is stateless).
       DATABASE_URL: "${DATABASE_URL_TEAM_PYRAX:?set DATABASE_URL_TEAM_PYRAX in .env}"
       DATABASE_CA: "${DATABASE_CA:-}"

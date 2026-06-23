@@ -38,6 +38,7 @@ import {
 import { sendMagicLink } from "./email.js";
 import { catalogue, downloadUrl } from "./downloads.js";
 import { listUsers, addUser, setRoles, removeUser } from "./admin.js";
+import { emitEvent } from "./events.js";
 
 const RUN_DIRECTLY = import.meta.url === pathToFileURL(process.argv[1] ?? "").href;
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -239,6 +240,9 @@ const server = http.createServer(async (req, res) => {
       const u = await consumeMagicToken(url.searchParams.get("token") ?? "");
       if (!u) return redirect(res, "/?error=link");
       const sid = await startSession(u.id);
+      // Record the login as a gas-only on-chain event (fire-and-forget; never blocks
+      // or fails the login). The relayer puts only the event TYPE + timestamp on chain.
+      emitEvent("team-login");
       return redirect(res, "/", { "Set-Cookie": sessionCookie(sid) });
     }
 
