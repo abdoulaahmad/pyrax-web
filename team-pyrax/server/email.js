@@ -43,7 +43,7 @@ export async function sendMagicLink(email, url) {
     body: JSON.stringify({
       sender: { email: BREVO_SENDER_EMAIL, name: BREVO_SENDER_NAME },
       to: [{ email }],
-      subject: "Your PYRAX Team sign-in link",
+      subject: "Sign in to PYRAX Team",
       htmlContent,
       textContent,
     }),
