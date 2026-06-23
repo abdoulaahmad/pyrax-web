@@ -17,6 +17,9 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+      # The update-notification feed (updates.pyraxchain.com). Releases drop their
+      # manifests/installers into this host dir under cli/ · node/ · ember/ · node-internal/.
+      - /srv/updates:/srv/updates:ro
     depends_on:
       - website
       - nodes-website

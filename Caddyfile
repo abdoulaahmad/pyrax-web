@@ -40,3 +40,18 @@ peers.pyraxchain.com {
 team-pyrax.pyraxchain.com {
 	reverse_proxy team-pyrax:8790
 }
+
+# --- update-notification feed: the static manifests (+ installers) the desktop apps
+# and the CLI poll for "a new version is ready" banners (NOT OTA auto-install). Served
+# from a host dir mounted into this container; each release drops its manifest under the
+# matching path: cli/latest.json, node/latest*.yml, ember/latest*.yml, node-internal/.
+# Version metadata is no-cache (always fresh); the immutable installer files cache long.
+updates.pyraxchain.com {
+	encode gzip
+	root * /srv/updates
+	@manifests path *latest*.json *latest*.yml
+	header @manifests Cache-Control "no-cache"
+	@installers path *.exe *.dmg *.AppImage *.zip *.tar.gz *.blockmap
+	header @installers Cache-Control "public, max-age=2592000, immutable"
+	file_server
+}
