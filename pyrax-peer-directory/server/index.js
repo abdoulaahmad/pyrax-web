@@ -315,7 +315,11 @@ const SECURITY_HEADERS = {
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains",
   "Content-Security-Policy":
     "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; " +
-    "script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+    // connect-src must allow the shared navbar's network store to poll the per-network public RPC
+    // endpoints (the @pyrax/shared endpoints SSOT → RPC_BY_CHAIN) so the live status dot reads green.
+    // Those RPCs are pyraxchain.com subdomains (e.g. sidn-rpc.pyraxchain.com); 'self' alone blocked
+    // the cross-origin fetch, which left the network reading "offline". 'self' still covers the SSE.
+    "script-src 'self'; connect-src 'self' https://*.pyraxchain.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
 };
 
 function withHeaders(res, extra = {}) {
