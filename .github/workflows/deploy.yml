@@ -42,6 +42,9 @@ jobs:
           - name: team-pyrax
             file: team-pyrax/Dockerfile
             context: team-pyrax
+          - name: relay
+            file: relay/Dockerfile
+            context: .
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -91,11 +94,13 @@ jobs:
           DATABASE_URL_EXPLORER: ${{ secrets.DATABASE_URL_EXPLORER }}
           GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
           GHCR_USER: ${{ secrets.GHCR_USER }}
+          PYRAX_RELAY_SECRET: ${{ secrets.PYRAX_RELAY_SECRET }}
+          PYRAX_KEY_PASSPHRASE: ${{ secrets.PYRAX_KEY_PASSPHRASE }}
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
-          envs: PYRAX_DIRECTORY_SECRET,SESSION_SECRET,BREVO_API_KEY,SPACES_KEY,SPACES_SECRET,DATABASE_URL_TEAM_PYRAX,DATABASE_URL_EXPLORER,GHCR_PULL_TOKEN,GHCR_USER
+          envs: PYRAX_DIRECTORY_SECRET,SESSION_SECRET,BREVO_API_KEY,SPACES_KEY,SPACES_SECRET,DATABASE_URL_TEAM_PYRAX,DATABASE_URL_EXPLORER,GHCR_PULL_TOKEN,GHCR_USER,PYRAX_RELAY_SECRET,PYRAX_KEY_PASSPHRASE
           script: |
             set -euo pipefail
             cd /opt/pyrax-web
@@ -112,6 +117,11 @@ jobs:
               printf 'SPACES_SECRET=%s\n' "${SPACES_SECRET:-}"
               printf 'DATABASE_URL_TEAM_PYRAX=%s\n' "${DATABASE_URL_TEAM_PYRAX:-}"
               printf 'DATABASE_URL_EXPLORER=%s\n' "${DATABASE_URL_EXPLORER:-}"
+              # On-chain events relayer: team-pyrax reaches it internally; both it and
+              # the relay share PYRAX_RELAY_SECRET. Empty -> relay idles, logins still work.
+              printf 'RELAY_BASE=%s\n' "http://relay:8799"
+              printf 'PYRAX_RELAY_SECRET=%s\n' "${PYRAX_RELAY_SECRET:-}"
+              printf 'PYRAX_KEY_PASSPHRASE=%s\n' "${PYRAX_KEY_PASSPHRASE:-}"
             } > .env
             # Authenticate to private GHCR via stdin, roll out, then drop the cached credential so no
             # registry token is left at rest on the droplet.

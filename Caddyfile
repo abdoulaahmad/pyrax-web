@@ -41,6 +41,12 @@ team-pyrax.pyraxchain.com {
 	reverse_proxy team-pyrax:8790
 }
 
+# --- on-chain events relayer (`pyrax relay`): HMAC-gated POST /event. team-pyrax
+# reaches it internally (http://relay:8799); this public route is for health + future use. ---
+relay.pyraxchain.com {
+	reverse_proxy relay:8799
+}
+
 # --- update-notification feed: the static manifests (+ installers) the desktop apps
 # and the CLI poll for "a new version is ready" banners (NOT OTA auto-install). Served
 # from a host dir mounted into this container; each release drops its manifest under the

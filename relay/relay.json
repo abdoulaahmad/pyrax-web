@@ -1,0 +1,11 @@
+{
+  "listen": "0.0.0.0:8799",
+  "sink": "0x000000000000000000000000000000000000dEaD",
+  "networks": [
+    { "name": "internal-devnet-simulated", "rpc": "https://sidn-rpc.pyraxchain.com:8811", "spender": "spender-simulated" },
+    { "name": "internal-devnet-live", "rpc": "", "spender": "spender-live" },
+    { "name": "devnet2", "rpc": "", "spender": "spender-devnet2" },
+    { "name": "testnet", "rpc": "", "spender": "spender-testnet" },
+    { "name": "mainnet", "rpc": "", "spender": "spender-mainnet" }
+  ]
+}

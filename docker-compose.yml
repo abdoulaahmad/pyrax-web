@@ -27,6 +27,7 @@ services:
       - explorer-indexer
       - peer-directory
       - team-pyrax
+      - relay
 
   website:
     image: ghcr.io/pyrax-network/pyrax-web-website:${TAG:-latest}
@@ -111,6 +112,26 @@ services:
       DATABASE_CA: "${DATABASE_CA:-}"
       PG_POOL_MAX: "5" # keep team-pyrax + explorer pools under the cluster's connection cap
 
+  # On-chain events relayer (`pyrax relay`): team-pyrax logins + curated app
+  # notifications become gas-only event txs on the newest live network. team-pyrax
+  # reaches it internally at http://relay:8799 (RELAY_BASE). Idle until
+  # PYRAX_RELAY_SECRET + PYRAX_KEY_PASSPHRASE are set (see relay/entrypoint.sh); on
+  # first real start it auto-creates a spender key per network (logs the addresses
+  # to fund). Keystore + relay state persist in the data volume.
+  relay:
+    image: ghcr.io/pyrax-network/pyrax-web-relay:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: relay/Dockerfile
+    restart: unless-stopped
+    environment:
+      PYRAX_HOME: /data
+      PYRAX_RELAY_SECRET: "${PYRAX_RELAY_SECRET:-}"
+      PYRAX_KEY_PASSPHRASE: "${PYRAX_KEY_PASSPHRASE:-}"
+    volumes:
+      - relay_data:/data
+
 volumes:
   caddy_data:
   caddy_config:
+  relay_data:
