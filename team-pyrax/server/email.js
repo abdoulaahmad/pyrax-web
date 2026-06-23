@@ -3,14 +3,13 @@
 // team-pyrax — transactional email via Brevo.
 //
 // `renderEmail()` is the SHARED, on-brand PYRAX email template — reuse it for every
-// future transactional email by passing different content. It mirrors the website
-// theme: near-black field with fire+blue glow, Sora headings / Inter body (web fonts
-// loaded for clients that support them, with system fallbacks), the horizontal
-// wordmark from the Spaces CDN, a centered brand-gradient CTA (solid-colour fallback
-// for Outlook), and fully centered content. sendMagicLink() composes the sign-in
-// email on top of it.
+// future transactional email. It mirrors the website hero: a deep near-black field
+// with fire+blue glow (a hosted background image applied via CSS AND VML so it shows
+// in Outlook, with bgcolor as the floor), Sora headings / Inter body, the horizontal
+// wordmark, and a bulletproof gradient CTA (a VML rounded button for Outlook + a CSS
+// gradient button with a brand glow for everything else). Fully centered.
 
-import { BREVO_API_KEY, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME, EMAIL_LOGO_URL } from "./config.js";
+import { BREVO_API_KEY, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME, EMAIL_LOGO_URL, EMAIL_BG_URL } from "./config.js";
 
 const BREVO_ENDPOINT = "https://api.brevo.com/v3/smtp/email";
 
@@ -58,14 +57,14 @@ export async function sendMagicLink(email, url) {
 const esc = (s) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-// Website type stacks (web fonts load in clients that allow them; the rest fall back).
+// Website type stacks (web fonts load where allowed; the rest fall back cleanly).
 const DISPLAY = "'Sora','Helvetica Neue',Helvetica,Arial,sans-serif";
 const BODY = "'Inter','Helvetica Neue',Helvetica,Arial,sans-serif";
 
 /**
- * The shared PYRAX transactional-email shell — fully centered, on-brand. Pass any of:
- *   preheader, eyebrow, heading, intro, bodyHtml, ctaLabel + ctaUrl, metaNote, fallbackUrl.
- * Returns a full HTML document. Reuse for all future PYRAX emails.
+ * The shared PYRAX transactional-email shell — fully centered, on-brand, Outlook-hardened.
+ * Pass any of: preheader, eyebrow, heading, intro, bodyHtml, ctaLabel + ctaUrl, metaNote,
+ * fallbackUrl. Returns a full HTML document. Reuse for every PYRAX email.
  */
 export function renderEmail({
   preheader = "",
@@ -79,16 +78,24 @@ export function renderEmail({
   fallbackUrl = "",
 } = {}) {
   const year = new Date().getFullYear();
+  const BG = esc(EMAIL_BG_URL);
 
+  // Bulletproof CTA: a VML rounded button for Outlook + a CSS gradient button (with a
+  // brand glow) for everything else. Live text, so it stays reusable.
   const cta =
     ctaLabel && ctaUrl
       ? `
-          <tr><td align="center" style="padding:28px 36px 2px;text-align:center;">
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" style="margin:0 auto;"><tr>
-              <td align="center" style="border-radius:12px;background-color:#f58622;background:linear-gradient(100deg,#fcd03d 0%,#f58622 58%,#d75427 100%);box-shadow:0 14px 32px -12px rgba(245,134,34,0.75);">
-                <a href="${esc(ctaUrl)}" target="_blank" style="display:inline-block;padding:16px 38px;font-family:${BODY};font-size:15px;font-weight:700;letter-spacing:0.01em;color:#1a0f02;text-decoration:none;border-radius:12px;">${esc(ctaLabel)} &nbsp;&rarr;</a>
-              </td>
-            </tr></table>
+          <tr><td align="center" style="padding:30px 36px 4px;text-align:center;">
+            <!--[if mso]>
+            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${esc(ctaUrl)}" style="height:52px;v-text-anchor:middle;width:300px;" arcsize="24%" strokecolor="#fcd03d" fillcolor="#f58622">
+              <v:fill type="gradient" color="#fcd03d" color2="#ef5e24" angle="90"/>
+              <w:anchorlock/>
+              <center style="color:#1a0f02;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">${esc(ctaLabel)} &#8594;</center>
+            </v:roundrect>
+            <![endif]-->
+            <!--[if !mso]><!-->
+            <a href="${esc(ctaUrl)}" target="_blank" style="display:inline-block;padding:16px 40px;border-radius:13px;background-color:#f58622;background-image:linear-gradient(100deg,#fcd03d 0%,#f5921e 50%,#ef5e24 100%);box-shadow:0 0 0 1px rgba(252,208,61,0.45),0 16px 36px -8px rgba(245,134,34,0.7);font-family:${BODY};font-size:15px;font-weight:700;letter-spacing:0.01em;color:#1a0f02;text-decoration:none;">${esc(ctaLabel)} &nbsp;&rarr;</a>
+            <!--<![endif]-->
           </td></tr>`
       : "";
 
@@ -99,7 +106,7 @@ export function renderEmail({
   const fallback = fallbackUrl
     ? `
           <tr><td style="padding:26px 36px 34px;">
-            <div style="border-top:1px solid #171b27;padding-top:20px;text-align:center;font-family:${BODY};font-size:12px;line-height:1.6;color:#6a7286;">
+            <div style="border-top:1px solid #1b2030;padding-top:20px;text-align:center;font-family:${BODY};font-size:12px;line-height:1.6;color:#6a7286;">
               Button not working? Copy and paste this link into your browser:<br>
               <a href="${esc(fallbackUrl)}" target="_blank" style="color:#60b8cc;text-decoration:none;word-break:break-all;">${esc(fallbackUrl)}</a>
             </div>
@@ -107,7 +114,7 @@ export function renderEmail({
     : "";
 
   return `<!doctype html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -115,6 +122,7 @@ export function renderEmail({
 <meta name="color-scheme" content="dark">
 <meta name="supported-color-schemes" content="dark">
 <title>PYRAX</title>
+<!--[if mso]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
@@ -123,26 +131,31 @@ export function renderEmail({
   @media (max-width:600px){ .px{ padding-left:24px!important; padding-right:24px!important; } }
 </style>
 </head>
-<body style="margin:0;padding:0;background-color:#050609;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+<body bgcolor="#050609" style="margin:0;padding:0;background-color:#050609;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
 <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;opacity:0;color:#050609;font-size:1px;line-height:1px;">${esc(preheader)}</div>
-<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color:#050609;background-image:radial-gradient(60rem 26rem at 16% -8%, rgba(215,84,39,0.22), transparent 60%), radial-gradient(58rem 30rem at 90% -6%, rgba(28,99,166,0.22), transparent 60%);">
+<!--[if gte mso 9]>
+<v:background xmlns:v="urn:schemas-microsoft-com:vml" fill="t">
+  <v:fill type="frame" src="${BG}" color="#050609"/>
+</v:background>
+<![endif]-->
+<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#050609" background="${BG}" style="background-color:#050609;background-image:url('${BG}');background-position:top center;background-repeat:no-repeat;background-size:cover;">
   <tr><td align="center" style="padding:46px 16px;">
     <table role="presentation" width="560" border="0" cellpadding="0" cellspacing="0" align="center" style="width:560px;max-width:100%;margin:0 auto;">
 
-      <tr><td align="center" style="padding:0 0 30px;text-align:center;">
+      <tr><td align="center" style="padding:4px 0 30px;text-align:center;">
         <img src="${esc(EMAIL_LOGO_URL)}" alt="PYRAX" width="190" style="display:block;border:0;outline:none;text-decoration:none;width:190px;max-width:62%;height:auto;margin:0 auto;">
       </td></tr>
 
-      <tr><td style="background-color:#0c0e16;border:1px solid #232838;border-radius:18px;">
+      <tr><td bgcolor="#0b0d15" style="background-color:#0b0d15;border:1px solid #262c3d;border-radius:18px;box-shadow:0 40px 80px -36px rgba(0,0,0,0.9);">
         <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
-          <tr><td style="height:3px;line-height:3px;font-size:0;background-color:#f58622;background:linear-gradient(90deg,#fcd03d 0%,#f58622 42%,#d75427 66%,#3981c0 100%);">&nbsp;</td></tr>
+          <tr><td style="height:3px;line-height:3px;font-size:0;background-color:#f58622;background-image:linear-gradient(90deg,#fcd03d 0%,#f58622 40%,#d75427 64%,#3981c0 100%);">&nbsp;</td></tr>
           <tr><td class="px" align="center" style="padding:40px 40px 0;text-align:center;">
             ${
               eyebrow
-                ? `<span style="display:inline-block;padding:5px 12px;border:1px solid #2a3142;border-radius:999px;background-color:#12141e;font-family:${BODY};font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#f5a623;">${esc(eyebrow)}</span>`
+                ? `<span style="display:inline-block;padding:5px 12px;border:1px solid #303852;border-radius:999px;background-color:#141824;font-family:${BODY};font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#f5a623;">${esc(eyebrow)}</span>`
                 : ""
             }
-            <h1 style="margin:18px 0 0;font-family:${DISPLAY};font-size:27px;line-height:1.2;font-weight:800;letter-spacing:-0.02em;color:#f7f9fd;text-align:center;">${esc(heading)}</h1>
+            <h1 style="margin:18px 0 0;font-family:${DISPLAY};font-size:28px;line-height:1.18;font-weight:800;letter-spacing:-0.02em;color:#f7f9fd;text-align:center;">${esc(heading)}</h1>
             ${intro ? `<p style="margin:14px auto 0;max-width:430px;font-family:${BODY};font-size:15px;line-height:1.65;color:#9aa4ba;text-align:center;">${esc(intro)}</p>` : ""}
             ${bodyHtml}
           </td></tr>
