@@ -40,7 +40,7 @@ export const SOCIAL = {
 //      "deploy the RPC droplet" guide). It MUST be HTTPS and send CORS headers (the droplet node is
 //      started with --rpc-cors, or fronted by Caddy that adds them).
 export const RPC_BY_CHAIN: Record<number, string> = {
-  881109: "https://sidn-rpc.pyraxchain.com:8811", // Internal Devnet (simulated) — DEV-TEAM RPC on the droplet (159.223.193.210:8811). Status is shown publicly; the connection endpoint is NOT advertised to users. See NETWORK-REGISTRY.md.
+  881109: "https://sidn-rpc.pyraxchain.com", // Internal Devnet (simulated) — DEV-TEAM RPC on the droplet (204.48.16.184), served on STANDARD 443. A non-standard port (was :8811) is blocked by many cellular carriers + captive/corporate Wi-Fi, so the live status read "offline" on mobile; 443 is reachable everywhere. Status is shown publicly; the endpoint is NOT advertised to users. See NETWORK-REGISTRY.md.
   429294: "", // Internal Live — wire when a public node is exposed
   710823: "", // Devnet2 — wire at launch (target Jul 2026)
   104928: "", // Testnet — wire at launch

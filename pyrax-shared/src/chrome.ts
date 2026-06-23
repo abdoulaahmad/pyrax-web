@@ -138,11 +138,16 @@ function headerHtml(active: string): string {
   <div id="megabackdrop" class="fixed inset-0 z-30 hidden bg-black/40 backdrop-blur-[1px]"></div>
   <header id="siteheader" class="fixed inset-x-0 top-0 z-40 transition-[background,border-color] duration-300">
     <nav class="container-x flex h-[4.5rem] items-center justify-between gap-3" aria-label="Global">
-      <div class="flex items-center">
+      <div class="flex min-w-0 items-center gap-3">
         <a href="/" class="logo-link group" aria-label="PYRAX home">
           <span class="logo-glow" aria-hidden="true"></span>
           <img src="/logo-horizontal.svg" alt="PYRAX" class="nav-logo relative w-auto" />
         </a>
+        <!-- mobile-only at-a-glance network status (desktop has the full selector on the right) -->
+        <button type="button" id="netmini" class="net-mini inline-flex min-w-0 items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-[color-mix(in_oklab,var(--color-elevated)_60%,transparent)] px-2.5 py-1 text-xs font-medium text-[var(--color-muted)] lg:hidden" aria-label="Network status — open menu">
+          <span class="status-dot net-dot shrink-0" data-net-trigger-dot aria-hidden="true"></span>
+          <span class="max-w-[6.5rem] truncate" data-net-trigger-name>Internal Devnet 1.0</span>
+        </button>
       </div>
 
       <div class="hidden items-center gap-x-0.5 lg:flex" id="desktopnav">
@@ -565,6 +570,8 @@ export function mountChrome(opts: ChromeOptions | string = {}): void {
     menubtn?.focus();
   };
   menubtn?.addEventListener("click", openMenu);
+  // the mobile at-a-glance status pill opens the drawer (which holds the full network selector)
+  document.getElementById("netmini")?.addEventListener("click", openMenu);
   menu?.querySelectorAll("[data-close]").forEach((el) => el.addEventListener("click", closeMenu));
   // trap Tab within the open drawer
   menu?.addEventListener("keydown", (e) => {
