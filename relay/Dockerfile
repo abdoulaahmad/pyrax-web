@@ -5,7 +5,10 @@
 # (updates.pyraxchain.com/cli) — no private registry/token needed — and runs the
 # relayer, which records team-pyrax logins + curated app notifications as gas-only
 # event transactions on the newest live network.
-FROM debian:bookworm-slim
+#
+# Base = ubuntu:24.04 to match the CLI's build runner (ubuntu-latest, glibc 2.39);
+# an older glibc (e.g. debian bookworm's 2.36) can't load the binary.
+FROM ubuntu:24.04
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends curl ca-certificates jq \
