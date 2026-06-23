@@ -28,6 +28,7 @@ services:
       - peer-directory
       - team-pyrax
       - relay
+      - faucet
 
   website:
     image: ghcr.io/pyrax-network/pyrax-web-website:${TAG:-latest}
@@ -131,7 +132,28 @@ services:
     volumes:
       - relay_data:/data
 
+  # Public test-token faucet (faucet.pyraxchain.com): dispenses test PYRX to any
+  # address on the active dev network, rate-limited per-address + per-IP. Signs via
+  # the bundled CLI + its own keystore key (auto-created; address logged to fund).
+  # Idle until PYRAX_KEY_PASSPHRASE is set. NEVER point FAUCET_RPC at mainnet.
+  faucet:
+    image: ghcr.io/pyrax-network/pyrax-web-faucet:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: faucet/Dockerfile
+    restart: unless-stopped
+    environment:
+      PYRAX_HOME: /data
+      PYRAX_KEY_PASSPHRASE: "${PYRAX_KEY_PASSPHRASE:-}"
+      FAUCET_RPC: "${FAUCET_RPC:-https://sidn-rpc.pyraxchain.com:8811}"
+      FAUCET_NETWORK: "${FAUCET_NETWORK:-Internal Devnet 1.0}"
+      FAUCET_DRIP_ASH: "${FAUCET_DRIP_ASH:-100000000000000000000}" # 100 PYRX
+      FAUCET_WINDOW_H: "${FAUCET_WINDOW_H:-12}"
+    volumes:
+      - faucet_data:/data
+
 volumes:
   caddy_data:
   caddy_config:
   relay_data:
+  faucet_data:

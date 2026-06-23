@@ -47,6 +47,11 @@ relay.pyraxchain.com {
 	reverse_proxy relay:8799
 }
 
+# --- public test-token faucet: a small web UI + rate-limited /drip endpoint ---
+faucet.pyraxchain.com {
+	reverse_proxy faucet:8800
+}
+
 # --- update-notification feed: the static manifests (+ installers) the desktop apps
 # and the CLI poll for "a new version is ready" banners (NOT OTA auto-install). Served
 # from a host dir mounted into this container; each release drops its manifest under the
