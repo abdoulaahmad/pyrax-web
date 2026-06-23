@@ -6,7 +6,7 @@ import { subscribe, getSelectedNetwork } from "@pyrax/shared";
 import type { NetSnapshot } from "@pyrax/shared";
 import { apiBlock, isIndexed } from "../lib/api.js";
 import { pageHead, card, kv, loading, errorPanel, offlinePanel, emptyPanel, addrLink, txLink, blockLink, copyable, mono, badge, wireCopy } from "../lib/widgets.js";
-import { commas, timeAgo, fullTime, toPyrx, toGwei, hexToInt, qp, shorten } from "../lib/format.js";
+import { commas, timeAgo, fullTime, toPyrx, toSpark, hexToInt, qp, shorten } from "../lib/format.js";
 import * as rpc from "../lib/rpc.js";
 
 const main = mountShell("");
@@ -52,7 +52,7 @@ function render(b: B): string {
       kv("Miner / producer", addrLink(b.miner, false)),
       kv("Transactions", String(b.txns.length)),
       kv("Gas used", `${commas(b.gas_used)} / ${commas(b.gas_limit)}`),
-      kv("Base fee", b.base_fee ? `${toGwei(BigInt(b.base_fee))} gwei` : "—"),
+      kv("Base fee", b.base_fee ? `${toSpark(BigInt(b.base_fee))} spark` : "—"),
       kv("Size", `${commas(b.size)} bytes`),
     ].join(""),
   );

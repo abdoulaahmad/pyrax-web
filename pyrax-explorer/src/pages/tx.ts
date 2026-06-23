@@ -6,7 +6,7 @@ import { subscribe, getSelectedNetwork } from "@pyrax/shared";
 import type { NetSnapshot } from "@pyrax/shared";
 import { apiTx, isIndexed } from "../lib/api.js";
 import { pageHead, card, kv, loading, errorPanel, offlinePanel, copyable, mono, badge, addrLink, blockLink, wireCopy } from "../lib/widgets.js";
-import { toPyrx, toGwei, commas, hexToInt, hexToBig, qp, escapeHtml } from "../lib/format.js";
+import { toPyrx, toSpark, commas, hexToInt, hexToBig, qp, escapeHtml } from "../lib/format.js";
 import * as rpc from "../lib/rpc.js";
 
 const main = mountShell("");
@@ -35,7 +35,7 @@ function fromRpc(t: rpc.RpcTx, r: rpc.RpcReceipt | null): TxView {
 function feeLine(v: TxView): string {
   if (v.gasUsed != null && v.effGasPrice) {
     const fee = BigInt(v.gasUsed) * BigInt(v.effGasPrice);
-    return `${toPyrx(fee, 8)} PYRX  ·  ${commas(v.gasUsed)} gas @ ${toGwei(BigInt(v.effGasPrice))} gwei`;
+    return `${toPyrx(fee, 8)} PYRX  ·  ${commas(v.gasUsed)} gas @ ${toSpark(BigInt(v.effGasPrice))} spark`;
   }
   return "—";
 }
@@ -68,7 +68,7 @@ function render(v: TxView): string {
       kv("To", toRow),
       kv("Value", `${toPyrx(BigInt(v.value || "0"), 8)} PYRX`),
       kv("Transaction fee", feeLine(v)),
-      kv("Gas limit / price", `${commas(v.gas)}${v.gasPrice ? ` @ ${toGwei(BigInt(v.gasPrice))} gwei` : ""}`),
+      kv("Gas limit / price", `${commas(v.gas)}${v.gasPrice ? ` @ ${toSpark(BigInt(v.gasPrice))} spark` : ""}`),
       kv("Nonce", String(v.nonce)),
       kv("Input data", v.input && v.input !== "0x" ? `<div class="expl-mono" style="word-break:break-all;max-height:9rem;overflow:auto">${escapeHtml(v.input)}</div>` : mono("0x (none)")),
     ].join(""),

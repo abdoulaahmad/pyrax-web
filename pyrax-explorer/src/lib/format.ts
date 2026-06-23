@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: LicenseRef-PYRAX-Proprietary
 //
-// Pure formatting + parsing helpers shared across explorer pages (no DOM). PYRX uses 18 base-unit
-// decimals (like wei); gas prices are shown in gwei (9 decimals).
+// Pure formatting + parsing helpers shared across explorer pages (no DOM). PYRAX denominations:
+// the base unit is the ASH (smallest, 18 decimals); gas prices are shown in SPARK (1 spark = 1e9 ash,
+// i.e. 9 decimals); PYRX is the whole token (1 PYRX = 1e9 spark = 1e18 ash).
 
 export const hexToInt = (h: unknown): number => (typeof h === "string" ? parseInt(h, 16) : NaN);
 
@@ -27,13 +28,13 @@ export function formatUnits(value: bigint, decimals = 18, maxFrac = 6): string {
   return (neg ? "-" : "") + whole + (frac ? "." + frac : "");
 }
 
-/** PYRX from a hex/bigint base-unit value. */
-export const toPyrx = (wei: string | bigint, maxFrac = 6): string =>
-  formatUnits(typeof wei === "bigint" ? wei : hexToBig(wei), 18, maxFrac);
+/** PYRX from a hex/bigint base-unit (ash) value. */
+export const toPyrx = (ash: string | bigint, maxFrac = 6): string =>
+  formatUnits(typeof ash === "bigint" ? ash : hexToBig(ash), 18, maxFrac);
 
-/** Gwei from a hex/bigint base-unit value (gas prices). */
-export const toGwei = (wei: string | bigint, maxFrac = 3): string =>
-  formatUnits(typeof wei === "bigint" ? wei : hexToBig(wei), 9, maxFrac);
+/** Spark from a hex/bigint base-unit (ash) value — gas prices (1 spark = 1e9 ash). */
+export const toSpark = (ash: string | bigint, maxFrac = 3): string =>
+  formatUnits(typeof ash === "bigint" ? ash : hexToBig(ash), 9, maxFrac);
 
 export const commas = (n: number | string): string => {
   const s = typeof n === "number" ? Math.trunc(n).toString() : n;

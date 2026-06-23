@@ -12,7 +12,7 @@ import * as rpc from "../lib/rpc.js";
 import { RpcOffline, type RpcBlock, type RpcTx } from "../lib/rpc.js";
 import { searchBarHtml, wireSearch } from "../lib/searchbox.js";
 import { pageHead, statTile, addrLink, txLink, blockLink, loading, errorPanel, offlinePanel, badge, wireCopy } from "../lib/widgets.js";
-import { hexToInt, toPyrx, toGwei, commas, timeAgo } from "../lib/format.js";
+import { hexToInt, toPyrx, toSpark, commas, timeAgo } from "../lib/format.js";
 
 const main = mountShell("overview");
 const sel = <T extends Element>(s: string): T | null => main.querySelector<T>(s);
@@ -135,7 +135,7 @@ async function refresh(): Promise<void> {
     if (statsEl)
       statsEl.innerHTML = [
         statTile("Latest block", "#" + commas(height), newest ? timeAgo(hexToInt(newest.timestamp)) : "", "brand"),
-        statTile("Gas price", gasHex ? toGwei(gasHex) + " gwei" : "—", "current base", "bolt"),
+        statTile("Gas price", gasHex ? toSpark(gasHex) + " spark" : "—", "current base", "bolt"),
         statTile("Connected peers", peersHex != null ? commas(hexToInt(peersHex)) : "—", "via net_peerCount"),
         statTile("Avg block time", avgBlockTime, `last ${blocks.length} blocks`),
         statTile("Txns (last 8 blk)", commas(txWindow), "recent throughput", "violet"),

@@ -5,7 +5,7 @@ import { mountShell } from "../lib/shell.js";
 import { subscribe, getSelectedNetwork } from "@pyrax/shared";
 import type { NetSnapshot } from "@pyrax/shared";
 import { pageHead, card, statTile, errorPanel, offlinePanel, wireCopy } from "../lib/widgets.js";
-import { toGwei } from "../lib/format.js";
+import { toSpark } from "../lib/format.js";
 import * as rpc from "../lib/rpc.js";
 
 const main = mountShell("gas");
@@ -42,10 +42,10 @@ async function load(): Promise<void> {
     const rewards = fh?.reward ?? [];
     const lastReward = last(rewards);
     const tiles = `<div class="expl-stat-grid" style="grid-template-columns:repeat(2,1fr)">
-      ${statTile("Gas price", gp ? toGwei(gp) + " gwei" : "—", "eth_gasPrice", "brand")}
-      ${statTile("Base fee", baseFee ? toGwei(baseFee) + " gwei" : "—", "latest block", "bolt")}
-      ${statTile("Priority — low", lastReward && lastReward[0] ? toGwei(lastReward[0]) + " gwei" : "—", "p10 tip")}
-      ${statTile("Priority — high", lastReward && lastReward[2] ? toGwei(lastReward[2]) + " gwei" : "—", "p90 tip", "violet")}
+      ${statTile("Gas price", gp ? toSpark(gp) + " spark" : "—", "eth_gasPrice", "brand")}
+      ${statTile("Base fee", baseFee ? toSpark(baseFee) + " spark" : "—", "latest block", "bolt")}
+      ${statTile("Priority — low", lastReward && lastReward[0] ? toSpark(lastReward[0]) + " spark" : "—", "p10 tip")}
+      ${statTile("Priority — high", lastReward && lastReward[2] ? toSpark(lastReward[2]) + " spark" : "—", "p90 tip", "violet")}
     </div>`;
     main.innerHTML = head + tiles + (fh ? utilBars(fh.gasUsedRatio) : "");
     wireCopy(main);

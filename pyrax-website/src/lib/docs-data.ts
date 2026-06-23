@@ -22,7 +22,7 @@ const PAGE_INTRODUCTION: DocPage = {
       "<strong>One state, three VMs.</strong> Accounts hold a balance, a nonce, and (optionally) deployed code. The code's leading bytes decide which VM runs it. There is no separate \"WASM chain\" or \"Cairo chain\" — it is one ledger.",
       "<strong>Contracts are accounts.</strong> Deploying a contract creates an account with code and storage. Calling it executes that code <em>inside L1 block application</em>, with the result (including reverts) committed to the block.",
       "<strong>Storage is universal.</strong> Every VM reads and writes the same model: <strong>32-byte key → 32-byte value</strong> slots, scoped per account. A Solidity <code>mapping</code> slot, a WASM <code>storage_set</code> slot, and a Cairo <code>pyrax.storage_write</code> slot are the same kind of slot.",
-      "<strong>The token is PYRX.</strong> All value, all gas, and all fees are denominated in PYRX (base units), with 18 decimals.",
+      "<strong>The token is PYRX.</strong> All value, gas, and fees are denominated in PYRX (18 decimals). The smallest indivisible unit is the <strong>ash</strong>, and gas prices are quoted in <strong>spark</strong> — PYRAX's analogues to Ethereum's wei and gwei: <code>1 PYRX = 1e9 spark = 1e18 ash</code>.",
       "<strong>Reverts are real transactions.</strong> A reverted or trapped call is <em>not</em> an error that vanishes — the transaction is still included in the block and still charged gas, exactly like Ethereum. The receipt simply reports <code>success: false</code>.",
       "<strong>The dev node speaks Ethereum JSON-RPC.</strong> Point MetaMask, Hardhat, Foundry, ethers, viem, or web3.js at it. HTTP and WebSocket are served on a single socket; <code>eth_*</code>, <code>net_*</code>, <code>web3_*</code>, filters, and subscriptions all work, alongside native <code>pyrax_*</code> methods."
     ]},
@@ -156,7 +156,7 @@ const PAGE_GETTING_STARTED: DocPage = {
     { t: "callout", kind: "warn", html: "<strong>Use the right chain id for the network you ran.</strong> The chain id must match the <code>--network</code> your node is on. The default is <code>710823</code> (Devnet 2); <code>--network testnet</code> is <code>104928</code>; <code>--network mainnet</code> is <code>563821</code>. A mismatch makes signed transactions un-includable (the node rejects them with a <code>ChainMismatch</code> error — replay protection)." },
     { t: "h3", text: "viem (TypeScript)" },
     { t: "code", lang: "typescript", code: "import { createPublicClient, http, defineChain } from \"viem\";\n\nexport const pyraxDevnet2 = defineChain({\n  id: 710823,\n  name: \"PYRAX Devnet 2\",\n  nativeCurrency: { name: \"PYRAX\", symbol: \"PYRX\", decimals: 18 },\n  rpcUrls: { default: { http: [\"http://127.0.0.1:8545\"] } },\n});\n\nconst client = createPublicClient({\n  chain: pyraxDevnet2,\n  transport: http(),\n});\n\nconst chainId = await client.getChainId();   // 710823\nconst blockNumber = await client.getBlockNumber(); // bigint, the current blue score\nconsole.log({ chainId, blockNumber });" },
-    { t: "callout", kind: "info", html: "<strong>EIP-1559 fees on PYRAX.</strong> PYRAX runs an EIP-1559 fee market. <code>eth_gasPrice</code>, <code>eth_maxPriorityFeePerGas</code>, and <code>eth_feeHistory</code> all work; the base fee floors at <code>1</code> base unit and adjusts at most 12.5% per block." },
+    { t: "callout", kind: "info", html: "<strong>EIP-1559 fees on PYRAX.</strong> PYRAX runs an EIP-1559 fee market. <code>eth_gasPrice</code>, <code>eth_maxPriorityFeePerGas</code>, and <code>eth_feeHistory</code> all work; the base fee floors at <code>1</code> ash (the smallest unit) and adjusts at most 12.5% per block." },
     { t: "h2", text: "5. Deploy your first contract" },
     { t: "p", html: "Every contract on PYRAX is an account with code and 32-byte-slot storage, executed inside L1 block application. <strong>The VM is auto-detected from the deployed code's leading bytes:</strong>" },
     { t: "table", head: ["Leading magic", "Detected VM"], rows: [
@@ -513,7 +513,7 @@ const PAGE_GAS_AND_FEES: DocPage = {
       ["BLOCK_GAS_LIMIT", "30_000_000", "Block gas cap; target is half of this."],
       ["GAS_ELASTICITY", "2", "Target = gas_limit / 2 = 15M gas."],
       ["BASE_FEE_MAX_CHANGE_DENOMINATOR", "8", "Max ±12.5% (1/8) change per block."],
-      ["MIN_BASE_FEE", "1", "Floor; the fee never drops below 1 base unit."],
+      ["MIN_BASE_FEE", "1", "Floor; the fee never drops below 1 ash (the smallest unit)."],
       ["INITIAL_BASE_FEE", "1", "Genesis base fee (equals the floor)."]
     ]},
     { t: "code", lang: "rust", title: "The retarget formula", code: "pub fn next_base_fee(parent_base_fee: u128, parent_gas_used: u64, parent_gas_limit: u64) -> u128 {\n    let target = (parent_gas_limit / GAS_ELASTICITY) as u128;   // 15_000_000\n    let base = parent_base_fee.max(MIN_BASE_FEE);\n    if target == 0 { return base; }\n    let used = parent_gas_used as u128;\n    let next = if used > target {\n        // Above target: raise the fee, rounded UP by at least 1 base unit.\n        let delta = used - target;\n        let inc = (base.saturating_mul(delta) / target / BASE_FEE_MAX_CHANGE_DENOMINATOR).max(1);\n        base.saturating_add(inc)\n    } else if used < target {\n        // Below target: lower the fee (NOT floored to 1, so idle chains reach the floor).\n        let delta = target - used;\n        let dec = base.saturating_mul(delta) / target / BASE_FEE_MAX_CHANGE_DENOMINATOR;\n        base.saturating_sub(dec)\n    } else {\n        base   // exactly at target → unchanged\n    };\n    next.max(MIN_BASE_FEE)\n}" },
@@ -1966,7 +1966,7 @@ const PAGE_ERRORS_AND_GLOSSARY: DocPage = {
     ]},
     { t: "h2", text: "Glossary — Tokens, accounts & privacy" },
     { t: "list", items: [
-      "<strong>PYRX</strong> — the native token (ticker PYRX, 18 decimals, 50B cap, genesis $0.0025, mining cap 12.5B, 25% base-fee burn). All balances, value, gas fees, and treasury splits are denominated in PYRX base units; RPC returns hex base units.",
+      "<strong>PYRX</strong> — the native token (ticker PYRX, 18 decimals, 50B cap, genesis $0.0025, mining cap 12.5B, 25% base-fee burn). All balances, value, gas fees, and treasury splits are denominated in PYRX base units — the smallest unit is the <strong>ash</strong> (1e18 per PYRX) and gas is priced in <strong>spark</strong> (1e9 ash); RPC returns hex base units.",
       "<strong>EOA</strong> — an externally-owned account with no code (eth_getCode returns 0x).",
       "<strong>Nonce</strong> — the per-account sequence number; each tx must use the exact next nonce, else InvalidNonce.",
       "<strong>Note</strong> — a shielded value commitment (an encrypted \"coin\"). The pool publishes commitments (leaves) and ciphertexts (items) via pyrax_shieldedChainData; the wallet trial-decrypts to find its own notes.",

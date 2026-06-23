@@ -6,7 +6,7 @@ import { subscribe, getSelectedNetwork } from "@pyrax/shared";
 import type { NetSnapshot } from "@pyrax/shared";
 import { apiStats, isIndexed } from "../lib/api.js";
 import { pageHead, card, kv, statTile, loading, errorPanel, badge, copyable, mono, wireCopy } from "../lib/widgets.js";
-import { commas, hexToInt, toGwei } from "../lib/format.js";
+import { commas, hexToInt, toSpark } from "../lib/format.js";
 import * as rpc from "../lib/rpc.js";
 
 const main = mountShell("network");
@@ -38,7 +38,7 @@ async function load(): Promise<void> {
       ]);
       live = `<h2 class="expl-section-title">Live</h2><div class="expl-stat-grid">
         ${statTile("Latest block", h ? "#" + commas(hexToInt(h)) : "—", "", "brand")}
-        ${statTile("Gas price", gp ? toGwei(gp) + " gwei" : "—", "", "bolt")}
+        ${statTile("Gas price", gp ? toSpark(gp) + " spark" : "—", "", "bolt")}
         ${statTile("Peers", pc != null ? String(hexToInt(pc)) : "—")}
         ${statTile("Client", ver ?? "—")}
       </div>`;
