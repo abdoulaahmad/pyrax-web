@@ -17,8 +17,9 @@
 //   POST /api/:chainId/verify                      ({ address, source, contractName, compilerVersion, ... })
 
 import { createServer } from "node:http";
+import { WebSocketServer } from "ws";
 import * as db from "./db.js";
-import { startIngest } from "./ingest.js";
+import { startIngest, events } from "./ingest.js";
 import { verifyContract } from "./verify.js";
 import { PORT, HOST, ALLOW_ORIGIN, NETWORKS, enabledNetworks } from "./config.js";
 
@@ -118,11 +119,39 @@ const server = createServer(async (req, res) => {
   }
 });
 
+// Realtime push to the browser: a WebSocket endpoint at `/api/ws` that streams a
+// frame for every freshly-indexed block (relayed from the ingest worker's `block`
+// events). The explorer UI updates the instant a block lands — no polling, no
+// 8-second jumps, no gaps. One-way (server→client); the API above remains the source
+// for history. Mounted under `/api/*` so the existing Caddy route proxies it (Caddy
+// upgrades the WebSocket automatically) — no extra routing needed.
+const wss = new WebSocketServer({ server, path: "/api/ws" });
+const broadcast = (obj) => {
+  const data = JSON.stringify(obj);
+  for (const c of wss.clients) {
+    if (c.readyState === 1) {
+      try {
+        c.send(data);
+      } catch {
+        /* client gone */
+      }
+    }
+  }
+};
+wss.on("connection", (socket) => {
+  try {
+    socket.send(JSON.stringify({ type: "hello", networks: enabledNetworks().map((n) => n.chainId) }));
+  } catch {
+    /* client gone */
+  }
+});
+events.on("block", (b) => broadcast({ type: "block", ...b }));
+
 // Create the schema, THEN serve + start ingesting.
 db.init()
   .then(() =>
     server.listen(PORT, HOST, () => {
-      console.log(`[api] pyrax-explorer indexer listening on http://${HOST}:${PORT}`);
+      console.log(`[api] pyrax-explorer indexer listening on http://${HOST}:${PORT} (+ /ws realtime)`);
       startIngest();
     }),
   )

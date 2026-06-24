@@ -31,6 +31,11 @@ export async function init() {
   await q(`
     CREATE TABLE IF NOT EXISTS sync_state (chain_id BIGINT PRIMARY KEY, last_block BIGINT NOT NULL);
 
+    -- Per-chain metadata. genesis_hash pins the chain's identity: if a disposable
+    -- network is wiped + re-genesised, its block 0 hash changes, and the indexer
+    -- detects the mismatch and re-indexes from scratch so old + new data never mix.
+    CREATE TABLE IF NOT EXISTS chain_meta (chain_id BIGINT PRIMARY KEY, genesis_hash TEXT);
+
     CREATE TABLE IF NOT EXISTS blocks (
       chain_id BIGINT NOT NULL, number BIGINT NOT NULL, hash TEXT NOT NULL, parent_hash TEXT,
       miner TEXT, timestamp BIGINT, gas_used BIGINT, gas_limit BIGINT, base_fee TEXT,
@@ -114,6 +119,32 @@ export const getSyncState = async (chainId) =>
   (await q("SELECT last_block FROM sync_state WHERE chain_id=$1", [chainId])).rows[0]?.last_block ?? -1;
 export const setSyncState = (chainId, n) =>
   q("INSERT INTO sync_state(chain_id,last_block) VALUES ($1,$2) ON CONFLICT(chain_id) DO UPDATE SET last_block=EXCLUDED.last_block", [chainId, n]);
+
+// ---- chain identity (genesis hash) -----------------------------------------
+export const getGenesisHash = async (chainId) =>
+  (await q("SELECT genesis_hash FROM chain_meta WHERE chain_id=$1", [chainId])).rows[0]?.genesis_hash ?? null;
+export const setGenesisHash = (chainId, hash) =>
+  q("INSERT INTO chain_meta(chain_id,genesis_hash) VALUES ($1,$2) ON CONFLICT(chain_id) DO UPDATE SET genesis_hash=EXCLUDED.genesis_hash", [chainId, hash]);
+
+/** Wipe EVERY indexed row for a chain (used when a disposable network is reset /
+ *  re-genesised), atomically: blocks, txns, logs, transfers, tokens, contracts,
+ *  and the sync cursor — so re-indexing starts cleanly from block 0. */
+export async function wipeChain(chainId) {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    for (const t of ["blocks", "txns", "logs", "transfers", "tokens", "contracts"]) {
+      await client.query(`DELETE FROM ${t} WHERE chain_id=$1`, [chainId]);
+    }
+    await client.query("DELETE FROM sync_state WHERE chain_id=$1", [chainId]);
+    await client.query("COMMIT");
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+}
 
 // ---- writes ----------------------------------------------------------------
 export const upsertBlock = (b) => q(BLOCK_SQL, vals(BLOCK_COLS, b));

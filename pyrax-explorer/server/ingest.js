@@ -4,9 +4,16 @@
 // receipts/logs, and decode ERC-20 / ERC-721 Transfer events. Handles shallow reorgs by re-anchoring
 // when a stored tip hash no longer matches the chain. Runs on an interval; also runnable standalone.
 
+import { EventEmitter } from "node:events";
 import { rpc, hexToInt, hexToBigStr, mapLimit } from "./rpc.js";
 import * as db from "./db.js";
 import { enabledNetworks, INGEST_INTERVAL_MS, INGEST_BATCH, RECEIPT_CONCURRENCY } from "./config.js";
+
+// Realtime feed: emits a `block` event for every freshly-indexed block. The HTTP
+// server relays these to connected browsers over WebSocket so the explorer UI updates
+// the instant a block lands — no polling, no 8-second jumps, no gaps.
+export const events = new EventEmitter();
+events.setMaxListeners(0);
 
 // keccak256("Transfer(address,address,uint256)")
 const TRANSFER_SIG = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
@@ -66,10 +73,37 @@ async function ingestBlock(chainId, url, blk) {
   });
 
   await db.writeBlockBundle({ block, txns: txnRows, logs: logRows, transfers: xferRows, tokens: tokenRows });
+  // Realtime push: tell subscribers a block landed (relayed to browsers over WS).
+  events.emit("block", {
+    chainId, number, hash: block.hash, parentHash: block.parent_hash, miner: block.miner,
+    timestamp: blockTime, txCount: block.tx_count, gasUsed: block.gas_used,
+  });
+}
+
+// Self-heal on a chain RESET: if the chain's genesis (block 0) hash no longer
+// matches what we indexed under, the disposable network was wiped + re-genesised, so
+// the stored data is from a DEAD chain. Wipe ALL of this chain's rows and re-index
+// from scratch — old + new data can never mix. Returns true if it reset.
+async function reconcileGenesis(chainId, url) {
+  const g = await rpc(url, "eth_getBlockByNumber", ["0x0", false]).catch(() => null);
+  const onchain = g && typeof g.hash === "string" ? g.hash.toLowerCase() : null;
+  if (!onchain) return false; // node unreachable — leave existing data untouched
+  const stored = await db.getGenesisHash(chainId);
+  if (stored && stored !== onchain) {
+    console.warn(`[ingest] ${chainId}: genesis changed (${stored.slice(0, 10)}… → ${onchain.slice(0, 10)}…) — chain was reset; wiping + re-indexing from 0`);
+    await db.wipeChain(chainId);
+    await db.setGenesisHash(chainId, onchain);
+    return true;
+  }
+  if (!stored) await db.setGenesisHash(chainId, onchain);
+  return false;
 }
 
 async function ingestNetwork(net) {
   const { chainId, rpc: url } = net;
+  // Detect + recover from a chain reset BEFORE walking blocks (so we never append
+  // new-chain blocks onto dead-chain history).
+  await reconcileGenesis(chainId, url);
   const head = hexToInt(await rpc(url, "eth_blockNumber"));
   if (!Number.isFinite(head)) return null;
   let last = await db.getSyncState(chainId);
@@ -98,6 +132,55 @@ async function ingestNetwork(net) {
   return { chainId, from, to, head };
 }
 
+// Realtime accelerator: subscribe to the node's `newHeads` over WebSocket so a new
+// block triggers an immediate ingest (sub-second) instead of waiting for the poll
+// tick. Best-effort + self-reconnecting; if the node doesn't serve subscriptions the
+// interval poll still keeps the chain indexed (no realtime, but no gaps either).
+function subscribeHeads(net, onHead) {
+  const wsUrl = net.rpc.replace(/^http/i, "ws"); // http→ws, https→wss (same host/port)
+  let alive = true;
+  let backoff = 1000;
+  const connect = () => {
+    if (!alive) return;
+    let ws;
+    try {
+      ws = new WebSocket(wsUrl);
+    } catch {
+      return void setTimeout(connect, backoff);
+    }
+    ws.addEventListener("open", () => {
+      backoff = 1000;
+      ws.send(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_subscribe", params: ["newHeads"] }));
+      console.log(`[ingest] ${net.chainId}: subscribed to newHeads over WebSocket (realtime)`);
+    });
+    ws.addEventListener("message", (ev) => {
+      try {
+        const msg = JSON.parse(typeof ev.data === "string" ? ev.data : ev.data.toString());
+        if (msg.method === "eth_subscription" && msg.params?.result) onHead();
+      } catch {
+        /* ignore non-JSON / unrelated frames */
+      }
+    });
+    const reconnect = () => {
+      if (!alive) return;
+      backoff = Math.min(backoff * 2, 30_000);
+      setTimeout(connect, backoff);
+    };
+    ws.addEventListener("close", reconnect);
+    ws.addEventListener("error", () => {
+      try {
+        ws.close();
+      } catch {
+        /* already closing */
+      }
+    });
+  };
+  connect();
+  return () => {
+    alive = false;
+  };
+}
+
 let timer = null;
 export async function startIngest() {
   await db.init();
@@ -108,21 +191,31 @@ export async function startIngest() {
   }
   console.log("[ingest] indexing:", nets.map((n) => `${n.name} (${n.chainId})`).join(", "));
   let running = false;
+  let again = false;
   const tick = async () => {
-    if (running) return;
-    running = true;
-    for (const net of nets) {
-      try {
-        const r = await ingestNetwork(net);
-        if (r && r.to >= r.from) console.log(`[ingest] ${net.chainId}: ${r.from}..${r.to} / head ${r.head}`);
-      } catch (e) {
-        console.warn(`[ingest] ${net.chainId} error: ${e.message}`);
-      }
+    if (running) {
+      again = true; // a head arrived mid-tick — run once more right after
+      return;
     }
+    running = true;
+    do {
+      again = false;
+      for (const net of nets) {
+        try {
+          const r = await ingestNetwork(net);
+          if (r && r.to >= r.from) console.log(`[ingest] ${net.chainId}: ${r.from}..${r.to} / head ${r.head}`);
+        } catch (e) {
+          console.warn(`[ingest] ${net.chainId} error: ${e.message}`);
+        }
+      }
+    } while (again);
     running = false;
   };
   void tick();
+  // Poll is the safety net (fills any gap a dropped subscription misses); the WS
+  // subscription is the realtime fast-path.
   timer = setInterval(() => void tick(), INGEST_INTERVAL_MS);
+  for (const net of nets) subscribeHeads(net, () => void tick());
 }
 export function stopIngest() {
   if (timer) clearInterval(timer);

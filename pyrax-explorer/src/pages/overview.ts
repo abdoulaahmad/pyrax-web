@@ -8,6 +8,7 @@
 import { mountShell } from "../lib/shell.js";
 import { subscribe, getSelectedNetwork, icon } from "@pyrax/shared";
 import type { NetSnapshot } from "@pyrax/shared";
+import { onLiveBlock } from "../lib/live.js";
 import * as rpc from "../lib/rpc.js";
 import { RpcOffline, type RpcBlock, type RpcTx } from "../lib/rpc.js";
 import { searchBarHtml, wireSearch } from "../lib/searchbox.js";
@@ -175,13 +176,21 @@ async function refresh(): Promise<void> {
 }
 
 function startPolling(): void {
+  // The WebSocket feed drives realtime updates; this is just a slow safety net that
+  // fills any gap if the socket drops (so the dashboard is never stale, never jumpy).
   window.clearInterval(polling);
-  polling = window.setInterval(() => void refresh(), 6000);
+  polling = window.setInterval(() => void refresh(), 15000);
 }
 
 frame();
 void refresh();
 startPolling();
+
+// Realtime: refresh the instant a block lands on the SELECTED network (coalesced so a
+// burst of blocks triggers at most one in-flight refresh — `refresh` guards on `busy`).
+onLiveBlock((b) => {
+  if (b.chainId === chainId) void refresh();
+});
 
 // React to network-selector changes: re-frame + refetch immediately on a chain switch.
 subscribe((s: NetSnapshot) => {

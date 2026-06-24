@@ -19,6 +19,7 @@ export const SIDEBAR: SideCat[] = [
       { key: "blocks", label: "Blocks", href: "/blocks.html", icon: "blocks" },
       { key: "txs", label: "Transactions", href: "/txs.html", icon: "arrow" },
       { key: "logs", label: "Logs & Events", href: "/logs.html", icon: "terminal" },
+      { key: "genesis", label: "Genesis block", href: "/genesis.html", icon: "cube" },
     ],
   },
   {
