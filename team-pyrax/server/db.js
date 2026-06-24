@@ -6,7 +6,7 @@
 // MUST be awaited before the server starts serving. All access is async.
 
 import pg from "pg";
-import { DATABASE_URL, DATABASE_SSL, DATABASE_CA, SUPERUSER_EMAIL, ROLES, ALL_ROLES } from "./config.js";
+import { DATABASE_URL, DATABASE_SSL, DATABASE_CA, SUPERUSER_EMAIL, ROLES, ASSIGNABLE_ROLES } from "./config.js";
 
 const pool = new pg.Pool({
   // Strip sslmode from the URL so node-postgres uses our explicit `ssl` below. Otherwise the
@@ -31,7 +31,7 @@ function parseRoles(val) {
   if (typeof val === "string") {
     try { arr = JSON.parse(val); } catch { arr = []; }
   }
-  return Array.isArray(arr) ? [...new Set(arr.filter((r) => ALL_ROLES.includes(r)))] : [];
+  return Array.isArray(arr) ? [...new Set(arr.filter((r) => ASSIGNABLE_ROLES.includes(r)))] : [];
 }
 
 function rowToUser(row) {
@@ -73,8 +73,16 @@ export async function init() {
       expires_at BIGINT NOT NULL,
       last_seen  BIGINT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS ember_otps (
+      code_hash  TEXT PRIMARY KEY,
+      email      TEXT NOT NULL,
+      created_at BIGINT NOT NULL,
+      expires_at BIGINT NOT NULL,
+      used_at    BIGINT
+    );
     CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
     CREATE INDEX IF NOT EXISTS idx_tokens_email ON magic_tokens(email);
+    CREATE INDEX IF NOT EXISTS idx_otps_email ON ember_otps(email);
   `);
 
   // Seed / repair the hardcoded superuser so the platform can never lock itself out.
@@ -137,6 +145,36 @@ export const Tokens = {
       ])).rows[0].c,
     ),
   sweep: () => q("DELETE FROM magic_tokens WHERE expires_at < $1", [now() - 60 * 60 * 1000]),
+};
+
+/** Single-use OTPs that unlock the Ember desktop app's admin area. Stored only as
+ *  an HMAC of the code (never plaintext), consumed atomically to close replay. */
+export const EmberOtps = {
+  create: (codeHash, email, expiresAt) =>
+    q("INSERT INTO ember_otps (code_hash, email, created_at, expires_at) VALUES ($1, $2, $3, $4)", [
+      codeHash,
+      String(email).toLowerCase(),
+      now(),
+      expiresAt,
+    ]),
+  /** Atomically consume: succeeds only if this code is for `email`, unused, and
+   *  unexpired (single UPDATE … RETURNING closes the double-use / replay race). */
+  consume: async (codeHash, email) => {
+    const t = now();
+    const { rows } = await q(
+      "UPDATE ember_otps SET used_at = $1 WHERE code_hash = $2 AND email = $3 AND used_at IS NULL AND expires_at > $4 RETURNING *",
+      [t, codeHash, String(email).toLowerCase(), t],
+    );
+    return rows[0] ?? null;
+  },
+  recentCountForEmail: async (email, windowMs) =>
+    Number(
+      (await q("SELECT COUNT(*)::int AS c FROM ember_otps WHERE email = $1 AND created_at > $2", [
+        String(email).toLowerCase(),
+        now() - windowMs,
+      ])).rows[0].c,
+    ),
+  sweep: () => q("DELETE FROM ember_otps WHERE expires_at < $1", [now() - 60 * 60 * 1000]),
 };
 
 export const Sessions = {

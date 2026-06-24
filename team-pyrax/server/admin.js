@@ -15,16 +15,22 @@
 
 import { Users } from "./db.js";
 import { isValidEmail } from "./auth.js";
-import { ALL_ROLES, ROLES, ROLE_META, SUPERUSER_EMAIL, EMAIL_DOMAIN } from "./config.js";
+import { ALL_ROLES, ALL_APP_ROLES, ROLES, ROLE_META, APP_ROLE_META, SUPERUSER_EMAIL, EMAIL_DOMAIN } from "./config.js";
+
+/** Combined metadata lookup (module roles + Ember App Roles). */
+const ROLE_META_ALL = { ...ROLE_META, ...APP_ROLE_META };
 
 /** Roles a given actor is allowed to assign. `superuser` is never assignable; only
- *  the superuser can hand out `user-admin`. */
+ *  the superuser can hand out `user-admin`. App Roles (Ember admin-tab access) are
+ *  assignable by any user-admin/superuser — they grant app-tab access, not platform
+ *  admin, so there's no privilege-escalation risk. */
 function assignableRolesFor(actor) {
-  return ALL_ROLES.filter((r) => {
+  const moduleRoles = ALL_ROLES.filter((r) => {
     if (r === ROLES.SUPERUSER) return false;
     if (r === ROLES.USER_ADMIN) return !!actor?.isSuperuser;
     return true;
   });
+  return [...moduleRoles, ...ALL_APP_ROLES];
 }
 
 /** Validate a requested role set against what the actor may assign. Returns the
@@ -47,7 +53,11 @@ const publicUser = (u) => ({
 });
 
 export async function listUsers(actor) {
-  const roles = assignableRolesFor(actor).map((r) => ({ key: r, ...ROLE_META[r] }));
+  const roles = assignableRolesFor(actor).map((r) => ({
+    key: r,
+    kind: ALL_APP_ROLES.includes(r) ? "app" : "module", // group module roles vs Ember App Roles in the UI
+    ...ROLE_META_ALL[r],
+  }));
   const users = (await Users.all()).map(publicUser);
   return { status: 200, body: { users, assignableRoles: roles } };
 }

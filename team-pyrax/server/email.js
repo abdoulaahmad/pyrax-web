@@ -54,6 +54,46 @@ export async function sendMagicLink(email, url) {
   }
 }
 
+/** Send the Ember admin-area unlock OTP. Throws on a hard send failure (the HTTP
+ *  layer still returns its generic anti-enumeration response). */
+export async function sendEmberOtp(email, code) {
+  const codeHtml = `<div style="margin:28px auto 6px;padding:18px 22px;max-width:340px;border:1px solid #303852;border-radius:12px;background-color:#141824;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;font-size:32px;font-weight:800;letter-spacing:0.34em;color:#fcd03d;text-align:center;">${esc(code)}</div>`;
+  const htmlContent = renderEmail({
+    preheader: "Your Ember admin unlock code — expires in 10 minutes.",
+    eyebrow: "Ember admin access",
+    heading: "Your admin unlock code",
+    intro: "Enter this code in the Ember app to unlock the admin area. It expires in 10 minutes and can be used once.",
+    bodyHtml: codeHtml,
+    metaNote: "Expires in 10 minutes · one-time use",
+  });
+  const textContent =
+    `Your Ember admin unlock code: ${code}\n\n` +
+    `Enter it in the Ember app to unlock the admin area.\n` +
+    `This code expires in 10 minutes and can be used once.\n` +
+    `If you didn't request it, you can safely ignore this email.`;
+
+  if (!BREVO_API_KEY) {
+    console.warn(`[team-pyrax] BREVO_API_KEY unset — Ember admin OTP for ${email}: ${code}`);
+    return;
+  }
+  const res = await fetch(BREVO_ENDPOINT, {
+    method: "POST",
+    headers: { "api-key": BREVO_API_KEY, "content-type": "application/json", accept: "application/json" },
+    body: JSON.stringify({
+      sender: { email: BREVO_SENDER_EMAIL, name: BREVO_SENDER_NAME },
+      to: [{ email }],
+      subject: "Your Ember admin unlock code",
+      htmlContent,
+      textContent,
+    }),
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`brevo send failed: ${res.status} ${body.slice(0, 300)}`);
+  }
+}
+
 const esc = (s) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 

@@ -19,12 +19,14 @@ import { readFile, stat } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join, normalize, extname } from "node:path";
 
-import { PORT, PUBLIC_URL, MODULES, ROLES, TRUST_PROXY, SESSION_SECRET_IS_EPHEMERAL, BREVO_API_KEY } from "./config.js";
-import { init as initDb, Tokens, Sessions } from "./db.js";
+import { PORT, PUBLIC_URL, MODULES, ROLES, APP_ROLE_META, TRUST_PROXY, SESSION_SECRET_IS_EPHEMERAL, BREVO_API_KEY } from "./config.js";
+import { init as initDb, Tokens, Sessions, EmberOtps } from "./db.js";
 import {
   issueMagicToken,
   magicLinkUrl,
   consumeMagicToken,
+  issueEmberOtp,
+  verifyEmberOtp,
   startSession,
   endSession,
   sessionUser,
@@ -35,7 +37,7 @@ import {
   sessionCookie,
   clearCookie,
 } from "./auth.js";
-import { sendMagicLink } from "./email.js";
+import { sendMagicLink, sendEmberOtp } from "./email.js";
 import { catalogue, downloadUrl } from "./downloads.js";
 import { listUsers, addUser, setRoles, removeUser } from "./admin.js";
 import { emitEvent } from "./events.js";
@@ -261,6 +263,49 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { ok: true, message: "If that address is on the team, a sign-in link is on its way." });
     }
 
+    // --- Ember admin OTP: request a code (called by the Ember desktop app) ---
+    // Session-less + anti-enumeration (identical response whether or not a code is
+    // issued), rate-limited per IP like the magic-link request.
+    if (method === "POST" && path === "/api/ember/otp/request") {
+      const raw = await readBody(req).catch(() => null);
+      if (raw === null) return json(res, 413, { error: "payload too large" });
+      let email;
+      try {
+        email = JSON.parse(raw || "{}")?.email;
+      } catch {
+        return json(res, 400, { error: "invalid json" });
+      }
+      try {
+        const issued = await issueEmberOtp(email);
+        if (issued) {
+          sendEmberOtp(issued.email, issued.code).catch((e) =>
+            console.error("[team-pyrax] Ember OTP send failed:", e?.message ?? e),
+          );
+        }
+      } catch (e) {
+        console.error("[team-pyrax] Ember OTP issue failed:", e?.message ?? e); // still generic response
+      }
+      return json(res, 200, { ok: true, message: "If that address has admin access, a code is on its way." });
+    }
+
+    // --- Ember admin OTP: verify a code → the user's granted App Roles + tabs ---
+    if (method === "POST" && path === "/api/ember/otp/verify") {
+      const raw = await readBody(req).catch(() => null);
+      if (raw === null) return json(res, 413, { error: "payload too large" });
+      let body;
+      try {
+        body = JSON.parse(raw || "{}");
+      } catch {
+        return json(res, 400, { error: "invalid json" });
+      }
+      const result = await verifyEmberOtp(body?.email, body?.code);
+      if (!result) return json(res, 401, { ok: false, error: "invalid or expired code" });
+      // Map App Roles → the Ember admin tab ids they unlock (drops any role with no
+      // tab mapping). Ember shows ONLY these tabs.
+      const tabs = [...new Set(result.appRoles.map((r) => APP_ROLE_META[r]?.tab).filter(Boolean))];
+      return json(res, 200, { ok: true, email: result.email, roles: result.appRoles, tabs });
+    }
+
     // --- auth: consume the magic link (top-level navigation from the email) ---
     if (method === "GET" && path === "/auth/callback") {
       const u = await consumeMagicToken(url.searchParams.get("token") ?? "");
@@ -371,10 +416,11 @@ if (RUN_DIRECTLY) {
   if (SESSION_SECRET_IS_EPHEMERAL) {
     console.warn("[team-pyrax] WARNING: SESSION_SECRET unset — using an ephemeral key. Sessions + pending links reset on restart. Set it in production.");
   }
-  // periodic cleanup of expired tokens + sessions
+  // periodic cleanup of expired tokens + sessions + Ember OTPs
   setInterval(() => {
     Tokens.sweep().catch(() => {});
     Sessions.sweep().catch(() => {});
+    EmberOtps.sweep().catch(() => {});
   }, 5 * 60 * 1000).unref();
   // Create the schema + seed the superuser, THEN start serving.
   initDb()

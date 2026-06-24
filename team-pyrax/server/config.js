@@ -36,6 +36,26 @@ export const ROLE_META = Object.freeze({
   [ROLES.DOWNLOADS]: { label: "Downloads", desc: "Access the app + CLI download center." },
 });
 
+/** App Roles — per-tab access to the Ember DESKTOP app's Admin area. These are
+ *  distinct from the module roles above (which gate THIS team site's dashboard
+ *  tiles): each Ember admin TAB has its own App Role. A teammate is granted App
+ *  Roles here, then unlocks Ember's admin area with an emailed OTP — Ember loads
+ *  ONLY the admin tabs the teammate's App Roles permit. Add a tab ⇒ add a role +
+ *  its `tab` mapping here. */
+export const APP_ROLES = Object.freeze({
+  EMBER_SEED_LISTS: "ember-seed-lists",
+});
+export const ALL_APP_ROLES = Object.freeze(Object.values(APP_ROLES));
+
+/** App-Role metadata. `tab` is the Ember nav-item id this role unlocks. */
+export const APP_ROLE_META = Object.freeze({
+  [APP_ROLES.EMBER_SEED_LISTS]: { label: "Ember · Seed Lists", desc: "Publish + sign signed seed lists in the Ember admin app.", tab: "seedlists" },
+});
+
+/** Every role a user may legitimately hold (module + app), for storage validation
+ *  + assignment. Superuser implicitly grants all of them. */
+export const ASSIGNABLE_ROLES = Object.freeze([...ALL_ROLES, ...ALL_APP_ROLES]);
+
 /** Dashboard module tiles. Each requires a role (superuser always passes). `key`
  *  is stable; the frontend supplies the icon/route. New modules append here. */
 export const MODULES = Object.freeze([
@@ -49,6 +69,14 @@ export const MAGIC_TTL_MS = 15 * 60 * 1000; // a sign-in link is valid 15 min, s
 export const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // a session lasts 7 days (sliding)
 export const MAGIC_MAX_PER_WINDOW = 5; // at most N links per email per MAGIC_TTL_MS
 export const COOKIE_NAME = "tp_session";
+
+// --- Ember admin OTP --------------------------------------------------------
+// A teammate unlocks the Ember desktop app's admin area with a single-use code
+// emailed here. 7 uppercase alphanumeric chars (excluding ambiguous 0/O/1/I).
+export const EMBER_OTP_TTL_MS = 10 * 60 * 1000; // valid 10 min, single-use
+export const EMBER_OTP_MAX_PER_WINDOW = 5; // at most N codes per email per TTL
+export const EMBER_OTP_LENGTH = 7;
+export const EMBER_OTP_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I
 
 /** Pepper used to HMAC magic tokens + session ids before storage and to derive
  *  CSRF tokens. If unset, a random per-boot value is used — fine for local dev, but

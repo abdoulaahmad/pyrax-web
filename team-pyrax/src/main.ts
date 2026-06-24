@@ -13,7 +13,7 @@ interface User { email: string; roles: string[]; isSuperuser: boolean; lastLogin
 interface Module { key: string; title: string; desc: string; role: string; icon: string; }
 interface Me { user: User | null; modules?: Module[]; csrf?: string; }
 interface AdminUser { id: number; email: string; roles: string[]; isSuperuser: boolean; createdAt: number; createdBy: string | null; lastLogin: number | null; }
-interface RoleMeta { key: string; label: string; desc: string; }
+interface RoleMeta { key: string; label: string; desc: string; kind?: "module" | "app"; }
 interface PlatformState { label: string; available: boolean; }
 interface Product { key: string; name: string; tagline: string; version: string | null; available: boolean; platforms: Record<string, PlatformState>; }
 interface FaucetNetwork { chainId: number; label: string; online: boolean; }
@@ -60,7 +60,8 @@ function toast(msg: string, kind: "ok" | "err" = "ok"): void {
   toastTimer = window.setTimeout(() => (toastEl.className = ""), 3600);
 }
 const hasModule = (key: string): boolean => !!me.modules?.some((m) => m.key === key);
-const roleLabel = (r: string): string => ({ superuser: "Superuser", "user-admin": "User Admin", downloads: "Downloads" }[r] ?? r);
+const roleLabel = (r: string): string =>
+  ({ superuser: "Superuser", "user-admin": "User Admin", downloads: "Downloads", "ember-seed-lists": "Ember · Seed Lists" }[r] ?? r);
 
 // --- login ------------------------------------------------------------------
 
@@ -360,25 +361,106 @@ async function renderFaucet(): Promise<void> {
 
 // --- user management --------------------------------------------------------
 
+// --- Users view state (client-side search / filter / pagination over the full
+//     whitelist the API returns in one call) ---
+let _users: AdminUser[] = [];
+let _roles: RoleMeta[] = [];
+let _q = "";
+let _filter = ""; // "" = all, else a role key
+let _page = 0;
+const USERS_PER_PAGE = 10;
+
+/** Grouped role checkboxes (Module roles + Ember admin tabs), preserving the
+ *  existing checkbox design. `uid` present ⇒ per-row (data-uid) edit checkboxes. */
+function roleChecks(uid: number | null, current: string[]): string {
+  const group = (kind: "module" | "app", title: string): string => {
+    const items = _roles.filter((r) => (r.kind ?? "module") === kind);
+    if (!items.length) return "";
+    const boxes = items
+      .map((r) => {
+        const attr = uid != null ? `data-uid="${uid}"` : "";
+        const checked = current.includes(r.key) ? "checked" : "";
+        return `<label class="rolepick" title="${esc(r.desc ?? "")}"><input type="checkbox" ${attr} value="${esc(r.key)}" ${checked} />${esc(r.label)}</label>`;
+      })
+      .join("");
+    return `<div class="rolegroup"><div class="rolegroup-title">${esc(title)}</div><div class="flex flex-wrap gap-1.5">${boxes}</div></div>`;
+  };
+  return `<div class="flex flex-col gap-2.5">${group("module", "Module roles")}${group("app", "Ember admin tabs")}</div>`;
+}
+
 async function renderUsers(): Promise<void> {
   shell("users", loading());
   try {
     const { users, assignableRoles } = await api<{ users: AdminUser[]; assignableRoles: RoleMeta[] }>("/api/admin/users");
-    const myEmail = (me.user as User).email;
+    _users = users;
+    _roles = assignableRoles;
+    _q = "";
+    _filter = "";
+    _page = 0;
 
-    const addRoleChecks = assignableRoles
-      .map((r) => `<label class="rolepick"><input type="checkbox" value="${esc(r.key)}" />${esc(r.label)}</label>`)
-      .join("");
+    const filterOpts = ['<option value="">All roles</option>', ...assignableRoles.map((r) => `<option value="${esc(r.key)}">${esc(r.label)}</option>`)].join("");
 
-    const rows = users
+    setView(`
+      <div class="mb-7">
+        <h1 class="text-2xl font-bold">User Management</h1>
+        <p class="mt-1.5 text-sm text-[var(--color-muted)]">Whitelist @pyraxchain.com teammates and assign their module roles + Ember admin-tab access.</p>
+      </div>
+
+      <div class="card p-6 mb-7">
+        <h3 class="font-bold">${icon("plus", "h-4 w-4 inline -mt-0.5")} Add a teammate</h3>
+        <form id="addform" class="mt-4 flex flex-col gap-3">
+          <input class="input sm:max-w-xs" name="email" type="email" placeholder="name@pyraxchain.com" required />
+          ${roleChecks(null, [])}
+          <button class="btn btn-primary btn-sm self-start" type="submit">${icon("plus", "h-4 w-4")} Add teammate</button>
+        </form>
+      </div>
+
+      <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <input id="user-search" class="input sm:max-w-xs" type="search" placeholder="Search by email…" autocomplete="off" />
+        <select id="user-filter" class="input sm:max-w-[14rem]">${filterOpts}</select>
+        <span id="user-count" class="text-xs text-[var(--color-faint)] sm:ml-auto"></span>
+      </div>
+
+      <div class="card overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="tbl">
+            <thead><tr><th>Teammate</th><th>Roles &amp; access</th><th>Last sign-in</th><th>Added by</th><th></th></tr></thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="users-pager" class="mt-4 flex items-center justify-center gap-3"></div>`);
+
+    wireUsers();
+    paintUsersTable();
+  } catch (e) {
+    setView(errorBox(e as ApiError, "Couldn't load users."));
+  }
+}
+
+/** Re-render the table body + pager from the current search/filter/page, then
+ *  rewire the per-row Save/Delete buttons. No refetch — operates on `_users`. */
+function paintUsersTable(): void {
+  const myEmail = (me.user as User).email;
+  const q = _q.trim().toLowerCase();
+  const filtered = _users.filter((u) => {
+    if (q && !u.email.toLowerCase().includes(q)) return false;
+    if (_filter && !(u.roles.includes(_filter) || (u.isSuperuser && _filter))) return false; // superuser implicitly holds every role
+    return true;
+  });
+  const pages = Math.max(1, Math.ceil(filtered.length / USERS_PER_PAGE));
+  if (_page >= pages) _page = pages - 1;
+  if (_page < 0) _page = 0;
+  const slice = filtered.slice(_page * USERS_PER_PAGE, _page * USERS_PER_PAGE + USERS_PER_PAGE);
+
+  const rows =
+    slice
       .map((u) => {
         const tags = `${u.email === myEmail ? '<span class="chip chip-bolt">you</span>' : ""}${u.isSuperuser ? '<span class="chip chip-brand">superuser</span>' : ""}`;
         const locked = u.isSuperuser; // the hardcoded superuser is immutable
         const checks = locked
-          ? u.roles.map((r) => `<span class="chip">${esc(roleLabel(r))}</span>`).join(" ")
-          : assignableRoles
-              .map((r) => `<label class="rolepick"><input type="checkbox" data-uid="${u.id}" value="${esc(r.key)}" ${u.roles.includes(r.key) ? "checked" : ""} />${esc(r.label)}</label>`)
-              .join("");
+          ? `<div class="flex flex-wrap gap-1.5">${u.roles.map((r) => `<span class="chip">${esc(roleLabel(r))}</span>`).join(" ") || '<span class="chip">all access</span>'}</div>`
+          : roleChecks(u.id, u.roles);
         const actions = locked
           ? ""
           : `<div class="flex gap-2 justify-end">
@@ -388,45 +470,53 @@ async function renderUsers(): Promise<void> {
         return `
           <tr>
             <td><div class="font-semibold">${esc(u.email)}</div><div class="mt-1 flex gap-1.5">${tags}</div></td>
-            <td><div class="flex flex-wrap gap-1.5">${checks}</div></td>
+            <td>${checks}</td>
             <td class="text-[var(--color-muted)] whitespace-nowrap">${fmtDate(u.lastLogin)}</td>
             <td class="text-[var(--color-faint)] whitespace-nowrap">${esc(u.createdBy ?? "—")}</td>
             <td>${actions}</td>
           </tr>`;
       })
-      .join("");
+      .join("") || `<tr><td colspan="5" class="text-center text-[var(--color-faint)] py-8">No teammates match.</td></tr>`;
 
-    setView(`
-      <div class="mb-7">
-        <h1 class="text-2xl font-bold">User Management</h1>
-        <p class="mt-1.5 text-sm text-[var(--color-muted)]">Whitelist @pyraxchain.com teammates and assign their module roles.</p>
-      </div>
+  const tbody = document.getElementById("users-tbody");
+  if (tbody) tbody.innerHTML = rows;
+  const count = document.getElementById("user-count");
+  if (count) count.textContent = `${filtered.length} teammate${filtered.length === 1 ? "" : "s"}${q || _filter ? ` (of ${_users.length})` : ""}`;
 
-      <div class="card p-6 mb-7">
-        <h3 class="font-bold">${icon("plus", "h-4 w-4 inline -mt-0.5")} Add a teammate</h3>
-        <form id="addform" class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <input class="input sm:max-w-xs" name="email" type="email" placeholder="name@pyraxchain.com" required />
-          <div class="flex flex-wrap gap-2">${addRoleChecks}</div>
-          <button class="btn btn-primary btn-sm sm:ml-auto" type="submit">${icon("plus", "h-4 w-4")} Add</button>
-        </form>
-      </div>
-
-      <div class="card overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="tbl">
-            <thead><tr><th>Teammate</th><th>Roles</th><th>Last sign-in</th><th>Added by</th><th></th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
-      </div>`);
-
-    wireUsers();
-  } catch (e) {
-    setView(errorBox(e as ApiError, "Couldn't load users."));
+  const pager = document.getElementById("users-pager");
+  if (pager) {
+    pager.innerHTML =
+      pages > 1
+        ? `<button class="btn btn-ghost btn-sm" id="pg-prev" ${_page === 0 ? "disabled" : ""}>Prev</button>
+           <span class="text-xs text-[var(--color-muted)]">Page ${_page + 1} of ${pages}</span>
+           <button class="btn btn-ghost btn-sm" id="pg-next" ${_page >= pages - 1 ? "disabled" : ""}>Next</button>`
+        : "";
+    document.getElementById("pg-prev")?.addEventListener("click", () => {
+      _page--;
+      paintUsersTable();
+    });
+    document.getElementById("pg-next")?.addEventListener("click", () => {
+      _page++;
+      paintUsersTable();
+    });
   }
+  wireUserRows();
 }
 
 function wireUsers(): void {
+  // search + filter (client-side; re-paints the table, no refetch)
+  const search = document.getElementById("user-search") as HTMLInputElement | null;
+  search?.addEventListener("input", () => {
+    _q = search.value;
+    _page = 0;
+    paintUsersTable();
+  });
+  const filter = document.getElementById("user-filter") as HTMLSelectElement | null;
+  filter?.addEventListener("change", () => {
+    _filter = filter.value;
+    _page = 0;
+    paintUsersTable();
+  });
   // add
   const addform = document.getElementById("addform") as HTMLFormElement | null;
   addform?.addEventListener("submit", async (e) => {
@@ -444,6 +534,10 @@ function wireUsers(): void {
       btn.disabled = false;
     }
   });
+}
+
+/** Wire the per-row Save/Delete buttons (called after every table re-paint). */
+function wireUserRows(): void {
   // save roles
   document.querySelectorAll<HTMLButtonElement>("[data-save]").forEach((b) =>
     b.addEventListener("click", async () => {
@@ -453,6 +547,8 @@ function wireUsers(): void {
       try {
         await api(`/api/admin/users/${uid}/roles`, { method: "POST", body: JSON.stringify({ roles }) });
         toast("Roles updated.", "ok");
+        const u = _users.find((x) => x.id === Number(uid));
+        if (u) (u as { roles: string[] }).roles = roles; // keep local state in sync so filters reflect it
       } catch (err) {
         toast((err as ApiError).message, "err");
       } finally {
