@@ -85,33 +85,29 @@ async function ingestBlock(chainId, url, blk) {
 // the stored data is from a DEAD chain. Wipe ALL of this chain's rows and re-index
 // from scratch — old + new data can never mix. Returns true if it reset.
 async function reconcileGenesis(chainId, url) {
-  const g = await rpc(url, "eth_getBlockByNumber", ["0x0", false]).catch(() => null);
-  const onchain = g && typeof g.hash === "string" ? g.hash.toLowerCase() : null;
-  if (!onchain) return false; // node unreachable — leave existing data untouched
-
-  const wipe = async (reason) => {
-    console.warn(`[ingest] ${chainId}: ${reason} — chain was reset; wiping + re-indexing from 0`);
-    await db.wipeChain(chainId);
-    await db.setGenesisHash(chainId, onchain);
-  };
-
-  // SOURCE OF TRUTH: the block 0 we actually indexed. If it doesn't match the live
-  // chain's genesis, our data is from a DEAD chain — wipe it. Checked independently of
-  // the recorded hash (a prior run may have recorded a hash that disagrees with the
-  // data, which is exactly the stale state this must repair).
-  const indexedB0 = await db.blockHashAt(chainId, 0);
-  if (indexedB0 && indexedB0.toLowerCase() !== onchain) {
-    await wipe(`indexed genesis ${indexedB0.slice(0, 10)}… ≠ chain ${onchain.slice(0, 10)}…`);
-    return true;
+  // Detect a chain RESET (a disposable network wiped + re-genesised) and re-index from
+  // scratch so old + new data never mix. We compare EARLY block hashes against the live
+  // chain. CRUCIAL: block 0 (genesis) is DETERMINISTIC from the chainspec, so every
+  // re-genesis of the same network produces the IDENTICAL block 0 — comparing it alone
+  // can't catch a reset. Block 1 is the first MINED block, so it differs on every
+  // re-genesis; comparing it catches a reset even when the genesis allocation is
+  // unchanged. We probe block 1 first, then fall back to block 0 (covers an actual
+  // genesis/allocation change).
+  for (const probe of [1, 0]) {
+    const hx = "0x" + probe.toString(16);
+    const live = await rpc(url, "eth_getBlockByNumber", [hx, false]).catch(() => null);
+    const liveHash = live && typeof live.hash === "string" ? live.hash.toLowerCase() : null;
+    if (!liveHash) continue; // chain too short for this probe (or node unreachable) — try next
+    const indexed = await db.blockHashAt(chainId, probe);
+    if (indexed && indexed.toLowerCase() !== liveHash) {
+      console.warn(
+        `[ingest] ${chainId}: block ${probe} diverged (${indexed.slice(0, 10)}… → ${liveHash.slice(0, 10)}…) — chain was reset; wiping + re-indexing from 0`,
+      );
+      await db.wipeChain(chainId);
+      await db.setGenesisHash(chainId, liveHash);
+      return true;
+    }
   }
-  // No block 0 indexed yet: fall back to the recorded hash (catches a reset detected
-  // before block 0 is re-stored).
-  const recorded = await db.getGenesisHash(chainId);
-  if (!indexedB0 && recorded && recorded !== onchain) {
-    await wipe(`recorded genesis ${recorded.slice(0, 10)}… ≠ chain ${onchain.slice(0, 10)}…`);
-    return true;
-  }
-  if (recorded !== onchain) await db.setGenesisHash(chainId, onchain); // record / re-affirm
   return false;
 }
 
