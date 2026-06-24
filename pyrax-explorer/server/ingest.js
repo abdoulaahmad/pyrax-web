@@ -88,14 +88,18 @@ async function reconcileGenesis(chainId, url) {
   const g = await rpc(url, "eth_getBlockByNumber", ["0x0", false]).catch(() => null);
   const onchain = g && typeof g.hash === "string" ? g.hash.toLowerCase() : null;
   if (!onchain) return false; // node unreachable — leave existing data untouched
-  const stored = await db.getGenesisHash(chainId);
+  // What we believe this chain's genesis is: the recorded genesis hash, or — for data
+  // indexed BEFORE chain_meta existed — the hash of the block 0 we already stored.
+  const recorded = await db.getGenesisHash(chainId);
+  const indexedB0 = await db.blockHashAt(chainId, 0);
+  const stored = recorded ?? (indexedB0 ? indexedB0.toLowerCase() : null);
   if (stored && stored !== onchain) {
     console.warn(`[ingest] ${chainId}: genesis changed (${stored.slice(0, 10)}… → ${onchain.slice(0, 10)}…) — chain was reset; wiping + re-indexing from 0`);
     await db.wipeChain(chainId);
     await db.setGenesisHash(chainId, onchain);
     return true;
   }
-  if (!stored) await db.setGenesisHash(chainId, onchain);
+  if (recorded !== onchain) await db.setGenesisHash(chainId, onchain); // record / re-affirm
   return false;
 }
 
