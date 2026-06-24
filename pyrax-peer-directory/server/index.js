@@ -80,14 +80,6 @@ if (SECRET === DEV_SECRET) {
 
 /** key = `${network}|${address}` → { network, address, lastSeen, since, relayPubkey }. */
 const peers = new Map();
-/** Simulated-mining LOTTERY registry: Map<lowercased 0x address, lastSeen ms>. A node
- *  running with a miner wallet heartbeats here; the producer polls the live set and
- *  dice-rolls block rewards among them. Low-stakes (disposable devnet play-rewards), so
- *  it's a separate, validated, rate-limited, NON-HMAC endpoint (user nodes need no
- *  secret to join) — the hardened announce path is untouched. */
-const miners = new Map();
-/** A miner ages out of the lottery this long after its last heartbeat (node stopped). */
-const MINER_TTL_MS = Number(process.env.MINER_TTL_MS ?? 180_000);
 /** Open SSE responses: Set<{ res, network }>. */
 const streams = new Set();
 /** Replay cache for HMAC signatures: Map<sig, expiryMs>. */
@@ -468,43 +460,6 @@ const server = http.createServer(async (req, res) => {
     const network = url.searchParams.get("network") ?? "";
     if (!ENABLED.has(network)) return json(res, 400, { error: "network not enabled" });
     return json(res, 200, { network, ttlMs: TTL_MS, peers: live(network) });
-  }
-
-  // --- WRITE: register a miner wallet for the simulated-mining lottery. A node running
-  // with a --coinbase heartbeats here so its wallet joins the dice-roll. Open (no HMAC —
-  // user nodes need no secret) but validated + globally rate-limited; the hardened
-  // announce path above is untouched. Low-stakes disposable-devnet play-rewards. ---
-  if (req.method === "POST" && path === "/api/miners") {
-    let raw;
-    try {
-      raw = await readBody(req);
-    } catch {
-      return json(res, 413, { error: "payload too large" });
-    }
-    let body;
-    try {
-      body = JSON.parse(raw || "{}");
-    } catch {
-      return json(res, 400, { error: "invalid json" });
-    }
-    const addr = String(body?.address ?? "").toLowerCase();
-    if (!/^0x[0-9a-f]{40}$/.test(addr)) {
-      return json(res, 400, { error: "expected { address: 0x…(40 hex) }" });
-    }
-    miners.set(addr, now());
-    return json(res, 200, { ok: true, ttlMs: MINER_TTL_MS });
-  }
-
-  // --- READ: the live lottery miner set (public; the producer polls this). Returns a
-  // plain JSON array of addresses, expiring stale heartbeats opportunistically. ---
-  if (req.method === "GET" && path === "/api/miners") {
-    const t = now();
-    const list = [];
-    for (const [a, seen] of miners) {
-      if (t - seen <= MINER_TTL_MS) list.push(a);
-      else miners.delete(a);
-    }
-    return json(res, 200, list);
   }
 
   // --- READ: live peers over SSE (same-origin website OR app HMAC) ---

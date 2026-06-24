@@ -145,19 +145,19 @@ services:
       - "--rpc-cors"
       - "*"
       - "--role"
-      # VERIFIER, not a miner: the producer is the SOLE block producer (one miner ⇒
-      # deterministic difficulty, no cross-node blue_work divergence). This node syncs
-      # + validates the producer's mined chain and serves the internal write RPC. (The
-      # relay/faucet write path is restored once the node gossips RPC-submitted txs to
-      # the producer — a node-core change tracked separately.)
-      - "verifier"
+      # FULL miner: real distributed mining — this node mines alongside the producer
+      # (GhostDAG merges their parallel blocks; difficulty retargets to hold the rate),
+      # earns its OWN block rewards, AND serves the internal write RPC for the relay/faucet.
+      - "full"
+      - "--coinbase"
+      - "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" # this node's mining rewards (a dev account)
       - "--peer"
       # The producer's peer-id changes on every fresh re-genesis — keep this in sync.
-      - "/ip4/204.48.16.184/tcp/30303/p2p/12D3KooWSwYwMx2Qdz32gt82BMo5NvCu6aygbe6XcGo77mCQ4Hjy"
+      - "/ip4/204.48.16.184/tcp/30303/p2p/12D3KooWAtbb7fYz8sCGTrKSpg8ooeCFrP8MzAUfiBqLdZa4oJHm"
     volumes:
-      # node_data5: a FRESH volume so this node syncs the producer's final mined chain
-      # (re-genesised on the lottery image) from genesis, with no stale blocks.
-      - node_data5:/home/pyrax/pyrax-data
+      # node_data6: a FRESH volume so this 2nd miner syncs the producer's new full-mining
+      # chain from genesis (no stale blocks from the prior topology).
+      - node_data6:/home/pyrax/pyrax-data
 
   # On-chain events relayer (`pyrax relay`): team-pyrax logins + curated app
   # notifications become gas-only event txs on the newest live network. team-pyrax
@@ -207,6 +207,6 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-  node_data5:
+  node_data6:
   relay_data:
   faucet_data:
