@@ -155,9 +155,11 @@ services:
       # The producer's peer-id changes on every fresh re-genesis — keep this in sync.
       - "/ip4/204.48.16.184/tcp/30303/p2p/12D3KooWAtbb7fYz8sCGTrKSpg8ooeCFrP8MzAUfiBqLdZa4oJHm"
     volumes:
-      # node_data6: a FRESH volume so this 2nd miner syncs the producer's new full-mining
-      # chain from genesis (no stale blocks from the prior topology).
-      - node_data6:/home/pyrax/pyrax-data
+      # node_data7: a FRESH volume so this 2nd miner syncs the producer's re-genesised
+      # chain (new real-UTC genesis timestamp 2026-06-24) from block 0 — no stale blocks
+      # from a prior genesis. Bump this name on every producer re-genesis whose genesis
+      # hash changes, so node B never resumes an incompatible chain.
+      - node_data7:/home/pyrax/pyrax-data
 
   # On-chain events relayer (`pyrax relay`): team-pyrax logins + curated app
   # notifications become gas-only event txs on the newest live network. team-pyrax
@@ -207,6 +209,6 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-  node_data6:
+  node_data7:
   relay_data:
   faucet_data:
