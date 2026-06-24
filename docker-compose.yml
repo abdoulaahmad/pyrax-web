@@ -95,6 +95,9 @@ services:
       OTA_BASE: "https://updates.pyraxchain.com"
       BREVO_SENDER_EMAIL: "noreply@pyraxchain.com"
       BREVO_SENDER_NAME: "PYRAX Team"
+      # Internal test-token faucet (reached over the compose network). Signed-in users
+      # request test PYRX in the portal's Faucet tab; the portal proxies to this service.
+      FAUCET_BASE: "${FAUCET_BASE:-http://faucet:8800}"
       # DO Spaces (used only when the creds below are set -> presigned, gated downloads).
       SPACES_REGION: "${SPACES_REGION:-nyc3}"
       SPACES_BUCKET: "${SPACES_BUCKET:-pyrax-updates}"
@@ -150,11 +153,11 @@ services:
       - "verifier"
       - "--peer"
       # The producer's peer-id changes on every fresh re-genesis — keep this in sync.
-      - "/ip4/204.48.16.184/tcp/30303/p2p/12D3KooWH1TBNiwA9YqMZepBX5xgxTcAMy4TXvnKhREmVhy6LaM5"
+      - "/ip4/204.48.16.184/tcp/30303/p2p/12D3KooWJC5kDvi2kuu9adGa9brE8nMqLYniru9Dt7DKe99BECm8"
     volumes:
-      # node_data3: a FRESH volume so this node syncs the producer's mined chain from
-      # genesis with NO self-mined blocks left over (those would diverge the coloring).
-      - node_data3:/home/pyrax/pyrax-data
+      # node_data4: a FRESH volume so this node syncs the producer's NEW mined chain
+      # (re-genesised on the blue_work-fixed image) from genesis, with no stale blocks.
+      - node_data4:/home/pyrax/pyrax-data
 
   # On-chain events relayer (`pyrax relay`): team-pyrax logins + curated app
   # notifications become gas-only event txs on the newest live network. team-pyrax
@@ -204,6 +207,6 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-  node_data3:
+  node_data4:
   relay_data:
   faucet_data:

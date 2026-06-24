@@ -16,6 +16,8 @@ interface AdminUser { id: number; email: string; roles: string[]; isSuperuser: b
 interface RoleMeta { key: string; label: string; desc: string; }
 interface PlatformState { label: string; available: boolean; }
 interface Product { key: string; name: string; tagline: string; version: string | null; available: boolean; platforms: Record<string, PlatformState>; }
+interface FaucetNetwork { chainId: number; label: string; online: boolean; }
+interface DripResult { ok?: boolean; hash?: string; amount?: string; network?: string; kind?: string; error?: string; }
 
 // --- icons ------------------------------------------------------------------
 
@@ -31,6 +33,7 @@ const ICONS: Record<string, string> = {
   shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
   back: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
   save: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/>',
+  droplet: '<path d="M12 2.7 6.3 8.4a8 8 0 1 0 11.4 0L12 2.7z"/>',
 };
 function icon(name: string, cls = "h-5 w-5"): string {
   return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] ?? ""}</svg>`;
@@ -123,6 +126,7 @@ function navTabs(active: string): string {
     `<a class="tab ${active === key ? "is-on" : ""}" href="#${href}">${icon(ic, "h-4 w-4")} ${label}</a>`;
   let out = tab("dashboard", "/", "Dashboard", "grid");
   if (hasModule("downloads")) out += tab("downloads", "/downloads", "Downloads", "download");
+  out += tab("faucet", "/faucet", "Faucet", "droplet"); // open to every signed-in user
   if (hasModule("users")) out += tab("users", "/users", "Users", "users");
   return out;
 }
@@ -226,6 +230,132 @@ async function renderDownloads(): Promise<void> {
   } catch (e) {
     setView(errorBox(e as ApiError, "Couldn't load the download catalogue."));
   }
+}
+
+// --- faucet -----------------------------------------------------------------
+
+function detectAddr(v: string): { kind: "transparent" | "shielded" | null } {
+  const s = v.trim();
+  if (/^0x[0-9a-fA-F]{40}$/.test(s)) return { kind: "transparent" };
+  if (/^0x[0-9a-fA-F]{128}$/.test(s)) return { kind: "shielded" };
+  return { kind: null };
+}
+
+async function renderFaucet(): Promise<void> {
+  shell("faucet", loading());
+  let networks: FaucetNetwork[] = [];
+  try {
+    networks = await api<FaucetNetwork[]>("/api/faucet/networks");
+  } catch {
+    networks = [];
+  }
+
+  // Default-select the first ONLINE network (881109 in practice); fall back to the first.
+  let selected = networks.find((n) => n.online)?.chainId ?? networks[0]?.chainId ?? 0;
+
+  const netRows =
+    networks.length === 0
+      ? `<p class="text-sm text-[var(--color-faint)]">No networks available right now.</p>`
+      : networks
+          .map(
+            (n) => `
+            <button type="button" class="netchip ${n.chainId === selected ? "is-sel" : ""}"
+                    data-chain="${n.chainId}" ${n.online ? "" : "disabled"}>
+              <span class="status-dot ${n.online ? "" : "is-off"}"></span>
+              <span class="netchip-label">${esc(n.label)}</span>
+              <span class="netchip-state">${n.online ? "online" : "offline"}</span>
+            </button>`,
+          )
+          .join("");
+
+  setView(`
+    <div class="mb-7">
+      <h1 class="text-2xl font-bold">Faucet</h1>
+      <p class="mt-1.5 text-sm text-[var(--color-muted)]">Free test PYRX for the selected network. Works for transparent and shielded addresses.</p>
+    </div>
+    <div class="card p-6 max-w-2xl">
+      <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--color-faint)] mb-2">Network</label>
+      <div id="netgrid" class="flex flex-wrap gap-2.5">${netRows}</div>
+
+      <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--color-faint)] mt-6 mb-1.5">Wallet address</label>
+      <input id="faddr" class="input" style="font-family:var(--font-mono)" placeholder="0x your transparent or shielded address" autocomplete="off" spellcheck="false" />
+      <div id="fkind" class="mt-2 text-xs text-[var(--color-faint)]">Paste a 0x address — transparent (40 hex) or shielded (128 hex).</div>
+
+      <button id="fgo" class="btn btn-primary mt-5" ${selected ? "" : "disabled"}>${icon("droplet", "h-4 w-4")} Request test PYRX</button>
+      <div id="fmsg" class="mt-4 text-sm" style="word-break:break-all"></div>
+    </div>`);
+
+  const grid = document.getElementById("netgrid") as HTMLElement | null;
+  const addr = document.getElementById("faddr") as HTMLInputElement | null;
+  const kindEl = document.getElementById("fkind") as HTMLElement | null;
+  const go = document.getElementById("fgo") as HTMLButtonElement | null;
+  const msg = document.getElementById("fmsg") as HTMLElement | null;
+
+  // network selection
+  grid?.querySelectorAll<HTMLButtonElement>(".netchip").forEach((b) =>
+    b.addEventListener("click", () => {
+      if (b.disabled) return;
+      selected = Number(b.dataset.chain);
+      grid.querySelectorAll(".netchip").forEach((x) => x.classList.remove("is-sel"));
+      b.classList.add("is-sel");
+    }),
+  );
+
+  // live address auto-detection
+  const refreshKind = (): void => {
+    if (!addr || !kindEl) return;
+    const v = addr.value.trim();
+    if (!v) {
+      kindEl.textContent = "Paste a 0x address — transparent (40 hex) or shielded (128 hex).";
+      kindEl.style.color = "var(--color-faint)";
+      return;
+    }
+    const { kind } = detectAddr(v);
+    if (kind === "transparent") {
+      kindEl.textContent = "Transparent";
+      kindEl.style.color = "var(--color-positive)";
+    } else if (kind === "shielded") {
+      kindEl.textContent = "Shielded (private)";
+      kindEl.style.color = "var(--color-bolt-bright)";
+    } else {
+      kindEl.textContent = "Not a valid address yet — expecting 0x + 40 or 128 hex characters.";
+      kindEl.style.color = "var(--color-negative)";
+    }
+  };
+  addr?.addEventListener("input", refreshKind);
+
+  // request
+  go?.addEventListener("click", async () => {
+    if (!addr || !msg) return;
+    const address = addr.value.trim();
+    if (detectAddr(address).kind === null) {
+      msg.style.color = "var(--color-negative)";
+      msg.textContent = "Enter a valid transparent or shielded 0x address.";
+      return;
+    }
+    if (!selected) {
+      msg.style.color = "var(--color-negative)";
+      msg.textContent = "Select an online network first.";
+      return;
+    }
+    go.disabled = true;
+    go.innerHTML = `<span class="spinner"></span> Requesting…`;
+    msg.textContent = "";
+    try {
+      const r = await api<DripResult>("/api/faucet/drip", {
+        method: "POST",
+        body: JSON.stringify({ address, chainId: selected }),
+      });
+      msg.style.color = "var(--color-positive)";
+      msg.innerHTML = `Sent ${esc(r.amount ?? "")} PYRX ✓<br/>tx: ${esc(r.hash ?? "")}`;
+    } catch (e) {
+      msg.style.color = "var(--color-negative)";
+      msg.textContent = (e as ApiError).message || "Request failed.";
+    } finally {
+      go.disabled = false;
+      go.innerHTML = `${icon("droplet", "h-4 w-4")} Request test PYRX`;
+    }
+  });
 }
 
 // --- user management --------------------------------------------------------
@@ -357,6 +487,7 @@ function errorBox(e: ApiError, fallback: string): string {
 function route(): void {
   const h = (location.hash.replace(/^#/, "") || "/").toLowerCase();
   if (h.startsWith("/downloads") && hasModule("downloads")) return void renderDownloads();
+  if (h.startsWith("/faucet")) return void renderFaucet(); // open to every signed-in user
   if (h.startsWith("/users") && hasModule("users")) return void renderUsers();
   renderDashboard();
 }

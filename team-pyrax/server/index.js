@@ -45,6 +45,10 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const DIST = join(HERE, "..", "dist");
 const MAX_BODY = 8 * 1024;
 
+// Internal test-token faucet (reached over the compose network). The portal proxies
+// signed-in users to it so they never hit it directly. Empty/unreachable → graceful.
+const FAUCET_BASE = process.env.FAUCET_BASE || "http://faucet:8800";
+
 // --- security primitives ----------------------------------------------------
 
 function clientIp(req) {
@@ -124,6 +128,28 @@ function sameOrigin(req) {
   if (origin) return origin === PUBLIC_URL;
   const referer = req.headers["referer"];
   return typeof referer === "string" && referer.startsWith(PUBLIC_URL + "/");
+}
+
+/**
+ * Proxy a request to the internal faucet service (compose network). Best-effort with an
+ * AbortController timeout, like events.js: on a network/abort/parse failure it throws, so
+ * callers swallow it (.catch) and degrade gracefully. Returns { status, body }.
+ */
+async function fetchFaucet(path, { method = "GET", body } = {}) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 6000);
+  try {
+    const res = await fetch(`${FAUCET_BASE}${path}`, {
+      method,
+      headers: body ? { "content-type": "application/json" } : undefined,
+      body,
+      signal: ctl.signal,
+    });
+    const data = await res.json().catch(() => ({}));
+    return { status: res.status, body: data };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // --- static SPA -------------------------------------------------------------
@@ -304,6 +330,27 @@ const server = http.createServer(async (req, res) => {
         const r = await removeUser(user, md[1]);
         return json(res, r.status, r.body);
       }
+    }
+
+    // --- faucet (open to ALL signed-in users; not role-gated) ---
+    if (method === "GET" && path === "/api/faucet/networks") {
+      if (!requireUser()) return;
+      const nets = await fetchFaucet("/networks").catch(() => null);
+      return json(res, 200, Array.isArray(nets?.body) ? nets.body : []);
+    }
+    if (method === "POST" && path === "/api/faucet/drip") {
+      if (!requireMutation()) return; // signed in + same-origin + CSRF
+      const raw = (await readBody(req).catch(() => "{}")) || "{}";
+      let payload;
+      try {
+        const b = JSON.parse(raw);
+        payload = { address: b.address, chainId: b.chainId };
+      } catch {
+        return json(res, 400, { error: "invalid json" });
+      }
+      const r = await fetchFaucet("/drip", { method: "POST", body: JSON.stringify(payload) }).catch(() => null);
+      if (!r) return json(res, 502, { error: "Faucet is unreachable. Try again shortly." });
+      return json(res, r.status, r.body);
     }
 
     if (path === "/api/health") {

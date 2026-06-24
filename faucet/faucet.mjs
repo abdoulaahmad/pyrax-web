@@ -7,10 +7,10 @@
 // to reimplement. Public networks only — never wired to mainnet.
 //
 // Env:
-//   FAUCET_RPC          the network RPC to dispense on (e.g. https://sidn-rpc.pyraxchain.com:8811)
+//   FAUCET_RPC          the default-network RPC to dispense on (chain 881109)
 //   FAUCET_DRIP_ASH     drip amount in base units (ash). default 100 PYRX = 100e18
 //   FAUCET_WINDOW_H     per-address/IP cooldown hours. default 12
-//   FAUCET_NETWORK      label shown in the UI (e.g. "Internal Devnet 1.0")
+//   FAUCET_NETWORK      label shown in the public HTML UI (e.g. "Internal Devnet 1.0")
 //   PYRAX_KEY_PASSPHRASE  unlocks the faucet keystore key (name: "faucet")
 //   PORT                listen port (default 8800)
 
@@ -25,6 +25,18 @@ const WINDOW_MS = Number(process.env.FAUCET_WINDOW_H || 12) * 3600 * 1000;
 const NETWORK = process.env.FAUCET_NETWORK || "the test network";
 const PORT = Number(process.env.PORT || 8800);
 const STATE = "/data/faucet-ratelimit.json";
+
+// Dispensable networks (SSOT). Mainnet (563821) is intentionally EXCLUDED — the
+// faucet is NEVER wired to mainnet. Add a chain by adding one line here; `online`
+// is derived from a non-empty rpc, so a chain with no write node yet still shows
+// in the selector but is greyed/disabled. Only 881109 has a write RPC for now.
+const DEFAULT_CHAIN = 881109;
+const NETWORKS = {
+  881109: { label: "Internal Devnet 1.0", rpc: RPC || "http://node:8545" },
+  429294: { label: "Internal Live", rpc: process.env.FAUCET_RPC_429294 || "" },
+  710823: { label: "Devnet2", rpc: process.env.FAUCET_RPC_710823 || "" },
+  104928: { label: "Testnet", rpc: process.env.FAUCET_RPC_104928 || "" },
+};
 
 const drip_pyrx = (() => {
   try {
@@ -52,14 +64,16 @@ function saveHits(hits) {
 }
 let hits = loadHits();
 
-const isAddr = (s) => typeof s === "string" && /^0x[0-9a-fA-F]{40}$/.test(s.trim());
+// Auto-detect address kind: 40 hex => transparent, 128 hex => shielded, else null.
+function addrKind(s) {
+  if (typeof s !== "string") return null;
+  const v = s.trim();
+  if (/^0x[0-9a-fA-F]{40}$/.test(v)) return "transparent";
+  if (/^0x[0-9a-fA-F]{128}$/.test(v)) return "shielded";
+  return null;
+}
 const ms = (k) => hits.get(k) || 0;
 const left = (k) => Math.max(0, WINDOW_MS - (Date.now() - ms(k)));
-
-function clientIp(req) {
-  const xff = req.headers["x-forwarded-for"];
-  return (Array.isArray(xff) ? xff[0] : (xff || "").split(",")[0]).trim() || req.socket.remoteAddress || "?";
-}
 
 function send(res, code, obj) {
   const body = JSON.stringify(obj);
@@ -67,13 +81,15 @@ function send(res, code, obj) {
   res.end(body);
 }
 
-function drip(address) {
-  // Sign + submit via the bundled CLI using the faucet keystore key.
-  const r = spawnSync(
-    "pyrax",
-    ["wallet", "send", address, DRIP, "--from", KEY, "--rpc-url", RPC],
-    { env: process.env, encoding: "utf8", timeout: 30000 },
-  );
+function drip(address, kind, rpc) {
+  // Sign + submit via the bundled CLI using the faucet keystore key. Transparent and
+  // shielded use different subcommands; for shielded-send, --rpc-url is a GLOBAL flag
+  // that MUST precede the `wallet` subcommand.
+  const args =
+    kind === "shielded"
+      ? ["--rpc-url", rpc, "wallet", "shielded-send", address, DRIP, "--from", KEY]
+      : ["wallet", "send", address, DRIP, "--from", KEY, "--rpc-url", rpc];
+  const r = spawnSync("pyrax", args, { env: process.env, encoding: "utf8", timeout: 30000 });
   const out = `${r.stdout || ""}${r.stderr || ""}`;
   const m = out.match(/submitted:\s*(\S+)/);
   if (r.status === 0 && m) return { ok: true, hash: m[1] };
@@ -93,6 +109,15 @@ const server = http.createServer((req, res) => {
   if (req.method === "GET" && (url.pathname === "/health")) {
     return send(res, 200, { service: "pyrax-faucet", ok: true, network: NETWORK, drip: drip_pyrx });
   }
+  // Dispensable networks for the portal selector. online = has a non-empty rpc.
+  if (req.method === "GET" && url.pathname === "/networks") {
+    const nets = Object.entries(NETWORKS).map(([chainId, n]) => ({
+      chainId: Number(chainId),
+      label: n.label,
+      online: !!n.rpc,
+    }));
+    return send(res, 200, nets);
+  }
   if (req.method === "GET" && url.pathname === "/") {
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
     return res.end(PAGE);
@@ -104,27 +129,33 @@ const server = http.createServer((req, res) => {
       if (body.length > 4096) req.destroy();
     });
     req.on("end", () => {
-      if (!RPC) return send(res, 503, { error: "faucet not configured (no RPC)" });
-      let address;
+      let address, chainId;
       try {
-        address = JSON.parse(body).address;
+        const j = JSON.parse(body);
+        address = j.address;
+        chainId = Number(j.chainId) || DEFAULT_CHAIN;
       } catch {
         return send(res, 400, { error: "bad request" });
       }
-      if (!isAddr(address)) return send(res, 400, { error: "enter a valid 0x… address" });
+      const kind = addrKind(address);
+      if (!kind) return send(res, 400, { error: "enter a valid 0x… address (transparent or shielded)" });
       address = address.trim();
-      const ip = clientIp(req);
-      const wait = Math.max(left(`a:${address.toLowerCase()}`), left(`i:${ip}`));
+      const net = NETWORKS[chainId];
+      if (!net) return send(res, 404, { error: "unknown network" });
+      if (!net.rpc) return send(res, 503, { error: `${net.label} faucet is not online yet` });
+      // Rate-limit PER-ADDRESS only on the /drip path. The portal proxies all users from a
+      // single shared IP, so an IP-keyed limit here would wrongly block everyone after the
+      // first portal request — keep this address-scoped.
+      const akey = `a:${address.toLowerCase()}`;
+      const wait = left(akey);
       if (wait > 0) {
         return send(res, 429, { error: `already funded recently — try again in ${Math.ceil(wait / 3600000)}h` });
       }
-      const r = drip(address);
+      const r = drip(address, kind, net.rpc);
       if (!r.ok) return send(res, 502, { error: r.error });
-      const now = Date.now();
-      hits.set(`a:${address.toLowerCase()}`, now);
-      hits.set(`i:${ip}`, now);
+      hits.set(akey, Date.now());
       saveHits(hits);
-      return send(res, 200, { ok: true, hash: r.hash, amount: drip_pyrx, network: NETWORK });
+      return send(res, 200, { ok: true, hash: r.hash, amount: drip_pyrx, network: net.label, kind });
     });
     return;
   }
