@@ -142,11 +142,17 @@ services:
       - "--rpc-cors"
       - "*"
       - "--role"
-      - "full" # MUST seal — it confirms the relay/faucet txs it receives via RPC
+      - "full" # MUST seal — it confirms the relay/faucet txs it receives via RPC, AND it
+      # competes in the simulated-mining race (both nodes mine; the DAA holds the rate)
+      - "--coinbase"
+      - "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" # this node's mining rewards (dev/team account)
       - "--peer"
-      - "/ip4/204.48.16.184/tcp/30303/p2p/12D3KooWHSmqDsAjYSQgFXXJNeBpvi3i2jt3sxxXAzbikWBDcs5H"
+      # The producer's peer-id changes on every fresh re-genesis — keep this in sync.
+      - "/ip4/204.48.16.184/tcp/30303/p2p/12D3KooWH1TBNiwA9YqMZepBX5xgxTcAMy4TXvnKhREmVhy6LaM5"
     volumes:
-      - node_data:/home/pyrax/pyrax-data
+      # node_data2: a FRESH volume so this node re-syncs the producer's new mined chain
+      # from genesis instead of resuming the old instant-seal datadir (which would fork).
+      - node_data2:/home/pyrax/pyrax-data
 
   # On-chain events relayer (`pyrax relay`): team-pyrax logins + curated app
   # notifications become gas-only event txs on the newest live network. team-pyrax
@@ -196,6 +202,6 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-  node_data:
+  node_data2:
   relay_data:
   faucet_data:
