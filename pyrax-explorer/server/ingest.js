@@ -88,15 +88,27 @@ async function reconcileGenesis(chainId, url) {
   const g = await rpc(url, "eth_getBlockByNumber", ["0x0", false]).catch(() => null);
   const onchain = g && typeof g.hash === "string" ? g.hash.toLowerCase() : null;
   if (!onchain) return false; // node unreachable — leave existing data untouched
-  // What we believe this chain's genesis is: the recorded genesis hash, or — for data
-  // indexed BEFORE chain_meta existed — the hash of the block 0 we already stored.
-  const recorded = await db.getGenesisHash(chainId);
-  const indexedB0 = await db.blockHashAt(chainId, 0);
-  const stored = recorded ?? (indexedB0 ? indexedB0.toLowerCase() : null);
-  if (stored && stored !== onchain) {
-    console.warn(`[ingest] ${chainId}: genesis changed (${stored.slice(0, 10)}… → ${onchain.slice(0, 10)}…) — chain was reset; wiping + re-indexing from 0`);
+
+  const wipe = async (reason) => {
+    console.warn(`[ingest] ${chainId}: ${reason} — chain was reset; wiping + re-indexing from 0`);
     await db.wipeChain(chainId);
     await db.setGenesisHash(chainId, onchain);
+  };
+
+  // SOURCE OF TRUTH: the block 0 we actually indexed. If it doesn't match the live
+  // chain's genesis, our data is from a DEAD chain — wipe it. Checked independently of
+  // the recorded hash (a prior run may have recorded a hash that disagrees with the
+  // data, which is exactly the stale state this must repair).
+  const indexedB0 = await db.blockHashAt(chainId, 0);
+  if (indexedB0 && indexedB0.toLowerCase() !== onchain) {
+    await wipe(`indexed genesis ${indexedB0.slice(0, 10)}… ≠ chain ${onchain.slice(0, 10)}…`);
+    return true;
+  }
+  // No block 0 indexed yet: fall back to the recorded hash (catches a reset detected
+  // before block 0 is re-stored).
+  const recorded = await db.getGenesisHash(chainId);
+  if (!indexedB0 && recorded && recorded !== onchain) {
+    await wipe(`recorded genesis ${recorded.slice(0, 10)}… ≠ chain ${onchain.slice(0, 10)}…`);
     return true;
   }
   if (recorded !== onchain) await db.setGenesisHash(chainId, onchain); // record / re-affirm
