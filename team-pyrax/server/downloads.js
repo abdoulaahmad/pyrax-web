@@ -42,10 +42,14 @@ function parseLatestYml(text) {
   return version && file ? { version, file } : null;
 }
 
-async function resolveOne(product, platform) {
+async function resolveOne(product, platform, fresh = false) {
   const ck = `${product.key}:${platform}`;
+  // The dashboard catalogue may use the brief cache (a slightly stale version label is
+  // fine), but an actual DOWNLOAD must resolve fresh: the release pipeline purges the
+  // previous installer on publish, so a cached filename would point at a deleted file
+  // and 404. `fresh` forces a re-read of the live latest*.yml / manifest.
   const hit = cache.get(ck);
-  if (hit && hit.exp > Date.now()) return hit.v;
+  if (!fresh && hit && hit.exp > Date.now()) return hit.v;
 
   let v = null;
   if (product.kind === "electron") {
@@ -87,7 +91,9 @@ export async function catalogue() {
 export async function downloadUrl(productKey, platform) {
   const p = productByKey(productKey);
   if (!p || !PLATFORMS.includes(platform)) return null;
-  const r = await resolveOne(p, platform);
+  // Resolve FRESH (bypass the cache) so the link always points at the build that is
+  // live on the feed right now — never a just-purged previous version.
+  const r = await resolveOne(p, platform, true);
   if (!r) return null;
   if (DOWNLOAD_MODE === "presign" && SPACES.key && SPACES.secret && SPACES.bucket) {
     return presignGet(r.key, PRESIGN_TTL_S);
