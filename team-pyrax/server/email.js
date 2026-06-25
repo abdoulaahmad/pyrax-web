@@ -97,6 +97,98 @@ export async function sendEmberOtp(email, code) {
 const esc = (s) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+/** Where automatic error reports are delivered (a Teams channel connector by default;
+ *  override with PYRAX_ERROR_EMAIL). */
+const ERROR_REPORT_EMAIL =
+  process.env.PYRAX_ERROR_EMAIL || "67dcaa51.PYRAXChain.onmicrosoft.com@ca.teams.ms";
+
+const LEVEL_HUE = { error: "#f87171", warn: "#fbbf24", info: "#cbd5e1", debug: "#7a8294" };
+
+function fmtTime(ms) {
+  try {
+    return new Date(Number(ms)).toISOString().replace("T", " ").replace("Z", " UTC");
+  } catch {
+    return String(ms);
+  }
+}
+
+/**
+ * Send an automatic error report from a node/CLI/app: a monospace dump of the 250
+ * lines leading up to the failure, with the failing line BOLDED, plus a header with
+ * the build identity + occurrence count. Best-effort — logs + returns on a no-key /
+ * send failure (never throws to the caller). Returns true on a successful send.
+ */
+export async function sendErrorReport(report) {
+  const { app = "app", variant = "", version = "", platform = "", level = "error", component = "", message = "", count = 1, firstTs, ts, context = [] } = report ?? {};
+  const lvl = String(level).toLowerCase();
+  const hue = LEVEL_HUE[lvl] ?? LEVEL_HUE.error;
+  const head = `[PYRAX ${esc(app)} ${lvl.toUpperCase()}] ${esc(component)}: ${esc(String(message).slice(0, 90))}`;
+
+  const rows = (Array.isArray(context) ? context : [])
+    .map((e) => {
+      const line = `${fmtTime(e.ts)}  ${String(e.level ?? "").toUpperCase().padEnd(5)}  ${e.component ?? ""}  ${e.message ?? ""}`;
+      if (e.isError) {
+        return `<div style="background:#3a1414;border-left:3px solid #f87171;padding:2px 8px;margin:2px -8px;color:#fca5a5;font-weight:700;">${esc(line)}</div>`;
+      }
+      return `<div style="padding:0 8px;color:#9aa4ba;">${esc(line)}</div>`;
+    })
+    .join("");
+
+  const metaRow = (k, v) => `<tr><td style="padding:2px 14px 2px 0;color:#6a7286;">${esc(k)}</td><td style="color:#d7def0;font-weight:600;">${esc(v)}</td></tr>`;
+  const htmlContent = `<!doctype html><html><body style="margin:0;background:#06070b;color:#e7ecf5;font-family:'SFMono-Regular',Consolas,Menlo,monospace;">
+  <div style="padding:20px 22px;">
+    <div style="font-size:16px;font-weight:800;color:${hue};margin-bottom:4px;">${lvl.toUpperCase()} in ${esc(app)} ${esc(version)}</div>
+    <div style="font-size:13px;color:#cbd5e1;margin-bottom:14px;word-break:break-word;"><b>${esc(String(message))}</b></div>
+    <table style="font-size:12px;margin-bottom:16px;border-collapse:collapse;">
+      ${metaRow("app", `${app} (${variant})`)}
+      ${metaRow("version", version)}
+      ${metaRow("platform", platform)}
+      ${metaRow("component", component)}
+      ${metaRow("occurrences", `${count}${count > 1 ? " (deduped in this window)" : ""}`)}
+      ${metaRow("first seen", fmtTime(firstTs ?? ts))}
+      ${metaRow("reported", fmtTime(ts))}
+    </table>
+    <div style="font-size:11px;color:#6a7286;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.08em;">Context — last ${Array.isArray(context) ? context.length : 0} lines (failing line highlighted)</div>
+    <div style="font-size:12px;line-height:1.5;background:#0b0d14;border:1px solid #1c2233;border-radius:8px;padding:10px 8px;white-space:pre-wrap;word-break:break-word;overflow-x:auto;">${rows || '<div style="color:#6a7286;padding:0 8px;">(no preceding context captured)</div>'}</div>
+  </div></body></html>`;
+
+  const textContent =
+    `${head}\n\n${message}\n\n` +
+    `app=${app} (${variant})  version=${version}  platform=${platform}  occurrences=${count}\n` +
+    `first=${fmtTime(firstTs ?? ts)}  reported=${fmtTime(ts)}\n\n--- context (failing line marked >>) ---\n` +
+    (Array.isArray(context) ? context : [])
+      .map((e) => `${e.isError ? ">> " : "   "}${fmtTime(e.ts)} ${String(e.level ?? "").toUpperCase()} ${e.component ?? ""} ${e.message ?? ""}`)
+      .join("\n");
+
+  if (!BREVO_API_KEY) {
+    console.warn(`[team-pyrax] BREVO_API_KEY unset — error report not emailed: ${head}`);
+    return false;
+  }
+  try {
+    const res = await fetch(BREVO_ENDPOINT, {
+      method: "POST",
+      headers: { "api-key": BREVO_API_KEY, "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({
+        sender: { email: BREVO_SENDER_EMAIL, name: BREVO_SENDER_NAME },
+        to: [{ email: ERROR_REPORT_EMAIL }],
+        subject: head,
+        htmlContent,
+        textContent,
+      }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.warn(`[team-pyrax] error-report send failed: ${res.status} ${body.slice(0, 200)}`);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.warn(`[team-pyrax] error-report send threw: ${e?.message ?? e}`);
+    return false;
+  }
+}
+
 // Website type stacks (web fonts load where allowed; the rest fall back cleanly).
 const DISPLAY = "'Sora','Helvetica Neue',Helvetica,Arial,sans-serif";
 const BODY = "'Inter','Helvetica Neue',Helvetica,Arial,sans-serif";

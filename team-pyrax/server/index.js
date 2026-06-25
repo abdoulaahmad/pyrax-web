@@ -37,7 +37,7 @@ import {
   sessionCookie,
   clearCookie,
 } from "./auth.js";
-import { sendMagicLink, sendEmberOtp } from "./email.js";
+import { sendMagicLink, sendEmberOtp, sendErrorReport } from "./email.js";
 import { catalogue, downloadUrl } from "./downloads.js";
 import { listUsers, addUser, setRoles, removeUser } from "./admin.js";
 import { emitEvent } from "./events.js";
@@ -76,6 +76,22 @@ function rateLimited(ip, cost = 1) {
   if (b.tokens < cost) return true;
   b.tokens -= cost;
   return false;
+}
+
+/** A dedicated cap on error-report EMAILS per IP per hour, on top of the global rate
+ *  limiter — a backstop so a runaway client can't turn into an email flood even though
+ *  the apps already dedupe+throttle client-side. */
+const ERROR_REPORT_MAX_PER_HOUR = Number(process.env.ERROR_REPORT_MAX_PER_HOUR ?? 30);
+const errReportHits = new Map(); // ip -> { count, windowStart }
+function errorReportThrottled(ip) {
+  const t = Date.now();
+  let h = errReportHits.get(ip);
+  if (!h || t - h.windowStart > 60 * 60 * 1000) {
+    h = { count: 0, windowStart: t };
+    errReportHits.set(ip, h);
+  }
+  h.count += 1;
+  return h.count > ERROR_REPORT_MAX_PER_HOUR;
 }
 
 const SECURE = PUBLIC_URL.startsWith("https://");
@@ -287,6 +303,30 @@ const server = http.createServer(async (req, res) => {
         console.error("[team-pyrax] Ember OTP issue failed:", e?.message ?? e); // still generic response
       }
       return json(res, 200, { ok: true, message: "If that address has admin access, a code is on its way." });
+    }
+
+    // --- Automatic error reports from nodes/CLI/apps → email (Brevo) ---
+    // Public (the apps have no session) but bounded: the global rate-limiter applies,
+    // plus a dedicated per-IP hourly cap below; the apps already dedupe+throttle, so a
+    // crash loop is at most one mail per unique error per 15 min. Fire-and-forget.
+    if (method === "POST" && path === "/api/error-report") {
+      const raw = await readBody(req).catch(() => null);
+      if (raw === null) return json(res, 413, { error: "payload too large" });
+      if (errorReportThrottled(ip)) return json(res, 429, { error: "error-report rate exceeded" });
+      let report;
+      try {
+        report = JSON.parse(raw || "{}");
+      } catch {
+        return json(res, 400, { error: "invalid json" });
+      }
+      if (!report || typeof report.message !== "string" || report.message === "") {
+        return json(res, 400, { error: "missing error message" });
+      }
+      // Hard caps so a hostile/buggy client can't email a giant payload.
+      report.message = String(report.message).slice(0, 4000);
+      if (Array.isArray(report.context)) report.context = report.context.slice(-300);
+      sendErrorReport(report).catch((e) => console.error("[team-pyrax] error-report send failed:", e?.message ?? e));
+      return json(res, 202, { ok: true });
     }
 
     // --- Ember admin OTP: verify a code → the user's granted App Roles + tabs ---
