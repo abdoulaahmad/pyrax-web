@@ -19,6 +19,21 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: "0.2.3",
+    date: "2026-06-25",
+    title: "Real peer-to-peer mesh — nodes connect to each other, not just the seed",
+    sections: [
+      {
+        label: "Networking",
+        items: [
+          "Nodes now form a true mesh instead of all funnelling onto the seed. Each node actively discovers other peers over the DHT and connects to many of them, filling toward its 128-peer limit — so your dashboard peer count climbs past 1.",
+          "Closest-first, NAT-aware connections — a node prefers nearby peers and reaches home nodes behind routers through PYRAX's relay with hole-punching, so two home nodes can connect directly to each other (not only to the public seed).",
+          "Faster peering — discovery and dialing now run on a tight 5-7s cycle, so the mesh fills in seconds.",
+        ],
+      },
+    ],
+  },
+  {
     version: "0.2.2",
     date: "2026-06-25",
     title: "Mine to your wallet, reliable portals & a branded offline page",
