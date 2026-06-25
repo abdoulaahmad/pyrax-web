@@ -41,6 +41,7 @@ import { sendMagicLink, sendEmberOtp } from "./email.js";
 import { catalogue, downloadUrl } from "./downloads.js";
 import { listUsers, addUser, setRoles, removeUser } from "./admin.js";
 import { emitEvent } from "./events.js";
+import { startUpdateAnnouncer } from "./update-announcer.js";
 
 const RUN_DIRECTLY = import.meta.url === pathToFileURL(process.argv[1] ?? "").href;
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -424,7 +425,12 @@ if (RUN_DIRECTLY) {
   }, 5 * 60 * 1000).unref();
   // Create the schema + seed the superuser, THEN start serving.
   initDb()
-    .then(() => server.listen(PORT, () => console.log(`team-pyrax on http://0.0.0.0:${PORT} (origin ${PUBLIC_URL})`)))
+    .then(() => {
+      server.listen(PORT, () => console.log(`team-pyrax on http://0.0.0.0:${PORT} (origin ${PUBLIC_URL})`));
+      // Record published app/CLI updates on-chain (gas-only, marketing-funded), one
+      // "update-available" event per release — like the team-login records.
+      startUpdateAnnouncer();
+    })
     .catch((e) => {
       console.error("[team-pyrax] failed to initialize the database:", e?.message ?? e);
       process.exit(1);

@@ -80,6 +80,14 @@ export async function init() {
       expires_at BIGINT NOT NULL,
       used_at    BIGINT
     );
+    -- The latest app/CLI version we have already recorded on-chain (one row per
+    -- product). Lets the update-announcer emit exactly ONE "update-available" event
+    -- per published release, idempotently, across restarts + multiple replicas.
+    CREATE TABLE IF NOT EXISTS update_announcements (
+      product      TEXT PRIMARY KEY,
+      version      TEXT NOT NULL,
+      announced_at BIGINT NOT NULL
+    );
     CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
     CREATE INDEX IF NOT EXISTS idx_tokens_email ON magic_tokens(email);
     CREATE INDEX IF NOT EXISTS idx_otps_email ON ember_otps(email);
@@ -198,6 +206,29 @@ export const Sessions = {
   destroy: (sidHash) => q("DELETE FROM sessions WHERE sid_hash = $1", [sidHash]),
   destroyForUser: (userId) => q("DELETE FROM sessions WHERE user_id = $1", [userId]),
   sweep: () => q("DELETE FROM sessions WHERE expires_at < $1", [now()]),
+};
+
+/** Tracks the latest app/CLI version already recorded on-chain, per product, so the
+ *  update-announcer emits exactly one "update-available" event per published release. */
+export const Announcements = {
+  /**
+   * Atomically claim `version` as the announced version for `product`. Returns true
+   * ONLY if this call moved the row to a NEW version (insert, or an update where the
+   * version differs) — so the caller emits the on-chain event exactly once even when
+   * several replicas race or the check runs repeatedly. Idempotent on the same version.
+   */
+  claimIfNew: async (product, version) => {
+    const { rows } = await q(
+      `INSERT INTO update_announcements (product, version, announced_at)
+         VALUES ($1, $2, $3)
+       ON CONFLICT (product) DO UPDATE
+         SET version = EXCLUDED.version, announced_at = EXCLUDED.announced_at
+         WHERE update_announcements.version <> EXCLUDED.version
+       RETURNING product`,
+      [product, version, now()],
+    );
+    return rows.length > 0;
+  },
 };
 
 export default pool;
