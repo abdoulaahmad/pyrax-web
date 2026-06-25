@@ -226,9 +226,12 @@ async function renderDownloads(): Promise<void> {
       })
       .join("");
     setView(`
-      <div class="mb-7">
-        <h1 class="text-2xl font-bold">Downloads</h1>
-        <p class="mt-1.5 text-sm text-[var(--color-muted)]">Always the latest signed installers, straight from the release feed.</p>
+      <div class="mb-7 flex items-end justify-between gap-3 flex-wrap">
+        <div>
+          <h1 class="text-2xl font-bold">Downloads</h1>
+          <p class="mt-1.5 text-sm text-[var(--color-muted)]">Always the latest signed installers, straight from the release feed.</p>
+        </div>
+        <a href="https://nodes.pyraxchain.com/changelog.html" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">${icon("save", "h-4 w-4")} Changelog ↗</a>
       </div>
       <div class="grid gap-5 md:grid-cols-2">${cards}</div>`);
   } catch (e) {

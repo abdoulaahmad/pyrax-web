@@ -28,6 +28,7 @@ function view(): string {
       </p>
       <div class="mt-7 flex flex-wrap justify-center gap-3">
         <a href="${LINKS.main}/node.html" target="_blank" rel="noopener" class="btn btn-primary">${icon("download", "h-4 w-4")} Get the node app ↗</a>
+        <a href="/changelog.html" class="btn btn-ghost">${icon("book", "h-4 w-4")} Changelog</a>
         <a href="${LINKS.docs}" target="_blank" rel="noopener" class="btn btn-ghost">Node docs ↗</a>
       </div>
     </div>

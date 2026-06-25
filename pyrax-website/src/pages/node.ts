@@ -44,6 +44,7 @@ const hero = `
     <div class="mt-7 flex flex-wrap gap-3">
       <a href="#waitlist" class="btn btn-primary">Get notified at launch ${icon("arrow", "h-4 w-4")}</a>
       <a href="${LINKS.docs}" class="btn btn-ghost">Setup guide</a>
+      <a href="https://nodes.pyraxchain.com/changelog.html" target="_blank" rel="noopener" class="btn btn-ghost">Changelog ↗</a>
     </div>
   </div>
 </section>`;
