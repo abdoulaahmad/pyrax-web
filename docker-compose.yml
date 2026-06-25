@@ -172,7 +172,12 @@ services:
       # 1782341053). node_data10 held the PRE-re-genesis chain, so the write node was
       # orphaned on a stale genesis -> peer-dropped by the producer -> its seal loop
       # could not land relay/login/faucet/notification txs (explorer showed 0 txs).
-      - node_data12:/home/pyrax/pyrax-data
+      #
+      # node_data13: bumped for the 2026-06-25 re-genesis (genesis_timestamp moved to
+      # 1782395230, alongside the NAT-traversal + sync-hardening + protocol-gate release).
+      # node_data12 held the PRE-re-genesis chain; a fresh volume makes the write node
+      # re-derive the new genesis from the image and sync the producer's fresh chain.
+      - node_data13:/home/pyrax/pyrax-data
 
   # On-chain events relayer (`pyrax relay`): team-pyrax logins + curated app
   # notifications become gas-only event txs on the newest live network. team-pyrax
@@ -222,6 +227,6 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-  node_data12:
+  node_data13:
   relay_data:
   faucet_data:
