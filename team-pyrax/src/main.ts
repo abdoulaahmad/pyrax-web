@@ -34,6 +34,8 @@ const ICONS: Record<string, string> = {
   back: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
   save: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/>',
   droplet: '<path d="M12 2.7 6.3 8.4a8 8 0 1 0 11.4 0L12 2.7z"/>',
+  power: '<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/>',
+  refresh: '<path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>',
 };
 function icon(name: string, cls = "h-5 w-5"): string {
   return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] ?? ""}</svg>`;
@@ -61,7 +63,7 @@ function toast(msg: string, kind: "ok" | "err" = "ok"): void {
 }
 const hasModule = (key: string): boolean => !!me.modules?.some((m) => m.key === key);
 const roleLabel = (r: string): string =>
-  ({ superuser: "Superuser", "user-admin": "User Admin", downloads: "Downloads", "ember-seed-lists": "Ember · Seed Lists" }[r] ?? r);
+  ({ superuser: "Superuser", "user-admin": "User Admin", downloads: "Downloads", "node-control": "Node Control", faucet: "Faucet", "ember-seed-lists": "Ember · Seed Lists" }[r] ?? r);
 
 // --- login ------------------------------------------------------------------
 
@@ -127,7 +129,8 @@ function navTabs(active: string): string {
     `<a class="tab ${active === key ? "is-on" : ""}" href="#${href}">${icon(ic, "h-4 w-4")} ${label}</a>`;
   let out = tab("dashboard", "/", "Dashboard", "grid");
   if (hasModule("downloads")) out += tab("downloads", "/downloads", "Downloads", "download");
-  out += tab("faucet", "/faucet", "Faucet", "droplet"); // open to every signed-in user
+  if (hasModule("node-control")) out += tab("node-control", "/node-control", "Node Control", "power");
+  if (hasModule("faucet")) out += tab("faucet", "/faucet", "Faucet", "droplet");
   if (hasModule("users")) out += tab("users", "/users", "Users", "users");
   return out;
 }
@@ -580,10 +583,132 @@ function errorBox(e: ApiError, fallback: string): string {
   return `<div class="card p-8 text-center"><p class="text-[var(--color-negative)] font-semibold">${esc(msg)}</p></div>`;
 }
 
+// --- node control (network node monitor + remote kill switch) ---------------
+
+interface NodeRow {
+  id: string;
+  peerId?: string;
+  network?: string;
+  nodeVersion?: string;
+  appVersion?: string;
+  current: boolean;
+  connected: boolean;
+  lastSeen?: number;
+  killed: boolean;
+}
+interface NodeListResp {
+  networkVersion?: string;
+  now: number;
+  nodes: NodeRow[];
+}
+
+let nodeCtlTimer = 0;
+
+function renderNodeControl(): void {
+  shell("node-control", loading());
+  void paintNodeControl();
+  // Live refresh while the page is open; stop when the user navigates away.
+  window.clearInterval(nodeCtlTimer);
+  nodeCtlTimer = window.setInterval(() => {
+    if (!location.hash.toLowerCase().startsWith("#/node-control")) {
+      window.clearInterval(nodeCtlTimer);
+      return;
+    }
+    void paintNodeControl();
+  }, 5000);
+}
+
+async function paintNodeControl(): Promise<void> {
+  let data: NodeListResp;
+  try {
+    data = await api<NodeListResp>("/api/node-control/nodes");
+  } catch (e) {
+    setView(errorBox(e as ApiError, "Couldn't load the node list."));
+    return;
+  }
+  const net = data.networkVersion || "—";
+  const nodes = data.nodes ?? [];
+  const badge = (text: string, color: string, bg: string) =>
+    `<span style="display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;color:${color};background:${bg}">${esc(text)}</span>`;
+  const rows = nodes
+    .map((n) => {
+      const ver = n.nodeVersion || n.appVersion || "—";
+      const verBadge = n.current
+        ? badge(`v${ver} · current`, "#34d399", "rgba(52,211,153,0.12)")
+        : badge(`v${ver} · outdated`, "var(--color-danger)", "rgba(255,86,86,0.12)");
+      const status = n.killed
+        ? badge("Killed", "var(--color-danger)", "rgba(255,86,86,0.12)")
+        : n.connected
+          ? badge("Online", "#34d399", "rgba(52,211,153,0.12)")
+          : badge("Offline", "var(--color-faint)", "rgba(150,150,150,0.12)");
+      const action = n.killed
+        ? `<button class="btn btn-ghost btn-sm" data-unkill="${esc(n.id)}">${icon("refresh", "h-4 w-4")} Allow online</button>`
+        : `<button class="btn btn-danger btn-sm" data-kill="${esc(n.id)}">${icon("power", "h-4 w-4")} Kill</button>`;
+      return `<tr style="border-top:1px solid var(--color-border,#222)">
+        <td class="p-3" style="font-family:ui-monospace,monospace">${esc(n.id)}</td>
+        <td class="p-3">${esc(n.network || "—")}</td>
+        <td class="p-3">${verBadge}</td>
+        <td class="p-3">${status}</td>
+        <td class="p-3 text-[var(--color-muted)]">${n.lastSeen ? esc(fmtDate(n.lastSeen)) : "—"}</td>
+        <td class="p-3 text-right">${action}</td>
+      </tr>`;
+    })
+    .join("");
+  setView(`
+    <div class="flex items-center justify-between gap-3 mb-5 flex-wrap">
+      <div>
+        <h1 class="text-2xl font-extrabold">Node Control</h1>
+        <p class="mt-1 text-sm text-[var(--color-muted)]">Every node on the network. Current release <strong class="text-[var(--color-ink)]">v${esc(net)}</strong> — out-of-date nodes are flagged. The kill switch force-stops a node and keeps it offline (overriding auto-start) until it updates. Last resort.</p>
+      </div>
+      <button id="nc-refresh" class="btn btn-ghost btn-sm">${icon("refresh", "h-4 w-4")} Refresh</button>
+    </div>
+    <div class="card overflow-x-auto">
+      <table class="w-full text-sm" style="border-collapse:collapse">
+        <thead><tr class="text-left text-[var(--color-faint)]">
+          <th class="p-3 font-semibold">Node ID</th><th class="p-3 font-semibold">Network</th><th class="p-3 font-semibold">Version</th><th class="p-3 font-semibold">Status</th><th class="p-3 font-semibold">Last seen</th><th class="p-3 font-semibold text-right">Action</th>
+        </tr></thead>
+        <tbody>${rows || `<tr><td colspan="6" class="p-6 text-center text-[var(--color-muted)]">No nodes have connected to the tunnel yet.</td></tr>`}</tbody>
+      </table>
+    </div>`);
+  document.getElementById("nc-refresh")?.addEventListener("click", () => void paintNodeControl());
+  wireNodeControlRows();
+}
+
+function wireNodeControlRows(): void {
+  document.querySelectorAll<HTMLButtonElement>("[data-kill]").forEach((b) =>
+    b.addEventListener("click", async () => {
+      const id = b.dataset.kill as string;
+      if (!confirm(`Kill node ${id}? It will be force-stopped and kept offline — overriding auto-start — until it updates to the current release. This is a last resort.`)) return;
+      b.disabled = true;
+      try {
+        await api(`/api/node-control/nodes/${id}/kill`, { method: "POST" });
+        toast("Node killed — it will stay offline until it updates.", "ok");
+      } catch (e) {
+        toast(e instanceof Error ? e.message : "Kill failed.", "err");
+      }
+      void paintNodeControl();
+    }),
+  );
+  document.querySelectorAll<HTMLButtonElement>("[data-unkill]").forEach((b) =>
+    b.addEventListener("click", async () => {
+      const id = b.dataset.unkill as string;
+      b.disabled = true;
+      try {
+        await api(`/api/node-control/nodes/${id}/unkill`, { method: "POST" });
+        toast("Node allowed back online.", "ok");
+      } catch (e) {
+        toast(e instanceof Error ? e.message : "Un-kill failed.", "err");
+      }
+      void paintNodeControl();
+    }),
+  );
+}
+
 function route(): void {
   const h = (location.hash.replace(/^#/, "") || "/").toLowerCase();
   if (h.startsWith("/downloads") && hasModule("downloads")) return void renderDownloads();
-  if (h.startsWith("/faucet")) return void renderFaucet(); // open to every signed-in user
+  if (h.startsWith("/node-control") && hasModule("node-control")) return void renderNodeControl();
+  if (h.startsWith("/faucet") && hasModule("faucet")) return void renderFaucet();
   if (h.startsWith("/users") && hasModule("users")) return void renderUsers();
   renderDashboard();
 }

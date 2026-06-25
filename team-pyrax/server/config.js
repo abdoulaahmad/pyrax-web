@@ -26,6 +26,8 @@ export const ROLES = Object.freeze({
   SUPERUSER: "superuser",
   USER_ADMIN: "user-admin", // whitelist teammates + assign roles ("adding users")
   DOWNLOADS: "downloads", // access the download center
+  NODE_CONTROL: "node-control", // the network node monitor + remote kill switch
+  FAUCET: "faucet", // dispense test PYRX from the team faucet
 });
 export const ALL_ROLES = Object.freeze(Object.values(ROLES));
 
@@ -34,6 +36,8 @@ export const ROLE_META = Object.freeze({
   [ROLES.SUPERUSER]: { label: "Superuser", desc: "Full access to every module. Cannot be revoked." },
   [ROLES.USER_ADMIN]: { label: "User Admin", desc: "Whitelist teammates and assign their roles." },
   [ROLES.DOWNLOADS]: { label: "Downloads", desc: "Access the app + CLI download center." },
+  [ROLES.NODE_CONTROL]: { label: "Node Control", desc: "Monitor every network node's version + remotely kill an out-of-date node (last resort)." },
+  [ROLES.FAUCET]: { label: "Faucet", desc: "Dispense test PYRX from the team faucet." },
 });
 
 /** App Roles — per-tab access to the Ember DESKTOP app's Admin area. These are
@@ -61,7 +65,16 @@ export const ASSIGNABLE_ROLES = Object.freeze([...ALL_ROLES, ...ALL_APP_ROLES]);
 export const MODULES = Object.freeze([
   { key: "downloads", title: "Downloads", desc: "Latest Ember, Inferno & CLI installers for Windows, macOS and Linux.", role: ROLES.DOWNLOADS, icon: "download" },
   { key: "users", title: "User Management", desc: `Whitelist @${EMAIL_DOMAIN} teammates and assign their module roles.`, role: ROLES.USER_ADMIN, icon: "users" },
+  { key: "node-control", title: "Node Control", desc: "Live network node monitor — versions vs. the current release — with a remote kill switch.", role: ROLES.NODE_CONTROL, icon: "power" },
+  { key: "faucet", title: "Faucet", desc: "Dispense test PYRX to any address on the internal networks.", role: ROLES.FAUCET, icon: "droplet" },
 ]);
+
+// --- node-control / tunnel admin (the kill switch calls the self-hosted relay's
+//     HMAC-gated /__admin API; the relay shares PYRAX_TUNNEL_ADMIN_SECRET) ----------
+/** The tunnel relay's internal base URL (compose service) for the admin control plane. */
+export const TUNNEL_ADMIN_BASE = process.env.PYRAX_TUNNEL_ADMIN_BASE ?? "http://tunnel-relay:8792";
+/** Shared HMAC secret with the tunnel relay's /__admin API (must equal the relay's). */
+export const TUNNEL_ADMIN_SECRET = process.env.PYRAX_TUNNEL_ADMIN_SECRET ?? "";
 
 // --- auth tunables ----------------------------------------------------------
 

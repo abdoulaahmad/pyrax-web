@@ -146,6 +146,10 @@ services:
       # Empty -> graceful no-op (logins still work). Both must be set to enable.
       RELAY_BASE: "${RELAY_BASE:-}"
       PYRAX_RELAY_SECRET: "${PYRAX_RELAY_SECRET:-}"
+      # Node Control / kill switch: the HMAC secret shared with the tunnel relay's /__admin
+      # API (same value the tunnel-relay service uses) + the relay's internal base URL.
+      PYRAX_TUNNEL_ADMIN_SECRET: "${PYRAX_TUNNEL_ADMIN_SECRET:-}"
+      PYRAX_TUNNEL_ADMIN_BASE: "http://tunnel-relay:8792"
       # DigitalOcean Managed PostgreSQL (state lives here — the container is stateless).
       DATABASE_URL: "${DATABASE_URL_TEAM_PYRAX:?set DATABASE_URL_TEAM_PYRAX in .env}"
       DATABASE_CA: "${DATABASE_CA:-}"

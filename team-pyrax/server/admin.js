@@ -27,7 +27,9 @@ const ROLE_META_ALL = { ...ROLE_META, ...APP_ROLE_META };
 function assignableRolesFor(actor) {
   const moduleRoles = ALL_ROLES.filter((r) => {
     if (r === ROLES.SUPERUSER) return false;
-    if (r === ROLES.USER_ADMIN) return !!actor?.isSuperuser;
+    // user-admin + node-control are high-privilege (assign roles / remotely kill nodes),
+    // so ONLY the superuser may grant them. Everything else any user-admin can assign.
+    if (r === ROLES.USER_ADMIN || r === ROLES.NODE_CONTROL) return !!actor?.isSuperuser;
     return true;
   });
   return [...moduleRoles, ...ALL_APP_ROLES];

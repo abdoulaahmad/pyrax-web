@@ -40,6 +40,7 @@ import {
 import { sendMagicLink, sendEmberOtp, sendErrorReport } from "./email.js";
 import { catalogue, downloadUrl } from "./downloads.js";
 import { listUsers, addUser, setRoles, removeUser } from "./admin.js";
+import { listNodes, killNode, unkillNode } from "./tunnel.js";
 import { emitEvent } from "./events.js";
 import { startUpdateAnnouncer } from "./update-announcer.js";
 
@@ -418,14 +419,14 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
-    // --- faucet (open to ALL signed-in users; not role-gated) ---
+    // --- faucet (role-gated by the Faucet module role; superuser always passes) ---
     if (method === "GET" && path === "/api/faucet/networks") {
-      if (!requireUser()) return;
+      if (!requireRole(ROLES.FAUCET)) return;
       const nets = await fetchFaucet("/networks").catch(() => null);
       return json(res, 200, Array.isArray(nets?.body) ? nets.body : []);
     }
     if (method === "POST" && path === "/api/faucet/drip") {
-      if (!requireMutation()) return; // signed in + same-origin + CSRF
+      if (!requireRole(ROLES.FAUCET) || !requireMutation()) return; // role + signed-in + same-origin + CSRF
       const raw = (await readBody(req).catch(() => "{}")) || "{}";
       let payload;
       try {
@@ -437,6 +438,24 @@ const server = http.createServer(async (req, res) => {
       const r = await fetchFaucet("/drip", { method: "POST", body: JSON.stringify(payload) }).catch(() => null);
       if (!r) return json(res, 502, { error: "Faucet is unreachable. Try again shortly." });
       return json(res, r.status, r.body);
+    }
+
+    // --- node control (the network node monitor + remote kill switch). Gated by the
+    //     Node Control role (superuser always passes; only the superuser can GRANT it).
+    //     Reads/commands proxy to the self-hosted tunnel relay's HMAC /__admin API. ---
+    if (method === "GET" && path === "/api/node-control/nodes") {
+      if (!requireRole(ROLES.NODE_CONTROL)) return;
+      const r = await listNodes();
+      return json(res, r.status, r.body);
+    }
+    {
+      const km = /^\/api\/node-control\/nodes\/([0-9a-f]{4,64})\/(kill|unkill)$/.exec(path);
+      if (km && method === "POST") {
+        if (!requireRole(ROLES.NODE_CONTROL) || !requireMutation()) return; // role + signed-in + same-origin + CSRF
+        const [, id, action] = km;
+        const r = action === "kill" ? await killNode(id) : await unkillNode(id);
+        return json(res, r.status, r.body);
+      }
     }
 
     if (path === "/api/health") {
