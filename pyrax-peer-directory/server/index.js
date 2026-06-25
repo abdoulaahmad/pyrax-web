@@ -314,7 +314,10 @@ const SECURITY_HEADERS = {
   "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains",
   "Content-Security-Policy":
-    "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; " +
+    // img-src adds flagcdn.com so the per-peer country FLAG images load (flag EMOJI
+    // don't render on Windows, so flags are <img> SVGs from flagcdn — a scoped, image-
+    // only allowance; no script/style/connect trust is granted to it).
+    "default-src 'self'; img-src 'self' data: https://flagcdn.com; style-src 'self' 'unsafe-inline'; " +
     // connect-src must allow the shared navbar's network store to poll the per-network public RPC
     // endpoints (the @pyrax/shared endpoints SSOT → RPC_BY_CHAIN) so the live status dot reads green.
     // Those RPCs are pyraxchain.com subdomains (e.g. sidn-rpc.pyraxchain.com); 'self' alone blocked

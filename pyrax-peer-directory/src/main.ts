@@ -73,10 +73,22 @@ function esc(s: string): string {
 function label(id: string): string {
   return ALL_NETWORKS.find((n) => n.id === id)?.label ?? id;
 }
-/** ISO-2 country code → flag emoji (regional indicators); globe if unknown. */
+/** ISO-2 country code → a flag IMAGE; globe glyph if unknown. We use an <img> (a
+ *  same-sized SVG flag) rather than a flag EMOJI because flag emoji are Unicode
+ *  regional-indicator pairs that Windows deliberately does NOT render as flags (Segoe
+ *  UI Emoji has no flag glyphs — it shows two boxed letters), so on Windows the emoji
+ *  approach showed no flags at all. The image host is allow-listed in the server CSP's
+ *  img-src. The globe 🌐 is a plain glyph that renders everywhere, so it stays as-is. */
 function flag(code?: string): string {
   if (!code || !/^[A-Za-z]{2}$/.test(code)) return "🌐";
-  return String.fromCodePoint(...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65));
+  const cc = code.toLowerCase();
+  // No inline onerror handler — the server CSP is script-src 'self' (no inline scripts),
+  // so it would be blocked; the alt text is the graceful fallback if the image fails.
+  return (
+    `<img src="https://flagcdn.com/${cc}.svg" alt="${esc(code.toUpperCase())}" ` +
+    `width="20" height="15" loading="lazy" decoding="async" ` +
+    `style="display:inline-block;border-radius:2px;vertical-align:middle;box-shadow:0 0 0 1px rgba(255,255,255,0.10)" />`
+  );
 }
 
 function pageCount(): number {
