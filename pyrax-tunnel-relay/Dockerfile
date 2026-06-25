@@ -7,6 +7,8 @@ FROM node:24-alpine
 WORKDIR /app
 COPY package.json ./
 COPY protocol.mjs ws.mjs relay.mjs ./
+# Branded "node offline" splash logo (inlined into the offline page at boot).
+COPY logo-vertical.svg ./
 # Persisted registry (killed flags + last-known meta) lives on a mounted volume.
 VOLUME ["/data"]
 EXPOSE 8792

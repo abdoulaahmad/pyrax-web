@@ -25,9 +25,67 @@
 import { createServer } from "node:http";
 import { createHmac, createHash, timingSafeEqual } from "node:crypto";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { TunnelHub, nodeIdFromHost } from "./protocol.mjs";
 import { acceptUpgrade } from "./ws.mjs";
+
+// ── branded "node offline" splash ─────────────────────────────────────────────
+// When a browser opens <id>.nodes.pyraxchain.com for a node that isn't currently
+// connected to the relay, we serve a branded page (PYRAX vertical logo) instead of a
+// bare error. IMPORTANT: it is returned with HTTP 200 — Cloudflare replaces an origin
+// 5xx body with its own generic "error code: 5xx" page, so a 200 is the only way the
+// branded page renders through the proxy. The page auto-refreshes so a node that is just
+// starting up "comes alive" without the visitor reloading.
+const HERE = dirname(fileURLToPath(import.meta.url));
+let OFFLINE_LOGO = "";
+try {
+  OFFLINE_LOGO = readFileSync(join(HERE, "logo-vertical.svg"), "utf8")
+    .replace(/<\?xml[^>]*\?>/i, "") // strip the XML prolog so it inlines cleanly in HTML
+    .trim();
+} catch {
+  /* logo missing — the page still renders, just without the mark */
+}
+function offlinePage(id) {
+  const safeId = String(id ?? "").replace(/[^0-9a-f]/gi, "").slice(0, 64);
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="refresh" content="12" />
+<title>PYRAX node — offline</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; padding:2rem;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color:#e8e9f0; background: radial-gradient(1200px 800px at 50% -10%, #1a1330 0%, #0b0a14 55%, #07060d 100%); }
+  .card { width:100%; max-width:30rem; text-align:center; }
+  .logo { width:148px; height:auto; margin:0 auto 1.75rem; display:block; filter: drop-shadow(0 8px 30px rgba(124,77,255,.35)); }
+  .logo svg { width:100%; height:auto; display:block; }
+  h1 { font-size:1.5rem; font-weight:800; letter-spacing:-.01em; margin:0 0 .5rem; }
+  p { margin:.35rem 0; color:#a8abc0; line-height:1.6; font-size:.975rem; }
+  .pulse { display:inline-flex; align-items:center; gap:.5rem; margin-top:1.25rem; padding:.5rem .9rem;
+    border:1px solid rgba(124,77,255,.35); border-radius:999px; font-size:.825rem; color:#cbb6ff; background:rgba(124,77,255,.08); }
+  .dot { width:.55rem; height:.55rem; border-radius:50%; background:#7c4dff; box-shadow:0 0 0 0 rgba(124,77,255,.6); animation:pulse 1.8s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(124,77,255,.55)} 70%{box-shadow:0 0 0 10px rgba(124,77,255,0)} 100%{box-shadow:0 0 0 0 rgba(124,77,255,0)} }
+  code { color:#cbb6ff; background:rgba(255,255,255,.05); padding:.1rem .4rem; border-radius:.35rem; font-size:.85em; }
+  .foot { margin-top:1.75rem; font-size:.8rem; color:#6f7188; }
+</style>
+</head>
+<body>
+  <main class="card">
+    <div class="logo">${OFFLINE_LOGO}</div>
+    <h1>This node is offline</h1>
+    <p>The PYRAX node for this address isn't connected to the tunnel right now.</p>
+    <p>If you just started it, give it a moment to come online and connect — this page refreshes automatically.</p>
+    <div class="pulse"><span class="dot"></span> Waiting for <code>${safeId || "node"}</code> to reconnect…</div>
+    <p class="foot">PYRAX node portal · nodes.pyraxchain.com</p>
+  </main>
+</body>
+</html>`;
+}
 
 const PORT = Number(process.env.PORT ?? 8792);
 // Shared secret for the admin control plane (team-pyrax holds the same value + signs).
@@ -242,7 +300,12 @@ const server = createServer(async (req, res) => {
   }
   const e = nodes.get(id);
   if (!e || !e.hub.hasAgent()) {
-    res.writeHead(502, { "content-type": "text/plain" }).end("PYRAX node is offline (no tunnel connected).");
+    // Branded splash, served as 200 so Cloudflare renders it (it swallows origin 5xx
+    // bodies into a generic "error code: 5xx" page). `no-store` so a node coming online
+    // is reflected on the next refresh, not from cache.
+    res
+      .writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" })
+      .end(offlinePage(id));
     return;
   }
   const chunks = [];
