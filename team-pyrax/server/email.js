@@ -97,10 +97,14 @@ export async function sendEmberOtp(email, code) {
 const esc = (s) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/** Where automatic error reports are delivered (a Teams channel connector by default;
- *  override with PYRAX_ERROR_EMAIL). */
-const ERROR_REPORT_EMAIL =
-  process.env.PYRAX_ERROR_EMAIL || "67dcaa51.PYRAXChain.onmicrosoft.com@ca.teams.ms";
+/** Where automatic error reports are delivered. The founder specified the Teams channel
+ *  connector. COMMA-SEPARATED so additional recipients can be added via PYRAX_ERROR_EMAIL
+ *  WITHOUT a code change (e.g. a mailbox, since a Teams connector can filter external
+ *  senders — if reports don't arrive, add an inbox here). */
+const ERROR_REPORT_EMAILS = (process.env.PYRAX_ERROR_EMAIL || "67dcaa51.PYRAXChain.onmicrosoft.com@ca.teams.ms")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 const LEVEL_HUE = { error: "#f87171", warn: "#fbbf24", info: "#cbd5e1", debug: "#7a8294" };
 
@@ -170,7 +174,7 @@ export async function sendErrorReport(report) {
       headers: { "api-key": BREVO_API_KEY, "content-type": "application/json", accept: "application/json" },
       body: JSON.stringify({
         sender: { email: BREVO_SENDER_EMAIL, name: BREVO_SENDER_NAME },
-        to: [{ email: ERROR_REPORT_EMAIL }],
+        to: ERROR_REPORT_EMAILS.map((email) => ({ email })),
         subject: head,
         htmlContent,
         textContent,
@@ -179,9 +183,10 @@ export async function sendErrorReport(report) {
     });
     if (!res.ok) {
       const body = await res.text().catch(() => "");
-      console.warn(`[team-pyrax] error-report send failed: ${res.status} ${body.slice(0, 200)}`);
+      console.warn(`[team-pyrax] error-report send FAILED: ${res.status} ${body.slice(0, 300)} (to ${ERROR_REPORT_EMAILS.join(", ")})`);
       return false;
     }
+    console.log(`[team-pyrax] error-report emailed → ${ERROR_REPORT_EMAILS.join(", ")}: ${head}`);
     return true;
   } catch (e) {
     console.warn(`[team-pyrax] error-report send threw: ${e?.message ?? e}`);
