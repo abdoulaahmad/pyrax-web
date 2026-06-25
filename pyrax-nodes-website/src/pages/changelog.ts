@@ -19,6 +19,28 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: "0.2.2",
+    date: "2026-06-25",
+    title: "Mine to your wallet, reliable portals & a branded offline page",
+    sections: [
+      {
+        label: "Mining & rewards",
+        items: [
+          "New one-tap “Mine to my wallet” switch on every node — turn it on and the node mines with your wallet as the reward address, so you earn block rewards directly to your wallet on Internal Devnet 1.0.",
+          "Your own transactions now confirm — a mining node seals the transactions you send from its wallet (a non-mining node accepts them but never seals them), so your activity actually lands on-chain and shows on the explorer.",
+          "The switch sets the reward address and enables mining together, then restarts the node so it takes effect immediately — no separate steps. Mining stays off by default for network stability.",
+        ],
+      },
+      {
+        label: "Connectivity & portals",
+        items: [
+          "Reliable node-portal tunnel — completing the move to PYRAX's own relay, every node now registers dependably and its portal is reachable at https://<id>.nodes.pyraxchain.com (fixes new nodes that could previously hang while connecting).",
+          "Branded “node offline” page — visiting a portal whose node is briefly offline now shows a clean PYRAX page that auto-refreshes when the node comes back, instead of a generic error.",
+        ],
+      },
+    ],
+  },
+  {
     version: "0.2.1",
     date: "2026-06-25",
     title: "NAT traversal, smarter peering, honest versioning & node control",
