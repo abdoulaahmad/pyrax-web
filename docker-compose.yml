@@ -168,11 +168,11 @@ services:
       # the image and sync the producer's chain cleanly. Bump this on EVERY producer
       # re-genesis (and any time node B may hold an incompatible chain).
       #
-      # node_data11: bumped for the 2026-06 re-genesis (genesis_timestamp moved to
+      # node_data12: bumped for the 2026-06 re-genesis (genesis_timestamp moved to
       # 1782341053). node_data10 held the PRE-re-genesis chain, so the write node was
       # orphaned on a stale genesis -> peer-dropped by the producer -> its seal loop
       # could not land relay/login/faucet/notification txs (explorer showed 0 txs).
-      - node_data11:/home/pyrax/pyrax-data
+      - node_data12:/home/pyrax/pyrax-data
 
   # On-chain events relayer (`pyrax relay`): team-pyrax logins + curated app
   # notifications become gas-only event txs on the newest live network. team-pyrax
@@ -222,6 +222,6 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-  node_data11:
+  node_data12:
   relay_data:
   faucet_data:
