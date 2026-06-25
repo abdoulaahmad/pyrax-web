@@ -9,9 +9,9 @@ import crypto from "node:crypto";
 
 // --- identity / access rules ------------------------------------------------
 
-/** The ONLY email domain permitted to access the platform. Enforced on every
- *  login request AND when whitelisting a user — there is no path in for any other
- *  domain. */
+/** The team's PRIMARY email domain — used only for default copy + the default Brevo
+ *  sender address. It is NO LONGER an access restriction: access is whitelist-only, so
+ *  ANY valid email a user-admin whitelists can sign in (e.g. external B2B contractors). */
 export const EMAIL_DOMAIN = (process.env.TEAM_EMAIL_DOMAIN ?? "pyraxchain.com").toLowerCase();
 
 /** The hardcoded superuser — seeded on first boot, always all-access, and never
@@ -64,7 +64,7 @@ export const ASSIGNABLE_ROLES = Object.freeze([...ALL_ROLES, ...ALL_APP_ROLES]);
  *  is stable; the frontend supplies the icon/route. New modules append here. */
 export const MODULES = Object.freeze([
   { key: "downloads", title: "Downloads", desc: "Latest Ember, Inferno & CLI installers for Windows, macOS and Linux.", role: ROLES.DOWNLOADS, icon: "download" },
-  { key: "users", title: "User Management", desc: `Whitelist @${EMAIL_DOMAIN} teammates and assign their module roles.`, role: ROLES.USER_ADMIN, icon: "users" },
+  { key: "users", title: "User Management", desc: "Whitelist teammates & contractors and assign their module roles.", role: ROLES.USER_ADMIN, icon: "users" },
   { key: "node-control", title: "Node Control", desc: "Live network node monitor — versions vs. the current release — with a remote kill switch.", role: ROLES.NODE_CONTROL, icon: "power" },
   { key: "faucet", title: "Faucet", desc: "Dispense test PYRX to any address on the internal networks.", role: ROLES.FAUCET, icon: "droplet" },
 ]);

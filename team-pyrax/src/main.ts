@@ -82,10 +82,10 @@ function renderLogin(): void {
           ${linkError ? `<div class="mb-4 rounded-lg border border-[color-mix(in_oklab,var(--color-negative)_45%,var(--color-line))] bg-[color-mix(in_oklab,var(--color-negative)_10%,transparent)] px-3.5 py-2.5 text-sm text-[var(--color-negative)]">That sign-in link was invalid or expired. Request a new one below.</div>` : ""}
           <form id="loginform" novalidate>
             <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--color-faint)] mb-1.5">Work email</label>
-            <input class="input" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@pyraxchain.com" required />
+            <input class="input" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@company.com" required />
             <button class="btn btn-primary w-full mt-3" type="submit">${icon("mail", "h-4 w-4")} Send sign-in link</button>
           </form>
-          <p class="mt-4 text-xs leading-relaxed text-[var(--color-faint)]">Only whitelisted <strong class="text-[var(--color-muted)]">@pyraxchain.com</strong> addresses can sign in. No password — the link signs you in for 7 days.</p>
+          <p class="mt-4 text-xs leading-relaxed text-[var(--color-faint)]">Only <strong class="text-[var(--color-muted)]">whitelisted</strong> addresses can sign in. No password — the link signs you in for 7 days.</p>
         </div>
         <p class="mt-6 text-center text-xs text-[var(--color-faint)]">© ${new Date().getFullYear()} PYRAX · internal use only</p>
       </div>
@@ -415,13 +415,13 @@ async function renderUsers(): Promise<void> {
     setView(`
       <div class="mb-7">
         <h1 class="text-2xl font-bold">User Management</h1>
-        <p class="mt-1.5 text-sm text-[var(--color-muted)]">Whitelist @pyraxchain.com teammates and assign their module roles + Ember admin-tab access.</p>
+        <p class="mt-1.5 text-sm text-[var(--color-muted)]">Whitelist teammates &amp; external contractors and assign their module roles + Ember admin-tab access.</p>
       </div>
 
       <div class="card p-6 mb-7">
         <h3 class="font-bold">${icon("plus", "h-4 w-4 inline -mt-0.5")} Add a teammate</h3>
         <form id="addform" class="mt-4 flex flex-col gap-3">
-          <input class="input sm:max-w-xs" name="email" type="email" placeholder="name@pyraxchain.com" required />
+          <input class="input sm:max-w-xs" name="email" type="email" placeholder="name@company.com" required />
           ${roleChecks(null, [])}
           <button class="btn btn-primary btn-sm self-start" type="submit">${icon("plus", "h-4 w-4")} Add teammate</button>
         </form>

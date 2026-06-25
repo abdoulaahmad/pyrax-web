@@ -10,7 +10,6 @@
 import crypto from "node:crypto";
 import { Users, Tokens, Sessions, EmberOtps } from "./db.js";
 import {
-  EMAIL_DOMAIN,
   MAGIC_TTL_MS,
   MAGIC_MAX_PER_WINDOW,
   SESSION_TTL_MS,
@@ -36,12 +35,14 @@ function constEq(a, b) {
 
 // --- email validation -------------------------------------------------------
 
-/** Normalise + validate an address: must be well-formed AND on the single allowed
- *  domain. Returns the lowercased email, or null. */
+/** Normalise + validate an address: must be a well-formed email. Access is NOT
+ *  restricted by domain — ANY whitelisted address may sign in (e.g. external B2B
+ *  contractors). The whitelist (managed by the superuser / a user-admin) is the
+ *  access gate; see `issueMagicToken` (which requires `Users.byEmail`). Returns the
+ *  lowercased email, or null. */
 export function isValidEmail(rawEmail) {
   const e = String(rawEmail ?? "").trim().toLowerCase();
   if (e.length < 3 || e.length > 254) return null;
-  if (!e.endsWith("@" + EMAIL_DOMAIN)) return null;
   if (!/^[a-z0-9](?:[a-z0-9._%+-]{0,62}[a-z0-9])?@[a-z0-9.-]+\.[a-z]{2,}$/.test(e)) return null;
   return e;
 }

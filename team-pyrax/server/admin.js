@@ -2,9 +2,11 @@
 //
 // team-pyrax — User Management module (role: user-admin).
 //
-// The superuser and any user-admin can whitelist @<domain> teammates and assign
-// their module roles. Guard rails:
-//   • only @<domain> addresses can ever be added (domain enforced in isValidEmail)
+// The superuser and any user-admin can whitelist teammates (any valid email — incl.
+// external B2B contractors, not just one domain) and assign their module roles. Guard
+// rails:
+//   • access is whitelist-only: an address must be added here before it can sign in
+//     (no domain restriction; the whitelist + RBAC are the gate)
 //   • the `superuser` role is never hand-assignable, and the hardcoded superuser
 //     can't be demoted or removed (the platform can't lock itself out)
 //   • only the superuser may grant/revoke `user-admin` (a user-admin can't mint more
@@ -15,7 +17,7 @@
 
 import { Users } from "./db.js";
 import { isValidEmail } from "./auth.js";
-import { ALL_ROLES, ALL_APP_ROLES, ROLES, ROLE_META, APP_ROLE_META, SUPERUSER_EMAIL, EMAIL_DOMAIN } from "./config.js";
+import { ALL_ROLES, ALL_APP_ROLES, ROLES, ROLE_META, APP_ROLE_META, SUPERUSER_EMAIL } from "./config.js";
 
 /** Combined metadata lookup (module roles + Ember App Roles). */
 const ROLE_META_ALL = { ...ROLE_META, ...APP_ROLE_META };
@@ -66,7 +68,7 @@ export async function listUsers(actor) {
 
 export async function addUser(actor, body) {
   const email = isValidEmail(body?.email);
-  if (!email) return { status: 400, body: { error: `Enter a valid @${EMAIL_DOMAIN} email address.` } };
+  if (!email) return { status: 400, body: { error: "Enter a valid email address." } };
   if (await Users.byEmail(email)) return { status: 409, body: { error: "That teammate is already on the whitelist." } };
   const roles = sanitizeRoles(actor, body?.roles ?? []);
   if (roles === null) return { status: 403, body: { error: "You can't assign one or more of those roles." } };

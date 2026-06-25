@@ -7,7 +7,9 @@
 // Everything past the login screen is role-gated (see auth.js / config.js).
 //
 // SECURITY MODEL:
-//   • Only @<domain> addresses, and only ones on the whitelist, can sign in.
+//   • Whitelist-only sign-in: any valid email a user-admin has whitelisted can sign in
+//     (no domain restriction — external B2B contractors are supported); the whitelist
+//     + RBAC are the access gate.
 //   • Magic tokens + session ids are single-use / TTL'd and stored only as HMACs.
 //   • Mutations require: a valid session, the matching CSRF token (X-CSRF-Token),
 //     AND a same-origin Origin/Referer — defence in depth on top of SameSite=Lax.
