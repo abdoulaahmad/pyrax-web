@@ -15,8 +15,28 @@ www.pyraxchain.com {
 }
 
 # --- nodes / status + run-a-node ---
+# The marketing/run-a-node site, EXCEPT /__tunnel/* which is the tunnel relay's node
+# registration endpoint (nodes dial wss://nodes.pyraxchain.com/__tunnel/register). Same
+# host serves both: the relay path goes to the relay, everything else to the site.
 nodes.pyraxchain.com {
-	reverse_proxy nodes-website:80
+	@tunnel path /__tunnel/*
+	handle @tunnel {
+		reverse_proxy tunnel-relay:8792
+	}
+	handle {
+		reverse_proxy nodes-website:80
+	}
+}
+
+# --- per-node portals: the self-hosted tunnel relay proxies each node's local portal.
+# Wildcard ORIGIN cert via Cloudflare DNS-01 (HTTP-01 can't do wildcards); the edge cert
+# is the zone's Advanced Certificate (Cloudflare-proxied). WebSockets pass through
+# natively (browser portal WS + the node's outbound agent WS). ---
+*.nodes.pyraxchain.com {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_DNS_TOKEN}
+	}
+	reverse_proxy tunnel-relay:8792
 }
 
 # --- block explorer: /api/* -> indexer, everything else -> static frontend ---

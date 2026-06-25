@@ -8,11 +8,21 @@ name: pyrax-web
 
 services:
   caddy:
-    image: caddy:2-alpine
+    # Custom build: stock Caddy + the Cloudflare-DNS module, so it can issue the
+    # `*.nodes.pyraxchain.com` wildcard ORIGIN cert via ACME DNS-01 (HTTP-01 can't do
+    # wildcards). Drop-in superset — every existing HTTP-01 site is unchanged.
+    image: ghcr.io/pyrax-network/pyrax-web-caddy:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: caddy/Dockerfile
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      # Cloudflare token (Zone:DNS:Edit on pyraxchain.com) for the DNS-01 wildcard cert.
+      # Injected into the droplet .env by the deploy from the CLOUDFLARE_DNS_TOKEN secret.
+      CLOUDFLARE_DNS_TOKEN: ${CLOUDFLARE_DNS_TOKEN:-}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
@@ -29,6 +39,27 @@ services:
       - team-pyrax
       - relay
       - faucet
+      - tunnel-relay
+
+  # Self-hosted node-portal tunnel relay (replaces the Cloudflare Worker) + the
+  # node-control admin plane (live node registry, version monitor, remote kill switch).
+  # Nodes dial OUT to wss://nodes.pyraxchain.com/__tunnel/register; Caddy proxies
+  # *.nodes.pyraxchain.com here. Internal port only — never published to the host.
+  tunnel-relay:
+    image: ghcr.io/pyrax-network/pyrax-web-tunnel-relay:${TAG:-latest}
+    build:
+      context: ./pyrax-tunnel-relay
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: "8792"
+      # Shared HMAC secret for the /__admin control plane (team-pyrax signs with the same
+      # value to drive the node-control / kill-switch page). Injected from the secret.
+      PYRAX_TUNNEL_ADMIN_SECRET: "${PYRAX_TUNNEL_ADMIN_SECRET:-}"
+      PYRAX_TUNNEL_STATE: "/data/registry.json"
+      PYRAX_OTA_LATEST: "https://updates.pyraxchain.com/node/latest.yml"
+    volumes:
+      - tunnel_relay_data:/data
 
   website:
     image: ghcr.io/pyrax-network/pyrax-web-website:${TAG:-latest}
@@ -230,3 +261,4 @@ volumes:
   node_data13:
   relay_data:
   faucet_data:
+  tunnel_relay_data:

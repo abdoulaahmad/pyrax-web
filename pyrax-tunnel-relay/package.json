@@ -1,0 +1,15 @@
+{
+  "name": "pyrax-tunnel-relay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-hosted PYRAX node-portal tunnel relay (replaces the Cloudflare Worker) + the node-control admin plane (live registry, version monitor, remote kill switch).",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "start": "node relay.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

@@ -48,6 +48,12 @@ jobs:
           - name: faucet
             file: faucet/Dockerfile
             context: .
+          - name: caddy
+            file: caddy/Dockerfile
+            context: .
+          - name: tunnel-relay
+            file: pyrax-tunnel-relay/Dockerfile
+            context: pyrax-tunnel-relay
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -99,11 +105,17 @@ jobs:
           GHCR_USER: ${{ secrets.GHCR_USER }}
           PYRAX_RELAY_SECRET: ${{ secrets.PYRAX_RELAY_SECRET }}
           PYRAX_KEY_PASSPHRASE: ${{ secrets.PYRAX_KEY_PASSPHRASE }}
+          # Cloudflare token (Zone:DNS:Edit on pyraxchain.com) for Caddy's *.nodes DNS-01
+          # wildcard origin cert; reuse the existing org token granted to this repo.
+          CLOUDFLARE_DNS_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          # Shared HMAC secret between the tunnel relay's /__admin plane and team-pyrax's
+          # node-control (kill-switch) page. Set this org/repo secret to a random value.
+          PYRAX_TUNNEL_ADMIN_SECRET: ${{ secrets.PYRAX_TUNNEL_ADMIN_SECRET }}
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
-          envs: PYRAX_DIRECTORY_SECRET,SESSION_SECRET,BREVO_API_KEY,SPACES_KEY,SPACES_SECRET,DATABASE_URL_TEAM_PYRAX,DATABASE_URL_EXPLORER,GHCR_PULL_TOKEN,GHCR_USER,PYRAX_RELAY_SECRET,PYRAX_KEY_PASSPHRASE
+          envs: PYRAX_DIRECTORY_SECRET,SESSION_SECRET,BREVO_API_KEY,SPACES_KEY,SPACES_SECRET,DATABASE_URL_TEAM_PYRAX,DATABASE_URL_EXPLORER,GHCR_PULL_TOKEN,GHCR_USER,PYRAX_RELAY_SECRET,PYRAX_KEY_PASSPHRASE,CLOUDFLARE_DNS_TOKEN,PYRAX_TUNNEL_ADMIN_SECRET
           script: |
             set -euo pipefail
             cd /opt/pyrax-web
@@ -125,6 +137,10 @@ jobs:
               printf 'RELAY_BASE=%s\n' "http://relay:8799"
               printf 'PYRAX_RELAY_SECRET=%s\n' "${PYRAX_RELAY_SECRET:-}"
               printf 'PYRAX_KEY_PASSPHRASE=%s\n' "${PYRAX_KEY_PASSPHRASE:-}"
+              # Tunnel relay: Caddy DNS-01 wildcard cert token + the admin/kill HMAC secret
+              # (shared with team-pyrax, which reads it from this same .env).
+              printf 'CLOUDFLARE_DNS_TOKEN=%s\n' "${CLOUDFLARE_DNS_TOKEN:-}"
+              printf 'PYRAX_TUNNEL_ADMIN_SECRET=%s\n' "${PYRAX_TUNNEL_ADMIN_SECRET:-}"
             } > .env
             # Authenticate to private GHCR via stdin, roll out, then drop the cached credential so no
             # registry token is left at rest on the droplet.
