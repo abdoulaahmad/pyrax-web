@@ -58,11 +58,15 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      # THROTTLED ingest from the node's PUBLIC RPC so it can never starve the block producer.
+      # Ingest from the read-only PUBLIC seed RPC (a dedicated node, NOT the producer) so a
+      # snappy poll cannot starve block production. Block time is ~5s; poll every 2.5s and
+      # batch wider so the explorer stays within one block of the tip and catches up quickly
+      # after a re-genesis re-index. The realtime feel is delivered by the explorer-web
+      # WebSocket (it pushes each newly-ingested block to the browser instantly).
       RPC_881109: "https://sidn-rpc.pyraxchain.com:8811"
-      INGEST_BATCH: "2"
-      RECEIPT_CONCURRENCY: "1"
-      INGEST_INTERVAL_MS: "8000"
+      INGEST_BATCH: "8"
+      RECEIPT_CONCURRENCY: "2"
+      INGEST_INTERVAL_MS: "2500"
       ALLOW_ORIGIN: "https://explorer.pyraxchain.com"
       # DigitalOcean Managed PostgreSQL (the indexer is now stateless — re-indexable).
       DATABASE_URL: "${DATABASE_URL_EXPLORER:?set DATABASE_URL_EXPLORER in .env}"
@@ -163,7 +167,12 @@ services:
       # wedges the mesh. Starting empty makes node B re-derive the matching genesis from
       # the image and sync the producer's chain cleanly. Bump this on EVERY producer
       # re-genesis (and any time node B may hold an incompatible chain).
-      - node_data10:/home/pyrax/pyrax-data
+      #
+      # node_data11: bumped for the 2026-06 re-genesis (genesis_timestamp moved to
+      # 1782341053). node_data10 held the PRE-re-genesis chain, so the write node was
+      # orphaned on a stale genesis -> peer-dropped by the producer -> its seal loop
+      # could not land relay/login/faucet/notification txs (explorer showed 0 txs).
+      - node_data11:/home/pyrax/pyrax-data
 
   # On-chain events relayer (`pyrax relay`): team-pyrax logins + curated app
   # notifications become gas-only event txs on the newest live network. team-pyrax
@@ -213,6 +222,6 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-  node_data10:
+  node_data11:
   relay_data:
   faucet_data:
