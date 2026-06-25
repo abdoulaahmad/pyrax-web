@@ -229,9 +229,15 @@ async function renderDownloads(): Promise<void> {
       <div class="mb-7 flex items-end justify-between gap-3 flex-wrap">
         <div>
           <h1 class="text-2xl font-bold">Downloads</h1>
-          <p class="mt-1.5 text-sm text-[var(--color-muted)]">Always the latest signed installers, straight from the release feed.</p>
+          <p class="mt-1.5 text-sm text-[var(--color-muted)]">Always the latest installers, straight from the release feed.</p>
         </div>
         <a href="https://nodes.pyraxchain.com/changelog.html" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">${icon("save", "h-4 w-4")} Changelog ↗</a>
+      </div>
+      <div class="card p-5 mb-5" style="border-color:rgba(124,77,255,.4);background:rgba(124,77,255,.06)">
+        <h3 class="text-sm font-bold flex items-center gap-2">macOS: first launch shows &ldquo;&hellip; is damaged&rdquo;?</h3>
+        <p class="mt-1.5 text-sm text-[var(--color-muted)]">The Mac builds aren&rsquo;t notarized by Apple yet, so macOS quarantines the download and shows a &ldquo;damaged&rdquo; warning. <strong>The app is safe.</strong> Drag it into Applications, then run this once in Terminal and open it normally:</p>
+        <pre class="mt-3 overflow-x-auto rounded-lg p-3 text-xs" style="background:rgba(0,0,0,.35)"><code>xattr -dr com.apple.quarantine /Applications/Ember.app</code></pre>
+        <p class="mt-2 text-xs text-[var(--color-faint)]">Installed Inferno instead? Use <code>"/Applications/Inferno Node.app"</code> (keep the quotes). Windows and Linux are unaffected.</p>
       </div>
       <div class="grid gap-5 md:grid-cols-2">${cards}</div>`);
   } catch (e) {
