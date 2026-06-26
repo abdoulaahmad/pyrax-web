@@ -214,7 +214,11 @@ services:
       # node_data14: bumped for the v0.2.1 fresh-start re-genesis (genesis_timestamp moved
       # to 1782408370). node_data13 held the prior chain; a fresh volume makes the write
       # node re-derive the new genesis from the image and sync the producer's fresh chain.
-      - node_data14:/home/pyrax/pyrax-data
+      #
+      # node_data15: bumped for the v0.3.0 sync-hardening full-wipe re-genesis
+      # (genesis_timestamp moved to 1782470400). node_data14 held the prior chain; a fresh
+      # volume makes the write node re-derive the new genesis and sync the producer's reset.
+      - node_data15:/home/pyrax/pyrax-data
 
   # On-chain events relayer (`pyrax relay`): team-pyrax logins + curated app
   # notifications become gas-only event txs on the newest live network. team-pyrax
@@ -264,7 +268,7 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-  node_data14:
+  node_data15:
   relay_data:
   faucet_data:
   tunnel_relay_data:

@@ -19,6 +19,26 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
+    version: "0.3.0",
+    date: "2026-06-25",
+    title: "Honest sync status, proven multi-miner convergence & a full chain reset",
+    sections: [
+      {
+        label: "Important — full chain reset",
+        items: [
+          "Internal Devnet 1.0 has been wiped to a brand-new genesis (block 0). All previous on-chain balances — mined rewards, faucet drips, and past activity — are reset to the fresh genesis allocation. When you update, fully uninstall the old app and wipe its data when prompted, then install 0.3.0 to sync the new chain (the in-app prompt walks you through it).",
+        ],
+      },
+      {
+        label: "Sync & mining",
+        items: [
+          'Honest sync status — a node now reports "synced" only when it truly is. Previously a producing seed, or a node briefly behind the tip, could mislabel itself; the app now reflects your real position relative to the network.',
+          'Proven decentralized-mining convergence — multiple home miners that each mine to their own wallet provably converge on one chain. A 1000-block, 4-miner stress test confirms every miner lands on the same height with matching rewards and zero rejected blocks, with no permanent forks. The earlier "synced but hundreds off" readings were transient propagation lag surfaced by the old, dishonest status — not a chain split.',
+        ],
+      },
+    ],
+  },
+  {
     version: "0.2.3",
     date: "2026-06-25",
     title: "Real peer-to-peer mesh — nodes connect to each other, not just the seed",
@@ -109,14 +129,14 @@ function releaseCard(r: Release): string {
       <span class="chip">v${r.version}</span>
       <span class="text-sm text-[var(--color-faint)]">${r.date}</span>
     </div>
-    <h2 class="mt-3 text-xl font-bold sm:text-2xl">${r.title}</h2>
+    <h2 class="mt-3 t-h2">${r.title}</h2>
     <div class="mt-6 grid gap-6 sm:grid-cols-2">
       ${r.sections
         .map(
           (s) => `
         <div>
           <h3 class="text-sm font-semibold uppercase tracking-wide text-[var(--color-brand-soft)]">${s.label}</h3>
-          <ul class="mt-2 space-y-2 text-sm leading-relaxed text-[var(--color-muted)]">
+          <ul class="mt-2 space-y-2 t-body text-[var(--color-muted)]">
             ${s.items
               .map(
                 (it) =>
@@ -136,8 +156,8 @@ function view(): string {
   <section class="container-x pt-28 pb-10 sm:pt-32">
     <div class="mx-auto max-w-3xl text-center">
       <span class="chip">${icon("book", "h-3.5 w-3.5")} Changelog</span>
-      <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">Node &amp; app changelog.</h1>
-      <p class="mt-5 text-lg leading-relaxed text-[var(--color-muted)]">
+      <h1 class="mt-5 t-h1">Node &amp; app changelog.</h1>
+      <p class="mt-5 t-lead text-[var(--color-muted)]">
         What's new in the PYRAX desktop node app + the <code>pyrax-node</code> / CLI. Newest first.
       </p>
       <div class="mt-7 flex flex-wrap justify-center gap-3">
