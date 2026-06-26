@@ -218,7 +218,11 @@ services:
       # node_data15: bumped for the v0.3.0 sync-hardening full-wipe re-genesis
       # (genesis_timestamp moved to 1782470400). node_data14 held the prior chain; a fresh
       # volume makes the write node re-derive the new genesis and sync the producer's reset.
-      - node_data15:/home/pyrax/pyrax-data
+      # node_data16: bumped for the v0.4.0 full-wipe re-genesis (genesis_timestamp moved to
+      # 1782495600) — fixes the production stall (chain fell behind wall-clock + producer
+      # choked at ~block 4672). node_data15 held the prior chain; a fresh volume makes the
+      # write node re-derive the new genesis and sync the producer's reset.
+      - node_data16:/home/pyrax/pyrax-data
 
   # On-chain events relayer (`pyrax relay`): team-pyrax logins + curated app
   # notifications become gas-only event txs on the newest live network. team-pyrax
@@ -262,13 +266,18 @@ services:
       FAUCET_NETWORK: "${FAUCET_NETWORK:-Internal Devnet 1.0}"
       FAUCET_DRIP_ASH: "${FAUCET_DRIP_ASH:-100000000000000000000}" # 100 PYRX
       FAUCET_WINDOW_H: "${FAUCET_WINDOW_H:-12}"
+      # Synthetic transactions: periodic tiny transfers so the simulated chain carries
+      # real txs (the explorer shows non-empty blocks). Internal-only; off by default.
+      SYNTHETIC_TX: "${SYNTHETIC_TX:-1}"
+      SYNTHETIC_TX_INTERVAL_S: "${SYNTHETIC_TX_INTERVAL_S:-60}"
+      SYNTHETIC_TX_ASH: "${SYNTHETIC_TX_ASH:-1000000000000000}" # 0.001 PYRX
     volumes:
       - faucet_data:/data
 
 volumes:
   caddy_data:
   caddy_config:
-  node_data15:
+  node_data16:
   relay_data:
   faucet_data:
   tunnel_relay_data:

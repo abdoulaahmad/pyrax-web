@@ -219,6 +219,23 @@ function announce({ network, port, peerId, ip, relayPubkey, kind }) {
   return address;
 }
 
+/** Immediately remove a node from a network's presence list by its peer id (the
+ *  destroy-wipe path: when a node is DESTROYED in the app, it disappears from the
+ *  directory at once instead of lingering for the TTL window). Matches on the peer
+ *  id embedded in the dial multiaddr, so it's IP-independent. Returns count removed. */
+function deregister({ network, peerId }) {
+  const suffix = `/p2p/${peerId}`;
+  let removed = 0;
+  for (const [k, e] of peers) {
+    if (e.network === network && e.address.endsWith(suffix)) {
+      peers.delete(k);
+      removed++;
+    }
+  }
+  if (removed) pushNetwork(network);
+  return removed;
+}
+
 function sweep() {
   const t = now();
   const changed = new Set();
@@ -455,6 +472,32 @@ const server = http.createServer(async (req, res) => {
     return json(res, 200, { ok: true, address, ttlMs: TTL_MS });
   }
 
+  // --- WRITE: deregister (app-only, HMAC + replay protected) — node destroy-wipe ---
+  // The app calls this when a managed node is DESTROYED so it vanishes from the
+  // directory immediately rather than aging out over the TTL window.
+  if (req.method === "POST" && path === "/api/deregister") {
+    let raw;
+    try {
+      raw = await readBody(req);
+    } catch {
+      return json(res, 413, { error: "payload too large" });
+    }
+    if (!hmacOk(req, path, raw)) return json(res, 401, { error: "unauthorized" });
+    let body;
+    try {
+      body = JSON.parse(raw || "{}");
+    } catch {
+      return json(res, 400, { error: "invalid json" });
+    }
+    const network = String(body?.network ?? "");
+    const peerId = String(body?.peerId ?? "");
+    if (!NETWORKS.has(network) || !/^[A-Za-z0-9]{20,80}$/.test(peerId)) {
+      return json(res, 400, { error: "expected { network, peerId }" });
+    }
+    const removed = deregister({ network, peerId });
+    return json(res, 200, { ok: true, removed });
+  }
+
   // --- READ: live peers (same-origin website OR app HMAC) ---
   if (req.method === "GET" && path === "/api/peers") {
     if (!sameOriginBrowser(req) && !hmacOk(req, path, "")) {
@@ -515,6 +558,7 @@ export {
   hmacOk,
   live,
   announce,
+  deregister,
   sweep,
   isPrivateIp,
   resolveAnnounceIp,

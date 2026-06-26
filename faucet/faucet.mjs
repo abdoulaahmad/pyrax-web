@@ -164,6 +164,52 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, "0.0.0.0", () => console.log(`[faucet] listening :${PORT} — ${drip_pyrx} PYRX per drip on ${NETWORK}`));
 
+// --- synthetic transactions (chain activity) -------------------------------
+// Periodically send a TINY transfer to a rotating set of sink addresses so the
+// simulated chain carries real transactions and the explorer shows non-empty
+// blocks (production-faithful), rather than an endless run of 0-tx blocks. This
+// is an INTERNAL, env-gated job: it calls drip() directly, so it bypasses the
+// public per-address cooldown, and it uses its own small amount (never the public
+// drip size). Off unless SYNTHETIC_TX is truthy.
+const SYNTH_ON = /^(1|true|yes|on)$/i.test(process.env.SYNTHETIC_TX || "");
+const SYNTH_INTERVAL_MS = Math.max(15, Number(process.env.SYNTHETIC_TX_INTERVAL_S || 60)) * 1000;
+const SYNTH_AMOUNT = (process.env.SYNTHETIC_TX_ASH || "1000000000000000").trim(); // 0.001 PYRX
+const SYNTH_CHAIN = Number(process.env.SYNTHETIC_TX_CHAIN || DEFAULT_CHAIN);
+// Valid transparent (0x + 40 hex) devnet sink addresses; rotated for variety.
+const SYNTH_SINKS = [
+  "0x5e7e7700000000000000000000000000000c0de1",
+  "0x5e7e7700000000000000000000000000000c0de2",
+  "0x5e7e7700000000000000000000000000000c0de3",
+  "0x5e7e7700000000000000000000000000000c0de4",
+  "0x5e7e7700000000000000000000000000000c0de5",
+];
+let synthIdx = 0;
+
+function synthDrip() {
+  const net = NETWORKS[SYNTH_CHAIN];
+  if (!net?.rpc) return; // network has no write RPC yet — skip this tick
+  const to = SYNTH_SINKS[synthIdx % SYNTH_SINKS.length];
+  synthIdx++;
+  // reuse drip() but with the small synthetic amount (temporarily swap DRIP via a
+  // local arg path would be cleaner — inline a minimal send here to avoid touching
+  // the public drip amount).
+  const args = ["wallet", "send", to, SYNTH_AMOUNT, "--from", KEY, "--rpc-url", net.rpc];
+  const r = spawnSync("pyrax", args, { env: process.env, encoding: "utf8", timeout: 30000 });
+  const out = `${r.stdout || ""}${r.stderr || ""}`;
+  const m = out.match(/submitted:\s*(\S+)/);
+  if (r.status === 0 && m) console.log(`[faucet] synthetic tx → ${to.slice(0, 12)}… ${m[1]}`);
+  else console.warn(`[faucet] synthetic tx failed: ${out.trim().split("\n").slice(-1)[0] || "send failed"}`);
+}
+
+if (SYNTH_ON) {
+  console.log(`[faucet] synthetic transactions ON — every ${SYNTH_INTERVAL_MS / 1000}s on chain ${SYNTH_CHAIN}`);
+  // first fire after a short delay (let the node/write-RPC settle), then on interval
+  setTimeout(() => {
+    synthDrip();
+    setInterval(synthDrip, SYNTH_INTERVAL_MS).unref();
+  }, 20_000).unref();
+}
+
 const PAGE = `<!doctype html><html lang="en" class="dark"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/><title>PYRAX Faucet</title>
 <style>

@@ -6,6 +6,7 @@ import {
   hmacOk,
   live,
   announce,
+  deregister,
   sweep,
   isPrivateIp,
   resolveAnnounceIp,
@@ -125,4 +126,29 @@ test("presence: 'rpc' node kind round-trips (violet RPC node)", () => {
   const got = live("devnet2");
   assert.equal(got.length, 1);
   assert.equal(got[0].kind, "rpc");
+});
+
+test("destroy-wipe: deregister removes a peer immediately by peerId, IP-independent + network-isolated", () => {
+  peers.clear();
+  const id = "12D3KooW" + "d".repeat(38);
+  const other = "12D3KooW" + "e".repeat(38);
+  // same node announced from two different source IPs; a second node also present
+  announce({ network: "devnet2", port: 30303, peerId: id, ip: "203.0.113.20" });
+  announce({ network: "devnet2", port: 30303, peerId: id, ip: "203.0.113.21" });
+  announce({ network: "devnet2", port: 30303, peerId: other, ip: "203.0.113.22" });
+  announce({ network: "testnet", port: 30303, peerId: id, ip: "203.0.113.20" }); // same id, other network
+  assert.equal(live("devnet2").length, 3); // id@20, id@21, other@22
+
+  // destroying `id` on devnet2 removes BOTH of its addresses, regardless of IP…
+  const removed = deregister({ network: "devnet2", peerId: id });
+  assert.equal(removed, 2);
+  // …leaves the other node…
+  const rest = live("devnet2");
+  assert.equal(rest.length, 1);
+  assert.ok(rest[0].address.endsWith("/p2p/" + other));
+  // …and does NOT touch the same id on a different network.
+  assert.equal(live("testnet").length, 1);
+
+  // deregistering something absent is a harmless no-op.
+  assert.equal(deregister({ network: "devnet2", peerId: "nope" }), 0);
 });
