@@ -57,8 +57,8 @@ const hero = `
   <div class="absolute inset-0 grid-bg opacity-50"></div>
   <div class="container-x relative max-w-3xl reveal">
     <span class="chip">Use cases</span>
-    <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">What you can <span class="brand-text text-anim">do</span> with PYRAX.</h1>
-    <p class="mt-6 max-w-2xl text-lg leading-relaxed text-[var(--color-muted)]">
+    <h1 class="mt-5 t-h1">What you can <span class="brand-text text-anim">do</span> with PYRAX.</h1>
+    <p class="mt-6 max-w-2xl t-lead text-[var(--color-muted)]">
       PYRAX is three superpowers in one network: a shielded-by-default base layer, a real decentralized AI compute marketplace, and full Ethereum compatibility. Together they turn private money, AI on your own GPU, and programmable apps into one stack instead of three disconnected products. Here's what each unlocks — and a concrete example of each in practice.
     </p>
   </div>
@@ -73,11 +73,11 @@ const useCard = (u: { title: string; desc: string; audience: string; icon: strin
         <div class="${orbClass(tone)} !h-12 !w-12">${icon(u.icon, "h-6 w-6")}</div>
         <span class="chip !px-2.5 !py-0.5">${u.audience}</span>
       </div>
-      <h3 class="mt-5 text-xl font-bold">${u.title}</h3>
-      <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${u.desc} ${e ? e.extra : ""}</p>
+      <h3 class="mt-5 t-h3">${u.title}</h3>
+      <p class="mt-2 t-body text-[var(--color-muted)]">${u.desc} ${e ? e.extra : ""}</p>
       ${
         e
-          ? `<p class="mt-3 border-l-2 border-[color-mix(in_oklab,var(--color-brand)_45%,var(--color-line))] pl-3 text-sm leading-relaxed text-[var(--color-muted)]">${e.eg}</p>`
+          ? `<p class="mt-3 border-l-2 border-[color-mix(in_oklab,var(--color-brand)_45%,var(--color-line))] pl-3 t-body text-[var(--color-muted)]">${e.eg}</p>`
           : ""
       }
     </article>`;
@@ -94,9 +94,9 @@ const grid = `
 
   <div class="reveal flex items-center gap-3">
     <span class="${orbClass("brand")} !h-9 !w-9">${icon("shield", "h-4 w-4")}</span>
-    <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Use it</h2>
+    <h2 class="t-h2">Use it</h2>
   </div>
-  <p class="reveal mt-2 max-w-xl text-sm leading-relaxed text-[var(--color-muted)]">
+  <p class="reveal mt-2 max-w-xl t-body text-[var(--color-muted)]">
     For people who want private money, local AI, and anonymous sharing — no contracts to write.
   </p>
   <div class="mt-6 grid gap-5 sm:grid-cols-2">
@@ -105,9 +105,9 @@ const grid = `
 
   <div class="reveal mt-16 flex items-center gap-3">
     <span class="${orbClass("bolt")} !h-9 !w-9">${icon("code", "h-4 w-4")}</span>
-    <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Build &amp; earn</h2>
+    <h2 class="t-h2">Build &amp; earn</h2>
   </div>
-  <p class="reveal mt-2 max-w-xl text-sm leading-relaxed text-[var(--color-muted)]">
+  <p class="reveal mt-2 max-w-xl t-body text-[var(--color-muted)]">
     For developers and hardware owners who want to ship apps and turn idle silicon into income.
   </p>
   <div class="mt-6 grid gap-5 sm:grid-cols-2">

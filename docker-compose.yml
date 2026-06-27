@@ -274,6 +274,25 @@ services:
     volumes:
       - faucet_data:/data
 
+  # NOVA log-shipper + remediation agent. Streams EVERY container's logs on this droplet
+  # (caddy, website, nodes-website, explorer-web, explorer-indexer, peer-directory,
+  # team-pyrax, relay, faucet, the write node, tunnel-relay) up to NOVA at
+  # status.pyraxchain.com — so the whole websites droplet is observable in NOVA off the
+  # hop. When NOVA_AGENT_REMEDIATION=1 it also applies NOVA's approved container restarts
+  # (stateless services auto; chain-affecting stay advisory + 15-min-warned). Mirrors the
+  # producer droplet's agent; needs only the shared NOVA_AGENT_SECRET.
+  nova-agent:
+    image: ghcr.io/pyrax-network/pyrax-nova-agent:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      NOVA_URL: https://status.pyraxchain.com
+      NOVA_AGENT_SECRET: ${NOVA_AGENT_SECRET:-}
+      NOVA_DROPLET: websites
+      NOVA_SERVICES: "*"
+      NOVA_AGENT_REMEDIATION: ${NOVA_AGENT_REMEDIATION:-0}
+
 volumes:
   caddy_data:
   caddy_config:

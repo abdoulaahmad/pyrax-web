@@ -22,8 +22,8 @@ function view(): string {
   <section class="container-x pt-28 pb-10 sm:pt-32">
     <div class="mx-auto max-w-3xl text-center">
       <span class="chip">${icon("server", "h-3.5 w-3.5")} Run a node</span>
-      <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">Run a PYRAX node.</h1>
-      <p class="mt-5 text-lg leading-relaxed text-[var(--color-muted)]">
+      <h1 class="mt-5 t-h1">Run a PYRAX node.</h1>
+      <p class="mt-5 t-lead text-[var(--color-muted)]">
         Join a 100% decentralized network in minutes. Validate the chain, relay privately, mine three ways, and rent your GPU to NEURAX — from one app.
       </p>
       <div class="mt-7 flex flex-wrap justify-center gap-3">
@@ -50,8 +50,8 @@ function view(): string {
           <div class="flex gap-4">
             <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[color-mix(in_oklab,var(--color-brand)_18%,transparent)] font-bold text-[var(--color-brand-soft)]">${s.n}</span>
             <div>
-              <h3 class="text-lg font-semibold">${s.title}</h3>
-              <p class="mt-1 text-sm leading-relaxed text-[var(--color-muted)]">${s.body}</p>
+              <h3 class="t-h3">${s.title}</h3>
+              <p class="mt-1 t-body text-[var(--color-muted)]">${s.body}</p>
             </div>
           </div>
         </li>`,
@@ -65,13 +65,13 @@ function view(): string {
       ${NODE_REQS.map(
         (r) => `
         <article class="reveal card p-6">
-          <h3 class="text-lg font-semibold">${r.tier}</h3>
+          <h3 class="t-h3">${r.tier}</h3>
           <dl class="mt-4 space-y-2 text-sm">
             <div class="flex justify-between gap-3"><dt class="text-[var(--color-faint)]">CPU / GPU</dt><dd class="text-right font-medium">${r.cpu}</dd></div>
             <div class="flex justify-between gap-3"><dt class="text-[var(--color-faint)]">RAM</dt><dd class="font-medium">${r.ram}</dd></div>
             <div class="flex justify-between gap-3"><dt class="text-[var(--color-faint)]">Disk</dt><dd class="font-medium">${r.disk}</dd></div>
           </dl>
-          <p class="mt-4 text-xs leading-relaxed text-[var(--color-faint)]">${r.note}</p>
+          <p class="mt-4 t-small leading-relaxed text-[var(--color-faint)]">${r.note}</p>
         </article>`,
       ).join("")}
     </div>
@@ -79,7 +79,7 @@ function view(): string {
 
   <section class="container-x py-12">
     <div class="card grad-ring p-8 text-center sm:p-12">
-      <h2 class="text-2xl font-bold sm:text-3xl">Want to expose a public RPC?</h2>
+      <h2 class="t-h2">Want to expose a public RPC?</h2>
       <p class="mx-auto mt-3 max-w-xl text-[var(--color-muted)] leading-relaxed">
         Run a node on a small cloud droplet with <code>--rpc-bind 0.0.0.0 --rpc-cors</code> and it becomes a public, CORS-enabled gateway —
         the same kind of node that powers this status page. Anyone can run one; the chain doesn't depend on any single RPC.

@@ -32,8 +32,8 @@ import { icon, heading, featureCard, orbClass } from "../lib/ui.js";
 // countdown) · Genesis Sponsorship · NEURAX. ONE hero-aurora for the whole section; each slide
 // has one text-anim word. Slide 1 keeps the count-up stats (it's the visible-at-load slide).
 const SLIDES = 4;
-const titleCls = "hero-title mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl";
-const ledeCls = "hero-lede mt-6 max-w-xl text-lg leading-relaxed text-[var(--color-muted)]";
+const titleCls = "hero-title mt-5 t-h1";
+const ledeCls = "hero-lede mt-6 max-w-xl t-lead text-[var(--color-muted)]";
 const slideWrap = (n: number, label: string, inner: string) => `
   <div data-slide role="group" aria-roledescription="slide" aria-label="${n} of ${SLIDES}: ${label}" class="carousel-slide${n === 1 ? " is-active" : ""}" aria-hidden="${n === 1 ? "false" : "true"}">
     <div class="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">${inner}</div>
@@ -117,7 +117,7 @@ const slideDevnet = slideWrap(
             )
             .join("")}
         </div>
-        <p class="mt-5 text-sm leading-relaxed text-[var(--color-muted)]">Foundational pioneers run the network on day one. No coding — just a standard home computer.</p>
+        <p class="mt-5 t-body text-[var(--color-muted)]">Foundational pioneers run the network on day one. No coding — just a standard home computer.</p>
       </div>
     </div>`,
 );
@@ -144,7 +144,7 @@ const slideGenesis = slideWrap(
           <span class="genesis-num">#0</span>
           <span class="genesis-hash">0x0000…pyrax</span>
         </div>
-        <p class="mt-6 text-center text-sm leading-relaxed text-[var(--color-muted)]">Block zero is minted once. Be part of the network from its very first block.</p>
+        <p class="mt-6 text-center t-body text-[var(--color-muted)]">Block zero is minted once. Be part of the network from its very first block.</p>
       </div>
     </div>`,
 );
@@ -206,48 +206,70 @@ const live = `
 <section class="section container-x">
   <div class="reveal mx-auto max-w-2xl text-center">
     <span class="chip"><span class="h-1.5 w-1.5 rounded-full bg-[var(--color-positive)] animate-pulse-glow"></span> Live network</span>
-    <h2 class="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">See it running — <span class="brand-text">right now.</span></h2>
-    <p class="mt-4 text-lg leading-relaxed text-[var(--color-muted)]">
+    <h2 class="mt-4 t-h2">See it running — <span class="brand-text">right now.</span></h2>
+    <p class="mt-4 t-lead text-[var(--color-muted)]">
       Every number below is pulled live from a running PYRAX network — real block height, real connected peers, refreshed as each block is sealed. Nothing here is staged. Switch networks in the navbar to watch any of them.
     </p>
   </div>
   <div id="livestats" class="reveal mx-auto mt-10 max-w-5xl"></div>
 </section>`;
 
-// 3) THE PROBLEM — the connective beat the storyline was missing.
+// 3) THE PROBLEM — the connective beat, given the hero's visual language: a gradient
+// highlight headline, tone-varied icon orbs (fire / NEURAX-violet / blue — mirroring the
+// three answers below), an index numeral, a sharp "what it costs you" footer per card,
+// and a lead-note bridge into the answer.
 const PROBLEMS = [
   {
     t: "Pick two of three",
-    d: "Most chains force a trade-off: you can be fast, or private, or programmable — rarely all at once. So privacy gets bolted on later, or never.",
+    d: "Most chains force a trade-off: you can be fast, or private, or programmable — rarely all at once.",
+    cost: "So privacy gets bolted on last — or never.",
     icon: "scale",
+    tone: "brand",
   },
   {
     t: "AI is gatekept",
-    d: "The compute behind modern AI sits inside a handful of clouds. Access needs an account, pricing is set by the few, and your data leaves your machine.",
+    d: "The compute behind modern AI sits inside a handful of clouds. Access needs an account, and pricing is set by the few.",
+    cost: "And your data leaves your machine.",
     icon: "lock",
+    tone: "violet",
   },
   {
     t: "Your hardware idles",
-    d: "Millions of capable GPUs sit idle while people rent the same compute back at a markup. The value flows up, not out to the people who own the silicon.",
+    d: "Millions of capable GPUs sit idle while people rent the same compute back at a markup.",
+    cost: "The value flows up — not to the people who own the silicon.",
     icon: "gpu",
+    tone: "bolt",
   },
 ];
 const problem = `
-<section class="section container-x">
-  ${heading(
-    "The problem",
-    "Fast, private, programmable — and AI you actually control. Today you get to pick maybe one.",
-    "Blockchains make you choose between speed, privacy and real programmability. And the compute powering AI is locked behind a few companies. PYRAX was built to refuse both compromises at once.",
-  )}
-  <div class="mt-12 grid gap-5 sm:grid-cols-3">
-    ${PROBLEMS.map(
-      (p) => `
-      <div class="reveal card p-6">
-        <div class="${orbClass("bolt")} !h-11 !w-11">${icon(p.icon, "h-5 w-5")}</div>
-        <h3 class="mt-4 text-base font-semibold">${p.t}</h3>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${p.d}</p>
-      </div>`,
-    ).join("")}
+<section id="problem" class="section container-x relative overflow-hidden">
+  <div class="pointer-events-none absolute inset-x-0 -top-10 mx-auto h-72 max-w-3xl" aria-hidden="true"
+       style="background:radial-gradient(40rem 18rem at 50% 0%, color-mix(in oklab, var(--color-ember) 12%, transparent), transparent 70%);"></div>
+  <div class="relative">
+    ${heading(
+      `${icon("scale", "h-3.5 w-3.5")} The problem`,
+      `Fast, private, programmable — and <span class="brand-text">AI you actually control.</span>`,
+      `Today you get to pick maybe one. Blockchains make you choose between speed, privacy and real programmability — and the compute powering AI is locked behind a few companies. <span class="font-medium text-[var(--color-ink)]">PYRAX was built to refuse both compromises at once.</span>`,
+    )}
+    <div class="mt-14 grid gap-5 md:grid-cols-3">
+      ${PROBLEMS.map(
+        (p, i) => `
+        <article class="reveal card card-hover group relative flex flex-col p-7">
+          <div class="flex items-start justify-between">
+            <div class="${orbClass(p.tone)} !h-12 !w-12">${icon(p.icon, "h-6 w-6")}</div>
+            <span class="font-display text-4xl font-extrabold leading-none text-[var(--color-line)] transition-colors group-hover:text-[var(--color-brand-soft)]">0${i + 1}</span>
+          </div>
+          <h3 class="mt-5 t-h3">${p.t}</h3>
+          <p class="mt-2 t-body text-[var(--color-muted)]">${p.d}</p>
+          <div class="mt-auto flex items-start gap-2 border-t border-[var(--color-line-soft)] pt-4 text-xs font-semibold leading-relaxed text-[var(--color-faint)]">
+            ${icon("close", "mt-0.5 h-3.5 w-3.5 flex-none text-[var(--color-negative)]")}<span>${p.cost}</span>
+          </div>
+        </article>`,
+      ).join("")}
+    </div>
+    <p class="reveal lead-note mx-auto mt-12 max-w-3xl text-base">
+      PYRAX refuses the trade-off: a shielded-by-default Layer-1 that's fast <span class="font-semibold text-[var(--color-ink)]">and</span> programmable, with a built-in marketplace that turns the world's idle GPUs into the compute behind AI — owned by the people who run it. <a href="#answer" class="font-semibold text-[var(--color-brand-soft)] link-underline">See how PYRAX answers ${icon("arrow", "inline h-3.5 w-3.5")}</a>
+    </p>
   </div>
 </section>`;
 
@@ -279,7 +301,7 @@ const ANSWER = [
   },
 ];
 const pillars = `
-<section class="section container-x">
+<section id="answer" class="section container-x scroll-mt-24">
   ${heading(
     "PYRAX's answer",
     "Money, apps, privacy — and a real AI compute network",
@@ -290,8 +312,8 @@ const pillars = `
       (c) => `
       <a href="${c.href}" class="reveal card card-hover group block p-7">
         <div class="${orbClass(c.tone)} !h-12 !w-12">${icon(c.icon, "h-6 w-6")}</div>
-        <h3 class="mt-5 text-xl font-bold">${c.t}</h3>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${c.d}</p>
+        <h3 class="mt-5 t-h3">${c.t}</h3>
+        <p class="mt-2 t-body text-[var(--color-muted)]">${c.d}</p>
         <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-brand-soft)]">${c.cta} ${icon("arrow", "h-4 w-4")}</span>
       </a>`,
     ).join("")}
@@ -355,7 +377,7 @@ const statusBanner = `
       <span class="icon-orb !h-10 !w-10 shrink-0">${icon("shield", "h-5 w-5")}</span>
       <div>
         <div class="text-sm font-semibold text-[var(--color-ink)]">Built and tested — honestly, audit-gated</div>
-        <p class="mt-0.5 text-sm leading-relaxed text-[var(--color-muted)]">An enormous amount is already built and tested on our internal networks. The privacy layer must clear an <strong class="text-[var(--color-ink)]">external ZK audit before it protects real money on mainnet</strong> — and we never commit dates or predict price.</p>
+        <p class="mt-0.5 t-body text-[var(--color-muted)]">An enormous amount is already built and tested on our internal networks. The privacy layer must clear an <strong class="text-[var(--color-ink)]">external ZK audit before it protects real money on mainnet</strong> — and we never commit dates or predict price.</p>
       </div>
     </div>
     <div class="flex shrink-0 gap-2">
@@ -445,7 +467,7 @@ const token = `
   <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
     <div class="reveal">
       <span class="chip">PYRX · utility token</span>
-      <h2 class="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">A fair-launch coin you <span class="brand-text">use</span>, not a stake you hold.</h2>
+      <h2 class="mt-4 t-h2">A fair-launch coin you <span class="brand-text">use</span>, not a stake you hold.</h2>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
         PYRX is the fuel of the network — gas for transactions, payment for AI compute, and the stake that secures the chain. A hard 50-billion cap, capped mining, and a fee burn keep supply disciplined and bounded forever.
       </p>
@@ -484,8 +506,8 @@ const whyAi = `
       (w, i) => `
       <div class="reveal card p-6">
         <div class="text-3xl font-extrabold brand-text">${String(i + 1).padStart(2, "0")}</div>
-        <h3 class="mt-3 text-base font-semibold">${w.title}</h3>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${w.desc}</p>
+        <h3 class="mt-3 t-h3">${w.title}</h3>
+        <p class="mt-2 t-body text-[var(--color-muted)]">${w.desc}</p>
       </div>`,
     ).join("")}
   </div>
@@ -508,8 +530,8 @@ const ecosystemTeaser = `
           <span class="${orbClass(e.kind === "Service" ? "bolt" : e.kind === "Tooling" ? "violet" : "brand")}">${icon(e.icon, "h-5 w-5")}</span>
           <span class="chip !px-2 !py-0.5 !text-[0.6rem]">${e.kind}</span>
         </div>
-        <h3 class="mt-4 text-base font-semibold">${e.name}</h3>
-        <p class="mt-2 flex-1 text-sm leading-relaxed text-[var(--color-muted)]">${e.desc}</p>
+        <h3 class="mt-4 t-h3">${e.name}</h3>
+        <p class="mt-2 flex-1 t-body text-[var(--color-muted)]">${e.desc}</p>
       </a>`,
       )
       .join("")}
@@ -525,7 +547,7 @@ const cta = `
     <div class="absolute -inset-x-10 -top-24 h-48 blur-3xl" aria-hidden="true" style="background: radial-gradient(closest-side, color-mix(in oklab, var(--color-brand) 35%, transparent), transparent);"></div>
     <div class="relative reveal">
       <span class="chip">Be early</span>
-      <h2 class="mx-auto mt-4 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">Join the waitlist for launch, the node app & NEURAX access</h2>
+      <h2 class="mx-auto mt-4 max-w-2xl t-h2">Join the waitlist for launch, the node app & NEURAX access</h2>
       <p class="mx-auto mt-4 max-w-xl text-[var(--color-muted)]">No spam, no price promises — just real updates as we approach mainnet and open NEURAX.</p>
       <div class="mt-7">${waitlistForm()}</div>
     </div>

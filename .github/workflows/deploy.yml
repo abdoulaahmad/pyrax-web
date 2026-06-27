@@ -111,11 +111,17 @@ jobs:
           # Shared HMAC secret between the tunnel relay's /__admin plane and team-pyrax's
           # node-control (kill-switch) page. Set this org/repo secret to a random value.
           PYRAX_TUNNEL_ADMIN_SECRET: ${{ secrets.PYRAX_TUNNEL_ADMIN_SECRET }}
+          # NOVA log-shipper + remediation agent on this droplet. NOVA_AGENT_SECRET MUST equal
+          # the one set on the NOVA backend + producer droplet (else the agent exits + crash-
+          # loops). NOVA_AGENT_REMEDIATION is an opt-in repo VARIABLE (0/1, default 0 = ship
+          # logs only); set the repo variable to 1 to let NOVA auto-restart stateless containers.
+          NOVA_AGENT_SECRET: ${{ secrets.NOVA_AGENT_SECRET }}
+          NOVA_AGENT_REMEDIATION: ${{ vars.NOVA_AGENT_REMEDIATION }}
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
-          envs: PYRAX_DIRECTORY_SECRET,SESSION_SECRET,BREVO_API_KEY,SPACES_KEY,SPACES_SECRET,DATABASE_URL_TEAM_PYRAX,DATABASE_URL_EXPLORER,GHCR_PULL_TOKEN,GHCR_USER,PYRAX_RELAY_SECRET,PYRAX_KEY_PASSPHRASE,CLOUDFLARE_DNS_TOKEN,PYRAX_TUNNEL_ADMIN_SECRET
+          envs: PYRAX_DIRECTORY_SECRET,SESSION_SECRET,BREVO_API_KEY,SPACES_KEY,SPACES_SECRET,DATABASE_URL_TEAM_PYRAX,DATABASE_URL_EXPLORER,GHCR_PULL_TOKEN,GHCR_USER,PYRAX_RELAY_SECRET,PYRAX_KEY_PASSPHRASE,CLOUDFLARE_DNS_TOKEN,PYRAX_TUNNEL_ADMIN_SECRET,NOVA_AGENT_SECRET,NOVA_AGENT_REMEDIATION
           script: |
             set -euo pipefail
             cd /opt/pyrax-web
@@ -141,6 +147,11 @@ jobs:
               # (shared with team-pyrax, which reads it from this same .env).
               printf 'CLOUDFLARE_DNS_TOKEN=%s\n' "${CLOUDFLARE_DNS_TOKEN:-}"
               printf 'PYRAX_TUNNEL_ADMIN_SECRET=%s\n' "${PYRAX_TUNNEL_ADMIN_SECRET:-}"
+              # NOVA agent: the shared bearer (MUST match the NOVA backend) + the opt-in
+              # auto-restart toggle (default 0 = ship logs only). Empty secret -> the agent
+              # idles? no — it exits; so this MUST be set (see the deploy runbook).
+              printf 'NOVA_AGENT_SECRET=%s\n' "${NOVA_AGENT_SECRET:-}"
+              printf 'NOVA_AGENT_REMEDIATION=%s\n' "${NOVA_AGENT_REMEDIATION:-0}"
             } > .env
             # Authenticate to private GHCR via stdin, roll out, then drop the cached credential so no
             # registry token is left at rest on the droplet.

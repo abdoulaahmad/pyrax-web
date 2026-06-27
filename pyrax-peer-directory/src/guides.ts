@@ -17,7 +17,7 @@ function esc(s: string): string {
 function renderBlock(b: GuideBlock): string {
   switch (b.type) {
     case "prose":
-      return `<p class="mt-4 text-sm sm:text-[15px] leading-relaxed text-muted break-words [overflow-wrap:anywhere]">${esc(b.text ?? "")}</p>`;
+      return `<p class="mt-4 t-body text-muted break-words [overflow-wrap:anywhere]">${esc(b.text ?? "")}</p>`;
     case "callout": {
       const tone =
         b.tone === "warn"
@@ -25,14 +25,14 @@ function renderBlock(b: GuideBlock): string {
           : b.tone === "tip"
             ? { accent: "border-positive", icon: "✦", ic: "text-positive" }
             : { accent: "border-bolt", icon: "ℹ", ic: "text-bolt" };
-      return `<div class="mt-5 flex gap-3 rounded-xl border border-line border-l-2 ${tone.accent} bg-elevated/50 px-4 py-3 text-sm leading-relaxed">
+      return `<div class="mt-5 flex gap-3 rounded-xl border border-line border-l-2 ${tone.accent} bg-elevated/50 px-4 py-3 t-body">
         <span class="${tone.ic} font-bold shrink-0">${tone.icon}</span><span class="text-muted">${esc(b.text ?? "")}</span></div>`;
     }
     case "list":
       return `<ul class="mt-4 space-y-2.5">${(b.items ?? [])
         .map(
           (it) =>
-            `<li class="flex gap-3 text-sm leading-relaxed text-muted"><span class="mt-2 size-1.5 shrink-0 rounded-full bg-brand"></span><span class="min-w-0 break-words [overflow-wrap:anywhere]">${esc(it.text ?? it.body ?? "")}</span></li>`,
+            `<li class="flex gap-3 t-body text-muted"><span class="mt-2 size-1.5 shrink-0 rounded-full bg-brand"></span><span class="min-w-0 break-words [overflow-wrap:anywhere]">${esc(it.text ?? it.body ?? "")}</span></li>`,
         )
         .join("")}</ul>`;
     case "steps":
@@ -41,7 +41,7 @@ function renderBlock(b: GuideBlock): string {
           (it, i) =>
             `<li class="card rounded-xl p-4 flex gap-4">
                <span class="grid size-7 shrink-0 place-items-center rounded-full bg-brand/15 text-brand text-sm font-bold">${i + 1}</span>
-               <div class="text-sm leading-relaxed min-w-0 break-words [overflow-wrap:anywhere]">
+               <div class="t-body min-w-0 break-words [overflow-wrap:anywhere]">
                  ${it.title ? `<p class="text-ink font-semibold">${esc(it.title)}</p>` : ""}
                  <p class="text-muted ${it.title ? "mt-1" : ""}">${esc(it.body ?? it.text ?? "")}</p>
                </div>
@@ -82,12 +82,12 @@ function renderBlock(b: GuideBlock): string {
 function renderGuide(g: Guide): string {
   return `
     <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand">${esc(g.eyebrow)}</p>
-    <h1 class="mt-2 text-3xl sm:text-4xl font-black tracking-tight">${esc(g.title)}</h1>
-    <p class="mt-3 text-base leading-relaxed text-muted">${esc(g.summary)}</p>
+    <h1 class="mt-2 t-h1">${esc(g.title)}</h1>
+    <p class="mt-3 t-lead text-muted">${esc(g.summary)}</p>
     ${g.sections
       .map(
         (s) => `<section class="mt-9 sm:mt-10">
-          <h2 class="text-lg sm:text-xl font-bold tracking-tight">${esc(s.heading)}</h2>
+          <h2 class="t-h3 tracking-tight">${esc(s.heading)}</h2>
           ${s.blocks.map(renderBlock).join("")}
         </section>`,
       )

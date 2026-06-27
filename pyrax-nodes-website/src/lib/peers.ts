@@ -55,8 +55,8 @@ export function mountPeers(el: HTMLElement): void {
         <div class="flex items-center gap-3">
           <span class="icon-orb !h-10 !w-10">${icon("globe", "h-5 w-5")}</span>
           <div>
-            <div class="text-lg font-semibold">Live peers</div>
-            <div class="text-sm text-[var(--color-muted)]" data-peers-sub>discovering peers…</div>
+            <div class="t-h3">Live peers</div>
+            <div class="t-body text-[var(--color-muted)]" data-peers-sub>discovering peers…</div>
           </div>
         </div>
         <div class="text-right">
@@ -65,7 +65,7 @@ export function mountPeers(el: HTMLElement): void {
         </div>
       </div>
       <div class="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4" data-peers-grid></div>
-      <p class="mt-5 text-xs leading-relaxed text-[var(--color-faint)]">
+      <p class="mt-5 t-small leading-relaxed text-[var(--color-faint)]">
         The peer directory is an optional discovery convenience — it aggregates nodes that announce themselves so apps can find peers fast.
         Nodes also find each other directly via mDNS, the Kademlia DHT, and signed seed lists, so the network keeps running even if this list is empty.
       </p>

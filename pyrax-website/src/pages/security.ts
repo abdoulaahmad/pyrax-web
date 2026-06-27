@@ -21,8 +21,8 @@ const hero = `
   <div class="absolute inset-0 grid-bg opacity-50" aria-hidden="true"></div>
   <div class="container-x relative max-w-3xl reveal">
     <span class="chip">Security &amp; audits</span>
-    <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">We earn trust by being <span class="bolt-text text-anim">honest</span> about the gate.</h1>
-    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-muted)]">Real privacy, real adversarial review, and one non-negotiable rule. We would rather ship slowly and tell you exactly what is and isn't proven than make a promise the cryptography hasn't earned yet.</p>
+    <h1 class="mt-5 t-h1">We earn trust by being <span class="bolt-text text-anim">honest</span> about the gate.</h1>
+    <p class="mt-5 max-w-2xl t-lead text-[var(--color-muted)]">Real privacy, real adversarial review, and one non-negotiable rule. We would rather ship slowly and tell you exactly what is and isn't proven than make a promise the cryptography hasn't earned yet.</p>
   </div>
 </section>`;
 
@@ -41,7 +41,7 @@ const proof = `
   <div class="reveal grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
     <div>
       <span class="chip">Proof, not promises</span>
-      <h2 class="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Adversarial review that has actually <span class="bolt-text">caught bugs</span>.</h2>
+      <h2 class="mt-4 t-h2">Adversarial review that has actually <span class="bolt-text">caught bugs</span>.</h2>
       <p class="mt-4 leading-relaxed text-[var(--color-muted)]">
         Every subsystem gets independent red-team passes — the point is to break it before an attacker does. That work isn't decorative: it has already found and fixed serious issues that would have been catastrophic on a live chain. Two of them are worth naming, because concrete beats reassuring.
       </p>
@@ -51,14 +51,14 @@ const proof = `
         <span class="icon-orb icon-orb-bolt shrink-0 !h-10 !w-10">${icon("shield", "h-5 w-5")}</span>
         <div class="min-w-0">
           <div class="text-sm font-semibold text-[var(--color-ink)]">Critical · fork-choice bypass</div>
-          <p class="mt-1 text-sm leading-relaxed text-[var(--color-muted)]">A flaw that could have let an attacker steer block ordering — found and fixed before it ever touched a real network.</p>
+          <p class="mt-1 t-body text-[var(--color-muted)]">A flaw that could have let an attacker steer block ordering — found and fixed before it ever touched a real network.</p>
         </div>
       </div>
       <div class="card flex items-start gap-3 p-5">
         <span class="icon-orb icon-orb-bolt shrink-0 !h-10 !w-10">${icon("lock", "h-5 w-5")}</span>
         <div class="min-w-0">
           <div class="text-sm font-semibold text-[var(--color-ink)]">High · prover overflow</div>
-          <p class="mt-1 text-sm leading-relaxed text-[var(--color-muted)]">An overflow in the proving path that adversarial testing surfaced and closed — exactly the class of bug the external ZK audit exists to gate against.</p>
+          <p class="mt-1 t-body text-[var(--color-muted)]">An overflow in the proving path that adversarial testing surfaced and closed — exactly the class of bug the external ZK audit exists to gate against.</p>
         </div>
       </div>
     </div>
@@ -96,7 +96,7 @@ const path = `
       <div class="relative">
         <div class="max-w-2xl">
           <span class="chip">The mainnet gate</span>
-          <h2 class="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">The ordered path to genesis</h2>
+          <h2 class="mt-4 t-h2">The ordered path to genesis</h2>
           <p class="mt-3 leading-relaxed text-[var(--color-muted)]">Each step gates the next, and nothing skips the line — follow it down to genesis. There is no committed date — genesis happens when this is done, not before.</p>
         </div>
         <ol class="flow-rail mt-9 max-w-xl">
@@ -111,7 +111,7 @@ const path = `
             </li>`,
           ).join("")}
         </ol>
-        <p class="mt-9 max-w-2xl border-t border-[var(--color-line)] pt-6 text-sm leading-relaxed text-[var(--color-muted)]">
+        <p class="mt-9 max-w-2xl border-t border-[var(--color-line)] pt-6 t-body text-[var(--color-muted)]">
           Why the order matters: an audit is only as good as the code it reviews, a testnet only finds what real users hit, and a bounty only works on a system that's already hard to break. Front-loading the easy steps would just move risk to where it costs the most — your money.
         </p>
       </div>

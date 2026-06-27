@@ -67,6 +67,17 @@ a { color: inherit; text-decoration: none; }
 ::selection { background: color-mix(in oklab, var(--color-brand) 40%, transparent); color: var(--color-ink); }
 :focus-visible { outline: 2px solid var(--color-bolt-bright); outline-offset: 2px; border-radius: 4px; }
 
+/* ---- canonical PYRAX type scale ------------------------------------------
+ * Shared 1:1 with the marketing site / peer-directory / explorer family so
+ * headers + body copy are the same sizes everywhere. Typography only (no color).
+ * team-pyrax is self-contained, so it carries its own copy of these. */
+@utility t-h1 { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; font-size: clamp(2.25rem, 1.35rem + 4.2vw, 3.75rem); }
+@utility t-h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.02em; line-height: 1.12; font-size: clamp(1.875rem, 1.55rem + 1.55vw, 2.25rem); }
+@utility t-h3 { font-weight: 600; line-height: 1.4; font-size: 1.125rem; }
+@utility t-lead { line-height: 1.7; font-size: 1.125rem; }
+@utility t-body { line-height: 1.65; font-size: 0.875rem; }
+@utility t-small { line-height: 1.5; font-size: 0.75rem; }
+
 /* ---- layout + brand utilities -------------------------------------------- */
 @utility container-x {
   width: 100%;

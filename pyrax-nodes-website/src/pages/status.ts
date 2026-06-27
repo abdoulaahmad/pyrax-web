@@ -40,8 +40,8 @@ function view(): string {
   <section class="container-x pt-28 pb-10 sm:pt-32">
     <div class="mx-auto max-w-3xl text-center">
       <span class="chip">Network status · live</span>
-      <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">The PYRAX network, live.</h1>
-      <p class="mt-5 text-lg leading-relaxed text-[var(--color-muted)]">
+      <h1 class="mt-5 t-h1">The PYRAX network, live.</h1>
+      <p class="mt-5 t-lead text-[var(--color-muted)]">
         Real block height, connected peers, and throughput — polled straight from a running node's JSON-RPC.
         Switch networks in the selector; the numbers below follow your choice.
       </p>
@@ -66,7 +66,7 @@ function view(): string {
       <div class="relative grid items-center gap-8 lg:grid-cols-[1.4fr_1fr]">
         <div>
           <span class="chip">${icon("server", "h-3.5 w-3.5")} Join the network</span>
-          <h2 class="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Run a PYRAX node</h2>
+          <h2 class="mt-4 t-h2">Run a PYRAX node</h2>
           <p class="mt-4 max-w-xl text-[var(--color-muted)] leading-relaxed">
             A node validates the chain, relays privately, and can mine across three streams to earn PYRX.
             It finds peers on its own — no port-forwarding required.

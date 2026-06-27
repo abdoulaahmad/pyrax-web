@@ -25,8 +25,8 @@ const hero = `
   <div class="absolute inset-0 grid-bg opacity-50"></div>
   <div class="container-x relative max-w-3xl reveal">
     <span class="chip">The base layer</span>
-    <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">A <span class="brand-text text-anim">GhostDAG</span> Layer-1, private by default.</h1>
-    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-muted)]">PYRAX is its own base network: a blockDAG that orders parallel work fairly, three mining streams that secure it together, shielded-by-default transactions, three contract VMs, and an onion-routed, bootstrapless mesh underneath. Here's how each piece actually works.</p>
+    <h1 class="mt-5 t-h1">A <span class="brand-text text-anim">GhostDAG</span> Layer-1, private by default.</h1>
+    <p class="mt-5 max-w-2xl t-lead text-[var(--color-muted)]">PYRAX is its own base network: a blockDAG that orders parallel work fairly, three mining streams that secure it together, shielded-by-default transactions, three contract VMs, and an onion-routed, bootstrapless mesh underneath. Here's how each piece actually works.</p>
     <div class="mt-7 flex flex-wrap gap-3">
       <a href="/architecture.html" class="btn btn-primary">Architecture deep-dive ${icon("arrow", "h-4 w-4")}</a>
       <a href="/security.html" class="btn btn-ghost">Security & audits</a>
@@ -101,7 +101,7 @@ const ghostdag = `
   <div class="grid gap-10 lg:grid-cols-2 lg:items-start">
     <div class="reveal">
       <span class="chip">GhostDAG · consensus</span>
-      <h2 class="mt-4 text-3xl font-bold tracking-tight">Many lanes, ordered into one fair history.</h2>
+      <h2 class="mt-4 t-h2">Many lanes, ordered into one fair history.</h2>
       <p class="mt-4 leading-relaxed text-[var(--color-muted)]">Blocks form a <strong class="text-[var(--color-ink)]">DAG, not a single-file chain</strong>. GhostDAG picks a well-connected <strong class="text-[var(--color-ink)]">"blue set"</strong> of blocks using a k-cluster rule, then topologically orders the whole graph — so honestly-produced parallel blocks are <strong class="text-[var(--color-ink)]">included, not orphaned</strong>. Each block's <code class="text-[var(--color-muted)]">parents[0]</code> is its selected parent.</p>
       <p class="mt-3 leading-relaxed text-[var(--color-muted)]"><strong class="text-[var(--color-ink)]">blue_score</strong> counts the blue blocks in a block's past; <strong class="text-[var(--color-ink)]">blue_work</strong> accumulates their proof-of-work. Fork choice is the <strong class="text-[var(--color-ink)]">heaviest blue work, constrained by finality</strong> — so a peer can never forge fork-choice weight, even on a parentless block.</p>
     </div>
@@ -117,7 +117,7 @@ const ghostdag = `
   </div>
   <div class="reveal mt-6 flex items-start gap-3 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
     ${icon("pulse", "h-5 w-5 text-[var(--color-brand-soft)] shrink-0")}
-    <p class="text-sm leading-relaxed text-[var(--color-muted)]"><strong class="text-[var(--color-ink)]">Honesty on the number:</strong> 500k <em>sustained</em> is beyond every production chain today. It's an <strong class="text-[var(--color-ink)]">aggregate</strong> goal realized progressively (DAG parallelism + parallel execution + L2/L3 rollups), with a high L1 floor — and it's <strong class="text-[var(--color-ink)]">gated by <code>pyrax-bench</code></strong>. We publish the methodology and never quote a number we can't reproduce.</p>
+    <p class="t-body text-[var(--color-muted)]"><strong class="text-[var(--color-ink)]">Honesty on the number:</strong> 500k <em>sustained</em> is beyond every production chain today. It's an <strong class="text-[var(--color-ink)]">aggregate</strong> goal realized progressively (DAG parallelism + parallel execution + L2/L3 rollups), with a high L1 floor — and it's <strong class="text-[var(--color-ink)]">gated by <code>pyrax-bench</code></strong>. We publish the methodology and never quote a number we can't reproduce.</p>
   </div>
 </section>`;
 
@@ -169,7 +169,7 @@ const tristream = `
         (s) => `
       <article class="reveal card p-6">
         <div class="${orbClass("brand")}">${icon(s.icon, "h-5 w-5")}</div>
-        <h3 class="mt-4 text-lg font-semibold">${s.name}</h3>
+        <h3 class="mt-4 t-h3">${s.name}</h3>
         <p class="mt-2 text-sm font-medium text-[var(--color-brand-soft)]">${s.algo}</p>
         ${specs(s.rows)}
       </article>`,
@@ -179,13 +179,13 @@ const tristream = `
   <div class="reveal mt-6 grid gap-4 sm:grid-cols-2">
     <div class="card p-6">
       <div class="${orbClass("bolt")}">${icon("stake", "h-5 w-5")}</div>
-      <h3 class="mt-4 text-base font-semibold">PoS finality (Stream C)</h3>
-      <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">Validators vote with <strong class="text-[var(--color-ink)]">BLS-aggregated</strong> signatures; a block is final once a <strong class="text-[var(--color-ink)]">>2/3</strong> majority signs it. Conflicting votes are <strong class="text-[var(--color-ink)]">slashable equivocation</strong>. Finality constrains fork choice, so a finalized prefix can't be reorged.</p>
+      <h3 class="mt-4 t-h3">PoS finality (Stream C)</h3>
+      <p class="mt-2 t-body text-[var(--color-muted)]">Validators vote with <strong class="text-[var(--color-ink)]">BLS-aggregated</strong> signatures; a block is final once a <strong class="text-[var(--color-ink)]">>2/3</strong> majority signs it. Conflicting votes are <strong class="text-[var(--color-ink)]">slashable equivocation</strong>. Finality constrains fork choice, so a finalized prefix can't be reorged.</p>
     </div>
     <div class="card p-6">
       <div class="${orbClass("brand")}">${icon("streams", "h-5 w-5")}</div>
-      <h3 class="mt-4 text-base font-semibold">Even reward split</h3>
-      <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">Each block's reward is split <strong class="text-[var(--color-ink)]">one-third to each stream</strong> — so ASIC owners, GPU/CPU miners and stakers all have a real place. (See the <a href="/token.html#emissions" class="font-semibold text-[var(--color-brand-soft)]">emissions schedule</a> for the per-block numbers.)</p>
+      <h3 class="mt-4 t-h3">Even reward split</h3>
+      <p class="mt-2 t-body text-[var(--color-muted)]">Each block's reward is split <strong class="text-[var(--color-ink)]">one-third to each stream</strong> — so ASIC owners, GPU/CPU miners and stakers all have a real place. (See the <a href="/token.html#emissions" class="font-semibold text-[var(--color-brand-soft)]">emissions schedule</a> for the per-block numbers.)</p>
     </div>
   </div>
 </section>`;
@@ -197,7 +197,7 @@ const privacy = `
     ${heading("Shielded by default", "Sender, receiver and amount — hidden by the math", "The default transaction is private, using zero-knowledge proofs with no trusted setup. Transparent transactions exist when you explicitly want them.")}
     <div class="mt-12 grid gap-8 lg:grid-cols-2 lg:items-start">
       <div class="reveal">
-        <h3 class="text-xl font-bold">How a shielded transfer proves itself</h3>
+        <h3 class="t-h3">How a shielded transfer proves itself</h3>
         <p class="mt-3 leading-relaxed text-[var(--color-muted)]">State is a growing <strong class="text-[var(--color-ink)]">note-commitment Merkle tree</strong> plus a <strong class="text-[var(--color-ink)]">nullifier set</strong>. A shielded transfer carries a single ZK proof that — without revealing anything — settles four claims in order:</p>
         <div class="flow-rail mt-5">
           ${[
@@ -241,7 +241,7 @@ const mesh = `
   ${heading("ISP-resistant networking", "No central boot server. No off-switch.", "Nodes find each other through several decentralized methods, and file/media sharing rides an onion-routed mixnet — so an ISP sees that encrypted traffic moves, but not what it is or who's talking.")}
   <div class="mt-12 grid gap-8 lg:grid-cols-2 lg:items-start">
     <div class="reveal">
-      <h3 class="text-xl font-bold">Onion mixnet</h3>
+      <h3 class="t-h3">Onion mixnet</h3>
       <p class="mt-3 leading-relaxed text-[var(--color-muted)]">Real <strong class="text-[var(--color-ink)]">Sphinx</strong> packets over the Ristretto group: each relay learns only the <strong class="text-[var(--color-ink)]">next hop</strong>, packets are <strong class="text-[var(--color-ink)]">unlinkable across hops</strong>, and <strong class="text-[var(--color-ink)]">cover traffic is indistinguishable on the wire</strong> from real traffic. A <code class="text-[var(--color-muted)]">MixPolicy</code> of Off / OptIn / AlwaysOn controls participation.</p>
       <div class="mt-5 flex flex-wrap items-center gap-x-1 gap-y-2" role="img" aria-label="Onion path: you to relay to relay to destination, each hop learns only the next hop">
         ${[
@@ -269,7 +269,7 @@ const mesh = `
       ])}
     </div>
     <div class="reveal">
-      <h3 class="text-xl font-bold">Bootstrapless discovery</h3>
+      <h3 class="t-h3">Bootstrapless discovery</h3>
       <p class="mt-3 leading-relaxed text-[var(--color-muted)]">There's <strong class="text-[var(--color-ink)]">no project-operated bootstrap server</strong> to seize or shut down. Nodes discover peers through mDNS on the LAN, a Kademlia DHT random-walk, peer-exchange, a signed community-maintained seed list, and DHT rendezvous.</p>
       ${specs([
         ["Discovery", "mDNS · Kademlia DHT · peer-exchange · signed seed list · rendezvous"],

@@ -68,7 +68,7 @@ function contentHtml(slug: string): string {
   return `
     <div class="doc">
       <div class="text-xs font-semibold uppercase tracking-wider text-[var(--color-brand-soft)]">${esc(category)}</div>
-      <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">${esc(page.title)}</h1>
+      <h1 class="mt-2 t-h1">${esc(page.title)}</h1>
       <div class="mt-6">${page.blocks.map(renderBlock).join("")}</div>
     </div>`;
 }
@@ -82,7 +82,7 @@ const shell = `
     <div class="mt-5 font-display text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
       Build on <span class="brand-text text-anim">PYRAX</span>
     </div>
-    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-muted)]">
+    <p class="mt-5 max-w-2xl t-lead text-[var(--color-muted)]">
       Everything you need to run a node, connect your tooling, deploy across three contract VMs, and reach the network over standard RPC. Pick a topic from the sidebar — the guides flow from first principles to reference.
     </p>
   </div>

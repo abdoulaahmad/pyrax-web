@@ -19,11 +19,11 @@ const group = (title: string, tone: string, items: Item[]) => `
   <div class="reveal">
     <div class="flex items-center gap-2.5">
       <span class="h-2.5 w-2.5 rounded-full" style="background:${tone}; box-shadow:0 0 12px ${tone}"></span>
-      <h3 class="text-lg font-bold tracking-tight">${title}</h3>
+      <h3 class="t-h3">${title}</h3>
       <span class="text-sm text-[var(--color-faint)]">${items.length}</span>
     </div>
     <div class="mt-4 space-y-3">
-      ${items.map((it) => `<div class="card p-5"><div class="text-sm font-semibold text-[var(--color-ink)]">${it.title}</div><p class="mt-1 text-sm leading-relaxed text-[var(--color-muted)]">${it.desc}</p></div>`).join("")}
+      ${items.map((it) => `<div class="card p-5"><div class="text-sm font-semibold text-[var(--color-ink)]">${it.title}</div><p class="mt-1 t-body text-[var(--color-muted)]">${it.desc}</p></div>`).join("")}
     </div>
   </div>`;
 
@@ -35,8 +35,8 @@ const hero = `
   <div class="absolute inset-0 grid-bg opacity-50"></div>
   <div class="container-x relative max-w-3xl reveal">
     <span class="chip"><span class="h-1.5 w-1.5 rounded-full bg-[var(--color-gold)]"></span> Pre-mainnet · built in the open</span>
-    <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">Built in the open, status-tracked <span class="brand-text text-anim">honestly</span>.</h1>
-    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-muted)]">An enormous amount is built and tested on our internal networks; the road to mainnet is hardening plus an external privacy/ZK audit. We <strong class="text-[var(--color-ink)]">don't commit dates</strong> and we don't make price predictions — here's exactly where things stand.</p>
+    <h1 class="mt-5 t-h1">Built in the open, status-tracked <span class="brand-text text-anim">honestly</span>.</h1>
+    <p class="mt-5 max-w-2xl t-lead text-[var(--color-muted)]">An enormous amount is built and tested on our internal networks; the road to mainnet is hardening plus an external privacy/ZK audit. We <strong class="text-[var(--color-ink)]">don't commit dates</strong> and we don't make price predictions — here's exactly where things stand.</p>
     <p class="lead-note mt-7 max-w-2xl text-sm sm:text-base">
       <strong class="text-[var(--color-ink)]">"Built in the open"</strong> means the hard parts already exist and run — the chain, the privacy layer, the three VMs, and the NEURAX substrate are coded and tested, not promised. What stands between here and a public mainnet is a single, ordered gate: <strong class="text-[var(--color-ink)]">hardening, then an independent external privacy/ZK audit</strong>. Until that clears, the privacy layer stays dev/testnet-grade and protects no real money.
     </p>
@@ -66,9 +66,9 @@ const neuraxCol = (title: string, tone: string, items: NeuraxItem[]) => `
   <div class="reveal">
     <div class="flex items-center gap-2.5">
       <span class="h-2.5 w-2.5 rounded-full" style="background:${tone}; box-shadow:0 0 12px ${tone}"></span>
-      <h3 class="text-base font-bold tracking-tight">${title}</h3>
+      <h3 class="t-h3">${title}</h3>
     </div>
-    <ul class="mt-3 space-y-1.5 text-sm leading-relaxed text-[var(--color-muted)]">
+    <ul class="mt-3 space-y-1.5 t-body text-[var(--color-muted)]">
       ${items.map((it) => `<li class="flex gap-2"><span class="mt-2 h-1 w-1 shrink-0 rounded-full" style="background:${tone}"></span><span>${it}</span></li>`).join("")}
     </ul>
   </div>`;
@@ -97,7 +97,7 @@ const neurax = `
     <div class="relative">
       <div class="reveal max-w-3xl">
         <span class="chip">NEURAX</span>
-        <h2 class="mt-4 text-2xl font-bold tracking-tight">NEURAX status — the substrate is live</h2>
+        <h2 class="mt-4 t-h2">NEURAX status — the substrate is live</h2>
         <p class="mt-3 leading-relaxed text-[var(--color-muted)]">The AI layer follows the same three honest states as the chain: what runs today, what's actively building, and what comes next.</p>
       </div>
       <div class="mt-8 grid gap-8 sm:grid-cols-3">
@@ -159,7 +159,7 @@ const gate = `
     <div class="relative">
       <div class="reveal mx-auto max-w-2xl text-center">
         <div class="icon-orb mx-auto !h-14 !w-14">${icon("shield", "h-7 w-7")}</div>
-        <h2 class="mt-5 text-2xl font-bold tracking-tight">The mainnet gate</h2>
+        <h2 class="mt-5 t-h2">The mainnet gate</h2>
         <p class="mt-3 leading-relaxed text-[var(--color-muted)]">Mainnet genesis is not a date — it's the end of an ordered gate. Each step below must clear before the next begins, and the privacy layer stays dev/testnet-grade until the external ZK-security audit passes. <strong class="text-[var(--color-ink)]">No date is committed anywhere.</strong></p>
       </div>
       <div class="flow-rail mx-auto mt-10 max-w-2xl">

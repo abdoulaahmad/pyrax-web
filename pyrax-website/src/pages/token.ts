@@ -28,8 +28,8 @@ const hero = `
   <div class="container-x relative grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
     <div class="reveal">
       <span class="chip">PYRX · utility token</span>
-      <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">A fair-launch coin you <span class="brand-text text-anim">use</span> — bounded forever.</h1>
-      <p class="mt-5 max-w-xl text-lg leading-relaxed text-[var(--color-muted)]">PYRX (18 decimals) has a hard 50-billion cap, capped halving mining, a usage-driven burn, and a high public float. It's the fuel of the network — not a stake in someone else's profit.</p>
+      <h1 class="mt-5 t-h1">A fair-launch coin you <span class="brand-text text-anim">use</span> — bounded forever.</h1>
+      <p class="mt-5 max-w-xl t-lead text-[var(--color-muted)]">PYRX (18 decimals) has a hard 50-billion cap, capped halving mining, a usage-driven burn, and a high public float. It's the fuel of the network — not a stake in someone else's profit.</p>
     </div>
     <div class="reveal relative mx-auto aspect-square w-56" data-parallax="0.08">
       <div class="absolute inset-4 rounded-full blur-2xl" aria-hidden="true" style="background: radial-gradient(closest-side, color-mix(in oklab, var(--color-gold) 45%, transparent), transparent 70%);"></div>
@@ -73,7 +73,7 @@ const supply = `
   </div>
   <div class="reveal mt-6 flex items-start gap-3 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
     ${icon("scale", "h-5 w-5 text-[var(--color-brand-soft)] shrink-0")}
-    <p class="text-sm leading-relaxed text-[var(--color-muted)]">We cut the planned max supply <strong class="text-[var(--color-ink)]">in half — from 100B to a hard, permanent 50B cap</strong>. The fair-launch shape didn't change (half still goes to the public at genesis); we simply shrank the whole pie, so each PYRX is a bigger slice of a smaller, fixed total. <em>This is about supply structure, not a price prediction — fewer total tokens does not automatically mean a higher price.</em></p>
+    <p class="t-body text-[var(--color-muted)]">We cut the planned max supply <strong class="text-[var(--color-ink)]">in half — from 100B to a hard, permanent 50B cap</strong>. The fair-launch shape didn't change (half still goes to the public at genesis); we simply shrank the whole pie, so each PYRX is a bigger slice of a smaller, fixed total. <em>This is about supply structure, not a price prediction — fewer total tokens does not automatically mean a higher price.</em></p>
   </div>
 </section>`;
 
@@ -85,8 +85,8 @@ const utility = `
       (u) => `
       <article class="reveal card p-6">
         <div class="${orbClass("bolt")}">${icon(u.icon, "h-5 w-5")}</div>
-        <h3 class="mt-4 text-base font-semibold">${u.title}</h3>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${u.desc}</p>
+        <h3 class="mt-4 t-h3">${u.title}</h3>
+        <p class="mt-2 t-body text-[var(--color-muted)]">${u.desc}</p>
       </article>`,
     ).join("")}
   </div>
@@ -127,8 +127,8 @@ const emissions = `
   <div class="mt-12 grid gap-10 lg:grid-cols-2">
     <div class="reveal">
       <span class="chip">Block rewards</span>
-      <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight">Capped, halving — then fees-only.</h2>
-      <ul class="mt-5 space-y-3 text-sm leading-relaxed text-[var(--color-muted)]">
+      <h2 class="mt-4 t-h2">Capped, halving — then fees-only.</h2>
+      <ul class="mt-5 space-y-3 t-body text-[var(--color-muted)]">
         ${[
           "<strong class='text-[var(--color-ink)]'>300 PYRX per block</strong> at start — roughly 100 to each of the three streams.",
           "<strong class='text-[var(--color-ink)]'>Halving every 21,000,000 blocks</strong> (~4 years at the ~6-second mainnet block time).",
@@ -141,7 +141,7 @@ const emissions = `
     </div>
     <div class="reveal">
       <span class="chip">Scarcity mechanics</span>
-      <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight">A supply that tightens with use.</h2>
+      <h2 class="mt-4 t-h2">A supply that tightens with use.</h2>
       <div class="mt-5 grid gap-3">
         ${[
           ["Hard 50B cap", "No infinite inflation — total supply is bounded forever."],
@@ -162,12 +162,12 @@ const fees = `
   <p class="reveal lead-note mx-auto mt-8 max-w-2xl text-sm sm:text-base">Read the base-fee split as the deflation engine: a full <strong class="text-[var(--color-ink)]">25% of every base fee is permanently burned</strong>, so the more the network is used, the more PYRX is destroyed. The tip simply pays the producer who did the work. Both ratios are frozen in consensus — no one can re-cut them later.</p>
   <div class="mt-10 grid gap-8 lg:grid-cols-2">
     <div class="reveal card p-7">
-      <div class="flex items-center gap-3"><span class="${orbClass("brand")}">${icon("flame", "h-5 w-5")}</span><h3 class="text-lg font-semibold">Base fee</h3></div>
+      <div class="flex items-center gap-3"><span class="${orbClass("brand")}">${icon("flame", "h-5 w-5")}</span><h3 class="t-h3">Base fee</h3></div>
       <p class="mt-2 text-sm text-[var(--color-muted)]">Burned + treasury + DAO.</p>
       <div class="mt-5">${bar(FEE_SPLIT.base)}</div>
     </div>
     <div class="reveal card p-7">
-      <div class="flex items-center gap-3"><span class="${orbClass("bolt")}">${icon("bolt", "h-5 w-5")}</span><h3 class="text-lg font-semibold">Priority tip</h3></div>
+      <div class="flex items-center gap-3"><span class="${orbClass("bolt")}">${icon("bolt", "h-5 w-5")}</span><h3 class="t-h3">Priority tip</h3></div>
       <p class="mt-2 text-sm text-[var(--color-muted)]">Rewards the block producer first.</p>
       <div class="mt-5">${bar(FEE_SPLIT.tip)}</div>
     </div>
@@ -201,7 +201,7 @@ const staking = `
   <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
     <div class="reveal">
       <span class="chip">Stream C · staking</span>
-      <h2 class="mt-4 text-3xl font-bold tracking-tight">Lock PYRX, finalize blocks, earn — or get slashed.</h2>
+      <h2 class="mt-4 t-h2">Lock PYRX, finalize blocks, earn — or get slashed.</h2>
       <p class="mt-4 leading-relaxed text-[var(--color-muted)]">Validators secure finality with their stake. Honest work earns; provable faults are slashed and the slashed amount is burned.</p>
     </div>
     <div class="reveal">
@@ -235,7 +235,7 @@ const genesis = `
       <div class="relative grid gap-8 lg:grid-cols-2 lg:items-center">
         <div>
           <span class="chip">Genesis</span>
-          <h2 class="mt-4 text-3xl font-bold tracking-tight"><span class="brand-text">$0.0025</span> — funding the build, not an investment pitch.</h2>
+          <h2 class="mt-4 t-h2"><span class="brand-text">$0.0025</span> — funding the build, not an investment pitch.</h2>
           <p class="mt-4 leading-relaxed text-[var(--color-muted)]">At $0.0025, a clean <strong class="text-[var(--color-ink)]">$50,000,000 genesis raise</strong> sells exactly 20,000,000,000 PYRX — round, clean math, and an affordable entry that fits the fair-launch philosophy. The 25% bonus is a launch utility allocation, explicitly not an investment return.</p>
         </div>
         <div class="grid grid-cols-2 gap-3">
@@ -255,8 +255,8 @@ const classification = `
   <div class="mt-12 grid gap-5 lg:grid-cols-2">
     <article class="reveal card p-7">
       <div class="${orbClass("brand")}">${icon("check", "h-5 w-5")}</div>
-      <h3 class="mt-4 text-lg font-semibold">Why we list as a utility</h3>
-      <ul class="mt-3 space-y-2 text-sm leading-relaxed text-[var(--color-muted)]">
+      <h3 class="mt-4 t-h3">Why we list as a utility</h3>
+      <ul class="mt-3 space-y-2 t-body text-[var(--color-muted)]">
         <li><strong class="text-[var(--color-ink)]">Broad, permissionless access</strong> — usable by the general public worldwide, without accredited-investor gates.</li>
         <li><strong class="text-[var(--color-ink)]">Real spot listings</strong> — mainstream exchanges list utility/commodity tokens on normal spot markets.</li>
         <li><strong class="text-[var(--color-ink)]">It matches reality</strong> — PYRX genuinely is a tool you consume on a live, decentralized network.</li>
@@ -264,8 +264,8 @@ const classification = `
     </article>
     <article class="reveal card p-7">
       <div class="${orbClass("bolt")}">${icon("scale", "h-5 w-5")}</div>
-      <h3 class="mt-4 text-lg font-semibold">How this shapes pricing</h3>
-      <ul class="mt-3 space-y-2 text-sm leading-relaxed text-[var(--color-muted)]">
+      <h3 class="mt-4 t-h3">How this shapes pricing</h3>
+      <ul class="mt-3 space-y-2 t-body text-[var(--color-muted)]">
         <li>We market <strong class="text-[var(--color-ink)]">utility, not price</strong> — no predictions, no return promises, no market-cap targets.</li>
         <li>The genesis price is <strong class="text-[var(--color-ink)]">funding + access</strong>; the 25% bonus is a launch utility allocation, not a return.</li>
         <li>At listing, utility status lets PYRX pursue ordinary spot listings — subject to each exchange's KYC/AML and each country's rules.</li>
@@ -280,7 +280,7 @@ const classification = `
 const addresses = `
 <section class="section container-x">
   <div class="card p-7 reveal">
-    <h3 class="text-lg font-bold">Reserved system addresses</h3>
+    <h3 class="t-h3">Reserved system addresses</h3>
     <p class="mt-2 text-sm text-[var(--color-muted)]">Protocol-owned, credit-only accounts seeded at genesis — identical across all five networks. The fee split and the AI-compute pool pay into these sinks directly, so every destination above exists on-chain from block 0.</p>
     <div class="mt-5 grid gap-3 sm:grid-cols-2">
       ${[

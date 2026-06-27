@@ -75,8 +75,8 @@ function renderLogin(): void {
         <div class="flex flex-col items-center text-center">
           <img src="/logo-horizontal.svg" alt="PYRAX" class="h-8" />
           <div class="mt-3 chip chip-brand">${icon("shield", "h-3.5 w-3.5")} Team portal · restricted</div>
-          <h1 class="mt-5 text-2xl font-bold">Sign in to <span class="brand-text">PYRAX Team</span></h1>
-          <p class="mt-2 text-sm text-[var(--color-muted)]">Enter your work email and we'll send a one-time sign-in link.</p>
+          <h1 class="mt-5 t-h1">Sign in to <span class="brand-text">PYRAX Team</span></h1>
+          <p class="mt-2 t-body text-[var(--color-muted)]">Enter your work email and we'll send a one-time sign-in link.</p>
         </div>
         <div class="card p-6 sm:p-7 mt-6">
           ${linkError ? `<div class="mb-4 rounded-lg border border-[color-mix(in_oklab,var(--color-negative)_45%,var(--color-line))] bg-[color-mix(in_oklab,var(--color-negative)_10%,transparent)] px-3.5 py-2.5 text-sm text-[var(--color-negative)]">That sign-in link was invalid or expired. Request a new one below.</div>` : ""}
@@ -177,8 +177,8 @@ function renderDashboard(): void {
           (m) => `
           <a href="#/${m.key === "users" ? "users" : m.key}" class="card card-hover p-6 block">
             <div class="icon-orb ${m.key === "users" ? "icon-orb-bolt" : ""} !h-12 !w-12">${icon(m.icon, "h-6 w-6")}</div>
-            <h3 class="mt-4 text-lg font-bold">${esc(m.title)}</h3>
-            <p class="mt-1.5 text-sm leading-relaxed text-[var(--color-muted)]">${esc(m.desc)}</p>
+            <h3 class="mt-4 t-h3">${esc(m.title)}</h3>
+            <p class="mt-1.5 t-body text-[var(--color-muted)]">${esc(m.desc)}</p>
             <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-brand-soft)]">Open ${icon("back", "h-4 w-4 rotate-180")}</span>
           </a>`,
         )
@@ -188,8 +188,8 @@ function renderDashboard(): void {
     "dashboard",
     `
     <div class="mb-7">
-      <h1 class="text-2xl font-bold">Welcome back</h1>
-      <p class="mt-1.5 text-sm text-[var(--color-muted)]">Signed in as ${esc((me.user as User).email)}. Pick a module to get started.</p>
+      <h1 class="t-h1">Welcome back</h1>
+      <p class="mt-1.5 t-body text-[var(--color-muted)]">Signed in as ${esc((me.user as User).email)}. Pick a module to get started.</p>
     </div>
     <div class="grid gap-5 sm:grid-cols-2">${tiles}</div>`,
   );
@@ -216,8 +216,8 @@ async function renderDownloads(): Promise<void> {
           <div class="card p-6">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <h3 class="text-lg font-bold">${esc(p.name)}</h3>
-                <p class="mt-1 text-sm text-[var(--color-muted)]">${esc(p.tagline)}</p>
+                <h3 class="t-h3">${esc(p.name)}</h3>
+                <p class="mt-1 t-body text-[var(--color-muted)]">${esc(p.tagline)}</p>
               </div>
               ${p.version ? `<span class="chip chip-brand shrink-0">v${esc(p.version)}</span>` : `<span class="chip shrink-0">Coming soon</span>`}
             </div>
@@ -228,8 +228,8 @@ async function renderDownloads(): Promise<void> {
     setView(`
       <div class="mb-7 flex items-end justify-between gap-3 flex-wrap">
         <div>
-          <h1 class="text-2xl font-bold">Downloads</h1>
-          <p class="mt-1.5 text-sm text-[var(--color-muted)]">Always the latest installers, straight from the release feed.</p>
+          <h1 class="t-h1">Downloads</h1>
+          <p class="mt-1.5 t-body text-[var(--color-muted)]">Always the latest installers, straight from the release feed.</p>
         </div>
         <a href="https://nodes.pyraxchain.com/changelog.html" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">${icon("save", "h-4 w-4")} Changelog ↗</a>
       </div>
@@ -283,8 +283,8 @@ async function renderFaucet(): Promise<void> {
 
   setView(`
     <div class="mb-7">
-      <h1 class="text-2xl font-bold">Faucet</h1>
-      <p class="mt-1.5 text-sm text-[var(--color-muted)]">Free test PYRX for the selected network. Works for transparent and shielded addresses.</p>
+      <h1 class="t-h1">Faucet</h1>
+      <p class="mt-1.5 t-body text-[var(--color-muted)]">Free test PYRX for the selected network. Works for transparent and shielded addresses.</p>
     </div>
     <div class="card p-6 max-w-2xl">
       <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--color-faint)] mb-2">Network</label>
@@ -414,12 +414,12 @@ async function renderUsers(): Promise<void> {
 
     setView(`
       <div class="mb-7">
-        <h1 class="text-2xl font-bold">User Management</h1>
-        <p class="mt-1.5 text-sm text-[var(--color-muted)]">Whitelist teammates &amp; external contractors and assign their module roles + Ember admin-tab access.</p>
+        <h1 class="t-h1">User Management</h1>
+        <p class="mt-1.5 t-body text-[var(--color-muted)]">Whitelist teammates &amp; external contractors and assign their module roles + Ember admin-tab access.</p>
       </div>
 
       <div class="card p-6 mb-7">
-        <h3 class="font-bold">${icon("plus", "h-4 w-4 inline -mt-0.5")} Add a teammate</h3>
+        <h3 class="t-h3">${icon("plus", "h-4 w-4 inline -mt-0.5")} Add a teammate</h3>
         <form id="addform" class="mt-4 flex flex-col gap-3">
           <input class="input sm:max-w-xs" name="email" type="email" placeholder="name@company.com" required />
           ${roleChecks(null, [])}
@@ -666,8 +666,8 @@ async function paintNodeControl(): Promise<void> {
   setView(`
     <div class="flex items-center justify-between gap-3 mb-5 flex-wrap">
       <div>
-        <h1 class="text-2xl font-extrabold">Node Control</h1>
-        <p class="mt-1 text-sm text-[var(--color-muted)]">Every node on the network. Current release <strong class="text-[var(--color-ink)]">v${esc(net)}</strong> — out-of-date nodes are flagged. The kill switch force-stops a node and keeps it offline (overriding auto-start) until it updates. Last resort.</p>
+        <h1 class="t-h1">Node Control</h1>
+        <p class="mt-1 t-body text-[var(--color-muted)]">Every node on the network. Current release <strong class="text-[var(--color-ink)]">v${esc(net)}</strong> — out-of-date nodes are flagged. The kill switch force-stops a node and keeps it offline (overriding auto-start) until it updates. Last resort.</p>
       </div>
       <button id="nc-refresh" class="btn btn-ghost btn-sm">${icon("refresh", "h-4 w-4")} Refresh</button>
     </div>

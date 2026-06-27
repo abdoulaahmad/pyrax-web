@@ -37,7 +37,7 @@ const page = `
 <section class="section container-x">
   <div class="reveal">
     <span class="chip">Whitepaper</span>
-    <h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">PYRAX Network <span class="brand-text">Whitepaper</span></h1>
+    <h1 class="mt-4 t-h1">PYRAX Network <span class="brand-text">Whitepaper</span></h1>
     <p class="mt-4 max-w-2xl text-[var(--color-muted)]">A from-scratch Layer-1 — GhostDAG consensus, shielded-by-default privacy, a multi-VM L2/L3, and an ISP-resistant mesh. Read it whichever way suits you:</p>
     <div class="mt-6 flex flex-wrap items-center gap-3">
       <div class="wp-toggle" role="tablist" aria-label="Whitepaper version">

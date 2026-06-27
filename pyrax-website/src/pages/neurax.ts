@@ -13,8 +13,8 @@ const hero = `
   <div class="absolute inset-0" aria-hidden="true" style="background: radial-gradient(50rem 30rem at 75% 10%, color-mix(in oklab, var(--color-violet) 16%, transparent), transparent 60%);"></div>
   <div class="container-x relative max-w-3xl reveal">
     <span class="chip">NEURAX · decentralized AI</span>
-    <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">A real AI that runs on <span class="bolt-text text-anim">your machine</span> — backed by a global GPU market.</h1>
-    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-muted)]">NEURAX is first a usable multimodal + agentic AI that does the work — chat, code, image, audio, video and immersive spatial sound on a consumer GPU. The on-chain marketplace and GPU pooling are the economy and scale-out layer beneath it, not the product itself.</p>
+    <h1 class="mt-5 t-h1">A real AI that runs on <span class="bolt-text text-anim">your machine</span> — backed by a global GPU market.</h1>
+    <p class="mt-5 max-w-2xl t-lead text-[var(--color-muted)]">NEURAX is first a usable multimodal + agentic AI that does the work — chat, code, image, audio, video and immersive spatial sound on a consumer GPU. The on-chain marketplace and GPU pooling are the economy and scale-out layer beneath it, not the product itself.</p>
     <div class="mt-7 flex flex-wrap gap-3">
       <a href="#waitlist" class="btn btn-primary">Get early access ${icon("arrow", "h-4 w-4")}</a>
       <a href="/build.html#neurax" class="btn btn-ghost">NEURAX SDKs</a>
@@ -48,10 +48,10 @@ const modalities = `
       <article class="reveal card card-hover p-6">
         <div class="${orbClass("violet")}">${icon(m.icon, "h-5 w-5")}</div>
         <div class="mt-4 flex items-baseline justify-between gap-2">
-          <h3 class="text-lg font-semibold">${m.name}</h3>
+          <h3 class="t-h3">${m.name}</h3>
           <code class="text-[0.7rem] text-[var(--color-faint)]">${m.model}</code>
         </div>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${m.blurb}</p>
+        <p class="mt-2 t-body text-[var(--color-muted)]">${m.blurb}</p>
       </article>`,
     ).join("")}
   </div>
@@ -93,7 +93,7 @@ const spatial = `
     <div class="relative grid gap-8 lg:grid-cols-2 lg:items-center">
       <div class="reveal">
         <span class="chip">NEURAX Spatial</span>
-        <h2 class="mt-4 text-3xl font-bold tracking-tight">Immersive 3D audio — open and royalty-free.</h2>
+        <h2 class="mt-4 t-h2">Immersive 3D audio — open and royalty-free.</h2>
         <p class="mt-4 leading-relaxed text-[var(--color-muted)]">Turn any finished mix into an enveloping experience: <strong class="text-[var(--color-ink)]">binaural</strong> HRTF for headphones, plus <strong class="text-[var(--color-ink)]">5.1 and 7.1</strong> surround upmix and ambisonics. It's a deterministic DSP transform — so it's exact-hash verifiable on the marketplace — built entirely on royalty-free tech. (It's <em>not</em> a licensed object-audio format.)</p>
       </div>
       <div class="reveal flex flex-wrap gap-2">
@@ -174,8 +174,8 @@ const verify = `
       (v, i) => `
       <article class="reveal card p-6">
         <div class="text-3xl font-extrabold bolt-text">${String(i + 1).padStart(2, "0")}</div>
-        <h3 class="mt-3 text-base font-semibold">${v.title}</h3>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${v.desc}</p>
+        <h3 class="mt-3 t-h3">${v.title}</h3>
+        <p class="mt-2 t-body text-[var(--color-muted)]">${v.desc}</p>
       </article>`,
     ).join("")}
   </div>
@@ -197,7 +197,7 @@ const pooling = `
   <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
     <div class="reveal">
       <span class="chip">GPU pooling</span>
-      <h2 class="mt-4 text-3xl font-bold tracking-tight">Consumer cards, teamed up.</h2>
+      <h2 class="mt-4 t-h2">Consumer cards, teamed up.</h2>
       <p class="mt-4 leading-relaxed text-[var(--color-muted)]">A model too big for one card? A <strong class="text-[var(--color-ink)]">cohort</strong> of consumer GPUs pools VRAM and shares the work — each member runs a shard, and the partials combine into one verifiable result. It's how a network of 3060s reaches further than any single card.</p>
     </div>
     <div class="reveal card p-6 sm:p-7">
@@ -228,9 +228,9 @@ const pooling = `
 const honest = `
 <section class="section container-x">
   <div class="card p-7 reveal">
-    <div class="flex items-center gap-3"><span class="${orbClass("brand")}">${icon("check", "h-5 w-5")}</span><h3 class="text-lg font-bold">Honest about the hardware</h3></div>
+    <div class="flex items-center gap-3"><span class="${orbClass("brand")}">${icon("check", "h-5 w-5")}</span><h3 class="t-h3">Honest about the hardware</h3></div>
     <p class="mt-2 text-sm text-[var(--color-muted)]">We don't oversell what consumer hardware does today:</p>
-    <ul class="mt-4 grid gap-2 text-sm leading-relaxed text-[var(--color-muted)] sm:grid-cols-2">
+    <ul class="mt-4 grid gap-2 t-body text-[var(--color-muted)] sm:grid-cols-2">
       ${[
         "Consumer <strong class='text-[var(--color-ink)]'>video</strong> generation is minutes-per-clip — not real-time.",
         "A WAN-sharded big model runs at roughly <strong class='text-[var(--color-ink)]'>1–5 tokens/sec</strong>.",
@@ -251,12 +251,12 @@ const why = `
       (w, i) => `
       <div class="reveal card p-6">
         <div class="text-3xl font-extrabold bolt-text">${String(i + 1).padStart(2, "0")}</div>
-        <h3 class="mt-3 text-base font-semibold">${w.title}</h3>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${w.desc}</p>
+        <h3 class="mt-3 t-h3">${w.title}</h3>
+        <p class="mt-2 t-body text-[var(--color-muted)]">${w.desc}</p>
       </div>`,
     ).join("")}
   </div>
-  <p class="reveal mx-auto mt-8 max-w-2xl text-center text-sm leading-relaxed text-[var(--color-faint)]">On the environment, honestly: AI compute is energy-intensive and decentralization is no magic fix — but NEURAX uses hardware that already exists and favors idle-only, contention-aware scheduling, soaking up otherwise-wasted capacity instead of demanding new datacenters.</p>
+  <p class="reveal mx-auto mt-8 max-w-2xl text-center t-body text-[var(--color-faint)]">On the environment, honestly: AI compute is energy-intensive and decentralization is no magic fix — but NEURAX uses hardware that already exists and favors idle-only, contention-aware scheduling, soaking up otherwise-wasted capacity instead of demanding new datacenters.</p>
 </section>`;
 
 const cta = `
@@ -264,7 +264,7 @@ const cta = `
   <div class="card relative overflow-hidden p-8 text-center sm:p-14">
     <div class="absolute inset-0 grid-bg opacity-60"></div>
     <div class="relative reveal">
-      <h2 class="mx-auto max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">Be first to run NEURAX</h2>
+      <h2 class="mx-auto max-w-2xl t-h2">Be first to run NEURAX</h2>
       <p class="mx-auto mt-4 max-w-xl text-[var(--color-muted)]">Join the waitlist for early access to the local AI, the copilot, and the compute marketplace.</p>
       <div class="mt-7">${waitlistForm()}</div>
       <a href="/build.html#neurax" class="mt-5 inline-block text-sm text-[var(--color-faint)] hover:text-[var(--color-ink)]">Or build with the NEURAX SDKs →</a>

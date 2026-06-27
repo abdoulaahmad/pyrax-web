@@ -19,8 +19,8 @@ const hero = `
   <div class="absolute inset-0 grid-bg opacity-50"></div>
   <div class="container-x relative max-w-3xl reveal">
     <span class="chip">Architecture</span>
-    <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">A layered system, built for <span class="brand-text text-anim">parallelism</span>.</h1>
-    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-muted)]">GhostDAG at the base, multi-VM execution inside block application, a ZK-rollup above, and an onion mesh beneath — every layer chosen to scale throughput while keeping privacy and verifiability intact.</p>
+    <h1 class="mt-5 t-h1">A layered system, built for <span class="brand-text text-anim">parallelism</span>.</h1>
+    <p class="mt-5 max-w-2xl t-lead text-[var(--color-muted)]">GhostDAG at the base, multi-VM execution inside block application, a ZK-rollup above, and an onion mesh beneath — every layer chosen to scale throughput while keeping privacy and verifiability intact.</p>
   </div>
 </section>`;
 
@@ -92,7 +92,7 @@ const execModel = `
   <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
     <div class="reveal">
       <span class="chip">Execution = consensus</span>
-      <h2 class="mt-4 text-3xl font-bold tracking-tight">A contract is an Account — re-executed by every node.</h2>
+      <h2 class="mt-4 t-h2">A contract is an Account — re-executed by every node.</h2>
       <p class="mt-4 leading-relaxed text-[var(--color-muted)]">CREATE and CALL run <strong class="text-[var(--color-ink)]">inside L1 block application</strong>, so every node re-executes identically — execution <em>is</em> consensus. The VM is <strong class="text-[var(--color-ink)]">auto-detected from the code's magic bytes</strong> (<code class="text-[var(--color-muted)]">\\0asm</code> → WASM, <code class="text-[var(--color-muted)]">\\0CAIRO</code> → Cairo, otherwise EVM), and all three share one 32-byte state overlay — which is how contracts call each other across VMs.</p>
       ${crossVmDiagram}
     </div>
@@ -156,7 +156,7 @@ const nodes = `
   <div class="mt-8 grid gap-4 sm:grid-cols-3">
     ${roles
       .map(
-        (r) => `<article class="reveal card p-6"${r.lead ? ' style="border-color:color-mix(in oklab, var(--color-brand) 30%, var(--color-line))"' : ""}><div class="flex items-center justify-between"><div class="${orbClass(r.tone)}">${icon(r.icon, "h-5 w-5")}</div><span class="chip !px-2 !py-0.5 !text-[0.58rem]">${r.tag}</span></div><h3 class="mt-4 text-base font-semibold">${r.name}</h3><p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${r.desc}</p></article>`,
+        (r) => `<article class="reveal card p-6"${r.lead ? ' style="border-color:color-mix(in oklab, var(--color-brand) 30%, var(--color-line))"' : ""}><div class="flex items-center justify-between"><div class="${orbClass(r.tone)}">${icon(r.icon, "h-5 w-5")}</div><span class="chip !px-2 !py-0.5 !text-[0.58rem]">${r.tag}</span></div><h3 class="mt-4 t-h3">${r.name}</h3><p class="mt-2 t-body text-[var(--color-muted)]">${r.desc}</p></article>`,
       )
       .join("")}
   </div>

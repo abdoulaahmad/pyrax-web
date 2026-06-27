@@ -289,6 +289,52 @@ a {
   padding-block: clamp(3.5rem, 8vw, 7rem);
 }
 
+/* ============================================================================
+ * CANONICAL TYPE SCALE — the SINGLE source of truth for text sizes across EVERY
+ * PYRAX property. Use these instead of ad-hoc `text-*` utilities so the family
+ * can never drift again. Typography only (size / weight / line-height / family);
+ * COLOR stays a separate utility (e.g. text-[var(--color-muted)]) so each use can
+ * pick ink/muted/faint without fighting specificity.
+ *   .t-h1   page / hero headline      (was text-4xl → sm:text-6xl, fluid)
+ *   .t-h2   section header            (was text-3xl → sm:text-4xl, fluid) ← "See it running" size
+ *   .t-h3   card / feature title      (text-lg)
+ *   .t-lead section lead paragraph    (text-lg)
+ *   .t-body card / body copy          (text-sm)
+ *   .t-small meta / caption           (text-xs)
+ * (Eyebrows keep using `.chip`.)
+ * ========================================================================== */
+@utility t-h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  font-size: clamp(2.25rem, 1.35rem + 4.2vw, 3.75rem);
+}
+@utility t-h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  font-size: clamp(1.875rem, 1.55rem + 1.55vw, 2.25rem);
+}
+@utility t-h3 {
+  font-weight: 600;
+  line-height: 1.4;
+  font-size: 1.125rem;
+}
+@utility t-lead {
+  line-height: 1.7;
+  font-size: 1.125rem;
+}
+@utility t-body {
+  line-height: 1.65;
+  font-size: 0.875rem;
+}
+@utility t-small {
+  line-height: 1.5;
+  font-size: 0.75rem;
+}
+
 /* gradient ring around a stat/icon */
 @utility icon-orb {
   display: inline-grid;

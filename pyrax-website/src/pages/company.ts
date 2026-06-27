@@ -11,8 +11,8 @@ const hero = `
   <div class="absolute inset-0 grid-bg opacity-50"></div>
   <div class="container-x relative max-w-3xl reveal">
     <span class="chip">Company</span>
-    <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">Built in the open, stress-tested <span class="brand-text text-anim">hard</span>.</h1>
-    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-muted)]">PYRAX is trying to build the whole city — not just the roads. A fast private base layer, full Ethereum compatibility, and a working decentralized AI marketplace, tied together so each reinforces the others. The private Layer-1 settles and shields the work, the same Ethereum tooling you already use deploys on top of it, and NEURAX turns idle GPUs into a compute network the chain pays for — three legs that only stand because of one another.</p>
+    <h1 class="mt-5 t-h1">Built in the open, stress-tested <span class="brand-text text-anim">hard</span>.</h1>
+    <p class="mt-5 max-w-2xl t-lead text-[var(--color-muted)]">PYRAX is trying to build the whole city — not just the roads. A fast private base layer, full Ethereum compatibility, and a working decentralized AI marketplace, tied together so each reinforces the others. The private Layer-1 settles and shields the work, the same Ethereum tooling you already use deploys on top of it, and NEURAX turns idle GPUs into a compute network the chain pays for — three legs that only stand because of one another.</p>
   </div>
 </section>`;
 
@@ -28,7 +28,7 @@ const about = `
       ["Audit-gated", "The privacy/ZK layer must clear an external security audit before mainnet. We won't turn it on for real money until it's vetted."],
       ["Community-owned", "Fair-launch distribution, a high public float, and a DAO that governs the treasury and tunable parameters."],
     ]
-      .map((x) => `<article class="reveal card p-6"><h3 class="text-base font-semibold">${x[0]}</h3><p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${x[1]}</p></article>`)
+      .map((x) => `<article class="reveal card p-6"><h3 class="t-h3">${x[0]}</h3><p class="mt-2 t-body text-[var(--color-muted)]">${x[1]}</p></article>`)
       .join("")}
   </div>
 </section>`;
@@ -48,7 +48,7 @@ const ama = `
       ["Top-20 in two years?", "We don't make price or market-cap predictions. Rank is an outcome of shipping something genuinely useful — that's our focus."],
       ["Are miners charged for AI jobs?", "Never. AI work is an earning opportunity. Requesters pay into escrow; providers run verified work and get paid out of it."],
     ]
-      .map((x) => `<article class="reveal card p-6"><h3 class="text-base font-semibold text-[var(--color-ink)]">${x[0]}</h3><p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${x[1]}</p></article>`)
+      .map((x) => `<article class="reveal card p-6"><h3 class="t-h3 text-[var(--color-ink)]">${x[0]}</h3><p class="mt-2 t-body text-[var(--color-muted)]">${x[1]}</p></article>`)
       .join("")}
   </div>
 </section>`;
@@ -81,12 +81,12 @@ const brand = `
   </div>
   <div class="mt-6 grid gap-4 sm:grid-cols-2">
     <div class="reveal card p-6">
-      <h3 class="text-base font-semibold">Where each color goes</h3>
-      <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">Orange is the brand core — primary buttons and the dominant fire accent. Bolt blue is the secondary, developer-facing accent. Violet is reserved for NEURAX and appears nowhere else. Gold and amber are ramp tones for gradients and detail, not standalone fills.</p>
+      <h3 class="t-h3">Where each color goes</h3>
+      <p class="mt-2 t-body text-[var(--color-muted)]">Orange is the brand core — primary buttons and the dominant fire accent. Bolt blue is the secondary, developer-facing accent. Violet is reserved for NEURAX and appears nowhere else. Gold and amber are ramp tones for gradients and detail, not standalone fills.</p>
     </div>
     <div class="reveal card p-6">
-      <h3 class="text-base font-semibold">Clear space & don'ts</h3>
-      <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">Keep clear space around the mark of at least the height of the phoenix's head, and place it on the near-black background or a plain dark surface. Don't recolor, rotate, stretch, add effects, or swap the fire and blue ramps. Use the files as provided.</p>
+      <h3 class="t-h3">Clear space & don'ts</h3>
+      <p class="mt-2 t-body text-[var(--color-muted)]">Keep clear space around the mark of at least the height of the phoenix's head, and place it on the near-black background or a plain dark surface. Don't recolor, rotate, stretch, add effects, or swap the fire and blue ramps. Use the files as provided.</p>
     </div>
   </div>
 </section>`;
@@ -96,7 +96,7 @@ const contact = `
   <div class="card relative overflow-hidden p-8 text-center sm:p-14">
     <div class="absolute -top-20 left-1/2 h-40 w-40 -translate-x-1/2 blur-3xl" style="background: radial-gradient(closest-side, color-mix(in oklab, var(--color-brand) 35%, transparent), transparent);"></div>
     <div class="relative reveal">
-      <h2 class="text-3xl font-bold tracking-tight">Get in touch</h2>
+      <h2 class="t-h2">Get in touch</h2>
       <p class="mx-auto mt-3 max-w-lg text-[var(--color-muted)]">Questions, partnerships, or press — we read everything.</p>
       <a href="mailto:${SITE.email}" class="btn btn-primary mt-6">${SITE.email}</a>
       <div class="mt-6 flex justify-center gap-2">

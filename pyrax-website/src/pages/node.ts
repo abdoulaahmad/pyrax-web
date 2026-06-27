@@ -39,8 +39,8 @@ const hero = `
   <div class="absolute inset-0 grid-bg opacity-50" aria-hidden="true"></div>
   <div class="container-x relative max-w-3xl reveal">
     <span class="chip"><span class="h-1.5 w-1.5 rounded-full bg-[var(--color-positive)]"></span> Run a node · Inferno</span>
-    <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">Mine, stake, and earn from <span class="brand-text text-anim">AI</span> — all from one app.</h1>
-    <p class="mt-6 max-w-2xl text-lg leading-relaxed text-[var(--color-muted)]"><strong class="text-[var(--color-ink)]">Inferno</strong> is the public desktop node app — the way most people run a full node, pick a mining stream, stake PYRX, and contribute AI compute. One signed install gives you three ways to earn block rewards, plus a second income from NEURAX when your GPU runs paid AI work — say an image job that runs on your idle RTX 3060.</p>
+    <h1 class="mt-5 t-h1">Mine, stake, and earn from <span class="brand-text text-anim">AI</span> — all from one app.</h1>
+    <p class="mt-6 max-w-2xl t-lead text-[var(--color-muted)]"><strong class="text-[var(--color-ink)]">Inferno</strong> is the public desktop node app — the way most people run a full node, pick a mining stream, stake PYRX, and contribute AI compute. One signed install gives you three ways to earn block rewards, plus a second income from NEURAX when your GPU runs paid AI work — say an image job that runs on your idle RTX 3060.</p>
     <div class="mt-7 flex flex-wrap gap-3">
       <a href="#waitlist" class="btn btn-primary">Get notified at launch ${icon("arrow", "h-4 w-4")}</a>
       <a href="${LINKS.docs}" class="btn btn-ghost">Setup guide</a>
@@ -61,9 +61,9 @@ const streams = `
       (s) => `
       <article class="reveal card card-hover p-6">
         <div class="${orbClass("brand")}">${icon(s.icon, "h-5 w-5")}</div>
-        <h3 class="mt-4 text-lg font-semibold">${s.name}</h3>
+        <h3 class="mt-4 t-h3">${s.name}</h3>
         <p class="mt-2 text-sm font-medium text-[var(--color-brand-soft)]">${s.algo}</p>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${s.who}</p>
+        <p class="mt-2 t-body text-[var(--color-muted)]">${s.who}</p>
       </article>`,
     ).join("")}
   </div>
@@ -76,8 +76,8 @@ const runways = `
   <div class="mt-10 grid gap-6 lg:grid-cols-2 lg:items-start">
     <div class="reveal card p-7">
       <div class="${orbClass("brand")}">${icon("server", "h-5 w-5")}</div>
-      <h3 class="mt-4 text-lg font-semibold">Inferno Node — the desktop app</h3>
-      <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">A signed, self-updating GUI that runs a full node, the three-stream miner, staking, and the AI-compute worker. It auto-discovers peers via the live directory, with an optional remote portal so you can reach your node from anywhere.</p>
+      <h3 class="mt-4 t-h3">Inferno Node — the desktop app</h3>
+      <p class="mt-2 t-body text-[var(--color-muted)]">A signed, self-updating GUI that runs a full node, the three-stream miner, staking, and the AI-compute worker. It auto-discovers peers via the live directory, with an optional remote portal so you can reach your node from anywhere.</p>
       <ol class="mt-5 space-y-2.5 text-sm text-[var(--color-muted)]">
         ${[
           ["Install", "Download the signed installer for your OS and open it."],
@@ -94,8 +94,8 @@ const runways = `
     <div class="reveal">
       <div class="card p-7">
         <div class="${orbClass("bolt")}">${icon("terminal", "h-5 w-5")}</div>
-        <h3 class="mt-4 text-lg font-semibold">PYRAX CLI — terminal & servers</h3>
-        <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">Create and run multiple nodes, each auto-isolated to free ports. Install via cargo, Homebrew, Scoop or the installer script (see the docs).</p>
+        <h3 class="mt-4 t-h3">PYRAX CLI — terminal & servers</h3>
+        <p class="mt-2 t-body text-[var(--color-muted)]">Create and run multiple nodes, each auto-isolated to free ports. Install via cargo, Homebrew, Scoop or the installer script (see the docs).</p>
       </div>
       ${codeBlock(CLI)}
     </div>
@@ -112,7 +112,7 @@ const roles = `
       ["Relay", "Carries gossip + mixnet traffic for others. Wants bandwidth and uptime more than compute — ideal on a well-connected server — and keeps the mesh fast for everyone.", "globe"],
       ["Verifier", "Checks proofs and state without sealing. Light on resources — runs on modest hardware — and helps keep the network honest without any mining gear.", "check"],
     ]
-      .map((x) => `<article class="reveal card p-6"><div class="${orbClass("violet")}">${icon(x[2] as string, "h-5 w-5")}</div><h3 class="mt-4 text-base font-semibold">${x[0]}</h3><p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${x[1]}</p></article>`)
+      .map((x) => `<article class="reveal card p-6"><div class="${orbClass("violet")}">${icon(x[2] as string, "h-5 w-5")}</div><h3 class="mt-4 t-h3">${x[0]}</h3><p class="mt-2 t-body text-[var(--color-muted)]">${x[1]}</p></article>`)
       .join("")}
   </div>
   <p class="reveal mx-auto mt-5 max-w-2xl text-center text-xs text-[var(--color-faint)]">Discovery is automatic via <a href="${LINKS.peers}" class="link-underline font-semibold text-[var(--color-brand-soft)]">peers.pyraxchain.com</a>; a hosted remote portal (a per-node subdomain) lets you reach your node's dashboard from anywhere.</p>
@@ -131,7 +131,7 @@ const ai = `
   <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
     <div class="reveal">
       <span class="chip">A second income</span>
-      <h2 class="mt-4 text-3xl font-bold tracking-tight">Your GPU earns from AI work — not just blocks.</h2>
+      <h2 class="mt-4 t-h2">Your GPU earns from AI work — not just blocks.</h2>
       <p class="mt-4 leading-relaxed text-[var(--color-muted)]">Stream B is wired so a capable GPU can take paid AI jobs from the NEURAX marketplace. Requesters pay into on-chain escrow; you run verified work and get paid out of it. You're <strong class="text-[var(--color-ink)]">choosing</strong> paid AI work — never taxed for it, never charged to run it.</p>
       <ul class="mt-5 space-y-2 text-sm text-[var(--color-muted)]">
         ${[
@@ -160,7 +160,7 @@ const staking = `
     <div class="relative grid gap-6 sm:grid-cols-3 sm:items-center">
       <div class="reveal sm:col-span-2">
         <span class="chip">Stream C · staking</span>
-        <h2 class="mt-4 text-2xl font-bold tracking-tight">No mining hardware? Stake and help finalize blocks.</h2>
+        <h2 class="mt-4 t-h2">No mining hardware? Stake and help finalize blocks.</h2>
         <p class="mt-3 leading-relaxed text-[var(--color-muted)]">Lock at least <strong class="text-[var(--color-ink)]">100,000 PYRX</strong> and run a validator on a normal, reliable server — no ASIC or GPU required. Staked coins secure the chain and leave circulation while they do, with a 7-day unbonding period when you withdraw.</p>
       </div>
       <div class="reveal text-center">
@@ -179,7 +179,7 @@ const cta = `
     <div class="absolute -inset-x-10 -top-24 h-48 blur-3xl" aria-hidden="true" style="background: radial-gradient(closest-side, color-mix(in oklab, var(--color-brand) 35%, transparent), transparent);"></div>
     <div class="relative reveal">
       <span class="chip">Be early</span>
-      <h2 class="mx-auto mt-4 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">Be first to run Inferno</h2>
+      <h2 class="mx-auto mt-4 max-w-2xl t-h2">Be first to run Inferno</h2>
       <p class="mx-auto mt-4 max-w-xl text-[var(--color-muted)]">Join the waitlist and we'll let you know the moment the node app is ready to download — no spam, no price promises.</p>
       <div class="mt-7">${waitlistForm()}</div>
     </div>

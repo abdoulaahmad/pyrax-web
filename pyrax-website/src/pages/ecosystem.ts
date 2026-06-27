@@ -11,8 +11,8 @@ const hero = `
   <div class="absolute inset-0 grid-bg opacity-50"></div>
   <div class="container-x relative max-w-3xl reveal">
     <span class="chip">Ecosystem</span>
-    <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">Everything that makes <span class="brand-text text-anim">PYRAX</span> run.</h1>
-    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-muted)]">PYRAX isn't a single app — it's a stack. The apps you download to run and use the network, the hosted services that keep it discoverable and observable, and the tooling that helps you build and represent it. This is the whole thing in one place, so you always know what to reach for and where it lives.</p>
+    <h1 class="mt-5 t-h1">Everything that makes <span class="brand-text text-anim">PYRAX</span> run.</h1>
+    <p class="mt-5 max-w-2xl t-lead text-[var(--color-muted)]">PYRAX isn't a single app — it's a stack. The apps you download to run and use the network, the hosted services that keep it discoverable and observable, and the tooling that helps you build and represent it. This is the whole thing in one place, so you always know what to reach for and where it lives.</p>
   </div>
 </section>`;
 
@@ -33,8 +33,8 @@ const grid = (kind: string) => `
           <span class="${orbClass(kind === "Service" ? "bolt" : kind === "Tooling" ? "violet" : "brand")}">${icon(e.icon, "h-5 w-5")}</span>
           <span class="chip !px-2 !py-0.5 !text-[0.6rem]">${e.kind}</span>
         </div>
-        <h3 class="mt-4 text-lg font-semibold">${e.name}</h3>
-        <p class="mt-2 flex-1 text-sm leading-relaxed text-[var(--color-muted)]">${e.desc}</p>
+        <h3 class="mt-4 t-h3">${e.name}</h3>
+        <p class="mt-2 flex-1 t-body text-[var(--color-muted)]">${e.desc}</p>
         <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-brand-soft)]">Open ${icon("arrow", "h-4 w-4")}</span>
       </a>`,
       )
@@ -91,10 +91,10 @@ const choose = `
       <a href="${c.href}" class="reveal card card-hover group flex flex-col p-6">
         <div class="flex items-center gap-3">
           <span class="${orbClass(c.tone)}">${icon(c.icon, "h-5 w-5")}</span>
-          <h3 class="text-lg font-semibold">${c.name}</h3>
+          <h3 class="t-h3">${c.name}</h3>
         </div>
         <p class="mt-4 text-sm font-semibold text-[var(--color-brand-soft)]">${c.when}</p>
-        <p class="mt-2 flex-1 text-sm leading-relaxed text-[var(--color-muted)]">${c.what}</p>
+        <p class="mt-2 flex-1 t-body text-[var(--color-muted)]">${c.what}</p>
         <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-brand-soft)]">Open ${icon("arrow", "h-4 w-4")}</span>
       </a>`,
     ).join("")}
@@ -108,8 +108,8 @@ const domains = `
     Everything is split across three clear homes — the brand, the network's services, and the docs — so it's always obvious where something lives and what it's for.
   </p>
   <div class="card p-8 reveal">
-    <h3 class="text-lg font-bold">Where everything lives</h3>
-    <p class="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--color-muted)]">One domain, clear roles — no sprawl, no guessing.</p>
+    <h3 class="t-h3">Where everything lives</h3>
+    <p class="mt-2 max-w-2xl t-body text-[var(--color-muted)]">One domain, clear roles — no sprawl, no guessing.</p>
     <div class="mt-5 grid gap-4 sm:grid-cols-3">
       ${[
         ["pyraxchain.com", "This site + the brand"],

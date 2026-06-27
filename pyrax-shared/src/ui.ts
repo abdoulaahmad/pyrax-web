@@ -80,8 +80,8 @@ export function heading(eyebrow: string, title: string, lead?: string): string {
   return `
     <div class="reveal mx-auto max-w-2xl text-center">
       <span class="chip">${eyebrow}</span>
-      <h2 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight">${title}</h2>
-      ${lead ? `<p class="mt-4 text-[var(--color-muted)] text-lg leading-relaxed">${lead}</p>` : ""}
+      <h2 class="mt-4 t-h2">${title}</h2>
+      ${lead ? `<p class="mt-4 t-lead text-[var(--color-muted)]">${lead}</p>` : ""}
     </div>`;
 }
 
@@ -90,7 +90,7 @@ export function featureCard(f: { title: string; desc: string; icon: string; tone
   return `
     <article class="reveal card card-hover p-6" data-hoverlift>
       <div class="${orbClass(f.tone)}">${icon(f.icon)}</div>
-      <h3 class="mt-4 text-lg font-semibold">${f.title}</h3>
-      <p class="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">${f.desc}</p>
+      <h3 class="mt-4 t-h3">${f.title}</h3>
+      <p class="mt-2 t-body text-[var(--color-muted)]">${f.desc}</p>
     </article>`;
 }

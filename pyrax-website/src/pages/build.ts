@@ -34,7 +34,7 @@ import {
 const sec = (id: string, eyebrow: string, title: string, lead: string, body: string) => `
   <section id="${id}" class="reveal scroll-mt-28 border-t border-[var(--color-line-soft)] py-12 first:border-0 first:pt-0">
     <span class="chip">${eyebrow}</span>
-    <h2 class="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">${title}</h2>
+    <h2 class="mt-3 t-h2">${title}</h2>
     ${lead ? `<p class="mt-3 max-w-2xl leading-relaxed text-[var(--color-muted)]">${lead}</p>` : ""}
     <div class="mt-6">${body}</div>
   </section>`;
@@ -78,8 +78,8 @@ const hero = `
   <div class="absolute inset-0 grid-bg opacity-50"></div>
   <div class="container-x relative reveal">
     <span class="chip">Build on PYRAX</span>
-    <h1 class="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">The developer docs — with <span class="brand-text text-anim">real code</span>, in your language.</h1>
-    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-muted)]">PYRAX is EVM-compatible, so your Ethereum tools work unchanged — and you can also ship WASM (Rust, AssemblyScript, TinyGo) and Cairo, with contracts that call each other across VMs. Pick a path:</p>
+    <h1 class="mt-5 max-w-3xl t-h1">The developer docs — with <span class="brand-text text-anim">real code</span>, in your language.</h1>
+    <p class="mt-5 max-w-2xl t-lead text-[var(--color-muted)]">PYRAX is EVM-compatible, so your Ethereum tools work unchanged — and you can also ship WASM (Rust, AssemblyScript, TinyGo) and Cairo, with contracts that call each other across VMs. Pick a path:</p>
     <div class="mt-7 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
       ${[
         ["Solidity / EVM", "#solidity", "code"],
