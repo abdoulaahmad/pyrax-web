@@ -191,8 +191,17 @@ services:
       - "--coinbase"
       - "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" # this node's mining rewards (a dev account)
       - "--peer"
-      # The producer's peer-id changes on every fresh re-genesis — keep this in sync.
-      - "/ip4/204.48.16.184/tcp/30303/p2p/12D3KooWAtbb7fYz8sCGTrKSpg8ooeCFrP8MzAUfiBqLdZa4oJHm"
+      # Dial the producer by its STABLE address only — deliberately NO pinned /p2p/<peer-id>.
+      # The producer's libp2p peer-id rotates on every fresh re-genesis; the old pinned id was
+      # set pre-v0.4.0 and was never re-synced across the re-genesis bumps above, so the write
+      # node was dialing a peer-id that no longer existed. libp2p rejects a dial on peer-id
+      # mismatch, so the node never peered/synced with the producer and the relay/faucet/synthetic
+      # txs submitted to it never sealed — surfacing as "node unreachable" + "synthetic tx failed".
+      # A bare /ip4/.../tcp/... lets libp2p learn the producer's CURRENT identity at the Noise
+      # handshake, so a re-genesis peer-id change can't wedge the bootstrap again (and there's
+      # nothing to keep in sync). The producer's identity is still trust-anchored network-side by
+      # the chainspec's signed seed lists (trusted_seed_publishers), not by this dial hint.
+      - "/ip4/204.48.16.184/tcp/30303"
     volumes:
       # node_data10: FRESH volume. node_data9 held a chain on a DIVERGENT genesis (it
       # gossiped a parentless block whose hash != the producer's genesis), so on
