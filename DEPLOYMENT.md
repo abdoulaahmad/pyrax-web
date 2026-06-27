@@ -27,10 +27,15 @@ mkdir -p /opt/pyrax-web && cd /opt/pyrax-web
 
 Copy `docker-compose.yml` + `Caddyfile` into `/opt/pyrax-web` (CI does this automatically; for a manual first run, `scp` them up).
 
-Open the firewall for web + keep SSH:
+Open the firewall for web + the node's P2P port + keep SSH:
 ```bash
-ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443/tcp && ufw --force enable
+ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443/tcp && ufw allow 30303/tcp && ufw --force enable
 ```
+> `30303/tcp` is the internal write node's libp2p P2P port (published by the `node` service in
+> `docker-compose.yml`). It must be open INBOUND so the producer can dial this node back and the
+> peering stays stable — without it the node only dials outbound, gets dropped on inactivity, falls
+> out of sync, and its write-RPC goes slow/unreachable (the faucet then reports "cannot reach a node").
+> The write-capable RPC (`8545`) is deliberately **not** published and must stay closed.
 
 ---
 

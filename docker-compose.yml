@@ -170,6 +170,19 @@ services:
   node:
     image: ghcr.io/pyrax-network/pyrax-node:latest
     restart: unless-stopped
+    ports:
+      # Publish ONLY the P2P port (30303/tcp) so the write node is reachable for INBOUND
+      # libp2p connections. Previously the node had no published ports, so it could only
+      # DIAL OUT to the producer; it was undialable from outside (Docker bridge NAT + the
+      # droplet firewall opens just 22/80/443). When the producer dropped the link
+      # ("libp2p_relay: Dropping peer due to inactivity") it could not re-dial this node,
+      # so the node fell out of sync, its seal loop stalled, and its write-RPC went slow /
+      # unreachable — surfacing as the faucet's "cannot reach a node at http://node:8545"
+      # and synthetic-tx timeouts. Exposing 30303 lets libp2p observe a public address
+      # (64.227.8.153:30303) and lets the producer dial back, keeping the peering stable.
+      # The write-capable RPC (8545) stays UNPUBLISHED — only the relay/faucet reach it
+      # over the compose network. Requires `ufw allow 30303/tcp` on the droplet (DEPLOYMENT.md §1).
+      - "30303:30303"
     command:
       - "--network"
       - "internal-devnet-simulated"
