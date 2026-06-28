@@ -9,10 +9,16 @@
 // Env:
 //   FAUCET_RPC          the default-network RPC to dispense on (chain 881109)
 //   FAUCET_DRIP_ASH     drip amount in base units (ash). default 100 PYRX = 100e18
+//   FAUCET_WELCOME_ASH  one-time new-wallet welcome grant in ash. default 1,000,000 PYRX
 //   FAUCET_WINDOW_H     per-address/IP cooldown hours. default 12
 //   FAUCET_NETWORK      label shown in the public HTML UI (e.g. "Internal Devnet 1.0")
 //   PYRAX_KEY_PASSPHRASE  unlocks the faucet keystore key (name: "faucet")
 //   PORT                listen port (default 8800)
+//
+// Endpoints:
+//   POST /drip     repeatable public faucet — FAUCET_DRIP_ASH per address, FAUCET_WINDOW_H cooldown.
+//   POST /welcome  ONE-TIME new-wallet grant — FAUCET_WELCOME_ASH, Internal Devnet 1.0 (881109) ONLY,
+//                  once per address for life. Called automatically by the apps/CLI/web on wallet creation.
 
 import http from "node:http";
 import { spawnSync } from "node:child_process";
@@ -21,10 +27,21 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 const RPC = process.env.FAUCET_RPC || "";
 const KEY = process.env.FAUCET_KEY || "faucet-op"; // keystore key name (genesis-funded Anvil #2)
 const DRIP = (process.env.FAUCET_DRIP_ASH || "100000000000000000000").trim(); // 100 PYRX
+// One-time new-wallet welcome grant. 1,000,000 PYRX = 1e6 * 1e18 ash. Internal Devnet 1.0
+// only (play money on the simulated chain), once per address — see POST /welcome.
+const WELCOME = (process.env.FAUCET_WELCOME_ASH || "1000000000000000000000000").trim();
+// Generous per-IP cap on NEW welcome grants per hour — a safety net against a single host
+// scripting fresh addresses to drain the shared faucet key (which also funds /drip + the
+// synthetic-tx job). Far above any legitimate use (a user creating a handful of wallets);
+// set FAUCET_WELCOME_IP_PER_H=0 to disable. Already-funded addresses don't count (they
+// return early), and unlike /drip the welcome grant is called per-user-device, not via the
+// shared portal IP, so an IP key is safe here.
+const WELCOME_IP_PER_H = Number(process.env.FAUCET_WELCOME_IP_PER_H || 60);
 const WINDOW_MS = Number(process.env.FAUCET_WINDOW_H || 12) * 3600 * 1000;
 const NETWORK = process.env.FAUCET_NETWORK || "the test network";
 const PORT = Number(process.env.PORT || 8800);
 const STATE = "/data/faucet-ratelimit.json";
+const WELCOME_STATE = "/data/faucet-welcomed.json";
 
 // Dispensable networks (SSOT). Mainnet (563821) is intentionally EXCLUDED — the
 // faucet is NEVER wired to mainnet. Add a chain by adding one line here; `online`
@@ -38,13 +55,15 @@ const NETWORKS = {
   104928: { label: "Testnet", rpc: process.env.FAUCET_RPC_104928 || "" },
 };
 
-const drip_pyrx = (() => {
+const to_pyrx = (ash) => {
   try {
-    return (BigInt(DRIP) / 10n ** 18n).toString();
+    return (BigInt(ash) / 10n ** 18n).toString();
   } catch {
     return "?";
   }
-})();
+};
+const drip_pyrx = to_pyrx(DRIP);
+const welcome_pyrx = to_pyrx(WELCOME);
 
 /** Persisted cooldown map: key (address|ip) -> last drip epoch ms. */
 function loadHits() {
@@ -64,6 +83,49 @@ function saveHits(hits) {
 }
 let hits = loadHits();
 
+/** Addresses that have already received the one-time welcome grant (lowercased). */
+function loadWelcomed() {
+  try {
+    return new Set(JSON.parse(readFileSync(WELCOME_STATE, "utf8")));
+  } catch {
+    return new Set();
+  }
+}
+function saveWelcomed(set) {
+  try {
+    mkdirSync("/data", { recursive: true });
+    writeFileSync(WELCOME_STATE, JSON.stringify([...set]));
+  } catch {
+    /* best-effort */
+  }
+}
+let welcomed = loadWelcomed();
+
+// In-memory per-IP fixed-window counter for NEW welcome grants (abuse cap only; a restart
+// safely resets it — the per-address `welcomed` set still prevents any re-funding).
+const welcomeIp = new Map(); // ip -> { count, resetAt }
+function clientIp(req) {
+  const xff = req.headers["x-forwarded-for"];
+  if (typeof xff === "string" && xff.length) return xff.split(",")[0].trim();
+  return req.socket?.remoteAddress || "unknown";
+}
+function welcomeIpAllowed(ip) {
+  if (WELCOME_IP_PER_H <= 0) return true; // disabled
+  const now = Date.now();
+  // Prune expired buckets opportunistically so the map can't grow unbounded.
+  if (welcomeIp.size > 10000) {
+    for (const [k, v] of welcomeIp) if (now >= v.resetAt) welcomeIp.delete(k);
+  }
+  const e = welcomeIp.get(ip);
+  if (!e || now >= e.resetAt) {
+    welcomeIp.set(ip, { count: 1, resetAt: now + 3600_000 });
+    return true;
+  }
+  if (e.count >= WELCOME_IP_PER_H) return false;
+  e.count += 1;
+  return true;
+}
+
 // Auto-detect address kind: 40 hex => transparent, 128 hex => shielded, else null.
 function addrKind(s) {
   if (typeof s !== "string") return null;
@@ -81,14 +143,14 @@ function send(res, code, obj) {
   res.end(body);
 }
 
-function drip(address, kind, rpc) {
+function drip(address, kind, rpc, amount = DRIP) {
   // Sign + submit via the bundled CLI using the faucet keystore key. Transparent and
   // shielded use different subcommands; for shielded-send, --rpc-url is a GLOBAL flag
   // that MUST precede the `wallet` subcommand.
   const args =
     kind === "shielded"
-      ? ["--rpc-url", rpc, "wallet", "shielded-send", address, DRIP, "--from", KEY]
-      : ["wallet", "send", address, DRIP, "--from", KEY, "--rpc-url", rpc];
+      ? ["--rpc-url", rpc, "wallet", "shielded-send", address, amount, "--from", KEY]
+      : ["wallet", "send", address, amount, "--from", KEY, "--rpc-url", rpc];
   const r = spawnSync("pyrax", args, { env: process.env, encoding: "utf8", timeout: 30000 });
   const out = `${r.stdout || ""}${r.stderr || ""}`;
   const m = out.match(/submitted:\s*(\S+)/);
@@ -107,7 +169,7 @@ const server = http.createServer((req, res) => {
   }
   const url = new URL(req.url, "http://x");
   if (req.method === "GET" && (url.pathname === "/health")) {
-    return send(res, 200, { service: "pyrax-faucet", ok: true, network: NETWORK, drip: drip_pyrx });
+    return send(res, 200, { service: "pyrax-faucet", ok: true, network: NETWORK, drip: drip_pyrx, welcome: welcome_pyrx });
   }
   // Dispensable networks for the portal selector. online = has a non-empty rpc.
   if (req.method === "GET" && url.pathname === "/networks") {
@@ -159,10 +221,56 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
+  // One-time new-wallet WELCOME grant (Internal Devnet 1.0 only). Called automatically by
+  // the apps/CLI/web when a wallet is created; once per address for life, separate from the
+  // repeatable /drip faucet. Idempotent: an address already granted returns ok:true so a
+  // re-run of wallet creation never errors or double-funds.
+  if (req.method === "POST" && url.pathname === "/welcome") {
+    let body = "";
+    req.on("data", (c) => {
+      body += c;
+      if (body.length > 4096) req.destroy();
+    });
+    req.on("end", () => {
+      let address, chainId;
+      try {
+        const j = JSON.parse(body);
+        address = j.address;
+        chainId = Number(j.chainId) || DEFAULT_CHAIN;
+      } catch {
+        return send(res, 400, { error: "bad request" });
+      }
+      // Devnet1-only by design — every other network uses the normal repeatable faucet.
+      if (chainId !== DEFAULT_CHAIN) {
+        return send(res, 400, { error: "the welcome grant is only on Internal Devnet 1.0" });
+      }
+      const kind = addrKind(address);
+      if (!kind) return send(res, 400, { error: "enter a valid 0x… address (transparent or shielded)" });
+      address = address.trim();
+      const net = NETWORKS[chainId];
+      if (!net || !net.rpc) return send(res, 503, { error: "the welcome faucet is not online yet" });
+      const akey = address.toLowerCase();
+      // Once per address for life — re-creating or importing the same address never re-grants.
+      // Checked BEFORE the IP cap so an idempotent re-request never consumes a host's budget.
+      if (welcomed.has(akey)) {
+        return send(res, 200, { ok: true, already: true, amount: welcome_pyrx, network: net.label, kind });
+      }
+      // Abuse cap: bound NEW grants per source host per hour (see WELCOME_IP_PER_H).
+      if (!welcomeIpAllowed(clientIp(req))) {
+        return send(res, 429, { error: "welcome grants are rate-limited from this network — try again later" });
+      }
+      const r = drip(address, kind, net.rpc, WELCOME);
+      if (!r.ok) return send(res, 502, { error: r.error });
+      welcomed.add(akey);
+      saveWelcomed(welcomed);
+      return send(res, 200, { ok: true, hash: r.hash, amount: welcome_pyrx, network: net.label, kind });
+    });
+    return;
+  }
   send(res, 404, { error: "not found" });
 });
 
-server.listen(PORT, "0.0.0.0", () => console.log(`[faucet] listening :${PORT} — ${drip_pyrx} PYRX per drip on ${NETWORK}`));
+server.listen(PORT, "0.0.0.0", () => console.log(`[faucet] listening :${PORT} — ${drip_pyrx} PYRX/drip, ${welcome_pyrx} PYRX welcome grant on ${NETWORK}`));
 
 // --- synthetic transactions (chain activity) -------------------------------
 // Periodically send a TINY transfer to a rotating set of sink addresses so the
