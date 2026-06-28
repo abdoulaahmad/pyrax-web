@@ -31,16 +31,19 @@ export const SOCIAL = {
 // data (block height / connected peers / live TPS) in the navbar selector + the homepage live-stats card.
 //
 //   • An EMPTY string ("") = that network shows a red "offline" dot — nothing is polled.
-//   • Pyrax Seed (881109) + Pyrax Forge (710823) are PRIVATE: their RPC is intentionally
-//     NOT published here, so this public build never carries or queries it. Authorized
-//     tools get the endpoint out-of-band (the core team grants access in writing). They
-//     render name-only/offline on the public site by design.
-//   • Pyrax Rise / Pyrax One stay empty until each public network launches with a public
-//     node, then point at pyrax-rise.rpc / pyrax-one.rpc.pyraxchain.com.
+//   • All networks are publicly VIEWABLE here as they come online (the explorer + the
+//     navbar live-status read these). Participation (running a node) is gated elsewhere:
+//     the public Inferno app + CLI only offer Pyrax Forge onwards; only the dev-team Ember
+//     app joins Pyrax Seed.
+//   • Pyrax Seed (881109) is served at pyrax-seed.rpc.pyraxchain.com (standard 443, so it
+//     is reachable on cellular/corporate Wi-Fi). It reads "offline" until that vhost is
+//     live, then flips to green automatically.
+//   • Pyrax Forge / Rise / One stay empty until each launches, then point at
+//     pyrax-forge.rpc / pyrax-rise.rpc / pyrax-one.rpc.pyraxchain.com.
 export const RPC_BY_CHAIN: Record<number, string> = {
-  881109: "", // Pyrax Seed — PRIVATE, RPC never published in a public build
+  881109: "https://pyrax-seed.rpc.pyraxchain.com", // Pyrax Seed — public read RPC for the explorer/live-status
   429294: "", // (retired)
-  710823: "", // Pyrax Forge — PRIVATE, RPC never published in a public build
+  710823: "", // Pyrax Forge — wire to pyrax-forge.rpc.pyraxchain.com at launch
   104928: "", // Pyrax Rise — wire to pyrax-rise.rpc.pyraxchain.com at launch
   563821: "", // Pyrax One — wire to pyrax-one.rpc.pyraxchain.com only after the audit gate
 };

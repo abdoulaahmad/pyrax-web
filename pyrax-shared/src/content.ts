@@ -191,14 +191,14 @@ export const MEGA: Record<string, Mega> = {
 // (endpoints.ts → RPC_BY_CHAIN); an empty rpc = that network shows a red "offline" dot until wired.
 // `status` drives chain-ID visibility in the navbar selector: "internal" networks NEVER show their
 // chainId publicly; "public"/"built"/"pre-launch" show it only once LIVE and producing blocks.
-// All four networks are listed so the selector shows them. Pyrax Seed + Pyrax Forge are
-// PRIVATE: `status: "internal"` makes the navbar NEVER show their chain ID, and their
-// public `rpc` is intentionally empty (endpoints.ts) so the public site never queries
-// them — they render name-only/locked (access is granted in writing by the core team).
-// Pyrax Rise + Pyrax One are public; their chain ID shows once they are live + producing.
+// All four networks are listed and publicly VIEWABLE as they come online. `status:
+// "internal"` (Seed/Forge) keeps the navbar from rendering their chain ID, matching the
+// prior behaviour — they still show name + live status. Participation is gated in the
+// apps/CLI, not here: only the dev-team Ember app joins Pyrax Seed; the public Inferno app
+// + CLI join Pyrax Forge onwards. Pyrax Rise + One show their chain ID once live + producing.
 export const NETWORKS: { name: string; chainId: number; rpc: string; blockTime: string; faucet: boolean; status: string; note: string }[] = [
-  { name: "Pyrax Seed Network", chainId: 881109, rpc: rpcFor(881109), blockTime: "5s", faucet: false, status: "internal", note: "Private network — access granted by the core team" },
-  { name: "Pyrax Forge Network", chainId: 710823, rpc: rpcFor(710823), blockTime: "5s", faucet: false, status: "internal", note: "Private network — access granted by the core team" },
+  { name: "Pyrax Seed Network", chainId: 881109, rpc: rpcFor(881109), blockTime: "5s", faucet: false, status: "internal", note: "The dev team's simulated network — the current default" },
+  { name: "Pyrax Forge Network", chainId: 710823, rpc: rpcFor(710823), blockTime: "5s", faucet: true, status: "internal", note: "The public-facing development network" },
   { name: "Pyrax Rise Network", chainId: 104928, rpc: rpcFor(104928), blockTime: "6s", faucet: true, status: "pre-launch", note: "Public test network — faucet + miner-reward ramp; launching soon" },
   { name: "Pyrax One Network", chainId: 563821, rpc: rpcFor(563821), blockTime: "6s", faucet: false, status: "pre-launch", note: "The production network — activated only after the external audit gate" },
 ];
