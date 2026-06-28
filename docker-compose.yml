@@ -286,6 +286,10 @@ services:
       # Dispense through the internal WRITE-capable node (the public seed RPC is read-only).
       FAUCET_RPC: "${FAUCET_RPC:-http://node:8545}"
       FAUCET_NETWORK: "${FAUCET_NETWORK:-Pyrax Seed Network}"
+      # Behind Caddy: trust the proxy's rightmost X-Forwarded-For so per-IP caps key on the
+      # REAL client IP (not a spoofable header). Global hourly ceiling backstops total drain.
+      TRUST_PROXY: "1"
+      FAUCET_GLOBAL_MAX_PER_H: "${FAUCET_GLOBAL_MAX_PER_H:-1000}"
       FAUCET_DRIP_ASH: "${FAUCET_DRIP_ASH:-100000000000000000000}" # 100 PYRX
       FAUCET_WINDOW_H: "${FAUCET_WINDOW_H:-12}"
       # Synthetic transactions: periodic tiny transfers so the simulated chain carries

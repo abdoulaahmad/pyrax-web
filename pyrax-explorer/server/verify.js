@@ -30,6 +30,18 @@ export async function verifyContract(chainId, body) {
   if (!address || !/^0x[0-9a-fA-F]{40}$/.test(address)) return { ok: false, error: "invalid address" };
   if (!source || !contractName || !compilerVersion)
     return { ok: false, error: "source, contractName and compilerVersion are required" };
+  // Harden the public verify endpoint against remote-compile DoS: pin compilerVersion to the
+  // canonical solc release tag so loadRemoteVersion can only fetch a REAL, known solc build
+  // (never an attacker-chosen URL), and cap source/name/runs so one request can't drive an
+  // unbounded compile.
+  if (!/^v?\d+\.\d+\.\d+\+commit\.[0-9a-f]{8}$/.test(compilerVersion))
+    return { ok: false, error: "compilerVersion must be a solc release tag, e.g. v0.8.28+commit.7893614a" };
+  if (typeof source !== "string" || source.length > 500_000)
+    return { ok: false, error: "source too large (max 500 KB)" };
+  if (typeof contractName !== "string" || !/^[A-Za-z_$][A-Za-z0-9_$]{0,127}$/.test(contractName))
+    return { ok: false, error: "invalid contractName" };
+  if (evmVersion !== undefined && !/^[a-z]{4,20}$/.test(String(evmVersion)))
+    return { ok: false, error: "invalid evmVersion" };
   const url = rpcFor(chainId);
   if (!url) return { ok: false, error: "this network is not indexed / has no RPC" };
 
@@ -47,7 +59,7 @@ export async function verifyContract(chainId, body) {
     language: "Solidity",
     sources: { "Contract.sol": { content: source } },
     settings: {
-      optimizer: { enabled: !!optimization, runs: Number(runs) || 200 },
+      optimizer: { enabled: !!optimization, runs: Math.min(Math.max(Number(runs) || 200, 1), 1_000_000) },
       ...(evmVersion ? { evmVersion } : {}),
       outputSelection: { "*": { "*": ["abi", "evm.deployedBytecode.object"] } },
     },

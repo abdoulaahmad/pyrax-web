@@ -103,10 +103,40 @@ let welcomed = loadWelcomed();
 // In-memory per-IP fixed-window counter for NEW welcome grants (abuse cap only; a restart
 // safely resets it — the per-address `welcomed` set still prevents any re-funding).
 const welcomeIp = new Map(); // ip -> { count, resetAt }
+// Trust the proxy's X-Forwarded-For ONLY when explicitly enabled (we run behind Caddy).
+// Caddy APPENDS the real client IP as the RIGHTMOST hop, so a client-spoofed leftmost XFF
+// can never be used as identity — closing the per-IP rate-limit bypass.
+const TRUST_PROXY = /^(1|true|yes|on)$/i.test(process.env.TRUST_PROXY || "");
 function clientIp(req) {
-  const xff = req.headers["x-forwarded-for"];
-  if (typeof xff === "string" && xff.length) return xff.split(",")[0].trim();
+  if (TRUST_PROXY) {
+    const xff = req.headers["x-forwarded-for"];
+    if (typeof xff === "string" && xff.length) {
+      const parts = xff.split(",").map((s) => s.trim()).filter(Boolean);
+      if (parts.length) return parts[parts.length - 1];
+    }
+  }
   return req.socket?.remoteAddress || "unknown";
+}
+// GLOBAL hourly dispense ceiling across ALL endpoints/IPs/addresses — the backstop that
+// bounds total drain even if every other gate is bypassed (mining refills the operator key
+// faster than this). 0 disables. Far above any legitimate aggregate use.
+const GLOBAL_MAX_PER_H = Number(process.env.FAUCET_GLOBAL_MAX_PER_H || 1000);
+let globalWin = { count: 0, resetAt: 0 };
+function globalAllowed() {
+  if (GLOBAL_MAX_PER_H <= 0) return true;
+  const now = Date.now();
+  if (now >= globalWin.resetAt) globalWin = { count: 0, resetAt: now + 3600_000 };
+  if (globalWin.count >= GLOBAL_MAX_PER_H) return false;
+  globalWin.count += 1;
+  return true;
+}
+// CORS: value-dispensing endpoints must NOT be wildcard-open. Echo the Origin only for
+// PYRAX-owned origins; same-origin (the faucet page) needs no ACAO and the apps/CLI call
+// server-side (not CORS-gated), so this just blocks drive-by abuse from third-party pages.
+function corsOrigin(req) {
+  const o = req.headers.origin;
+  if (typeof o === "string" && /^https:\/\/([a-z0-9-]+\.)*pyraxchain\.com$/i.test(o)) return o;
+  return "";
 }
 function welcomeIpAllowed(ip) {
   if (WELCOME_IP_PER_H <= 0) return true; // disabled
@@ -137,9 +167,9 @@ const ms = (k) => hits.get(k) || 0;
 const left = (k) => Math.max(0, WINDOW_MS - (Date.now() - ms(k)));
 
 function send(res, code, obj) {
-  const body = JSON.stringify(obj);
-  res.writeHead(code, { "content-type": "application/json", "access-control-allow-origin": "*" });
-  res.end(body);
+  // The per-request CORS allow-list header is set once on `res` at the top of the handler.
+  res.writeHead(code, { "content-type": "application/json" });
+  res.end(JSON.stringify(obj));
 }
 
 function drip(address, kind, rpc, amount = DRIP) {
@@ -158,9 +188,11 @@ function drip(address, kind, rpc, amount = DRIP) {
 }
 
 const server = http.createServer((req, res) => {
+  // CORS: only PYRAX-owned origins are echoed (most callers are same-origin or server-side).
+  const acao = corsOrigin(req);
+  if (acao) res.setHeader("access-control-allow-origin", acao);
   if (req.method === "OPTIONS") {
     res.writeHead(204, {
-      "access-control-allow-origin": "*",
       "access-control-allow-methods": "GET,POST,OPTIONS",
       "access-control-allow-headers": "content-type",
     });
@@ -212,6 +244,9 @@ const server = http.createServer((req, res) => {
       if (wait > 0) {
         return send(res, 429, { error: `already funded recently — try again in ${Math.ceil(wait / 3600000)}h` });
       }
+      if (!globalAllowed()) {
+        return send(res, 503, { error: "the faucet is at capacity right now — please try again shortly" });
+      }
       const r = drip(address, kind, net.rpc);
       if (!r.ok) return send(res, 502, { error: r.error });
       hits.set(akey, Date.now());
@@ -257,6 +292,9 @@ const server = http.createServer((req, res) => {
       // Abuse cap: bound NEW grants per source host per hour (see WELCOME_IP_PER_H).
       if (!welcomeIpAllowed(clientIp(req))) {
         return send(res, 429, { error: "welcome grants are rate-limited from this network — try again later" });
+      }
+      if (!globalAllowed()) {
+        return send(res, 503, { error: "the faucet is at capacity right now — please try again shortly" });
       }
       const r = drip(address, kind, net.rpc, WELCOME);
       if (!r.ok) return send(res, 502, { error: r.error });
