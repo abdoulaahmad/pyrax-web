@@ -49,10 +49,9 @@ const WELCOME_STATE = "/data/faucet-welcomed.json";
 // in the selector but is greyed/disabled. Only 881109 has a write RPC for now.
 const DEFAULT_CHAIN = 881109;
 const NETWORKS = {
-  881109: { label: "Internal Devnet 1.0", rpc: RPC || "http://node:8545" },
-  429294: { label: "Internal Live", rpc: process.env.FAUCET_RPC_429294 || "" },
-  710823: { label: "Devnet2", rpc: process.env.FAUCET_RPC_710823 || "" },
-  104928: { label: "Testnet", rpc: process.env.FAUCET_RPC_104928 || "" },
+  881109: { label: "Pyrax Seed Network", rpc: RPC || "http://node:8545" },
+  710823: { label: "Pyrax Forge Network", rpc: process.env.FAUCET_RPC_710823 || "" },
+  104928: { label: "Pyrax Rise Network", rpc: process.env.FAUCET_RPC_104928 || "" },
 };
 
 const to_pyrx = (ash) => {

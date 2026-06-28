@@ -5,11 +5,10 @@
 // falls back to a live-RPC read / honest "not live" state). Override any RPC via env (RPC_<chainId>).
 
 export const NETWORKS = {
-  881109: { name: "Internal Devnet 1.0", rpc: process.env.RPC_881109 ?? "https://sidn-rpc.pyraxchain.com:8811" },
-  429294: { name: "Internal Live", rpc: process.env.RPC_429294 ?? "" },
-  710823: { name: "Devnet2", rpc: process.env.RPC_710823 ?? "" },
-  104928: { name: "Testnet", rpc: process.env.RPC_104928 ?? "" },
-  563821: { name: "Mainnet", rpc: process.env.RPC_563821 ?? "" },
+  881109: { name: "Pyrax Seed Network", rpc: process.env.RPC_881109 ?? "https://pyrax-seed.rpc.pyraxchain.com" },
+  710823: { name: "Pyrax Forge Network", rpc: process.env.RPC_710823 ?? "" },
+  104928: { name: "Pyrax Rise Network", rpc: process.env.RPC_104928 ?? "" },
+  563821: { name: "Pyrax One Network", rpc: process.env.RPC_563821 ?? "" },
 };
 
 export const PORT = Number(process.env.PORT ?? 8788);
