@@ -5,8 +5,9 @@
 name: build-and-deploy
 
 on:
-  push:
-    branches: [main]
+  # MANUAL-ONLY: a push to main NEVER auto-deploys. Production rollout is a deliberate,
+  # approved action (Actions tab -> Run workflow), so repos never deploy out of order or
+  # before they're approved. CI/build validation runs on push via ci.yml.
   workflow_dispatch:
 
 concurrency:
