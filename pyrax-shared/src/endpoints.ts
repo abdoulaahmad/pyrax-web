@@ -31,20 +31,18 @@ export const SOCIAL = {
 // data (block height / connected peers / live TPS) in the navbar selector + the homepage live-stats card.
 //
 //   • An EMPTY string ("") = that network shows a red "offline" dot — nothing is polled.
-//   • Internal Devnet 1.0 (881109) points at the always-on DigitalOcean droplet that runs the simulated
-//     devnet 24/7 (so the network stays reachable when the founder's PC is off). It will show "offline"
-//     until that droplet + DNS are live, then flip to green automatically — no code change needed.
-//   • Devnet2 / Testnet / Mainnet stay empty until each network actually launches and has a public node.
-//
-//   ⮕ TO LIGHT UP THE DEVNET: set RPC_BY_CHAIN[881109] to your droplet's real RPC URL (see the
-//      "deploy the RPC droplet" guide). It MUST be HTTPS and send CORS headers (the droplet node is
-//      started with --rpc-cors, or fronted by Caddy that adds them).
+//   • Pyrax Seed (881109) + Pyrax Forge (710823) are PRIVATE: their RPC is intentionally
+//     NOT published here, so this public build never carries or queries it. Authorized
+//     tools get the endpoint out-of-band (the core team grants access in writing). They
+//     render name-only/offline on the public site by design.
+//   • Pyrax Rise / Pyrax One stay empty until each public network launches with a public
+//     node, then point at pyrax-rise.rpc / pyrax-one.rpc.pyraxchain.com.
 export const RPC_BY_CHAIN: Record<number, string> = {
-  881109: "https://sidn-rpc.pyraxchain.com", // Internal Devnet (simulated) — DEV-TEAM RPC on the droplet (204.48.16.184), served on STANDARD 443. A non-standard port (was :8811) is blocked by many cellular carriers + captive/corporate Wi-Fi, so the live status read "offline" on mobile; 443 is reachable everywhere. Status is shown publicly; the endpoint is NOT advertised to users. See NETWORK-REGISTRY.md.
-  429294: "", // Internal Live — wire when a public node is exposed
-  710823: "", // Devnet2 — wire at launch (target Jul 2026)
-  104928: "", // Testnet — wire at launch
-  563821: "", // Mainnet — wire only after the external audit gate
+  881109: "", // Pyrax Seed — PRIVATE, RPC never published in a public build
+  429294: "", // (retired)
+  710823: "", // Pyrax Forge — PRIVATE, RPC never published in a public build
+  104928: "", // Pyrax Rise — wire to pyrax-rise.rpc.pyraxchain.com at launch
+  563821: "", // Pyrax One — wire to pyrax-one.rpc.pyraxchain.com only after the audit gate
 };
 
 /** The RPC URL for a chainId, or "" if not wired (network-store treats "" as offline). */

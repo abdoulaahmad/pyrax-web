@@ -94,7 +94,7 @@ function netSelectHtml(extra = ""): string {
     <div class="net-select ${extra}" data-net-select>
       <button type="button" class="net-trigger" data-net-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Network selector">
         <span class="status-dot net-dot" data-net-trigger-dot aria-hidden="true"></span>
-        <span class="net-trigger-name" data-net-trigger-name>Internal Devnet 1.0</span>
+        <span class="net-trigger-name" data-net-trigger-name>Pyrax Seed Network</span>
         ${icon("chevron", "h-3.5 w-3.5 shrink-0 opacity-70")}
       </button>
       <div class="net-menu" data-net-menu role="menu" aria-label="Choose network" hidden>
