@@ -94,7 +94,7 @@ services:
       # batch wider so the explorer stays within one block of the tip and catches up quickly
       # after a re-genesis re-index. The realtime feel is delivered by the explorer-web
       # WebSocket (it pushes each newly-ingested block to the browser instantly).
-      RPC_881109: "https://sidn-rpc.pyraxchain.com:8811"
+      RPC_881109: "https://pyrax-seed.rpc.pyraxchain.com"
       INGEST_BATCH: "8"
       RECEIPT_CONCURRENCY: "2"
       INGEST_INTERVAL_MS: "2500"
@@ -155,7 +155,7 @@ services:
       DATABASE_CA: "${DATABASE_CA:-}"
       PG_POOL_MAX: "5" # keep team-pyrax + explorer pools under the cluster's connection cap
 
-  # Internal write-capable full node for chain 881109 (Internal Devnet 1.0). It PEERS
+  # Internal write-capable full node for chain 881109 (Pyrax Seed Network). It PEERS
   # with the public seed/producer (204.48.16.184:30303) over the p2p mesh, syncs the
   # chain, and — crucially — SEALS the transactions submitted to it via RPC. A node only
   # gossips sealed BLOCKS to peers (it never re-broadcasts raw txs), so a non-sealing
@@ -285,7 +285,7 @@ services:
       PYRAX_KEY_PASSPHRASE: "${PYRAX_KEY_PASSPHRASE:-}"
       # Dispense through the internal WRITE-capable node (the public seed RPC is read-only).
       FAUCET_RPC: "${FAUCET_RPC:-http://node:8545}"
-      FAUCET_NETWORK: "${FAUCET_NETWORK:-Internal Devnet 1.0}"
+      FAUCET_NETWORK: "${FAUCET_NETWORK:-Pyrax Seed Network}"
       FAUCET_DRIP_ASH: "${FAUCET_DRIP_ASH:-100000000000000000000}" # 100 PYRX
       FAUCET_WINDOW_H: "${FAUCET_WINDOW_H:-12}"
       # Synthetic transactions: periodic tiny transfers so the simulated chain carries

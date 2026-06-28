@@ -68,7 +68,7 @@ relay.pyraxchain.com {
 }
 
 # --- public test-token faucet: a small web UI + rate-limited /drip endpoint.
-# Dispenses test PYRX on Internal Devnet 1.0 through the internal write node. ---
+# Dispenses test PYRX on the Pyrax Seed Network through the internal write node. ---
 faucet.pyraxchain.com {
 	reverse_proxy faucet:8800
 }
