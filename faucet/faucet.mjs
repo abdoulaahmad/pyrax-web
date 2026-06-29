@@ -25,7 +25,11 @@ import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 
 const RPC = process.env.FAUCET_RPC || "";
-const KEY = process.env.FAUCET_KEY || "faucet-op"; // keystore key name (genesis-funded Anvil #2)
+// Keystore key NAME the faucet signs with. Its address is the genesis-funded, CONTROLLED
+// Seed faucet/genesis-public wallet (0xd175f99de68ba0bc017ba85e507e0f3798e98863, ~1 T at
+// genesis + all coinbase). The deploy imports the secret SEED_FAUCET_KEY (root .env vault)
+// into the CLI keystore under this name (the public Anvil #2 key it replaced is gone).
+const KEY = process.env.FAUCET_KEY || "seed-faucet";
 const DRIP = (process.env.FAUCET_DRIP_ASH || "100000000000000000000").trim(); // 100 PYRX
 // One-time new-wallet welcome grant. 1,000,000 PYRX = 1e6 * 1e18 ash. Internal Devnet 1.0
 // only (play money on the simulated chain), once per address — see POST /welcome.
