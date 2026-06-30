@@ -518,6 +518,40 @@ export async function searchTesters(q: string, excludeId: string, limit = 8): Pr
   const r = await db().query("SELECT id, handle, display_name FROM testers WHERE status='active' AND id<>$1 AND handle<>'' AND (lower(handle) LIKE $2 OR lower(display_name) LIKE $2) ORDER BY handle LIMIT $3", [excludeId, s, limit]);
   return r.rows;
 }
+// ---- releases ----
+export async function createRelease(by: string, f: { version: string; channel?: string; title?: string; notes?: string; downloadUrl?: string }): Promise<any> {
+  await init();
+  const r = await db().query("INSERT INTO releases (id,version,channel,title,notes,download_url,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *",
+    [id("rel"), f.version.slice(0, 40), (f.channel || "inferno").slice(0, 24), (f.title || "").slice(0, 160), (f.notes || "").slice(0, 8000), f.downloadUrl || null, by, Date.now()]);
+  return r.rows[0];
+}
+export async function listReleases(limit = 30): Promise<any[]> {
+  await init();
+  const r = await db().query("SELECT id,version,channel,title,notes,download_url,created_at FROM releases ORDER BY created_at DESC LIMIT $1", [limit]);
+  return r.rows;
+}
+
+// ---- web push subscriptions ----
+export async function savePushSub(testerId: string, endpoint: string, keys: any): Promise<void> {
+  await init();
+  await db().query("INSERT INTO push_subscriptions (endpoint,tester_id,keys,created_at) VALUES ($1,$2,$3::jsonb,$4) ON CONFLICT (endpoint) DO UPDATE SET tester_id=$2, keys=$3::jsonb", [endpoint, testerId, JSON.stringify(keys), Date.now()]);
+}
+export async function listPushSubs(): Promise<any[]> {
+  await init();
+  const r = await db().query("SELECT endpoint, keys FROM push_subscriptions");
+  return r.rows;
+}
+export async function deletePushSub(endpoint: string): Promise<void> {
+  await init();
+  await db().query("DELETE FROM push_subscriptions WHERE endpoint=$1", [endpoint]);
+}
+
+/** Persist a system chat message (e.g., a release announcement) to a channel. */
+export async function postSystemMessage(channel: string, body: string): Promise<void> {
+  await init();
+  await db().query("INSERT INTO chat_messages (id,channel,author_id,author_name,author_user,author_admin,author_role,body,created_at) VALUES ($1,$2,'system','PYRAX','PYRAX',TRUE,'admin',$3,$4)", [id("m"), channel, body.slice(0, 2000), Date.now()]);
+}
+
 /** Active-tester roster for the chat members panel (online status comes from the WS server).
  *  role: admin (staff/blue), support (community-support/green), tester (orange). */
 export async function chatRoster(): Promise<any[]> {

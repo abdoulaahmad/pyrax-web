@@ -378,8 +378,76 @@ function MiniBox({ title, body }: { title: string; body: string }) { return <div
 export function Chat(_: { me: any }) {
   return <><PageHeader title="Chat" subtitle="Realtime community — channels, DMs + group chats, @mentions, emoji + GIFs. Team = Admin, Community Support = green." /><ChatRoom apiBase="/api/chat" /></>;
 }
-export function Releases(_: { subject: AccessSubject }) {
-  return <><PageHeader title="Releases" subtitle="Latest devnet builds + changelog." /><ComingSoon title="Release feed is being wired up" detail="New builds appear here with changelog + download, and you'll get a browser push + email the moment one drops." /></>;
+function urlB64ToUint8(base64: string) {
+  const padding = "=".repeat((4 - (base64.length % 4)) % 4);
+  const b64 = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(b64); const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+export function Releases({ subject }: { subject: AccessSubject }) {
+  const [items, setItems] = useState<any[] | null>(null);
+  const [pub, setPub] = useState(false);
+  const [f, setF] = useState<any>({ version: "", channel: "inferno", title: "", notes: "", downloadUrl: "" });
+  const [busy, setBusy] = useState(false); const [errs, setErrs] = useState<any>({});
+  const [pushState, setPushState] = useState("");
+  const canPublish = subject.isSuperuser || subject.permissions.includes("releases.publish");
+  async function load() { const d = await (await fetch("/api/releases")).json(); setItems(d.ok ? d.releases : []); }
+  useEffect(() => { load(); }, []);
+  async function publish() {
+    if (!f.version.trim()) { setErrs({ version: "Version required." }); return; }
+    setBusy(true); setErrs({});
+    const res = await fetch("/api/releases", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(f) });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok || !d.ok) { setErrs(d.errors || { _: d.error || "Couldn't publish." }); setBusy(false); return; }
+    setPub(false); setF({ version: "", channel: "inferno", title: "", notes: "", downloadUrl: "" }); setBusy(false); load();
+  }
+  async function enablePush() {
+    setPushState("…");
+    try {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) return setPushState("Not supported in this browser.");
+      const perm = await Notification.requestPermission();
+      if (perm !== "granted") return setPushState("Permission denied.");
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      const v = await (await fetch("/api/push/vapid")).json();
+      if (!v.ok || !v.configured) return setPushState("Push isn't configured yet.");
+      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8(v.publicKey) });
+      await fetch("/api/push/subscribe", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ subscription: sub }) });
+      setPushState("✓ Notifications on");
+    } catch { setPushState("Couldn't enable notifications."); }
+  }
+  return (
+    <>
+      <PageHeader title="Releases" subtitle="Latest devnet builds + changelog. Get a browser push + email the moment one drops."
+        action={<div className="flex items-center gap-2"><Button onClick={enablePush}>🔔 Enable alerts</Button>{canPublish && <Button variant="primary" onClick={() => setPub(true)}><Icon.plus className="h-4 w-4" /> Publish</Button>}</div>} />
+      {pushState && <p className="mb-3 text-xs text-faint">{pushState}</p>}
+      {pub && (
+        <Card className="mb-4 p-5">
+          <div className="text-sm font-semibold">Publish a release</div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div><label className="label">Version</label><input className="input" value={f.version} onChange={(e) => setF({ ...f, version: e.target.value })} placeholder="v0.1.1" />{errs.version && <p className="text-xs text-[color:var(--color-negative)]">{errs.version}</p>}</div>
+            <div><label className="label">Channel</label><select className="input" value={f.channel} onChange={(e) => setF({ ...f, channel: e.target.value })}><option value="inferno">Inferno</option><option value="cli">CLI</option><option value="node">Node</option></select></div>
+          </div>
+          <div className="mt-3"><label className="label">Title</label><input className="input" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="What's new" /></div>
+          <div className="mt-3"><label className="label">Changelog</label><textarea className="input" rows={4} value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></div>
+          <div className="mt-3"><label className="label">Download URL <span className="font-normal text-faint">(optional)</span></label><input className="input" value={f.downloadUrl} onChange={(e) => setF({ ...f, downloadUrl: e.target.value })} placeholder="https://…" /></div>
+          {errs._ && <p className="mt-2 text-sm text-[color:var(--color-negative)]">{errs._}</p>}
+          <div className="mt-4 flex gap-3"><Button variant="primary" onClick={publish} disabled={busy}>{busy ? "Publishing…" : "Publish + notify everyone"}</Button><Button onClick={() => setPub(false)}>Cancel</Button></div>
+        </Card>
+      )}
+      {!items ? <Card className="p-8 text-center text-sm text-muted">Loading…</Card> : items.length === 0 ? <Card className="p-8 text-center text-sm text-muted">No releases yet.</Card> : (
+        <div className="space-y-3">
+          {items.map((r) => (
+            <Card key={r.id} className="p-5">
+              <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Badge tone="brand">{r.version}</Badge><span className="text-xs text-faint">{r.channel} · {new Date(Number(r.created_at)).toLocaleDateString()}</span></div>{r.download_url && <a className="btn btn-ghost" href={r.download_url} target="_blank" rel="noreferrer"><Icon.download className="h-4 w-4" /> Get it</a>}</div>
+              {r.title && <div className="mt-2 font-bold">{r.title}</div>}
+              {r.notes && <div className="mt-1 whitespace-pre-wrap text-sm text-muted">{r.notes}</div>}
+            </Card>
+          ))}
+        </div>
+      )}
+    </>
+  );
 }
 export function Triage(_: { subject: AccessSubject }) {
   return <><PageHeader title="Triage" subtitle="Staff: triage bug reports + award bounties." /><ComingSoon title="Triage tools are being wired up" detail="Set severity/status, link duplicates, and award bug bounties to testers." /></>;
