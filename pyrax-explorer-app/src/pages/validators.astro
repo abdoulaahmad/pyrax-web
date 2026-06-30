@@ -1,12 +1,63 @@
 ---
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Shell from "../layouts/Shell.astro";
+import { selectedChainId, netFor, getValidators } from "../server/chain";
+import { shortAddr, fmtNum } from "../lib/format";
+
+const net = netFor(selectedChainId(Astro.request.headers.get("cookie")));
+const v: any = await getValidators(net);
+const sample = v.source === "sample";
+const tiles = [
+  { label: "Active validators", value: fmtNum(v.activeCount), sub: "Stream C set" },
+  { label: "Total staked", value: v.totalStaked + " PYRX", sub: `${v.bondedRatio}% of supply bonded` },
+  { label: "Finality rounds", value: v.finalityRounds, sub: "BLS BFT" },
+  { label: "Finality", value: "Stream C", sub: "deterministic, instant" },
+];
 ---
-<Shell title="Validators">
-  <h1 class="text-2xl font-extrabold sm:text-3xl">Validators</h1>
-  <p class="mt-1 max-w-2xl text-muted">Stream C proof-of-stake validators and finality participation.</p>
-  <div class="card mt-6 p-8">
-    <div class="flex items-center gap-2 text-sm font-semibold text-[color:var(--color-brand)]"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3c1 3 4 4 4 8a4 4 0 0 1-8 0c0-1.5.6-2.3 1.2-3C9.8 9 10 7 9 5c2 .5 3 1.5 3 3 0-1.7 0-3.5 0-5Z"/></svg> In active development</div>
-    <p class="mt-1.5 max-w-xl text-sm text-muted">Validator set, stake weights and BFT finality stats (Phase 4 staking surface).</p>
+<Shell title="Validators" description="PYRAX Stream C proof-of-stake validators, stake weights and BFT finality.">
+  <div class="flex flex-wrap items-center gap-2">
+    <h1 class="text-2xl font-extrabold sm:text-3xl">Validators</h1>
+    <span class="chip" style="color:#34d399;border-color:rgba(52,211,153,.4)">Stream C · PoS</span>
+    {sample && <span class="rounded-full border border-[color:rgba(252,208,61,0.4)] bg-[rgba(252,208,61,0.08)] px-2 py-0.5 text-[0.66rem] font-semibold uppercase tracking-wider text-[color:var(--color-gold)]">sample</span>}
+  </div>
+  <p class="mt-1 max-w-2xl text-sm text-muted">Stream C provides PYRAX's deterministic BFT finality. Validators bond PYRX, propose and attest to blocks, and finalize the GhostDAG selected chain. A dedicated staking RPC surface will replace this preview as the node exposes it.</p>
+
+  <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    {tiles.map((t) => (
+      <div class="card p-5">
+        <div class="text-xs font-semibold uppercase tracking-wider text-faint">{t.label}</div>
+        <div class="mt-1.5 text-2xl font-extrabold">{t.value}</div>
+        <div class="mt-0.5 text-xs text-faint">{t.sub}</div>
+      </div>
+    ))}
+  </div>
+
+  <h2 class="mt-6 text-lg font-bold">Validator set</h2>
+  <div class="card mt-2 overflow-hidden p-0">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead><tr class="border-b border-line text-left text-xs uppercase tracking-wider text-faint">
+          <th class="px-4 py-3 font-semibold">#</th><th class="px-4 py-3 font-semibold">Validator</th><th class="px-4 py-3 font-semibold">Stake</th><th class="px-4 py-3 font-semibold">Share</th><th class="px-4 py-3 font-semibold">Blocks</th><th class="px-4 py-3 font-semibold">Uptime</th><th class="px-4 py-3 text-right font-semibold">Status</th>
+        </tr></thead>
+        <tbody>
+          {v.validators.map((val: any) => (
+            <tr class="border-b border-line-soft last:border-0 hover:bg-[rgba(255,255,255,0.02)]">
+              <td class="px-4 py-3 font-mono text-faint">{val.rank}</td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2">
+                  <span class="grid h-7 w-7 place-items-center rounded-full text-[0.6rem] font-bold text-[color:#34d399]" style="background:rgba(52,211,153,0.12)">{val.name.slice(0, 2)}</span>
+                  <div><div class="font-semibold text-ink">{val.name}</div><a href={`/address/${val.address}`} class="font-mono text-xs text-faint hover:text-muted">{shortAddr(val.address)}</a></div>
+                </div>
+              </td>
+              <td class="px-4 py-3 font-mono text-muted">{fmtNum(val.stake)} <span class="text-faint">PYRX</span></td>
+              <td class="px-4 py-3"><div class="flex items-center gap-2"><span class="font-mono text-muted">{val.share}%</span><div class="hidden h-1.5 w-16 overflow-hidden rounded-full bg-[rgba(255,255,255,0.05)] sm:block"><div class="h-full rounded-full" style={`width:${Math.min(100, Number(val.share) * 4)}%;background:#34d399`}></div></div></div></td>
+              <td class="px-4 py-3 font-mono text-muted">{fmtNum(val.blocksProposed)}</td>
+              <td class="px-4 py-3 font-mono text-muted">{val.uptime}%</td>
+              <td class="px-4 py-3 text-right"><span class="chip" style={val.status === "active" ? "color:var(--color-positive);border-color:rgba(52,211,153,.4)" : "color:var(--color-negative);border-color:rgba(251,111,115,.4)"}>{val.status}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   </div>
 </Shell>

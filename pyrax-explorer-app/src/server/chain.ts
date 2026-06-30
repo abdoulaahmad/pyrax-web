@@ -5,7 +5,7 @@
 // sample data when the node is unreachable — so the explorer always renders.
 import { NETWORKS, networkByChain, DEFAULT_CHAIN, type ExplorerNetwork } from "../lib/networks";
 import { rpc, rpcAll, hexToNum } from "./rpc";
-import { sampleOverview, sampleBlocks, sampleBlockDetail, sampleTxs, sampleTxDetail, sampleAddress, sampleShielded } from "./sample";
+import { sampleOverview, sampleBlocks, sampleBlockDetail, sampleTxs, sampleTxDetail, sampleAddress, sampleShielded, sampleDag, sampleNetwork, sampleGas, sampleValidators, sampleContracts, sampleTokens, sampleLogs } from "./sample";
 
 export function selectedChainId(cookieHeader: string | null): number {
   const m = (cookieHeader || "").match(/(?:^|;\s*)pyrax_net=(\d+)/);
@@ -133,4 +133,106 @@ export async function getAddress(net: ExplorerNetwork, a: string) {
 export async function getShielded(net: ExplorerNetwork) {
   if (net.rpc) try { const n = await rpc(net.rpc, "pyrax_noteState", [], 5000); if (n) return { source: "live" as const, anchor: n.anchor, noteCount: Number(n.note_count) || 0, nullifierCount: Number(n.nullifier_count) || 0, shieldedTxShare: "—", treeDepth: 32, capacity: 2 ** 32, recent: [] }; } catch {}
   return sampleShielded();
+}
+
+/** DAG & Streams: live pyrax_dagRecent (parents/blueScore/stream) → derived seal lane, else sample. */
+export async function getDag(net: ExplorerNetwork) {
+  if (net.rpc) try {
+    const recent = await rpc(net.rpc, "pyrax_dagRecent", [48], 5000);
+    if (Array.isArray(recent) && recent.length) {
+      // Map native pyr-hashes to compact indices so the view can draw parent edges.
+      const idx = new Map<string, number>();
+      recent.forEach((d: any, i: number) => idx.set(String(d.hash), i));
+      const nodes = recent.map((d: any) => {
+        const blueScore = Number(d.blueScore);
+        const stream = d.stream === "A" || d.stream === "B" || d.stream === "C" ? d.stream : "A";
+        return { hash: d.hash, blueScore, stream, sealAlgo: deriveSeal(stream, blueScore), timestamp: Number(d.timestamp), parents: (d.parents || []).map((p: string) => idx.get(p)).filter((n: number | undefined) => n !== undefined) as number[] };
+      });
+      const streamCounts: Record<string, number> = { A: 0, B: 0, C: 0 };
+      for (const n of nodes) streamCounts[n.stream]++;
+      return { source: "live" as const, nodes, streamCounts, tips: [nodes[0]?.hash].filter(Boolean), head: nodes[0]?.blueScore || 0 };
+    }
+  } catch {}
+  return sampleDag();
+}
+
+/** Network health: consensus mode, sync/finality, peers, node identity — live or sample. */
+export async function getNetwork(net: ExplorerNetwork) {
+  if (net.rpc) try {
+    const [consensus, sync, peerCount, nodeInfo, peers, gp, cid, dag] = await Promise.all([
+      rpc(net.rpc, "pyrax_consensusInfo", [], 5000).catch(() => null),
+      rpc(net.rpc, "pyrax_syncStatus", [], 5000).catch(() => null),
+      rpc(net.rpc, "pyrax_peerCount", [], 4000).catch(() => null),
+      rpc(net.rpc, "pyrax_nodeInfo", [], 4000).catch(() => null),
+      rpc(net.rpc, "pyrax_peers", [], 4000).catch(() => null),
+      rpc(net.rpc, "eth_gasPrice", [], 4000).catch(() => null),
+      rpc(net.rpc, "eth_chainId", [], 4000).catch(() => null),
+      dagStreamMap(net),
+    ]);
+    if (sync || consensus) {
+      const sealLanes: Record<string, number> = { blake3: 0, sha256d: 0, kheavyhash: 0, argon2id: 0, pos: 0 };
+      for (const [bs, st] of dag.entries()) sealLanes[deriveSeal(st, bs)]++;
+      return {
+        source: "live" as const, mode: consensus?.mode || "—", modeNote: consensus?.single_stream_note || null,
+        activeStreams: consensus?.active_streams || [], height: Number(sync?.height) || 0, target: Number(sync?.target) || 0,
+        finalizedHeight: Number(sync?.finalizedBlueScore ?? sync?.height) || 0, syncing: !!sync?.syncing, targetKnown: !!sync?.targetKnown,
+        peerCount: Number(peerCount) || (Array.isArray(peers) ? peers.length : 0), incompatiblePeers: Number(sync?.incompatiblePeers) || 0, updateRequired: !!sync?.updateRequired,
+        nodeInfo: nodeInfo ? { peerId: nodeInfo.peerId, listenAddrs: nodeInfo.listenAddrs || [], p2pPort: nodeInfo.p2pPort } : null,
+        chainId: cid ? hexToNum(cid) : net.chainId, clientVersion: "pyrax-node", gasPrice: gp ? (Number(hexToNum(gp)) / 1e9).toFixed(2) : "—", baseFee: "—", sealLanes,
+        peers: (Array.isArray(peers) ? peers : []).map((p: any) => ({ id: p.peerId || p.id || "—", addr: p.addr || (p.listenAddrs && p.listenAddrs[0]) || "—", height: Number(p.height) || 0, latency: Number(p.latencyMs ?? p.latency) || 0, direction: p.direction || "—" })),
+      };
+    }
+  } catch {}
+  return sampleNetwork();
+}
+
+/** Gas tracker: EIP-1559 base-fee history + suggested tiers — live or sample. */
+export async function getGas(net: ExplorerNetwork) {
+  if (net.rpc) try {
+    const [gp, fh] = await Promise.all([
+      rpc(net.rpc, "eth_gasPrice", [], 4000).catch(() => null),
+      rpc(net.rpc, "eth_feeHistory", ["0x18", "latest", [10, 50, 90]], 6000).catch(() => null),
+    ]);
+    if (fh && Array.isArray(fh.baseFeePerGas)) {
+      const oldest = hexToNum(fh.oldestBlock);
+      const history = fh.baseFeePerGas.slice(0, -1).map((b: string, i: number) => ({ block: oldest + i, baseFee: Number((Number(hexToNum(b)) / 1e9).toFixed(3)), gasUsedRatio: Number(fh.gasUsedRatio?.[i]) || 0 }));
+      const cur = Number(hexToNum(fh.baseFeePerGas[fh.baseFeePerGas.length - 1])) / 1e9;
+      const tip = gp ? Number(hexToNum(gp)) / 1e9 : 0.1;
+      return { source: "live" as const, baseFee: cur.toFixed(2), tiers: { low: (cur + tip * 0.5).toFixed(2), avg: (cur + tip).toFixed(2), high: (cur + tip * 2).toFixed(2) }, history, avgUtil: history.length ? (history.reduce((a: number, h: any) => a + h.gasUsedRatio, 0) / history.length * 100).toFixed(0) : "0" };
+    }
+  } catch {}
+  return sampleGas();
+}
+
+/** Validators (Stream C PoS). No RPC surface yet — sample with a clear note until staking RPC lands. */
+export async function getValidators(_net: ExplorerNetwork) {
+  return sampleValidators();
+}
+
+/** Contracts registry. Needs the indexer to enumerate deployments — sample until it's wired. */
+export async function getContracts(_net: ExplorerNetwork) {
+  return { source: "sample" as const, contracts: sampleContracts() };
+}
+
+/** Token registry. Discovered from Transfer events by the indexer — sample until it's wired. */
+export async function getTokens(_net: ExplorerNetwork) {
+  return { source: "sample" as const, tokens: sampleTokens() };
+}
+
+/** Event logs: live eth_getLogs over a recent window, else sample. */
+export async function getLogs(net: ExplorerNetwork) {
+  if (net.rpc) try {
+    const head = hexToNum(await rpc(net.rpc, "eth_blockNumber", [], 4000));
+    if (Number.isFinite(head)) {
+      const from = Math.max(0, head - 50);
+      const raw = await rpc(net.rpc, "eth_getLogs", [{ fromBlock: "0x" + from.toString(16), toBlock: "0x" + head.toString(16) }], 8000);
+      if (Array.isArray(raw)) return {
+        source: "live" as const, logs: raw.slice(-40).reverse().map((l: any) => ({
+          address: l.address, event: null, topic0: (l.topics || [])[0] || "0x", topics: l.topics || [], data: l.data || "0x",
+          block: hexToNum(l.blockNumber), txHash: l.transactionHash, logIndex: hexToNum(l.logIndex), timestamp: 0,
+        })),
+      };
+    }
+  } catch {}
+  return { source: "sample" as const, logs: sampleLogs() };
 }

@@ -98,6 +98,130 @@ export function sampleShielded() {
     recent: Array.from({ length: 10 }, (_, i) => { const op = pick(["shield", "deshield", "transfer"] as const); return { hash: hash(), op, valueBalance: op === "transfer" ? "0" : (op === "shield" ? "-" : "+") + pyrx(Math.floor(rnd() * 50)), block: HEAD - i * 2, timestamp: Math.floor(Date.now() / 1000) - i * 240 }; }) };
 }
 
+// ---- DAG & Streams ----
+export function sampleDag(nowSec = Math.floor(Date.now() / 1000)) {
+  const head = HEAD + Math.floor(rnd() * 200);
+  const N = 22;
+  // Build a column-banded DAG: each block points back to 1-2 recent ancestors.
+  const nodes = Array.from({ length: N }, (_, i) => {
+    const blueScore = head - i;
+    const stream = pick(STREAMS);
+    return {
+      hash: hash(), blueScore, stream, sealAlgo: pick(STREAM_ALGOS[stream]),
+      timestamp: nowSec - i * 4, parents: [] as number[],
+    };
+  });
+  // parents reference earlier indices (higher i = older); selected parent first, plus an
+  // occasional merge parent — the multi-parent structure that makes this a DAG, not a chain.
+  for (let i = 0; i < N; i++) {
+    if (i + 1 < N) nodes[i].parents.push(i + 1);
+    const merge = i + 2 + (rnd() > 0.6 ? 1 : 0);
+    if (rnd() > 0.55 && merge < N) nodes[i].parents.push(merge);
+  }
+  const streamCounts: Record<string, number> = { A: 0, B: 0, C: 0 };
+  for (const n of nodes) streamCounts[n.stream]++;
+  return { source: "sample" as const, nodes, streamCounts, tips: [nodes[0].hash], head };
+}
+
+// ---- Network health ----
+export function sampleNetwork() {
+  const height = HEAD + Math.floor(rnd() * 400);
+  const sealLanes: Record<string, number> = { blake3: 0, sha256d: 0, kheavyhash: 0, argon2id: 0, pos: 0 };
+  for (let i = 0; i < 40; i++) { const s = pick(STREAMS); sealLanes[pick(STREAM_ALGOS[s])]++; }
+  const peers = Array.from({ length: 8 }, (_, i) => ({
+    id: "12D3Koo" + hex(20).slice(2), addr: `/ip4/${10 + Math.floor(rnd() * 240)}.${Math.floor(rnd() * 255)}.${Math.floor(rnd() * 255)}.${Math.floor(rnd() * 255)}/tcp/${30000 + Math.floor(rnd() * 5000)}`,
+    height: height - Math.floor(rnd() * 6), latency: 20 + Math.floor(rnd() * 180), direction: rnd() > 0.5 ? "outbound" : "inbound",
+  }));
+  return {
+    source: "sample" as const, mode: "simulated", modeNote: null as string | null, activeStreams: ["A", "B", "C"],
+    height, target: height + Math.floor(rnd() * 3), finalizedHeight: height - 18, syncing: false, targetKnown: true,
+    peerCount: peers.length, incompatiblePeers: 0, updateRequired: false,
+    nodeInfo: { peerId: "12D3KooW" + hex(18).slice(2), listenAddrs: ["/ip4/0.0.0.0/tcp/30333", "/ip4/0.0.0.0/udp/30333/quic-v1"], p2pPort: 30333 },
+    chainId: 0, clientVersion: "pyrax-node/v0.3.0", gasPrice: "1.42", baseFee: "1.18", sealLanes, peers,
+  };
+}
+
+// ---- Gas tracker ----
+export function sampleGas() {
+  const base = 1 + rnd() * 2;
+  const history = Array.from({ length: 24 }, (_, i) => {
+    const b = base + Math.sin(i / 3) * 0.4 + rnd() * 0.25;
+    return { block: HEAD - (23 - i), baseFee: Number(b.toFixed(3)), gasUsedRatio: Math.min(0.99, 0.25 + rnd() * 0.7) };
+  });
+  const cur = history[history.length - 1].baseFee;
+  return {
+    source: "sample" as const, baseFee: cur.toFixed(2),
+    tiers: { low: (cur + 0.05).toFixed(2), avg: (cur + 0.15).toFixed(2), high: (cur + 0.4).toFixed(2) },
+    history, avgUtil: (history.reduce((a, h) => a + h.gasUsedRatio, 0) / history.length * 100).toFixed(0),
+  };
+}
+
+// ---- Validators (Stream C PoS) ----
+const VAL_NAMES = ["Phoenix", "Ember", "Inferno", "Solace", "Cinder", "Pyre", "Forge", "Helios", "Vesta", "Ignis", "Aurora", "Flux"];
+export function sampleValidators() {
+  const total = 12;
+  const stakes = Array.from({ length: total }, () => 1 + rnd() * 9);
+  const sum = stakes.reduce((a, b) => a + b, 0);
+  const validators = stakes.map((s, i) => ({
+    rank: i + 1, address: addr(), name: VAL_NAMES[i % VAL_NAMES.length] + "-" + (i + 1),
+    stake: (s * 1_000_000).toFixed(0), share: ((s / sum) * 100).toFixed(2),
+    uptime: (97 + rnd() * 3).toFixed(2), blocksProposed: Math.floor(rnd() * 40000), status: rnd() > 0.1 ? "active" : "jailed",
+  })).sort((a, b) => Number(b.stake) - Number(a.stake)).map((v, i) => ({ ...v, rank: i + 1 }));
+  return {
+    source: "sample" as const, validators,
+    totalStaked: (sum * 1_000_000).toLocaleString("en-US"), activeCount: validators.filter((v) => v.status === "active").length,
+    finalityRounds: 2, bondedRatio: (38 + rnd() * 8).toFixed(1),
+  };
+}
+
+// ---- Contracts (multi-VM registry) ----
+const VMS = ["evm", "wasm", "cairo"] as const;
+const CONTRACT_NAMES = ["PyraxSwap Router", "PYRX Staking", "Phoenix NFT", "Ember Vault", "Treasury Multisig", "DAO Governor", "Bridge Adapter", "Oracle Aggregator", "Lending Pool", "Cinder Token", "Compute Escrow", "Solace Vesting"];
+export function sampleContracts(count = 18) {
+  return Array.from({ length: count }, (_, i) => {
+    const vm = i < 12 ? "evm" : pick(["wasm", "cairo"] as const); // EVM is live today; WASM/Cairo are emerging
+    return {
+      address: addr(), name: CONTRACT_NAMES[i % CONTRACT_NAMES.length], vm,
+      verified: vm === "evm" && rnd() > 0.35, txCount: Math.floor(rnd() * 80000), balance: pyrx(Math.floor(rnd() * 50000)),
+      deployedBlock: HEAD - Math.floor(rnd() * 200000), language: vm === "evm" ? "Solidity" : vm === "wasm" ? "Rust" : "Cairo",
+    };
+  });
+}
+
+// ---- Tokens ----
+const TOKEN_DEFS = [
+  ["Pyrax USD", "pUSD", 6, "ERC-20"], ["Wrapped PYRX", "WPYRX", 18, "ERC-20"], ["Phoenix Gold", "PXG", 18, "ERC-20"],
+  ["Ember Stable", "EMB", 18, "ERC-20"], ["Cinder", "CDR", 18, "ERC-20"], ["Solace", "SOL", 9, "ERC-20"],
+  ["Phoenix Genesis", "PHX", 0, "ERC-721"], ["Forge Artifacts", "FRG", 0, "ERC-721"], ["Pyrax Items", "ITM", 0, "ERC-1155"],
+] as const;
+export function sampleTokens() {
+  return TOKEN_DEFS.map(([name, symbol, decimals, kind], i) => ({
+    address: addr(), name, symbol, decimals, kind,
+    holders: Math.floor(500 + rnd() * 40000), transfers: Math.floor(1000 + rnd() * 900000),
+    supply: kind === "ERC-20" ? (Math.floor(rnd() * 900) + 100).toLocaleString("en-US") + "M" : fmtCount(Math.floor(rnd() * 10000) + 100),
+    verified: rnd() > 0.25,
+  }));
+}
+const fmtCount = (n: number) => n.toLocaleString("en-US");
+
+// ---- Event logs ----
+const EVENT_SIGS = [
+  { name: "Transfer(address,address,uint256)", topic: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef" },
+  { name: "Approval(address,address,uint256)", topic: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925" },
+  { name: "Swap(address,uint256,uint256,address)", topic: "0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822" },
+  { name: "Staked(address,uint256)", topic: "0x9e71bc8eea02a63969f509818f2dafb9254532904319f9dbda79b67bd34a5f3d" },
+];
+export function sampleLogs(count = 20, nowSec = Math.floor(Date.now() / 1000)) {
+  return Array.from({ length: count }, (_, i) => {
+    const sig = pick(EVENT_SIGS);
+    return {
+      address: addr(), event: sig.name, topic0: sig.topic,
+      topics: [sig.topic, "0x000000000000000000000000" + hex(40).slice(2), "0x000000000000000000000000" + hex(40).slice(2)],
+      data: hex(64), block: HEAD - Math.floor(i / 2), txHash: hash(), logIndex: i % 6, timestamp: nowSec - i * 12,
+    };
+  });
+}
+
 export function sampleOverview(nowSec = Math.floor(Date.now() / 1000)) {
   const height = 4_812_900 + Math.floor(rnd() * 1000);
   const blocks = Array.from({ length: 8 }, (_, i) => { const b = sampleBlock(height - i, nowSec - i * 5); return b; });

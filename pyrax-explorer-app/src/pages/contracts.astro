@@ -1,12 +1,52 @@
 ---
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Shell from "../layouts/Shell.astro";
+import { selectedChainId, netFor, getContracts } from "../server/chain";
+import { shortAddr, fmtNum } from "../lib/format";
+
+const net = netFor(selectedChainId(Astro.request.headers.get("cookie")));
+const { source, contracts } = await getContracts(net);
+const sample = source === "sample";
+const vmFilter = (Astro.url.searchParams.get("vm") || "all").toLowerCase();
+const shown = vmFilter === "all" ? contracts : contracts.filter((c: any) => c.vm === vmFilter);
+const VM_TONE: Record<string, string> = { evm: "#f58622", wasm: "#60b8cc", cairo: "#7c5cff" };
+const VM_LABEL: Record<string, string> = { evm: "EVM", wasm: "WASM", cairo: "Cairo" };
+const counts = { all: contracts.length, evm: contracts.filter((c: any) => c.vm === "evm").length, wasm: contracts.filter((c: any) => c.vm === "wasm").length, cairo: contracts.filter((c: any) => c.vm === "cairo").length };
+const tabs = [["all", "All VMs"], ["evm", "EVM"], ["wasm", "WASM"], ["cairo", "Cairo"]] as const;
 ---
-<Shell title="Contracts">
-  <h1 class="text-2xl font-extrabold sm:text-3xl">Contracts</h1>
-  <p class="mt-1 max-w-2xl text-muted">Deployed contracts across the EVM, WASM and Cairo VMs — verified source, ABI, and read/write interfaces.</p>
-  <div class="card mt-6 p-8">
-    <div class="flex items-center gap-2 text-sm font-semibold text-[color:var(--color-brand)]"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3c1 3 4 4 4 8a4 4 0 0 1-8 0c0-1.5.6-2.3 1.2-3C9.8 9 10 7 9 5c2 .5 3 1.5 3 3 0-1.7 0-3.5 0-5Z"/></svg> In active development</div>
-    <p class="mt-1.5 max-w-xl text-sm text-muted">VM-aware contract registry + Solidity verification, wiring to the indexer. EVM is live today; WASM and Cairo introspection land as the node exposes them.</p>
+<Shell title="Contracts" description="Deployed contracts across PYRAX's EVM, WASM and Cairo virtual machines.">
+  <div class="flex flex-wrap items-center gap-2">
+    <h1 class="text-2xl font-extrabold sm:text-3xl">Contracts</h1>
+    {sample && <span class="rounded-full border border-[color:rgba(252,208,61,0.4)] bg-[rgba(252,208,61,0.08)] px-2 py-0.5 text-[0.66rem] font-semibold uppercase tracking-wider text-[color:var(--color-gold)]">sample</span>}
+  </div>
+  <p class="mt-1 max-w-2xl text-sm text-muted">PYRAX runs three VMs side by side. <span class="text-ink">EVM</span> (Solidity, via revm) is live today; <span class="text-ink">WASM</span> (Rust) and <span class="text-ink">Cairo</span> introspection surface as the node exposes them. Verify your source on the <a href="/verify" class="text-[color:var(--color-brand)]">Verify</a> page.</p>
+
+  <!-- VM tabs -->
+  <div class="mt-5 flex flex-wrap gap-2">
+    {tabs.map(([key, label]) => (
+      <a href={`/contracts?vm=${key}`} class={`chip ${vmFilter === key ? "chip-brand" : "chip-muted"}`} style={vmFilter === key ? "" : "cursor:pointer"}>{label} <span class="opacity-60">{counts[key as keyof typeof counts]}</span></a>
+    ))}
+  </div>
+
+  <div class="card mt-4 overflow-hidden p-0">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead><tr class="border-b border-line text-left text-xs uppercase tracking-wider text-faint">
+          <th class="px-4 py-3 font-semibold">Contract</th><th class="px-4 py-3 font-semibold">VM</th><th class="px-4 py-3 font-semibold">Language</th><th class="px-4 py-3 font-semibold">Txns</th><th class="px-4 py-3 font-semibold">Balance</th><th class="px-4 py-3 text-right font-semibold">Source</th>
+        </tr></thead>
+        <tbody>
+          {shown.map((c: any) => (
+            <tr class="border-b border-line-soft last:border-0 hover:bg-[rgba(255,255,255,0.02)]">
+              <td class="px-4 py-3"><div class="font-semibold text-ink">{c.name}</div><a href={`/address/${c.address}`} class="font-mono text-xs text-faint hover:text-muted">{shortAddr(c.address)}</a></td>
+              <td class="px-4 py-3"><span class="rounded-md px-1.5 py-0.5 text-[0.62rem] font-bold" style={`color:${VM_TONE[c.vm]};background:${VM_TONE[c.vm]}1a`}>{VM_LABEL[c.vm]}</span></td>
+              <td class="px-4 py-3 text-muted">{c.language}</td>
+              <td class="px-4 py-3 font-mono text-muted">{fmtNum(c.txCount)}</td>
+              <td class="px-4 py-3 font-mono text-muted">{c.balance} <span class="text-faint">PYRX</span></td>
+              <td class="px-4 py-3 text-right">{c.verified ? <span class="chip chip-positive">✓ verified</span> : <span class="chip chip-muted">unverified</span>}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   </div>
 </Shell>
