@@ -13,6 +13,7 @@ export const PERMISSIONS = {
   "campaigns.manage": { group: "Testing", label: "Manage campaigns", desc: "Create + publish test campaigns and accept reports.", elevated: true },
   "releases.publish": { group: "Releases", label: "Publish releases", desc: "Announce a build → notifies all testers (push + email).", elevated: true },
   "chat.moderate": { group: "Community", label: "Moderate chat", desc: "Delete messages, mute testers.", elevated: true },
+  "community.support": { group: "Community", label: "Community Support", desc: "Trusted-helper badge: a green chat name. Grant to testers who consistently help others." },
   "testers.view": { group: "Admin", label: "View testers", desc: "See the tester roster, uptime + earnings.", elevated: true },
   "testers.manage": { group: "Admin", label: "Manage testers", desc: "Adjust eligibility, roles, and reward ledger entries.", elevated: true },
   "rewards.admin": { group: "Admin", label: "Reward admin", desc: "Tune reward parameters + run payouts/exports.", superuserOnly: true },
@@ -38,6 +39,7 @@ export const PRESETS: Record<string, { label: string; desc: string; permissions:
   triage: { label: "Triage", desc: "Triage bugs + manage campaigns.", permissions: [...TESTER_BASELINE, "issues.triage", "campaigns.manage"] },
   release_manager: { label: "Release Manager", desc: "Publish releases + manage campaigns.", permissions: [...TESTER_BASELINE, "releases.publish", "campaigns.manage"] },
   moderator: { label: "Moderator", desc: "Moderate community chat.", permissions: [...TESTER_BASELINE, "chat.moderate"] },
+  community_support: { label: "Community Support", desc: "Trusted helper — green chat name; helps other testers.", permissions: [...TESTER_BASELINE, "community.support"] },
   devnet_admin: { label: "Devnet Admin", desc: "Everything except superuser-only reward admin.", permissions: ALL_PERMISSIONS.filter((p) => !isSuperuserOnly(p)) },
 };
 

@@ -3,8 +3,16 @@ import React, { useEffect, useState } from "react";
 import { Card, Button, Badge, PageHeader, Icon, StatTile } from "./ui";
 import { type AccessSubject } from "../lib/permissions";
 import { LEDGER_LABELS, REWARDS, usd } from "../lib/rewards";
+import ChatRoom from "./ChatRoom";
 
 const fmt = (n: number) => n.toLocaleString("en-US");
+function osIcon(platform: string): keyof typeof Icon {
+  const s = (platform || "").toLowerCase();
+  if (s.includes("win")) return "windows";
+  if (s.includes("mac") || s.includes("apple") || s.includes("os x") || s.includes("ios")) return "apple";
+  if (s.includes("linux")) return "linux";
+  return "download";
+}
 const ago = (ms: number) => { const s = Math.floor((Date.now() - ms) / 1000); if (s < 60) return s + "s ago"; if (s < 3600) return Math.floor(s / 60) + "m ago"; if (s < 86400) return Math.floor(s / 3600) + "h ago"; return Math.floor(s / 86400) + "d ago"; };
 
 function ComingSoon({ title, detail }: { title: string; detail: string }) {
@@ -88,7 +96,7 @@ export function Dashboard({ onNavigate }: { onNavigate: (k: string) => void }) {
             <>
               <div className="mt-2 text-3xl font-extrabold flame-text">{fmt(e.totalPyrx)}</div>
               <div className="text-xs text-faint">PYRX accrued · ≈ ${e.totalUsd.toLocaleString("en-US")} · paid via mainnet airdrop</div>
-              <div className="mt-3 flex items-center gap-2"><span className="chip" style={{ borderColor: e.tier.color, color: e.tier.color }}>{e.tier.label} tier</span>{e.projectedUptimePyrx > 0 && <span className="text-xs text-muted">+{fmt(e.projectedUptimePyrx)} PYRX/mo at current uptime</span>}</div>
+              <div className="mt-3 flex flex-wrap items-center gap-2"><span className="chip" style={{ borderColor: e.tier.color, color: e.tier.color }}>{e.tier.label} tier</span><span className="text-xs text-muted">{e.bugsAccepted || 0} accepted bug{(e.bugsAccepted || 0) !== 1 ? "s" : ""}</span>{e.projectedUptimePyrx > 0 && <span className="text-xs text-muted">· +{fmt(e.projectedUptimePyrx)} PYRX/mo at uptime</span>}</div>
               <div className="mt-4 space-y-1.5">
                 {e.ledger.length === 0 ? <p className="text-xs text-faint">No earnings yet — connect a node + file reports to start.</p> :
                   e.ledger.slice(0, 6).map((l: any, i: number) => (
@@ -142,8 +150,11 @@ export function Downloads() {
       <div className="grid gap-4 sm:grid-cols-2">
         {(d.downloads || []).map((it: any, i: number) => (
           <Card key={i} className="flex items-center justify-between p-5">
-            <div><div className="text-base font-bold">{it.name}</div><div className="text-xs text-faint">{it.platform}{it.note ? ` · ${it.note}` : ""}</div></div>
-            <a className="btn btn-primary" href={it.url} target="_blank" rel="noreferrer"><Icon.download className="h-4 w-4" /> Download</a>
+            <div className="flex items-center gap-3">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-line bg-[rgba(255,255,255,0.03)]">{React.createElement(Icon[osIcon(it.platform)], { className: "h-5 w-5 text-muted" })}</div>
+              <div><div className="text-base font-bold">{it.name}</div><div className="text-xs text-faint">{it.platform}{it.note ? ` · ${it.note}` : ""}</div></div>
+            </div>
+            <a className="btn btn-primary" href={it.url} target="_blank" rel="noreferrer">{React.createElement(Icon[osIcon(it.platform)], { className: "h-4 w-4" })} Download</a>
           </Card>
         ))}
       </div>
@@ -165,7 +176,7 @@ export function Leaderboard({ me }: { me: any }) {
             {(d.leaderboardTop || []).map((t: any, i: number) => (
               <div key={t.id} className={`flex items-center justify-between px-4 py-3 text-sm ${t.id === me.id ? "bg-[rgba(245,134,34,0.08)]" : ""}`}>
                 <div className="flex items-center gap-3"><span className="w-7 text-center font-mono text-faint">{i + 1}</span><span className="font-semibold">{t.handle ? "@" + t.handle : t.display_name}</span>{t.founding_rank && <Badge tone="brand">Founding #{t.founding_rank}</Badge>}{t.id === me.id && <span className="text-xs text-faint">you</span>}</div>
-                <span className="font-mono text-muted">{fmt(Number(t.total))} PYRX</span>
+                <div className="flex items-center gap-3 text-xs"><span className="text-faint">{t.bugs || 0} bugs</span><span className="font-mono text-muted">{fmt(Number(t.total))} PYRX</span></div>
               </div>
             ))}
             {(!d.leaderboardTop || d.leaderboardTop.length === 0) && <div className="p-6 text-center text-sm text-faint">No ranked testers yet.</div>}
@@ -365,7 +376,7 @@ function BugDetail({ id, me, subject, onClose, onChanged }: { id: string; me: an
 function Section({ title, children }: { title: string; children: React.ReactNode }) { return <div className="mt-3"><div className="label">{title}</div><div className="mt-1 whitespace-pre-wrap rounded-lg border border-line bg-[rgba(5,6,9,0.4)] p-3 text-sm text-muted">{children}</div></div>; }
 function MiniBox({ title, body }: { title: string; body: string }) { return <div><div className="label">{title}</div><div className="mt-1 whitespace-pre-wrap rounded-lg border border-line p-2.5 text-sm text-muted">{body || "—"}</div></div>; }
 export function Chat(_: { me: any }) {
-  return <><PageHeader title="Chat" subtitle="Realtime tester community chat." /><ComingSoon title="Realtime chat is being wired up" detail="A WebSocket community chat with @mentions, emojis + GIFs — shared with the PYRAX team (who appear as Admins). Your username is your Telegram handle." /></>;
+  return <><PageHeader title="Chat" subtitle="Realtime community — channels, DMs + group chats, @mentions, emoji + GIFs. Team = Admin, Community Support = green." /><ChatRoom apiBase="/api/chat" /></>;
 }
 export function Releases(_: { subject: AccessSubject }) {
   return <><PageHeader title="Releases" subtitle="Latest devnet builds + changelog." /><ComingSoon title="Release feed is being wired up" detail="New builds appear here with changelog + download, and you'll get a browser push + email the moment one drops." /></>;

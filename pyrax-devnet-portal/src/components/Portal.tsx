@@ -20,6 +20,33 @@ const NAV: { key: ModuleKey; label: string; perm: Permission | null; icon: keyof
   { key: "testers", label: "Testers", perm: "testers.view", icon: "users", group: "Admin" },
 ];
 
+function Bell() {
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState<any[]>([]);
+  const [unread, setUnread] = useState(0);
+  async function load() { try { const d = await (await fetch("/api/notifications")).json(); if (d.ok) { setItems(d.notifications); setUnread(d.unread); } } catch {} }
+  useEffect(() => { load(); const i = window.setInterval(load, 30000); return () => window.clearInterval(i); }, []);
+  async function toggle() { const n = !open; setOpen(n); if (n && unread) { await fetch("/api/notifications", { method: "POST" }).catch(() => {}); setUnread(0); } }
+  return (
+    <div className="relative">
+      <button onClick={toggle} className="relative grid h-9 w-9 place-items-center rounded-lg border border-line text-muted hover:text-ink" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></svg>
+        {unread > 0 && <span className="absolute -right-1 -top-1 grid h-4 min-w-[1rem] place-items-center rounded-full bg-[color:var(--color-brand)] px-1 text-[0.6rem] font-bold text-[#1a0f06]">{unread}</span>}
+      </button>
+      {open && (
+        <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-xl border border-line bg-[rgba(8,10,17,0.98)] shadow-2xl">
+          <div className="border-b border-line px-4 py-2 text-sm font-semibold">Notifications</div>
+          <div className="max-h-96 overflow-y-auto">
+            {items.length === 0 ? <p className="p-4 text-center text-xs text-faint">Nothing yet.</p> : items.map((n) => (
+              <a key={n.id} href={n.link || "#"} className="block border-b border-line-soft px-4 py-2.5 last:border-0 hover:bg-[rgba(255,255,255,0.02)]"><div className="text-sm font-medium">{n.title}</div><div className="text-xs text-muted">{n.body}</div></a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Portal() {
   const [me, setMe] = useState<Me | null>(null);
   const [loading, setLoading] = useState(true);
@@ -95,11 +122,11 @@ export default function Portal() {
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-[rgba(5,6,9,0.82)] px-4 py-3 backdrop-blur md:hidden">
           <a href="/app"><BrandMark variant="horizontal" className="h-6 w-[4.4rem]" /></a>
-          <button onClick={() => setMobileOpen(true)} aria-label="Open menu" className="grid h-9 w-9 place-items-center rounded-lg border border-line text-muted"><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg></button>
+          <div className="flex items-center gap-2"><Bell /><button onClick={() => setMobileOpen(true)} aria-label="Open menu" className="grid h-9 w-9 place-items-center rounded-lg border border-line text-muted"><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg></button></div>
         </div>
         <header className="sticky top-0 z-20 hidden items-center justify-between gap-3 border-b border-line bg-[rgba(5,6,9,0.7)] px-5 py-3 backdrop-blur md:flex">
           <div className="flex items-center gap-2 text-sm text-muted">{meUser.isStaff && <Badge tone="brand"><Icon.shield className="h-3 w-3" /> Admin</Badge>}<span>{NAV.find((n) => n.key === cur)?.label}</span></div>
-          {meUser.foundingRank && <Badge tone="brand">Founding Tester #{meUser.foundingRank}</Badge>}
+          <div className="flex items-center gap-3">{meUser.foundingRank && <Badge tone="brand">Founding Tester #{meUser.foundingRank}</Badge>}<Bell /></div>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 p-4 sm:p-7">
           <AnimatePresence mode="wait"><motion.div key={cur} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>{render()}</motion.div></AnimatePresence>

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import type { APIRoute } from "astro";
 import { requireTester, subjectOf } from "../../../server/guard";
-import { getBug, triageBug } from "../../../server/db";
+import { getBug, triageBug, testerById } from "../../../server/db";
 import { json } from "../../../server/http";
 import { can } from "../../../lib/permissions";
+import { sendIssueNotify } from "../../../server/email";
 
 export const prerender = false;
 
@@ -24,5 +25,10 @@ export const PUT: APIRoute = async ({ params, request, cookies }) => {
   const b = await request.json().catch(() => ({}));
   const updated = await triageBug(String(params.id), { status: b?.status, assignedSeverity: b?.assignedSeverity, bountyPyrx: b?.bountyPyrx });
   if (!updated) return json({ ok: false, error: "Not found." }, 404);
-  return json({ ok: true, bug: updated });
+  if (updated._awarded) {
+    const reporter = await testerById(updated._awarded.reporterId);
+    if (reporter) void sendIssueNotify(reporter.email, "Your bug was accepted 🎉", `Your report "${updated._awarded.title}" was accepted and earned ${updated._awarded.amount.toLocaleString("en-US")} PYRX, paid via the mainnet airdrop.`);
+  }
+  const { _awarded, ...bug } = updated;
+  return json({ ok: true, bug });
 };

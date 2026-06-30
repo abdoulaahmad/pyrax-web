@@ -30,6 +30,10 @@ Things I deferred / need from you during the autonomous build. Tackle when you'r
   `DEVNET_CHAT_SECRET`, `GIPHY_API_KEY`.
 - Provisioned: the `devnet_tester` database already exists on the managed PG cluster.
 
+## Funding
+- Tester rewards (the accruing PYRX, paid at mainnet airdrop) are funded from the **marketing
+  allocation**. Track the running liability via the earnings ledger / leaderboard totals.
+
 ## Decisions for you (none blocking — defaults chosen)
 - Reward magnitude = your generous 2× table (founding bonus 50,000 PYRX). Adjust in `src/lib/rewards.ts`.
 - Attachment visibility = public-read with unguessable keys. Harden to private + signed-GET if needed.

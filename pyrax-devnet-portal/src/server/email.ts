@@ -93,6 +93,19 @@ function fmtExpiry(ms: number): string {
   return new Intl.DateTimeFormat("en-US", { timeZone: "UTC", hour: "numeric", minute: "2-digit", hour12: true }).format(new Date(ms)) + " UTC";
 }
 
+function renderNotify(title: string, body: string, path: string): string {
+  const link = `${PUBLIC_URL}${path}`;
+  return shell(title, `
+    <h1 style="margin:0 0 10px;font-family:'Segoe UI',Arial,sans-serif;font-size:21px;font-weight:800;color:${C.ink};">${title}</h1>
+    <p style="margin:0;font-family:'Segoe UI',Arial,sans-serif;font-size:14px;color:${C.muted};line-height:1.7;">${body}</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:18px;"><tr><td style="border-radius:10px;background:${C.brand};">
+      <a href="${link}" style="display:inline-block;padding:12px 24px;font-family:'Segoe UI',Arial,sans-serif;font-size:14px;font-weight:700;color:#1a0f06;text-decoration:none;border-radius:10px;">Open the portal →</a>
+    </td></tr></table>
+    <p style="margin:16px 0 0;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:${C.faint};line-height:1.6;">Manage notifications from your portal settings.</p>`);
+}
+/** Issue Council / activity notification (mention, reply, accepted bug, …). */
+export const sendIssueNotify = (to: string, title: string, body: string, path = "/app") => sendEmail(to, `PYRAX Devnet — ${title}`, renderNotify(title, body, path));
+
 export const sendOtp = (to: string, code: string, expiresAt: number) =>
   OTP_TEMPLATE_ID ? sendTemplate(to, OTP_TEMPLATE_ID, { otp: code, expires: fmtExpiry(expiresAt) }) : sendEmail(to, "Your PYRAX Devnet sign-in code", renderOtp(code, fmtExpiry(expiresAt)));
 export const sendInvite = (to: string, token: string) => sendEmail(to, "Your PYRAX Devnet closed-alpha invite", renderInvite(token));

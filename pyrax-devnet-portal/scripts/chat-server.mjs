@@ -1,0 +1,96 @@
+// SPDX-License-Identifier: LicenseRef-Proprietary
+//
+// Shared chat WebSocket server for the PYRAX Devnet Portal + Team site. Auth is a short-lived
+// HMAC chat token (DEVNET_CHAT_SECRET) minted by either app; messages persist in devnet_tester.
+// Channels, presence, @mentions (client highlights), GIFs, admin delete, rate limiting.
+//   env: DATABASE_URL_DEVNET, DEVNET_CHAT_SECRET, CHAT_WS_PORT (default 8788)
+import crypto from "node:crypto";
+import { WebSocketServer } from "ws";
+import pg from "pg";
+
+const SECRET = process.env.DEVNET_CHAT_SECRET || "dev-chat-secret-change-me";
+const PORT = Number(process.env.CHAT_WS_PORT || 8788);
+const CHANNELS = ["announcements", "general", "getting-started", "node-support", "bug-chat", "feedback", "known-issues", "off-topic"];
+const cs = (process.env.DATABASE_URL_DEVNET || "").replace(/[?&]sslmode=[^&]*/, "");
+const pool = new pg.Pool({ connectionString: cs, ssl: { rejectUnauthorized: false }, max: 4 });
+const id = (p) => `${p}_${crypto.randomBytes(8).toString("base64url")}`;
+
+function verify(token) {
+  const [body, sig] = (token || "").split(".");
+  if (!body || !sig) return null;
+  const expect = crypto.createHmac("sha256", SECRET).update(body).digest("base64url");
+  if (sig.length !== expect.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expect))) return null;
+  try { const c = JSON.parse(Buffer.from(body, "base64url").toString()); if (!c || c.exp < Math.floor(Date.now() / 1000)) return null; return c; } catch { return null; }
+}
+
+const wss = new WebSocketServer({ port: PORT });
+const send = (ws, obj) => { try { ws.send(JSON.stringify(obj)); } catch {} };
+const broadcast = (channel, obj) => { for (const c of wss.clients) if (c.readyState === 1 && c.channel === channel) send(c, obj); };
+function presence(channel) {
+  const seen = new Map();
+  for (const c of wss.clients) if (c.readyState === 1 && c.channel === channel && c.claims) seen.set(c.claims.user || c.claims.uid, { user: c.claims.user, name: c.claims.name, admin: c.claims.admin, role: c.claims.role });
+  return [...seen.values()];
+}
+const pushPresence = (channel) => broadcast(channel, { type: "presence", channel, users: presence(channel) });
+
+// Public channels are open; private conversation ids require membership.
+async function canAccess(channel, uid) {
+  if (CHANNELS.includes(channel)) return true;
+  const r = await pool.query("SELECT 1 FROM conversation_members WHERE conversation_id=$1 AND member_id=$2", [channel, uid]);
+  return (r.rowCount ?? 0) > 0;
+}
+// Global online roster (everyone connected, deduped) — drives the chat members panel.
+function globalOnline() {
+  const seen = new Map();
+  for (const c of wss.clients) if (c.readyState === 1 && c.claims) seen.set(c.claims.user || c.claims.uid, { user: c.claims.user, name: c.claims.name, admin: c.claims.admin, role: c.claims.role });
+  return [...seen.values()];
+}
+function broadcastOnline() { const u = globalOnline(); for (const c of wss.clients) if (c.readyState === 1) send(c, { type: "online", users: u }); }
+
+async function history(channel) {
+  const r = await pool.query("SELECT id,channel,author_id,author_name,author_user,author_admin,author_role,body,gif,created_at FROM chat_messages WHERE channel=$1 AND deleted=FALSE ORDER BY created_at DESC LIMIT 50", [channel]);
+  return r.rows.reverse();
+}
+
+wss.on("connection", (ws, req) => {
+  const url = new URL(req.url, "http://x");
+  const claims = verify(url.searchParams.get("token"));
+  if (!claims) { send(ws, { type: "error", error: "auth" }); ws.close(); return; }
+  ws.claims = claims; ws.channel = "general"; ws.times = [];
+  send(ws, { type: "ready", me: { user: claims.user, name: claims.name, admin: claims.admin }, channels: CHANNELS });
+  history("general").then((m) => send(ws, { type: "history", channel: "general", messages: m }));
+  pushPresence("general");
+  broadcastOnline();
+
+  ws.on("message", async (raw) => {
+    let m; try { m = JSON.parse(raw.toString()); } catch { return; }
+    try {
+    if (m.type === "join" && typeof m.channel === "string") {
+      if (!(await canAccess(m.channel, claims.uid))) { send(ws, { type: "error", error: "No access to that conversation." }); return; }
+      const prev = ws.channel; ws.channel = m.channel;
+      send(ws, { type: "history", channel: m.channel, messages: await history(m.channel) });
+      pushPresence(prev); pushPresence(m.channel);
+    } else if (m.type === "msg") {
+      if (!(await canAccess(ws.channel, claims.uid))) return;
+      const now = Date.now();
+      ws.times = ws.times.filter((t) => now - t < 60000);
+      if (ws.times.length >= 20 || (ws.times.length && now - ws.times[ws.times.length - 1] < 700)) { send(ws, { type: "error", error: "Slow down a moment." }); return; }
+      ws.times.push(now);
+      const body = String(m.body || "").slice(0, 2000).trim();
+      const gif = typeof m.gif === "string" && /^https:\/\//.test(m.gif) ? m.gif.slice(0, 500) : null;
+      if (!body && !gif) return;
+      const msg = { id: id("m"), channel: ws.channel, author_id: claims.uid, author_name: claims.name, author_user: claims.user, author_admin: !!claims.admin, author_role: claims.role || "tester", body, gif, created_at: now };
+      await pool.query("INSERT INTO chat_messages (id,channel,author_id,author_name,author_user,author_admin,author_role,body,gif,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",
+        [msg.id, msg.channel, msg.author_id, msg.author_name, msg.author_user, msg.author_admin, msg.author_role, body, gif, now]);
+      broadcast(ws.channel, { type: "msg", message: msg });
+    } else if (m.type === "delete" && claims.admin) {
+      await pool.query("UPDATE chat_messages SET deleted=TRUE WHERE id=$1", [m.id]);
+      broadcast(ws.channel, { type: "deleted", id: m.id });
+    }
+    } catch (e) { console.error("[chat] message error:", e?.message || e); try { send(ws, { type: "error", error: "Something went wrong." }); } catch {} }
+  });
+  ws.on("close", () => { pushPresence(ws.channel); broadcastOnline(); });
+});
+
+process.on("unhandledRejection", (e) => console.error("[chat] unhandledRejection:", e?.message || e));
+console.log(`[chat] WebSocket chat server listening on :${PORT} (channels: ${CHANNELS.join(", ")})`);

@@ -9,6 +9,7 @@ import crypto from "node:crypto";
 import type { Permission } from "../lib/permissions";
 import { TESTER_BASELINE } from "../lib/permissions";
 import { isStaffEmail, isRewardEligible } from "../lib/tester";
+import { bugBounty } from "../lib/rewards";
 
 const URL_RAW = process.env.DATABASE_URL_DEVNET || process.env.DATABASE_URL || "";
 const connectionString = URL_RAW.replace(/[?&]sslmode=[^&]*/, "");
@@ -99,8 +100,15 @@ export function init(): Promise<void> {
         PRIMARY KEY (bug_id, tester_id, kind)
       );
       CREATE TABLE IF NOT EXISTS bug_comments (
-        id TEXT PRIMARY KEY, bug_id TEXT NOT NULL, tester_id TEXT NOT NULL, body TEXT NOT NULL, created_at BIGINT NOT NULL
+        id TEXT PRIMARY KEY, bug_id TEXT NOT NULL, author_id TEXT NOT NULL,
+        author_name TEXT NOT NULL DEFAULT '', author_user TEXT NOT NULL DEFAULT '', author_admin BOOLEAN NOT NULL DEFAULT FALSE,
+        body TEXT NOT NULL, created_at BIGINT NOT NULL
       );
+      ALTER TABLE bug_comments ADD COLUMN IF NOT EXISTS author_id TEXT;
+      ALTER TABLE bug_comments ADD COLUMN IF NOT EXISTS author_name TEXT NOT NULL DEFAULT '';
+      ALTER TABLE bug_comments ADD COLUMN IF NOT EXISTS author_user TEXT NOT NULL DEFAULT '';
+      ALTER TABLE bug_comments ADD COLUMN IF NOT EXISTS author_admin BOOLEAN NOT NULL DEFAULT FALSE;
+      ALTER TABLE bug_comments DROP COLUMN IF EXISTS tester_id;
       CREATE INDEX IF NOT EXISTS idx_bugcomments_bug ON bug_comments(bug_id);
       CREATE TABLE IF NOT EXISTS campaigns (
         id TEXT PRIMARY KEY, title TEXT NOT NULL, body TEXT NOT NULL DEFAULT '', steps JSONB NOT NULL DEFAULT '[]'::jsonb,
@@ -112,10 +120,30 @@ export function init(): Promise<void> {
         accepted BOOLEAN, created_at BIGINT NOT NULL
       );
       CREATE TABLE IF NOT EXISTS chat_messages (
-        id TEXT PRIMARY KEY, channel TEXT NOT NULL DEFAULT 'general', tester_id TEXT NOT NULL,
-        body TEXT NOT NULL, created_at BIGINT NOT NULL, deleted BOOLEAN NOT NULL DEFAULT FALSE
+        id TEXT PRIMARY KEY, channel TEXT NOT NULL DEFAULT 'general', author_id TEXT NOT NULL,
+        author_name TEXT NOT NULL DEFAULT '', author_user TEXT NOT NULL DEFAULT '', author_admin BOOLEAN NOT NULL DEFAULT FALSE,
+        author_role TEXT NOT NULL DEFAULT 'tester', body TEXT NOT NULL DEFAULT '', gif TEXT, created_at BIGINT NOT NULL, deleted BOOLEAN NOT NULL DEFAULT FALSE
       );
+      ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS author_role TEXT NOT NULL DEFAULT 'tester';
+      ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS author_id TEXT;
+      ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS author_name TEXT NOT NULL DEFAULT '';
+      ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS author_user TEXT NOT NULL DEFAULT '';
+      ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS author_admin BOOLEAN NOT NULL DEFAULT FALSE;
+      ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS gif TEXT;
+      ALTER TABLE chat_messages DROP COLUMN IF EXISTS tester_id;
       CREATE INDEX IF NOT EXISTS idx_chat_channel ON chat_messages(channel, created_at);
+      -- Private conversations: DMs (2 members) + named group chats (multi-member). Messages live in
+      -- chat_messages with channel = conversation id; the WS server enforces membership.
+      CREATE TABLE IF NOT EXISTS conversations (
+        id TEXT PRIMARY KEY, type TEXT NOT NULL DEFAULT 'group', name TEXT NOT NULL DEFAULT '',
+        created_by TEXT NOT NULL, created_at BIGINT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS conversation_members (
+        conversation_id TEXT NOT NULL, member_id TEXT NOT NULL, member_user TEXT NOT NULL DEFAULT '',
+        member_name TEXT NOT NULL DEFAULT '', member_admin BOOLEAN NOT NULL DEFAULT FALSE,
+        PRIMARY KEY (conversation_id, member_id)
+      );
+      CREATE INDEX IF NOT EXISTS idx_convmembers_member ON conversation_members(member_id);
       CREATE TABLE IF NOT EXISTS notifications (
         id TEXT PRIMARY KEY, tester_id TEXT NOT NULL, kind TEXT NOT NULL, title TEXT NOT NULL,
         body TEXT NOT NULL DEFAULT '', link TEXT, read BOOLEAN NOT NULL DEFAULT FALSE, created_at BIGINT NOT NULL
@@ -277,11 +305,12 @@ export async function listLedger(testerId: string, limit = 100): Promise<any[]> 
 export async function leaderboard(limit = 50): Promise<any[]> {
   await init();
   const r = await db().query(
-    `SELECT t.id, t.display_name, t.handle, t.founding_rank, COALESCE(SUM(l.pyrx),0) AS total
+    `SELECT t.id, t.display_name, t.handle, t.founding_rank, COALESCE(SUM(l.pyrx),0) AS total,
+            (SELECT COUNT(*) FROM bugs b WHERE b.tester_id = t.id AND b.bounty_pyrx > 0) AS bugs
      FROM testers t LEFT JOIN earnings_ledger l ON l.tester_id = t.id
      WHERE t.reward_eligible = TRUE AND t.status = 'active'
      GROUP BY t.id ORDER BY total DESC, t.joined_at ASC LIMIT $1`, [limit]);
-  return r.rows.map((x) => ({ ...x, total: Number(x.total) }));
+  return r.rows.map((x) => ({ ...x, total: Number(x.total), bugs: Number(x.bugs) }));
 }
 
 /** Claim a Founding Tester slot (first N to connect a node). Returns the rank or null if full/taken. */
@@ -358,7 +387,7 @@ export async function getBug(bugId: string, viewerId?: string): Promise<any | nu
   await init();
   const r = await db().query(`SELECT b.*, t.display_name AS reporter_name, t.handle AS reporter_handle FROM bugs b JOIN testers t ON t.id=b.tester_id WHERE b.id=$1`, [bugId]);
   if (!r.rows[0]) return null;
-  const cm = await db().query(`SELECT c.id,c.body,c.created_at,t.display_name,t.handle,t.is_staff FROM bug_comments c JOIN testers t ON t.id=c.tester_id WHERE c.bug_id=$1 ORDER BY c.created_at ASC`, [bugId]);
+  const cm = await db().query(`SELECT id,body,created_at,author_name AS display_name,author_user AS handle,author_admin AS is_staff FROM bug_comments WHERE bug_id=$1 ORDER BY created_at ASC`, [bugId]);
   let mine: string[] = [];
   if (viewerId) { const mr = await db().query("SELECT kind FROM bug_reactions WHERE bug_id=$1 AND tester_id=$2", [bugId, viewerId]); mine = mr.rows.map((x) => x.kind); }
   return { ...r.rows[0], comments: cm.rows, myReactions: mine };
@@ -374,33 +403,127 @@ export async function reactBug(bugId: string, testerId: string, kind: "vote" | "
   await db().query("UPDATE bugs SET votes=$2, confirms=$3, updated_at=$4 WHERE id=$1", [bugId, votes, confirms, Date.now()]);
   return { votes, confirms, on };
 }
-export async function addBugComment(bugId: string, testerId: string, body: string): Promise<any> {
+export async function addBugComment(bugId: string, author: { id: string; name: string; user: string; admin: boolean }, body: string): Promise<any> {
   await init();
-  const r = await db().query("INSERT INTO bug_comments (id,bug_id,tester_id,body,created_at) VALUES ($1,$2,$3,$4,$5) RETURNING id,body,created_at", [id("c"), bugId, testerId, body.slice(0, 4000), Date.now()]);
+  const r = await db().query("INSERT INTO bug_comments (id,bug_id,author_id,author_name,author_user,author_admin,body,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id,body,created_at", [id("c"), bugId, author.id, author.name, author.user, author.admin, body.slice(0, 4000), Date.now()]);
   return r.rows[0];
 }
-/** Staff triage: set status/severity + award the bug bounty once (idempotent by ledger ref). */
+/** Bug reporter (for notifications). */
+export async function bugReporter(bugId: string): Promise<{ tester_id: string; title: string } | null> {
+  await init(); const r = await db().query("SELECT tester_id, title FROM bugs WHERE id=$1", [bugId]); return r.rows[0] || null;
+}
+const VALID_STATUSES = ["confirmed", "in_progress", "fixed", "verified"];
+/** Staff triage: set status/criticality + reward a VALID issue once. The bounty is the criticality
+ *  (severity)-based amount unless an explicit override is given; the reporter is notified. */
 export async function triageBug(bugId: string, f: { status?: string; assignedSeverity?: string; bountyPyrx?: number }): Promise<any | null> {
   await init();
-  const cur = await db().query("SELECT tester_id, title, bounty_pyrx FROM bugs b JOIN testers t ON t.id=b.tester_id WHERE b.id=$1", [bugId]);
+  const cur = await db().query("SELECT tester_id, title, severity, assigned_severity FROM bugs WHERE id=$1", [bugId]);
   if (!cur.rows[0]) return null;
   const status = f.status && (BUG_STATUSES as readonly string[]).includes(f.status) ? f.status : undefined;
   const sev = f.assignedSeverity && (BUG_SEVERITIES as readonly string[]).includes(f.assignedSeverity) ? f.assignedSeverity : undefined;
-  const bounty = typeof f.bountyPyrx === "number" && f.bountyPyrx > 0 ? Math.round(f.bountyPyrx) : undefined;
+  const explicit = typeof f.bountyPyrx === "number" && f.bountyPyrx > 0 ? Math.round(f.bountyPyrx) : undefined;
+  const effSeverity = (sev || cur.rows[0].assigned_severity || cur.rows[0].severity) as string;
+  const alreadyPaid = ((await db().query("SELECT 1 FROM earnings_ledger WHERE ref=$1", [`bug:${bugId}`])).rowCount ?? 0) > 0;
+  let award = 0;
+  if (!alreadyPaid) {
+    if (explicit) award = explicit;
+    else if (status && VALID_STATUSES.includes(status)) award = bugBounty(effSeverity as any);
+  }
   const r = await db().query(
     `UPDATE bugs SET status=COALESCE($2,status), assigned_severity=COALESCE($3,assigned_severity), bounty_pyrx=COALESCE($4,bounty_pyrx), updated_at=$5 WHERE id=$1 RETURNING *`,
-    [bugId, status ?? null, sev ?? null, bounty ?? null, Date.now()],
+    [bugId, status ?? null, sev ?? null, award > 0 ? award : (explicit ?? null), Date.now()],
   );
-  if (bounty) {
+  let _awarded: { reporterId: string; amount: number; title: string } | null = null;
+  if (award > 0) {
     const reporter = cur.rows[0].tester_id;
-    const ref = `bug:${bugId}`;
-    const paid = await db().query("SELECT 1 FROM earnings_ledger WHERE ref=$1", [ref]);
-    if ((paid.rowCount ?? 0) === 0) {
-      const t = await testerById(reporter);
-      if (t?.reward_eligible) await addLedger(reporter, "bug", bounty, cur.rows[0].title, ref);
+    const t = await testerById(reporter);
+    if (t?.reward_eligible) {
+      await addLedger(reporter, "bug", award, cur.rows[0].title, `bug:${bugId}`);
+      await addNotification(reporter, "bug", "Your bug was accepted 🎉", `"${cur.rows[0].title}" earned ${award.toLocaleString("en-US")} PYRX.`, "/app");
+      _awarded = { reporterId: reporter, amount: award, title: cur.rows[0].title };
     }
   }
-  return r.rows[0];
+  return { ...r.rows[0], _awarded };
+}
+
+export async function testerByHandle(handle: string): Promise<TesterRow | null> {
+  await init();
+  const r = await db().query("SELECT * FROM testers WHERE lower(handle)=lower($1) AND handle <> ''", [handle]);
+  return r.rows[0] ? row(r.rows[0]) : null;
+}
+
+// ---- notifications ----
+export async function addNotification(testerId: string, kind: string, title: string, body: string, link?: string): Promise<void> {
+  await init();
+  await db().query("INSERT INTO notifications (id,tester_id,kind,title,body,link,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)", [id("n"), testerId, kind, title.slice(0, 160), body.slice(0, 400), link ?? null, Date.now()]);
+}
+export async function listNotifications(testerId: string, limit = 30): Promise<any[]> {
+  await init();
+  const r = await db().query("SELECT id,kind,title,body,link,read,created_at FROM notifications WHERE tester_id=$1 ORDER BY created_at DESC LIMIT $2", [testerId, limit]);
+  return r.rows;
+}
+export async function unreadCount(testerId: string): Promise<number> {
+  await init();
+  const r = await db().query("SELECT COUNT(*)::int AS n FROM notifications WHERE tester_id=$1 AND read=FALSE", [testerId]);
+  return r.rows[0].n;
+}
+export async function markNotificationsRead(testerId: string): Promise<void> {
+  await init();
+  await db().query("UPDATE notifications SET read=TRUE WHERE tester_id=$1 AND read=FALSE", [testerId]);
+}
+export async function bugsAcceptedCount(testerId: string): Promise<number> {
+  await init();
+  const r = await db().query("SELECT COUNT(*)::int AS n FROM bugs WHERE tester_id=$1 AND bounty_pyrx>0", [testerId]);
+  return r.rows[0].n;
+}
+
+// ---- private conversations (DMs + group chats) ----
+export interface ConvMember { id: string; user: string; name: string; admin: boolean }
+export async function findDm(a: string, b: string): Promise<string | null> {
+  await init();
+  const r = await db().query(
+    `SELECT c.id FROM conversations c
+     JOIN conversation_members m1 ON m1.conversation_id=c.id AND m1.member_id=$1
+     JOIN conversation_members m2 ON m2.conversation_id=c.id AND m2.member_id=$2
+     WHERE c.type='dm' LIMIT 1`, [a, b]);
+  return r.rows[0]?.id || null;
+}
+export async function createConversation(type: "dm" | "group", name: string, creator: ConvMember, members: ConvMember[]): Promise<string> {
+  await init();
+  const all = [creator, ...members].filter((m, i, arr) => arr.findIndex((x) => x.id === m.id) === i);
+  if (type === "dm" && all.length === 2) { const ex = await findDm(all[0].id, all[1].id); if (ex) return ex; }
+  const cid = "c_" + crypto.randomBytes(10).toString("base64url");
+  await db().query("INSERT INTO conversations (id,type,name,created_by,created_at) VALUES ($1,$2,$3,$4,$5)", [cid, type, name.slice(0, 80), creator.id, Date.now()]);
+  for (const m of all) await db().query("INSERT INTO conversation_members (conversation_id,member_id,member_user,member_name,member_admin) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING", [cid, m.id, m.user, m.name, m.admin]);
+  return cid;
+}
+export async function isConversationMember(convId: string, uid: string): Promise<boolean> {
+  await init();
+  const r = await db().query("SELECT 1 FROM conversation_members WHERE conversation_id=$1 AND member_id=$2", [convId, uid]);
+  return (r.rowCount ?? 0) > 0;
+}
+export async function listConversations(uid: string): Promise<any[]> {
+  await init();
+  const r = await db().query(
+    `SELECT c.id, c.type, c.name, c.created_at,
+       (SELECT json_agg(json_build_object('id',cm.member_id,'user',cm.member_user,'name',cm.member_name,'admin',cm.member_admin)) FROM conversation_members cm WHERE cm.conversation_id=c.id) AS members,
+       (SELECT body FROM chat_messages msg WHERE msg.channel=c.id AND msg.deleted=FALSE ORDER BY msg.created_at DESC LIMIT 1) AS last_body
+     FROM conversations c JOIN conversation_members m ON m.conversation_id=c.id AND m.member_id=$1
+     ORDER BY COALESCE((SELECT MAX(msg.created_at) FROM chat_messages msg WHERE msg.channel=c.id), c.created_at) DESC LIMIT 50`, [uid]);
+  return r.rows;
+}
+export async function searchTesters(q: string, excludeId: string, limit = 8): Promise<any[]> {
+  await init();
+  const s = `%${q.toLowerCase()}%`;
+  const r = await db().query("SELECT id, handle, display_name FROM testers WHERE status='active' AND id<>$1 AND handle<>'' AND (lower(handle) LIKE $2 OR lower(display_name) LIKE $2) ORDER BY handle LIMIT $3", [excludeId, s, limit]);
+  return r.rows;
+}
+/** Active-tester roster for the chat members panel (online status comes from the WS server).
+ *  role: admin (staff/blue), support (community-support/green), tester (orange). */
+export async function chatRoster(): Promise<any[]> {
+  await init();
+  const r = await db().query("SELECT id, handle AS user, display_name AS name, is_staff, permissions FROM testers WHERE status='active' AND handle<>'' ORDER BY is_staff DESC, lower(handle) ASC LIMIT 300");
+  return r.rows.map((x) => ({ id: x.id, user: x.user, name: x.name, admin: !!x.is_staff, role: x.is_staff ? "admin" : ((x.permissions || []).includes("community.support") ? "support" : "tester") }));
 }
 
 /** Award the monthly uptime reward once per tester per month (idempotent by ledger ref). */
