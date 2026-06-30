@@ -136,10 +136,10 @@ function renderDevnetInvite(token: string): string {
     <tr><td align="center" style="padding:6px 0 22px;"><img src="${CDN}/pyrax-logo.png" width="148" alt="PYRAX" style="display:block;border:0;width:148px;max-width:60%;height:auto;"></td></tr>
     <tr><td style="background:${C.card};border:1px solid ${C.line};border-radius:16px;overflow:hidden;">
       <img src="${CDN}/flame-bar-v2.png" width="560" height="6" alt="" style="display:block;width:100%;height:6px;border:0;">
-      <div style="padding:36px 34px;">
+      <div style="padding:36px 34px;text-align:center;">
         <h1 style="margin:0 0 10px;font-family:'Segoe UI',Arial,sans-serif;font-size:23px;font-weight:800;color:${C.ink};">You're in the closed Alpha.</h1>
         <p style="margin:0 0 22px;font-family:'Segoe UI',Arial,sans-serif;font-size:15px;color:${C.muted};line-height:1.65;">You've been invited to help test the <strong style="color:${C.ink};">PYRAX network</strong> as a closed-alpha tester. Click below to set up your tester account — it takes a minute.</p>
-        <table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:10px;background:${C.brand};"><a href="${link}" style="display:inline-block;padding:14px 28px;font-family:'Segoe UI',Arial,sans-serif;font-size:15px;font-weight:700;color:#1a0f06;text-decoration:none;border-radius:10px;">Accept your invite →</a></td></tr></table>
+        <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr><td align="center" style="border-radius:10px;background:${C.brand};"><a href="${link}" style="display:inline-block;padding:14px 28px;font-family:'Segoe UI',Arial,sans-serif;font-size:15px;font-weight:700;color:#1a0f06;text-decoration:none;border-radius:10px;">Accept your invite →</a></td></tr></table>
         <p style="margin:22px 0 0;font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:${C.muted};line-height:1.6;">You'll run a node via the Inferno app or the CLI, file bug reports, and help shape the network before mainnet.</p>
         <p style="margin:14px 0 0;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:${C.faint};line-height:1.6;">This invite link is personal to you and expires in 14 days.</p>
       </div>

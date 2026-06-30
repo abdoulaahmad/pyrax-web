@@ -51,23 +51,27 @@ function renderOtp(code: string, expires: string): string {
 function renderInvite(token: string): string {
   const link = `${PUBLIC_URL}/join?token=${encodeURIComponent(token)}`;
   return shell("You're invited to the PYRAX Devnet", `
+    <div style="text-align:center;">
     <h1 style="margin:0 0 10px;font-family:'Segoe UI',Arial,sans-serif;font-size:23px;font-weight:800;color:${C.ink};">You're in the closed Alpha.</h1>
     <p style="margin:0 0 22px;font-family:'Segoe UI',Arial,sans-serif;font-size:15px;color:${C.muted};line-height:1.65;">You've been invited to help test the <strong style="color:${C.ink};">PYRAX network</strong> as a closed-alpha tester. Click below to set up your tester account — it takes a minute.</p>
-    <table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:10px;background:${C.brand};">
+    <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr><td align="center" style="border-radius:10px;background:${C.brand};">
       <a href="${link}" style="display:inline-block;padding:14px 28px;font-family:'Segoe UI',Arial,sans-serif;font-size:15px;font-weight:700;color:#1a0f06;text-decoration:none;border-radius:10px;">Accept your invite →</a>
     </td></tr></table>
     <p style="margin:22px 0 0;font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:${C.muted};line-height:1.6;">You'll run a node via the Inferno app or the CLI, file bug reports, and help shape the network before mainnet.</p>
-    <p style="margin:14px 0 0;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:${C.faint};line-height:1.6;">This invite link is personal to you and expires in 14 days. If it wasn't meant for you, ignore this email.</p>`);
+    <p style="margin:14px 0 0;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:${C.faint};line-height:1.6;">This invite link is personal to you and expires in 14 days. If it wasn't meant for you, ignore this email.</p>
+    </div>`);
 }
 
 function renderRelease(version: string, title: string, notes: string, downloadUrl?: string): string {
-  const dl = downloadUrl ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:18px;"><tr><td style="border-radius:10px;background:${C.brand};"><a href="${downloadUrl}" style="display:inline-block;padding:13px 26px;font-family:'Segoe UI',Arial,sans-serif;font-size:15px;font-weight:700;color:#1a0f06;text-decoration:none;border-radius:10px;">Update now →</a></td></tr></table>` : "";
+  const dl = downloadUrl ? `<table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:18px auto 0;"><tr><td align="center" style="border-radius:10px;background:${C.brand};"><a href="${downloadUrl}" style="display:inline-block;padding:13px 26px;font-family:'Segoe UI',Arial,sans-serif;font-size:15px;font-weight:700;color:#1a0f06;text-decoration:none;border-radius:10px;">Update now →</a></td></tr></table>` : "";
   return shell(`New build: ${version}`, `
+    <div style="text-align:center;">
     <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;color:${C.brand};text-transform:uppercase;">New release · ${version}</div>
     <h1 style="margin:6px 0 10px;font-family:'Segoe UI',Arial,sans-serif;font-size:22px;font-weight:800;color:${C.ink};">${title || "A new build is available"}</h1>
     <p style="margin:0;font-family:'Segoe UI',Arial,sans-serif;font-size:14px;color:${C.muted};line-height:1.7;white-space:pre-wrap;">${notes}</p>
     ${dl}
-    <p style="margin:18px 0 0;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:${C.faint};line-height:1.6;">Please update promptly + keep your node online so we get clean test data.</p>`);
+    <p style="margin:18px 0 0;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:${C.faint};line-height:1.6;">Please update promptly + keep your node online so we get clean test data.</p>
+    </div>`);
 }
 
 async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
@@ -104,12 +108,14 @@ function fmtExpiry(ms: number): string {
 function renderNotify(title: string, body: string, path: string): string {
   const link = `${PUBLIC_URL}${path}`;
   return shell(title, `
+    <div style="text-align:center;">
     <h1 style="margin:0 0 10px;font-family:'Segoe UI',Arial,sans-serif;font-size:21px;font-weight:800;color:${C.ink};">${title}</h1>
     <p style="margin:0;font-family:'Segoe UI',Arial,sans-serif;font-size:14px;color:${C.muted};line-height:1.7;">${body}</p>
-    <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:18px;"><tr><td style="border-radius:10px;background:${C.brand};">
+    <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:18px auto 0;"><tr><td align="center" style="border-radius:10px;background:${C.brand};">
       <a href="${link}" style="display:inline-block;padding:12px 24px;font-family:'Segoe UI',Arial,sans-serif;font-size:14px;font-weight:700;color:#1a0f06;text-decoration:none;border-radius:10px;">Open the portal →</a>
     </td></tr></table>
-    <p style="margin:16px 0 0;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:${C.faint};line-height:1.6;">Manage notifications from your portal settings.</p>`);
+    <p style="margin:16px 0 0;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:${C.faint};line-height:1.6;">Manage notifications from your portal settings.</p>
+    </div>`);
 }
 // Every transactional email prefers its Brevo stored template (on-brand, copy-managed in Brevo) and
 // falls back to the inline HTML render only if that template id isn't configured.
