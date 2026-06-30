@@ -2,10 +2,11 @@
 //
 // PYRAX Network Map. 3D is globe.gl styled IDENTICALLY to the node apps (bundled earth-dark texture,
 // neon-orange country borders, brand atmosphere, colored node dots, animated arcs). 2D is a matching
-// d3-geo flat canvas. Both show: online nodes per network, REAL connection arcs (only edges a node
-// actually reports — no fabrication), capital-city markers (hover = name + timezone), a real-time
-// day/night terminator, a "countries online" panel, and a branded snapshot export at social-media
-// sizes incl. 4K UHD. The 2D/3D choice persists. All assets are bundled — no third-party CDN.
+// d3-geo flat canvas. Both show: online nodes per network, a live PEER-CONNECTION MESH (cyan
+// per-network fabric like the node app's globe, with each node's real reported links drawn on top),
+// capital-city markers (hover = name + timezone), a real-time day/night terminator, a "countries
+// online" panel, and a branded snapshot export at social-media sizes incl. 4K UHD. The 2D/3D choice
+// persists. All assets are bundled — no third-party CDN.
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Globe from "globe.gl";
 import { geoNaturalEarth1, geoPath, geoGraticule10, geoCircle, geoDistance, geoInterpolate, type GeoProjection } from "d3-geo";
@@ -18,6 +19,13 @@ interface Cap { n: string; c: string; lat: number; lng: number; tz: string }
 const P = { primary: "#f58722", bolt: "#4c99cc", violet: "#7c5cff", gold: "#fcd03d", ok: "#34d399", text: "#f6f8fc", dim: "#99a2b5" };
 const BORDER = "rgba(245,135,34,0.45)", BORDER_CAP = "rgba(245,135,34,0.06)", OCEAN = "#070b12", LAND = "#11161f";
 const kindColor = (k: string) => (k === "seed" ? P.bolt : k === "rpc" ? P.violet : P.primary);
+// Connection lines, matched to the node app's globe: a semi-transparent cyan PEER MESH (every
+// located node ↔ every located node, per network, capped) so the P2P fabric is ALWAYS visible —
+// not just the sparse edges nodes happen to report. Hex (not rgba) so it composes with both the
+// 3D arc gradient (`d.color + "00"`) and the 2D alpha-append (`a.color + "55"`). Real reported
+// links are drawn ON TOP in their network colour so true direct edges pop over the mesh.
+const MESH_COLOR = "#38bdf8";
+const MAX_MESH_ARCS = 300;
 const LOGO_URL = "https://pyrax.tor1.cdn.digitaloceanspaces.com/brand/logo-vertical.png";
 const MODE_KEY = "pyrax:map-mode";
 const SHOT_SIZES = [
@@ -119,15 +127,39 @@ export default function MapCanvas() {
       .map((p) => ({ peerId: p.peerId, lng: p.lon!, lat: p.lat!, net: p.network, color: netColor.current[p.network] || P.primary, kind: p.kind, label: `${netName.current[p.network] || p.network} · ${p.kind}${p.country ? " · " + (p.city ? p.city + ", " : "") + p.country : ""}` }));
   }
 
-  // REAL connection arcs: only edges a node actually reports (same network, both online + located).
+  // Connection lines — matched to the node app's globe (DashboardPanels.tsx NetworkGlobePanel):
+  //   1) a semi-transparent CYAN PEER MESH connecting every located node to every other located
+  //      node WITHIN the same network (per-network so unrelated networks are never linked), capped
+  //      at MAX_MESH_ARCS so a large fabric stays readable + performant (a full mesh is N² lines);
+  //   2) each node's REAL reported direct links drawn ON TOP in its network colour, so true edges
+  //      pop over the mesh. Both 2D (canvas) and 3D (globe.gl) consume this one function.
   function arcs(ns: GNode[]): { startLat: number; startLng: number; endLat: number; endLng: number; color: string }[] {
-    const byId = new Map(ns.map((n) => [n.peerId, n]));
-    if (previewRef.current && isLocal) { // illustrative sample mesh so the demo shows arcs
-      const out: any[] = []; for (let i = 0; i < ns.length; i++) { const a = ns[i], b = ns[(i + 1) % ns.length], c = ns[(i + 3) % ns.length]; if (a.net === b.net) out.push({ startLat: a.lat, startLng: a.lng, endLat: b.lat, endLng: b.lng, color: a.color }); if (a.net === c.net) out.push({ startLat: a.lat, startLng: a.lng, endLat: c.lat, endLng: c.lng, color: a.color }); } return out; }
-    const raw = previewRef.current ? [] : peersRef.current;
-    const seen = new Set<string>(); const out: any[] = [];
-    for (const p of raw) { if (!p.peers || !byId.has(p.peerId)) continue; const a = byId.get(p.peerId)!; for (const pid of p.peers) { const b = byId.get(pid); if (!b || b.net !== a.net) continue; const key = a.peerId < pid ? `${a.peerId}|${pid}` : `${pid}|${a.peerId}`; if (seen.has(key)) continue; seen.add(key); out.push({ startLat: a.lat, startLng: a.lng, endLat: b.lat, endLng: b.lng, color: a.color }); } }
-    return out.slice(0, 800);
+    const out: { startLat: number; startLng: number; endLat: number; endLng: number; color: string }[] = [];
+    // (1) cyan peer mesh, grouped by network so colours/edges stay meaningful, capped.
+    const byNet = new Map<string, GNode[]>();
+    for (const n of ns) { let arr = byNet.get(n.net); if (!arr) { arr = []; byNet.set(n.net, arr); } arr.push(n); }
+    for (const group of byNet.values()) {
+      for (let i = 0; i < group.length && out.length < MAX_MESH_ARCS; i++)
+        for (let j = i + 1; j < group.length && out.length < MAX_MESH_ARCS; j++)
+          out.push({ startLat: group[i].lat, startLng: group[i].lng, endLat: group[j].lat, endLng: group[j].lng, color: MESH_COLOR });
+    }
+    // (2) real reported direct links on top, in the network colour. Skipped in the sample/preview
+    //     demo (it has no real `peers` adjacency) — the mesh alone carries the demo.
+    if (!(previewRef.current && isLocal)) {
+      const byId = new Map(ns.map((n) => [n.peerId, n]));
+      const seen = new Set<string>();
+      for (const p of peersRef.current) {
+        if (!p.peers || !byId.has(p.peerId)) continue;
+        const a = byId.get(p.peerId)!;
+        for (const pid of p.peers) {
+          const b = byId.get(pid); if (!b || b.net !== a.net) continue;
+          const key = a.peerId < pid ? `${a.peerId}|${pid}` : `${pid}|${a.peerId}`;
+          if (seen.has(key)) continue; seen.add(key);
+          out.push({ startLat: a.lat, startLng: a.lng, endLat: b.lat, endLng: b.lng, color: a.color });
+        }
+      }
+    }
+    return out.slice(0, MAX_MESH_ARCS + 800);
   }
 
   const countryStats = useMemo(() => {
@@ -287,7 +319,7 @@ export default function MapCanvas() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div><h1 className="text-3xl font-extrabold sm:text-4xl">Network map</h1><p className="mt-2 max-w-xl text-muted">Every located node online across the PYRAX networks, in real time — with real connection arcs, capital cities, and a live day/night terminator.</p></div>
+        <div><h1 className="text-3xl font-extrabold sm:text-4xl">Network map</h1><p className="mt-2 max-w-xl text-muted">Every located node online across the PYRAX networks, in real time — with a live peer-connection mesh, capital cities, and a real-time day/night terminator.</p></div>
         <div className="text-sm text-muted">{totalOnline.toLocaleString()} node{totalOnline === 1 ? "" : "s"} online</div>
       </div>
 
@@ -298,6 +330,7 @@ export default function MapCanvas() {
         {mode === "3d" && <button onClick={() => setPaused((v) => !v)} className={pill(paused)}>{paused ? "▶ Play" : "⏸ Pause"}</button>}
         <button onClick={() => setDayNight((v) => !v)} className={pill(dayNight)} title="Real-time day/night">🌓 Day/Night</button>
         <button onClick={() => setShowCaps((v) => !v)} className={pill(showCaps)}>🏙 Capitals</button>
+        <span className="flex items-center gap-1.5 px-1 text-xs text-faint" title="Cyan lines show the live peer-to-peer connection mesh; brighter coloured lines are direct links a node reports."><span className="inline-block h-px w-4 rounded-full" style={{ background: MESH_COLOR, boxShadow: `0 0 6px ${MESH_COLOR}` }} /> Peer mesh</span>
         {isLocal && <button onClick={() => setPreview((v) => !v)} className={`rounded-full border px-3 py-1.5 text-xs transition ${preview ? "border-[color:var(--color-gold)] text-[color:var(--color-gold)]" : "border-line text-faint hover:text-ink"}`}>{preview ? "● sample" : "○ preview"}</button>}
         <div className="ml-auto flex items-center gap-2">
           <select value={shot} onChange={(e) => setShot(e.target.value)} className="rounded-lg border border-line bg-[rgba(5,6,9,0.6)] px-2 py-1.5 text-xs text-muted">{SHOT_SIZES.map((z) => <option key={z.id} value={z.id}>{z.label}</option>)}</select>
