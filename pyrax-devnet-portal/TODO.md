@@ -2,6 +2,14 @@
 
 Things I deferred / need from you during the autonomous build. Tackle when you're back.
 
+**Status: feature-complete + committed (local, not pushed).** Tester portal (onboarding, 9-digit OTP,
+dashboard, node link + founding/uptime rewards, Issue Council with uploads + criticality bounties,
+realtime chat with DMs/groups/roster/roles, releases + web push) **and** the team-site Devnet
+Management surface (Devnet Users + invites, Issue Council triage, Downloads/status toggle, shared
+community chat where team appears as Admin, per-admin chat username). All suites green: foundation
+12/12, node 10/10, Issue Council 10/10, chat/DM 10/10, team↔devnet chat 10/10. Both apps build clean.
+Remaining items below are config/deploy/integration that need you or a later app rebuild.
+
 ## Keys / config you need to add (in the root `.env`)
 - **`GIPHY_API_KEY=`** — paste your Giphy key. The chat GIF picker is wired but inert until set.
 - **DO Spaces (Issue Council attachments)** — confirm `SPACES_KEY` / `SPACES_SECRET` are present and
@@ -21,8 +29,11 @@ Things I deferred / need from you during the autonomous build. Tackle when you'r
 - **Inferno app + CLI** — pairing + heartbeat to be implemented during the app rebuild. Portal side
   is done + a simulator stands in (`scripts/node-simulator.mjs`, spec in `docs/NODE-INTEGRATION.md`).
 - **Reward cron** — `/api/admin/run-rewards` is a manual monthly runner; wire a real cron at deploy.
-- **Brevo stored templates** — inline HTML emails work now; create stored templates (like team id=1)
-  for OTP / invite / release if you want template-managed copy.
+- **Brevo stored templates** — DONE. The devnet sign-in OTP now sends via the stored template
+  **id=2** ("PYRAX Devnet — Sign-in code"), same card/flame-bar design as the team template (id=1),
+  rebranded for devnet, params `{{params.otp}}` / `{{params.expires}}`. Recorded as
+  `BREVO_DEVNET_OTP_TEMPLATE_ID=2`; `sendOtp` uses it (inline HTML remains as a fallback only).
+  To re-sync the design after editing `src/server/otp-template.html`, re-run the creator script.
 
 ## Deploy (via pyrax-infra, like the team site)
 - New `devnet-portal` image + deploy workflow + compose in pyrax-infra; DNS `devnet.pyraxchain.com`;
