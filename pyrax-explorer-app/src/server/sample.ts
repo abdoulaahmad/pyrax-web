@@ -8,8 +8,18 @@ export const SEAL_ALGOS = ["blake3", "sha256d", "kheavyhash", "argon2id", "pos"]
 export const STREAMS = ["A", "B", "C"] as const;
 export const TX_TYPES = ["transparent", "ethereum", "shielded", "escrow", "stake", "gov"] as const;
 export const SEAL_LABEL: Record<string, string> = { blake3: "BLAKE3 PoW", sha256d: "SHA-256d PoW", kheavyhash: "kHeavyHash PoW", argon2id: "Argon2id PoW", pos: "PoS / BLS" };
-export const STREAM_LABEL: Record<string, string> = { A: "Stream A · ASIC", B: "Stream B · GPU/CPU + AI", C: "Stream C · PoS finality" };
+export const STREAM_LABEL: Record<string, string> = { A: "Stream A · BLAKE3 / SHA-256d (ASIC)", B: "Stream B · kHeavyHash / Argon2id (GPU/CPU)", C: "Stream C · PoS / BLS finality" };
 export const TX_TYPE_LABEL: Record<string, string> = { transparent: "Transparent", ethereum: "Ethereum", shielded: "Shielded", escrow: "Escrow", stake: "Stake", gov: "Governance" };
+
+// Canonical TriStream seal-lane mapping (authoritative — pyrax-primitives Stream enum + pyrax-consensus lane_algo):
+//   Stream A  = ASIC PoW   → BLAKE3 (even rotor) / SHA-256d (odd rotor)
+//   Stream B  = GPU/CPU PoW → kHeavyHash (GPU lane) / Argon2id (CPU lane)
+//   Stream C  = Proof-of-Stake + BLS finality (no PoW lane)
+export const STREAM_ALGOS: Record<string, readonly string[]> = {
+  A: ["blake3", "sha256d"],
+  B: ["kheavyhash", "argon2id"],
+  C: ["pos"],
+};
 
 let seed = 0x9e3779b9;
 function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 0xffffffff; }
@@ -21,7 +31,8 @@ const pyrx = (whole: number) => (whole + rnd()).toFixed(4);
 
 export function sampleBlock(num: number, nowSec: number) {
   const stream = pick(STREAMS);
-  const seal = stream === "C" ? "pos" : pick(SEAL_ALGOS.slice(0, 4));
+  // Seal lane is bound to the stream (never random across streams): A→blake3/sha256d, B→kheavyhash/argon2id, C→pos.
+  const seal = pick(STREAM_ALGOS[stream]);
   const txCount = Math.floor(rnd() * 40);
   const gasLimit = 30_000_000;
   return {

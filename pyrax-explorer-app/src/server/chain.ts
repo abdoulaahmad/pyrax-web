@@ -21,12 +21,42 @@ export async function liveStatus(net: ExplorerNetwork): Promise<{ online: boolea
   return { online: false };
 }
 
-const ethBlock = (b: any) => ({
-  number: hexToNum(b.number), blueScore: hexToNum(b.blueScore ?? b.number), hash: b.hash,
-  parents: b.parents || (b.parentHash ? [b.parentHash] : []), stream: b.stream || "A", sealAlgo: b.sealAlgo || "blake3",
-  miner: b.miner || b.coinbase || "0x", timestamp: hexToNum(b.timestamp), txCount: Array.isArray(b.transactions) ? b.transactions.length : hexToNum(b.txCount),
-  gasUsed: hexToNum(b.gasUsed), gasLimit: hexToNum(b.gasLimit), baseFee: b.baseFeePerGas ? (Number(hexToNum(b.baseFeePerGas)) / 1e9).toFixed(2) : "0", size: hexToNum(b.size),
-});
+// Seal lane reconstructed from the stream, per pyrax-consensus `lane_algo` (production `real_lanes`):
+//   Stream A → BLAKE3 (even blue score) / SHA-256d (odd);  Stream B → kHeavyHash (GPU primary);
+//   Stream C → PoS/BLS. The eth block JSON and pyrax_dagRecent don't carry header.seal_algo, so we
+//   rebuild the lane from the authoritative per-stream rule rather than guessing across streams —
+//   the displayed seal is therefore ALWAYS consistent with the block's stream.
+function deriveSeal(stream: string, blueScore: number): string {
+  if (stream === "C") return "pos";
+  if (stream === "B") return "kheavyhash";
+  return blueScore % 2 === 0 ? "blake3" : "sha256d";
+}
+
+/** Fetch the real per-block stream from pyrax_dagRecent → a {blueScore → "A"|"B"|"C"} lookup. */
+async function dagStreamMap(net: ExplorerNetwork): Promise<Map<number, string>> {
+  const m = new Map<number, string>();
+  if (!net.rpc) return m;
+  try {
+    const recent = await rpc(net.rpc, "pyrax_dagRecent", [64], 4000);
+    if (Array.isArray(recent)) for (const d of recent) {
+      const bs = Number(d.blueScore);
+      if (Number.isFinite(bs) && (d.stream === "A" || d.stream === "B" || d.stream === "C") && !m.has(bs)) m.set(bs, d.stream);
+    }
+  } catch {}
+  return m;
+}
+
+const ethBlock = (b: any, streams?: Map<number, string>) => {
+  const blueScore = hexToNum(b.blueScore ?? b.number);
+  const stream = b.stream || streams?.get(blueScore) || "A";
+  const sealAlgo = b.sealAlgo || deriveSeal(stream, blueScore);
+  return {
+    number: hexToNum(b.number), blueScore, hash: b.hash,
+    parents: b.parents || (b.parentHash ? [b.parentHash] : []), stream, sealAlgo,
+    miner: b.miner || b.coinbase || "0x", timestamp: hexToNum(b.timestamp), txCount: Array.isArray(b.transactions) ? b.transactions.length : hexToNum(b.txCount),
+    gasUsed: hexToNum(b.gasUsed), gasLimit: hexToNum(b.gasLimit), baseFee: b.baseFeePerGas ? (Number(hexToNum(b.baseFeePerGas)) / 1e9).toFixed(2) : "0", size: hexToNum(b.size),
+  };
+};
 
 /** Overview dashboard: assembled live from the node when reachable, else PYRAX-native sample. */
 export async function getOverview(net: ExplorerNetwork) {
@@ -36,8 +66,11 @@ export async function getOverview(net: ExplorerNetwork) {
     const height = hexToNum(bn);
     if (!Number.isFinite(height)) throw new Error("offline");
     const nums = Array.from({ length: 8 }, (_, i) => height - i).filter((n) => n >= 0);
-    const raw = await Promise.all(nums.map((n) => rpc(net.rpc, "eth_getBlockByNumber", ["0x" + n.toString(16), true], 5000).catch(() => null)));
-    const blocks = raw.filter(Boolean).map(ethBlock);
+    const [raw, streams] = await Promise.all([
+      Promise.all(nums.map((n) => rpc(net.rpc, "eth_getBlockByNumber", ["0x" + n.toString(16), true], 5000).catch(() => null))),
+      dagStreamMap(net),
+    ]);
+    const blocks = raw.filter(Boolean).map((b) => ethBlock(b, streams));
     const txs = blocks.flatMap((b: any, bi: number) => (raw[bi]?.transactions || []).slice(0, 3).map((t: any) => ({ hash: t.hash, type: "ethereum", block: b.number, timestamp: b.timestamp, status: 1, from: t.from, to: t.to ?? null, value: (Number(hexToNum(t.value)) / 1e18).toFixed(4), valueBalance: null }))).slice(0, 8);
     const streamCounts: Record<string, number> = { A: 0, B: 0, C: 0 };
     for (const b of blocks) streamCounts[b.stream] = (streamCounts[b.stream] || 0) + 1;
@@ -58,8 +91,11 @@ export async function getBlocks(net: ExplorerNetwork, beforeNum?: number) {
     const head = beforeNum ?? hexToNum(await rpc(net.rpc, "eth_blockNumber", [], 4000));
     if (Number.isFinite(head)) {
       const nums = Array.from({ length: 25 }, (_, i) => head - i).filter((n) => n >= 0);
-      const raw = await Promise.all(nums.map((n) => rpc(net.rpc, "eth_getBlockByNumber", ["0x" + n.toString(16), false], 5000).catch(() => null)));
-      const blocks = raw.filter(Boolean).map(ethBlock);
+      const [raw, streams] = await Promise.all([
+        Promise.all(nums.map((n) => rpc(net.rpc, "eth_getBlockByNumber", ["0x" + n.toString(16), false], 5000).catch(() => null))),
+        dagStreamMap(net),
+      ]);
+      const blocks = raw.filter(Boolean).map((b) => ethBlock(b, streams));
       if (blocks.length) return { source: "live" as const, head, blocks };
     }
   } catch {}
@@ -68,8 +104,11 @@ export async function getBlocks(net: ExplorerNetwork, beforeNum?: number) {
 export async function getBlock(net: ExplorerNetwork, idOrHash: string) {
   if (net.rpc) try {
     const isHash = /^0x[0-9a-fA-F]{64}$/.test(idOrHash);
-    const b = await rpc(net.rpc, isHash ? "eth_getBlockByHash" : "eth_getBlockByNumber", [isHash ? idOrHash : "0x" + Number(idOrHash).toString(16), true], 6000);
-    if (b) { const base = ethBlock(b); return { source: "live" as const, ...base, txs: (b.transactions || []).map((t: any) => ({ hash: t.hash, type: "ethereum", block: base.number, timestamp: base.timestamp, status: 1, from: t.from, to: t.to ?? null, value: (Number(hexToNum(t.value)) / 1e18).toFixed(4), valueBalance: null })), stateRoot: b.stateRoot, transactionsRoot: b.transactionsRoot, receiptsRoot: b.receiptsRoot, blueWork: b.blueWork, daaScore: hexToNum(b.daaScore), difficulty: String(hexToNum(b.difficulty)), finalized: false }; }
+    const [b, streams] = await Promise.all([
+      rpc(net.rpc, isHash ? "eth_getBlockByHash" : "eth_getBlockByNumber", [isHash ? idOrHash : "0x" + Number(idOrHash).toString(16), true], 6000),
+      dagStreamMap(net),
+    ]);
+    if (b) { const base = ethBlock(b, streams); return { source: "live" as const, ...base, txs: (b.transactions || []).map((t: any) => ({ hash: t.hash, type: "ethereum", block: base.number, timestamp: base.timestamp, status: 1, from: t.from, to: t.to ?? null, value: (Number(hexToNum(t.value)) / 1e18).toFixed(4), valueBalance: null })), stateRoot: b.stateRoot, transactionsRoot: b.transactionsRoot, receiptsRoot: b.receiptsRoot, blueWork: b.blueWork, daaScore: hexToNum(b.daaScore), difficulty: String(hexToNum(b.difficulty)), finalized: false }; }
   } catch {}
   return sampleBlockDetail(/^0x/.test(idOrHash) ? 4_812_800 : Number(idOrHash) || 4_812_800);
 }
