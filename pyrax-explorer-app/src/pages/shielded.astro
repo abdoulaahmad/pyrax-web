@@ -1,0 +1,45 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Shell from "../layouts/Shell.astro";
+import { selectedChainId, netFor, getShielded } from "../server/chain";
+import { shortHash, fmtNum, timeAgo } from "../lib/format";
+const net = netFor(selectedChainId(Astro.request.headers.get("cookie")));
+const s: any = await getShielded(net);
+const sample = s.source === "sample";
+const fillPct = s.capacity ? Math.min(100, (s.noteCount / s.capacity) * 100 * 1e5) : 0;
+const OP_TONE: Record<string, string> = { shield: "#f58622", deshield: "#60b8cc", transfer: "#7c5cff" };
+---
+<Shell title="Shielded Pool">
+  <div class="flex items-center gap-2">
+    <h1 class="flex items-center gap-2 text-2xl font-extrabold sm:text-3xl"><svg viewBox="0 0 24 24" class="h-6 w-6 text-[color:#7c5cff]" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 5 6v5c0 4.5 3 7.8 7 9 4-1.2 7-4.5 7-9V6l-7-3Z"/></svg> Shielded pool</h1>
+    {sample && <span class="rounded-full border border-[color:rgba(252,208,61,0.4)] bg-[rgba(252,208,61,0.08)] px-2 py-0.5 text-[0.66rem] font-semibold uppercase tracking-wider text-[color:var(--color-gold)]">sample</span>}
+  </div>
+  <p class="mt-1 max-w-2xl text-sm text-muted">PYRAX supports private, zero-knowledge transactions (Orchard-style note commitments). Amounts, senders and recipients are encrypted; only the pool's structural state is public — never breaking privacy.</p>
+
+  <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="card p-5"><div class="text-xs font-semibold uppercase tracking-wider text-faint">Note commitments</div><div class="mt-1 text-2xl font-extrabold" style="color:#7c5cff">{fmtNum(s.noteCount)}</div></div>
+    <div class="card p-5"><div class="text-xs font-semibold uppercase tracking-wider text-faint">Nullifiers spent</div><div class="mt-1 text-2xl font-extrabold">{fmtNum(s.nullifierCount)}</div></div>
+    <div class="card p-5"><div class="text-xs font-semibold uppercase tracking-wider text-faint">Unspent notes</div><div class="mt-1 text-2xl font-extrabold">{fmtNum(Math.max(0, s.noteCount - s.nullifierCount))}</div></div>
+    <div class="card p-5"><div class="text-xs font-semibold uppercase tracking-wider text-faint">Tree depth</div><div class="mt-1 text-2xl font-extrabold">{s.treeDepth}</div><div class="text-xs text-faint">capacity 2^{s.treeDepth}</div></div>
+  </div>
+
+  <div class="card mt-5 p-5">
+    <div class="flex items-center justify-between"><h3 class="text-base font-bold">Commitment tree</h3><code class="font-mono text-xs text-faint">anchor {shortHash(s.anchor)}</code></div>
+    <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-[rgba(255,255,255,0.05)]"><div class="h-full rounded-full" style={`width:${Math.max(2, fillPct)}%;background:linear-gradient(90deg,#7c5cff,#60b8cc)`}></div></div>
+    <p class="mt-2 text-xs text-faint">The note-commitment Merkle tree; every shielded output appends a leaf, every spend reveals a nullifier.</p>
+  </div>
+
+  {s.recent && s.recent.length > 0 && (
+    <>
+      <h2 class="mt-6 text-lg font-bold">Recent shielded activity</h2>
+      <div class="card mt-2 overflow-hidden p-0"><div class="divide-y divide-[color:var(--color-line-soft)]">
+        {s.recent.map((r: any) => (
+          <a href={`/tx/${r.hash}`} class="flex items-center justify-between gap-3 px-5 py-3 hover:bg-[rgba(255,255,255,0.02)]">
+            <div class="flex items-center gap-2"><span class="rounded-md px-1.5 py-0.5 text-[0.62rem] font-bold capitalize" style={`color:${OP_TONE[r.op]};background:${OP_TONE[r.op]}1a`}>{r.op}</span><code class="font-mono text-sm text-ink">{shortHash(r.hash)}</code></div>
+            <div class="shrink-0 text-right text-sm"><span class="font-mono text-muted">{r.valueBalance} PYRX</span> <span class="text-xs text-faint">· {timeAgo(r.timestamp)}</span></div>
+          </a>
+        ))}
+      </div></div>
+    </>
+  )}
+</Shell>

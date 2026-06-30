@@ -1,0 +1,58 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Shell from "../../layouts/Shell.astro";
+import { selectedChainId, netFor, getTx } from "../../server/chain";
+import { TX_TYPE_LABEL } from "../../server/sample";
+import { shortHash, shortAddr, fmtNum, timeAgo, TX_TYPE_TONE } from "../../lib/format";
+const net = netFor(selectedChainId(Astro.request.headers.get("cookie")));
+const { hash } = Astro.params;
+const t: any = await getTx(net, hash!);
+const sample = t.source === "sample";
+const shielded = t.type === "shielded";
+---
+<Shell title="Transaction">
+  <div class="flex flex-wrap items-center gap-2">
+    <a href="/txs" class="text-sm text-muted hover:text-ink">← Transactions</a>
+    <h1 class="text-2xl font-extrabold">Transaction</h1>
+    <span class="rounded-md px-2 py-0.5 text-xs font-bold" style={`color:${TX_TYPE_TONE[t.type]};background:${TX_TYPE_TONE[t.type]}1a`}>{TX_TYPE_LABEL[t.type]}</span>
+    <span class={`chip ${t.status ? "" : ""}`} style={t.status ? "color:var(--color-positive);border-color:rgba(52,211,153,.4)" : "color:var(--color-negative);border-color:rgba(251,111,115,.4)"}>{t.status ? "Success" : "Failed"}</span>
+    {sample && <span class="rounded-full border border-[color:rgba(252,208,61,0.4)] bg-[rgba(252,208,61,0.08)] px-2 py-0.5 text-[0.66rem] font-semibold uppercase tracking-wider text-[color:var(--color-gold)]">sample</span>}
+  </div>
+  <code class="mt-2 block break-all font-mono text-sm text-muted">{t.hash}</code>
+
+  <div class="card mt-5 p-5">
+    <dl class="space-y-3">
+      <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4"><dt class="w-44 shrink-0 text-xs font-semibold uppercase tracking-wider text-faint">Block</dt><dd class="text-sm"><a href={`/block/${t.block}`} class="font-mono text-[color:var(--color-brand)]">#{fmtNum(t.block)}</a> <span class="text-faint">· index {t.txIndex}{t.timestamp ? " · " + timeAgo(t.timestamp) : ""}</span></dd></div>
+      {shielded ? (
+        <>
+          <div class="rounded-lg border border-[color:rgba(124,92,255,0.35)] bg-[rgba(124,92,255,0.06)] p-3 text-sm text-muted">This is a <strong class="text-[color:#7c5cff]">shielded</strong> transaction. Sender, recipient and amount are private (zero-knowledge). Only the value balance with the transparent pool and the structural commitments/nullifiers are public.</div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4"><dt class="w-44 shrink-0 text-xs font-semibold uppercase tracking-wider text-faint">Value balance</dt><dd class="font-mono text-sm text-ink">{t.valueBalance} PYRX <span class="text-faint">({Number(t.valueBalance) < 0 ? "shield → pool" : Number(t.valueBalance) > 0 ? "deshield → transparent" : "pure shielded transfer"})</span></dd></div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4"><dt class="w-44 shrink-0 text-xs font-semibold uppercase tracking-wider text-faint">Anchor</dt><dd class="break-all font-mono text-sm text-muted">{t.anchor}</dd></div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4"><dt class="w-44 shrink-0 text-xs font-semibold uppercase tracking-wider text-faint">Nullifiers</dt><dd class="space-y-0.5">{t.nullifiers.map((n: string) => <code class="block break-all font-mono text-xs text-muted">{n}</code>)}</dd></div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4"><dt class="w-44 shrink-0 text-xs font-semibold uppercase tracking-wider text-faint">Commitments</dt><dd class="space-y-0.5">{t.commitments.map((n: string) => <code class="block break-all font-mono text-xs text-muted">{n}</code>)}</dd></div>
+        </>
+      ) : (
+        <>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4"><dt class="w-44 shrink-0 text-xs font-semibold uppercase tracking-wider text-faint">From</dt><dd class="text-sm"><a href={`/address/${t.from}`} class="break-all font-mono text-muted hover:text-ink">{t.from}</a></dd></div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4"><dt class="w-44 shrink-0 text-xs font-semibold uppercase tracking-wider text-faint">To</dt><dd class="text-sm">{t.to ? <a href={`/address/${t.to}`} class="break-all font-mono text-muted hover:text-ink">{t.to}</a> : <span class="text-ink">Contract creation{t.contractCreated ? " → " : ""}</span>}{t.contractCreated && <a href={`/address/${t.contractCreated}`} class="break-all font-mono text-[color:var(--color-brand)]">{t.contractCreated}</a>}</dd></div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4"><dt class="w-44 shrink-0 text-xs font-semibold uppercase tracking-wider text-faint">Value</dt><dd class="font-mono text-sm text-ink">{t.value} PYRX</dd></div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4"><dt class="w-44 shrink-0 text-xs font-semibold uppercase tracking-wider text-faint">Gas</dt><dd class="font-mono text-sm text-muted">{fmtNum(t.gasUsed)} / {fmtNum(t.gasLimit)} @ {t.gasPrice} gwei</dd></div>
+          <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4"><dt class="w-44 shrink-0 text-xs font-semibold uppercase tracking-wider text-faint">Nonce</dt><dd class="font-mono text-sm text-muted">{t.nonce}</dd></div>
+          {t.input && t.input !== "0x" && <div class="flex flex-col gap-0.5 sm:flex-row sm:gap-4"><dt class="w-44 shrink-0 text-xs font-semibold uppercase tracking-wider text-faint">Input data</dt><dd class="min-w-0"><code class="block max-h-32 overflow-y-auto break-all rounded-lg border border-line bg-[rgba(5,6,9,0.5)] p-2 font-mono text-xs text-muted">{t.input}</code></dd></div>}
+        </>
+      )}
+    </dl>
+  </div>
+
+  {t.logs && t.logs.length > 0 && (
+    <>
+      <h2 class="mt-6 text-lg font-bold">Event logs ({t.logs.length})</h2>
+      <div class="mt-2 space-y-2">{t.logs.map((l: any) => (
+        <div class="card p-4"><a href={`/address/${l.address}`} class="font-mono text-xs text-[color:var(--color-brand)]">{shortAddr(l.address)}</a>
+          <div class="mt-1 space-y-0.5">{(l.topics || []).map((tp: string, i: number) => <div class="flex gap-2 text-xs"><span class="w-16 shrink-0 text-faint">topic{i}</span><code class="break-all font-mono text-muted">{tp}</code></div>)}</div>
+          {l.data && l.data !== "0x" && <div class="mt-1 flex gap-2 text-xs"><span class="w-16 shrink-0 text-faint">data</span><code class="break-all font-mono text-muted">{l.data}</code></div>}
+        </div>
+      ))}</div>
+    </>
+  )}
+</Shell>

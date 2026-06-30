@@ -1,0 +1,50 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Shell from "../../layouts/Shell.astro";
+import { selectedChainId, netFor, getBlock } from "../../server/chain";
+import { SEAL_LABEL, STREAM_LABEL, TX_TYPE_LABEL } from "../../server/sample";
+import { shortHash, shortAddr, fmtNum, timeAgo, STREAM_TONE, TX_TYPE_TONE } from "../../lib/format";
+const net = netFor(selectedChainId(Astro.request.headers.get("cookie")));
+const { id } = Astro.params;
+const b: any = await getBlock(net, id!);
+const sample = b.source === "sample";
+const kv = [
+  ["Block hash", b.hash, true], ["Parent(s)", (b.parents || []).join(", "), true], ["Blue score", fmtNum(b.blueScore), false],
+  ["State root", b.stateRoot, true], ["Transactions root", b.transactionsRoot, true], ["Receipts root", b.receiptsRoot, true],
+  ["Producer (coinbase)", b.miner, true], ["Gas used", `${fmtNum(b.gasUsed)} / ${fmtNum(b.gasLimit)}`, false], ["Base fee", `${b.baseFee} gwei`, false],
+  ["DAA score", fmtNum(b.daaScore), false], ["Difficulty", b.difficulty, false], ["Size", `${fmtNum(b.size)} bytes`, false],
+];
+---
+<Shell title={`Block #${fmtNum(b.number)}`}>
+  <div class="flex flex-wrap items-center gap-2">
+    <a href="/blocks" class="text-sm text-muted hover:text-ink">← Blocks</a>
+    <h1 class="text-2xl font-extrabold sm:text-3xl">Block #{fmtNum(b.number)}</h1>
+    <span class="rounded-md px-2 py-0.5 text-xs font-bold" style={`color:${STREAM_TONE[b.stream]};background:${STREAM_TONE[b.stream]}1a`}>{STREAM_LABEL[b.stream]}</span>
+    <span class="chip chip-muted">{SEAL_LABEL[b.sealAlgo] || b.sealAlgo}</span>
+    {b.finalized && <span class="chip" style="color:var(--color-positive);border-color:rgba(52,211,153,.4)">finalized</span>}
+    {sample && <span class="rounded-full border border-[color:rgba(252,208,61,0.4)] bg-[rgba(252,208,61,0.08)] px-2 py-0.5 text-[0.66rem] font-semibold uppercase tracking-wider text-[color:var(--color-gold)]">sample</span>}
+  </div>
+  <p class="mt-1 text-sm text-muted">{timeAgo(b.timestamp)} · {b.txs.length} transactions</p>
+
+  <div class="card mt-5 p-5">
+    <dl class="grid gap-x-8 gap-y-3 sm:grid-cols-2">
+      {kv.map(([k, v, mono]) => (
+        <div class="min-w-0"><dt class="text-xs font-semibold uppercase tracking-wider text-faint">{k}</dt><dd class={`mt-0.5 break-all text-sm ${mono ? "font-mono text-muted" : "text-ink"}`}>{v || "—"}</dd></div>
+      ))}
+    </dl>
+  </div>
+
+  <h2 class="mt-6 text-lg font-bold">Transactions ({b.txs.length})</h2>
+  <div class="card mt-2 overflow-hidden p-0">
+    {b.txs.length === 0 ? <div class="p-8 text-center text-sm text-muted">No transactions in this block.</div> : (
+      <div class="divide-y divide-[color:var(--color-line-soft)]">
+        {b.txs.map((t: any) => (
+          <a href={`/tx/${t.hash}`} class="flex items-center justify-between gap-3 px-5 py-3 hover:bg-[rgba(255,255,255,0.02)]">
+            <div class="flex min-w-0 items-center gap-2"><span class="rounded-md px-1.5 py-0.5 text-[0.6rem] font-bold" style={`color:${TX_TYPE_TONE[t.type]};background:${TX_TYPE_TONE[t.type]}1a`}>{TX_TYPE_LABEL[t.type]}</span><code class="truncate font-mono text-sm text-ink">{shortHash(t.hash, 10)}</code></div>
+            <div class="shrink-0 text-right text-sm"><span class="font-mono text-muted">{t.type === "shielded" ? "private" : `${shortAddr(t.from)} → ${t.to ? shortAddr(t.to) : "create"}`}</span></div>
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
+</Shell>

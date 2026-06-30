@@ -1,0 +1,47 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Shell from "../../layouts/Shell.astro";
+import { selectedChainId, netFor, getAddress } from "../../server/chain";
+import { TX_TYPE_LABEL } from "../../server/sample";
+import { shortHash, shortAddr, fmtNum, timeAgo, TX_TYPE_TONE } from "../../lib/format";
+const net = netFor(selectedChainId(Astro.request.headers.get("cookie")));
+const { a } = Astro.params;
+const d: any = await getAddress(net, a!);
+const sample = d.source === "sample";
+const VM = (d.vm || "").toUpperCase();
+---
+<Shell title="Address">
+  <div class="flex flex-wrap items-center gap-2">
+    <h1 class="text-2xl font-extrabold">{d.isContract ? "Contract" : "Address"}</h1>
+    {d.isContract && <span class="chip" style="color:var(--color-brand);border-color:rgba(245,134,34,.4)">{VM} contract</span>}
+    {d.verified && <span class="chip" style="color:var(--color-positive);border-color:rgba(52,211,153,.4)">✓ verified</span>}
+    {sample && <span class="rounded-full border border-[color:rgba(252,208,61,0.4)] bg-[rgba(252,208,61,0.08)] px-2 py-0.5 text-[0.66rem] font-semibold uppercase tracking-wider text-[color:var(--color-gold)]">sample</span>}
+  </div>
+  <code class="mt-2 block break-all font-mono text-sm text-muted">{d.address}</code>
+
+  <div class="mt-5 grid gap-4 sm:grid-cols-3">
+    <div class="card p-5"><div class="text-xs font-semibold uppercase tracking-wider text-faint">Balance</div><div class="mt-1 text-2xl font-extrabold flame-text">{d.balance}</div><div class="text-xs text-faint">PYRX</div></div>
+    <div class="card p-5"><div class="text-xs font-semibold uppercase tracking-wider text-faint">Transactions</div><div class="mt-1 text-2xl font-extrabold">{fmtNum(d.txCount)}</div></div>
+    <div class="card p-5"><div class="text-xs font-semibold uppercase tracking-wider text-faint">Nonce</div><div class="mt-1 text-2xl font-extrabold">{fmtNum(d.nonce)}</div></div>
+  </div>
+
+  {d.isContract && <div class="mt-4 flex gap-2"><a href={`/contract/${d.address}`} class="btn btn-primary">View contract ({VM})</a></div>}
+
+  {d.tokens && d.tokens.length > 0 && (
+    <div class="card mt-5 p-5"><h3 class="text-base font-bold">Token holdings</h3>
+      <div class="mt-3 grid gap-2 sm:grid-cols-2">{d.tokens.map((tk: any) => (<div class="flex items-center justify-between rounded-lg border border-line px-3 py-2 text-sm"><a href={`/token/${tk.token}`} class="font-mono text-muted hover:text-ink">{tk.symbol}</a><span class="font-mono text-ink">{tk.amount}</span></div>))}</div>
+    </div>
+  )}
+
+  <h2 class="mt-6 text-lg font-bold">Transactions</h2>
+  <div class="card mt-2 overflow-hidden p-0">
+    {d.txs.length === 0 ? <div class="p-8 text-center text-sm text-muted">No transactions found{net.rpc ? "" : " (network offline)"}.</div> : (
+      <div class="divide-y divide-[color:var(--color-line-soft)]">{d.txs.map((t: any) => (
+        <a href={`/tx/${t.hash}`} class="flex items-center justify-between gap-3 px-5 py-3 hover:bg-[rgba(255,255,255,0.02)]">
+          <div class="flex min-w-0 items-center gap-2"><span class="rounded-md px-1.5 py-0.5 text-[0.6rem] font-bold" style={`color:${TX_TYPE_TONE[t.type]};background:${TX_TYPE_TONE[t.type]}1a`}>{TX_TYPE_LABEL[t.type]}</span><code class="truncate font-mono text-sm text-ink">{shortHash(t.hash)}</code></div>
+          <div class="shrink-0 text-right text-xs text-faint">{timeAgo(t.timestamp)}</div>
+        </a>
+      ))}</div>
+    )}
+  </div>
+</Shell>

@@ -1,0 +1,15 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Shell from "../layouts/Shell.astro";
+const q = (Astro.url.searchParams.get("q") || "").trim();
+if (/^\d+$/.test(q)) return Astro.redirect(`/block/${q}`);
+if (/^0x[0-9a-fA-F]{64}$/.test(q)) return Astro.redirect(`/tx/${q}`);
+if (/^0x[0-9a-fA-F]{40}$/.test(q)) return Astro.redirect(`/address/${q}`);
+---
+<Shell title="Search">
+  <h1 class="text-2xl font-extrabold">Search</h1>
+  <div class="card mt-5 p-8 text-center">
+    <div class="text-base font-semibold">No match for “{q}”</div>
+    <p class="mx-auto mt-1.5 max-w-md text-sm text-muted">Enter a <span class="text-ink">block number</span>, a 66-char <span class="text-ink">transaction hash</span> (0x…), or a 42-char <span class="text-ink">address</span> (0x…). Token + ENS-style name search arrives with the indexer.</p>
+  </div>
+</Shell>
