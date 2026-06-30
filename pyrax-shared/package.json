@@ -2,7 +2,7 @@
   "name": "@pyrax/shared",
   "version": "0.1.0",
   "private": true,
-  "description": "The single-source PYRAX site chrome: shared mega-menu nav, live network store + selector, command palette, icon/UI helpers and the brand stylesheet. Consumed by pyrax-website, pyrax-explorer, pyrax-nodes-website and pyrax-peer-directory so the navigation never drifts across properties.",
+  "description": "The single-source PYRAX site chrome: shared mega-menu nav, live network store + selector, command palette, icon/UI helpers and the brand stylesheet. Consumed by pyrax-website and pyrax-explorer so the navigation never drifts across properties. (The nodes site + peer directory are now the unified pyrax-nodes app.)",
   "license": "UNLICENSED",
   "type": "module",
   "exports": {
