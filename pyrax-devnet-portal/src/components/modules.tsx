@@ -24,7 +24,10 @@ function ComingSoon({ title, detail }: { title: string; detail: string }) {
 export function Dashboard({ onNavigate }: { onNavigate: (k: string) => void }) {
   const [d, setD] = useState<any>(null);
   const [err, setErr] = useState("");
+  const [pair, setPair] = useState<{ code: string; expiresInSec: number } | null>(null);
+  const [pairBusy, setPairBusy] = useState(false);
   useEffect(() => { fetch("/api/dashboard").then((r) => r.json()).then((x) => { if (x?.ok) setD(x); else setErr("Couldn't load your dashboard."); }).catch(() => setErr("Network error.")); }, []);
+  async function linkNode() { setPairBusy(true); try { const r = await (await fetch("/api/node/pair-code", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })).json(); if (r.ok) setPair({ code: r.code, expiresInSec: r.expiresInSec }); } catch {} setPairBusy(false); }
   if (err) return <Card className="p-8 text-center text-sm text-[color:var(--color-negative)]">{err}</Card>;
   if (!d) return <Card className="p-10 text-center text-sm text-muted"><span className="mr-2 inline-block h-4 w-4 animate-spin-slow rounded-full border-2 border-line border-t-[color:var(--color-brand)] align-middle" />Loading…</Card>;
 
@@ -57,7 +60,14 @@ export function Dashboard({ onNavigate }: { onNavigate: (k: string) => void }) {
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <Card className="p-5 lg:col-span-2">
-          <div className="flex items-center justify-between"><h3 className="text-base font-bold">Your nodes</h3><span className="text-xs text-faint">{d.devnet.rpc}</span></div>
+          <div className="flex items-center justify-between"><h3 className="text-base font-bold">Your nodes</h3><Button onClick={linkNode} disabled={pairBusy}>{pairBusy ? "…" : "+ Link a node"}</Button></div>
+          {pair && (
+            <div className="mt-3 rounded-xl border border-[color:rgba(245,134,34,0.4)] bg-[rgba(245,134,34,0.06)] p-4 text-center">
+              <div className="text-xs uppercase tracking-wider text-faint">Enter this code in Inferno or the CLI to link your node</div>
+              <div className="mt-1 font-mono text-3xl font-extrabold tracking-[0.3em] text-gold">{pair.code}</div>
+              <div className="mt-1 text-xs text-faint">Expires in {Math.max(1, Math.floor(pair.expiresInSec / 60))} min</div>
+            </div>
+          )}
           {d.nodes.length === 0 ? (
             <div className="mt-4 rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted">No nodes linked yet. Connect Inferno or the CLI to your account to start tracking uptime.<div className="mt-3"><Button variant="primary" onClick={() => onNavigate("downloads")}>Download the app</Button></div></div>
           ) : (

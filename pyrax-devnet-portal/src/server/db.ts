@@ -66,10 +66,16 @@ export function init(): Promise<void> {
       );
       CREATE TABLE IF NOT EXISTS nodes (
         node_pk TEXT PRIMARY KEY, tester_id TEXT NOT NULL REFERENCES testers(id) ON DELETE CASCADE,
-        label TEXT, app TEXT, app_version TEXT, node_version TEXT, height BIGINT, peers INT,
+        token_hash TEXT, label TEXT, app TEXT, app_version TEXT, node_version TEXT, height BIGINT, peers INT,
         first_seen BIGINT NOT NULL, last_heartbeat BIGINT NOT NULL
       );
+      ALTER TABLE nodes ADD COLUMN IF NOT EXISTS token_hash TEXT;
       CREATE INDEX IF NOT EXISTS idx_nodes_tester ON nodes(tester_id);
+      CREATE INDEX IF NOT EXISTS idx_nodes_token ON nodes(token_hash);
+      CREATE TABLE IF NOT EXISTS pairing_codes (
+        code TEXT PRIMARY KEY, tester_id TEXT NOT NULL REFERENCES testers(id) ON DELETE CASCADE,
+        label TEXT, created_at BIGINT NOT NULL, expires_at BIGINT NOT NULL, used_at BIGINT
+      );
       CREATE TABLE IF NOT EXISTS node_heartbeats (
         node_pk TEXT NOT NULL, tester_id TEXT NOT NULL, ts BIGINT NOT NULL
       );
@@ -288,4 +294,49 @@ export async function claimFounding(testerId: string, bonusPyrx: number, max: nu
   await db().query("UPDATE testers SET founding_rank=$2 WHERE id=$1 AND founding_rank IS NULL", [testerId, rank]);
   await addLedger(testerId, "founding", bonusPyrx, `Founding Tester #${rank}`);
   return rank;
+}
+
+// ---- node pairing + tokens ----
+const sha256 = (s: string) => crypto.createHash("sha256").update(s).digest("hex");
+function genCode(n = 8): string { const a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s = ""; for (let i = 0; i < n; i++) s += a[crypto.randomInt(a.length)]; return s; }
+
+/** Tester-initiated: mint a short pairing code the Inferno app/CLI enters to link a node (15 min). */
+export async function createPairingCode(testerId: string, label?: string): Promise<{ code: string; expiresAt: number }> {
+  await init();
+  const now = Date.now(); const code = genCode(8); const expiresAt = now + 15 * 60_000;
+  await db().query("INSERT INTO pairing_codes (code,tester_id,label,created_at,expires_at) VALUES ($1,$2,$3,$4,$5)", [code, testerId, label ?? null, now, expiresAt]);
+  return { code, expiresAt };
+}
+/** App/CLI: redeem a pairing code → create the node + return its long-lived heartbeat token. */
+export async function pairNode(code: string, info: { label?: string; app?: string; appVersion?: string; nodeVersion?: string }): Promise<{ ok: true; nodePk: string; nodeToken: string; testerId: string } | { ok: false; reason: "invalid" | "expired" | "used" }> {
+  await init();
+  const r = await db().query("SELECT tester_id, label, expires_at, used_at FROM pairing_codes WHERE code=$1", [code.trim().toUpperCase()]);
+  const row = r.rows[0];
+  if (!row) return { ok: false, reason: "invalid" };
+  if (row.used_at) return { ok: false, reason: "used" };
+  if (Number(row.expires_at) <= Date.now()) return { ok: false, reason: "expired" };
+  const now = Date.now();
+  const nodePk = "node_" + crypto.randomBytes(10).toString("base64url");
+  const nodeToken = crypto.randomBytes(32).toString("base64url");
+  await db().query("INSERT INTO nodes (node_pk,tester_id,token_hash,label,app,app_version,node_version,first_seen,last_heartbeat) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$8)",
+    [nodePk, row.tester_id, sha256(nodeToken), info.label || row.label || null, info.app ?? null, info.appVersion ?? null, info.nodeVersion ?? null, now]);
+  await db().query("UPDATE pairing_codes SET used_at=$1 WHERE code=$2", [now, code.trim().toUpperCase()]);
+  return { ok: true, nodePk, nodeToken, testerId: row.tester_id };
+}
+/** Resolve a heartbeat Bearer token → the node it belongs to. */
+export async function nodeByToken(token: string): Promise<{ node_pk: string; tester_id: string } | null> {
+  await init();
+  const r = await db().query("SELECT node_pk, tester_id FROM nodes WHERE token_hash=$1", [sha256(token || "")]);
+  return r.rows[0] || null;
+}
+
+/** Award the monthly uptime reward once per tester per month (idempotent by ledger ref). */
+export async function awardUptimeForMonth(testerId: string, ym: string, pyrx: number): Promise<boolean> {
+  await init();
+  if (pyrx <= 0) return false;
+  const ref = `uptime:${ym}`;
+  const exists = await db().query("SELECT 1 FROM earnings_ledger WHERE tester_id=$1 AND ref=$2", [testerId, ref]);
+  if ((exists.rowCount ?? 0) > 0) return false;
+  await addLedger(testerId, "uptime", pyrx, `Uptime — ${ym}`, ref);
+  return true;
 }
