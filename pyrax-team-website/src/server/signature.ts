@@ -8,6 +8,7 @@
 //   • the "Book a Meeting With Me" banner appears ONLY if they set a Microsoft Bookings link
 // The company-static blocks (spec readout, Community, Office, disclaimer) are fixed brand content.
 import { SOCIAL_FIELDS, socialUrl, type SocialKey } from "../lib/profile";
+import { DEFAULT_SIGNATURE_SETTINGS, COMMUNITY_KEYS, type SignatureSettings, type SpecTile, type LinkItem, type CommunityKey } from "../lib/signature-settings";
 
 const CDN = "https://pyrax.tor1.cdn.digitaloceanspaces.com/email";
 
@@ -70,8 +71,80 @@ function bookingBanner(url: string | null): string {
   </tr>`;
 }
 
-/** The signature itself: the <table class="px-wrap"> block users paste into their email client. */
-export function renderSignatureInner(u: SignatureUser): string {
+// Community icons — official PYRAX socials (taller 18px row; dark-swap for X + GitHub).
+const COMMUNITY_ICONS: Record<CommunityKey, string> = {
+  facebook: `<img src="${CDN}/social/v2/icon-facebook.png" width="18" height="18" alt="Facebook" title="PYRAX on Facebook" style="display:block; width:18px; height:18px; border:0; outline:none;">`,
+  x: `<img class="px-ico-l" src="${CDN}/social/v2/icon-x.png" width="20" height="18" alt="X" title="PYRAX on X" style="display:block; width:20px; height:18px; border:0; outline:none;"><img class="px-ico-d" src="${CDN}/social/v2/icon-x-dark.png" width="20" height="18" alt="X" title="PYRAX on X" style="display:none; width:20px; height:18px; border:0; outline:none;">`,
+  telegram: `<img src="${CDN}/social/v2/icon-telegram.png" width="18" height="18" alt="Telegram" title="PYRAX on Telegram" style="display:block; width:18px; height:18px; border:0; outline:none;">`,
+  discord: `<img src="${CDN}/social/v2/icon-discord.png" width="24" height="18" alt="Discord" title="PYRAX on Discord" style="display:block; width:24px; height:18px; border:0; outline:none;">`,
+  youtube: `<img src="${CDN}/social/v2/icon-youtube.png" width="26" height="18" alt="YouTube" title="PYRAX on YouTube" style="display:block; width:26px; height:18px; border:0; outline:none;">`,
+  github: `<img class="px-ico-l" src="${CDN}/social/v2/icon-github.png" width="19" height="18" alt="GitHub" title="PYRAX on GitHub" style="display:block; width:19px; height:18px; border:0; outline:none;"><img class="px-ico-d" src="${CDN}/social/v2/icon-github-dark.png" width="19" height="18" alt="GitHub" title="PYRAX on GitHub" style="display:none; width:19px; height:18px; border:0; outline:none;">`,
+  linkedin: `<img src="${CDN}/social/v2/icon-linkedin.png" width="18" height="18" alt="LinkedIn" title="PYRAX on LinkedIn" style="display:block; width:18px; height:18px; border:0; outline:none;">`,
+};
+
+/** Spec readout tiles (1–4), evenly split with vertical rules between them. */
+function specRow(tiles: SpecTile[]): string {
+  const list = tiles.length ? tiles : DEFAULT_SIGNATURE_SETTINGS.specTiles;
+  const w = (100 / list.length).toFixed(4);
+  return list.map((t, i) => `
+          <td class="${i === 0 ? "px-spec" : "px-vrule px-spec"}" width="${w}%" valign="top" style="width:${w}%; text-align:center; padding:0 6px;${i === 0 ? "" : " border-left:1px solid #e6e9f0;"}">
+            <div style="font-family:'Segoe UI', Arial, sans-serif; font-size:8px; font-weight:700; letter-spacing:1px; color:#f58622; text-transform:uppercase;">${esc(t.label)}</div>
+            <div class="px-tileval" style="padding-top:2px; font-family:'Consolas','SF Mono',monospace; font-size:12.5px; font-weight:700; color:#11161f;">${esc(t.value)}</div>
+          </td>`).join("");
+}
+
+/** Network links — first is primary (bold blue), the rest secondary. */
+function networkRow(links: LinkItem[]): string {
+  const list = links.length ? links : DEFAULT_SIGNATURE_SETTINGS.networkLinks;
+  const [first, ...rest] = list;
+  let out = `<a class="px-link" href="${esc(first.href)}" style="color:#1c63a6; text-decoration:none; font-weight:600;">${esc(first.label)}</a>`;
+  for (const l of rest) out += `<span class="px-sep" style="color:#c4cad4;">&nbsp;&middot;&nbsp;</span><a class="px-link2" href="${esc(l.href)}" style="color:#3a4453; text-decoration:none;">${esc(l.label)}</a>`;
+  return out;
+}
+
+/** Community row — only platforms with a URL set; "" if none (whole row omitted). */
+function communityRow(community: Record<CommunityKey, string>): string {
+  const present = COMMUNITY_KEYS.filter((k) => community[k] && community[k].trim());
+  if (!present.length) return "";
+  const spacer = `<td style="width:16px; font-size:0; line-height:0;">&nbsp;</td>`;
+  const cells = present.map((k) => `<td style="vertical-align:middle;"><a href="${esc(community[k])}" style="text-decoration:none;">${COMMUNITY_ICONS[k]}</a></td>`).join(spacer);
+  return `
+        <tr>
+          <td style="padding:1px 0 13px 0; font-family:'Segoe UI', Arial, sans-serif;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+              <tr>
+                <td style="width:84px; font-size:9.5px; font-weight:700; color:#f58622; text-transform:uppercase; letter-spacing:1px; vertical-align:middle;">&#9656;&nbsp;Community</td>
+                ${cells}
+              </tr>
+            </table>
+          </td>
+        </tr>`;
+}
+
+/** Office row — "" if no address set. */
+function officeRow(office: { label: string; mapHref: string }): string {
+  if (!office.label?.trim()) return "";
+  const inner = office.mapHref
+    ? `<a class="px-link2" href="${esc(office.mapHref)}" style="color:#3a4453; text-decoration:none;">${esc(office.label)}</a>`
+    : `<span class="px-link2" style="color:#3a4453;">${esc(office.label)}</span>`;
+  return `
+        <tr>
+          <td style="padding:0; font-family:'Segoe UI', Arial, sans-serif; font-size:11.5px; line-height:1.4;">
+            <span style="display:inline-block; width:84px; font-size:9.5px; font-weight:700; color:#f58622; text-transform:uppercase; letter-spacing:1px;">&#9656;&nbsp;Office</span>
+            ${inner}
+          </td>
+        </tr>`;
+}
+
+/** A disclaimer paragraph (label + body); "" when the body is empty. */
+function discPara(label: string, body: string, last = false): string {
+  if (!body?.trim()) return "";
+  return `<p style="margin:0${last ? "" : " 0 5px 0"};"><strong class="px-disc-strong" style="color:#6b7482;">${esc(label)}</strong> &mdash; ${esc(body)}</p>`;
+}
+
+/** The signature itself: the <table class="px-wrap"> block users paste into their email client.
+ *  Per-user fields come from `u`; the shared company design comes from `s` (Signature Studio). */
+export function renderSignatureInner(u: SignatureUser, s: SignatureSettings = DEFAULT_SIGNATURE_SETTINGS): string {
   return `<table class="px-wrap" role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px; max-width:600px; border-collapse:collapse; background-color:transparent; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
 
   <tr>
@@ -100,7 +173,7 @@ export function renderSignatureInner(u: SignatureUser): string {
             </div>
 ${findMeHere(u.socials)}
             <div class="px-tag px-tagw" style="padding-top:6px; white-space:nowrap; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:11px; font-style:italic; line-height:1.4; color:#5b6573;">
-              A privacy first Layer&#8209;1 that doubles as a decentralized AI supercomputer.
+              ${esc(s.tagline)}
             </div>
           </td>
         </tr>
@@ -111,23 +184,7 @@ ${findMeHere(u.socials)}
   <tr>
     <td style="padding:2px 4px 0 4px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; table-layout:fixed;">
-        <tr>
-          <td class="px-spec" width="25%" valign="top" style="width:25%; text-align:center; padding:0 6px;">
-            <div style="font-family:'Segoe UI', Arial, sans-serif; font-size:8px; font-weight:700; letter-spacing:1px; color:#f58622; text-transform:uppercase;">Token</div>
-            <div class="px-tileval" style="padding-top:2px; font-family:'Consolas','SF Mono',monospace; font-size:12.5px; font-weight:700; color:#11161f;">$PYRX</div>
-          </td>
-          <td class="px-vrule px-spec" width="25%" valign="top" style="width:25%; text-align:center; padding:0 6px; border-left:1px solid #e6e9f0;">
-            <div style="font-family:'Segoe UI', Arial, sans-serif; font-size:8px; font-weight:700; letter-spacing:1px; color:#f58622; text-transform:uppercase;">Consensus</div>
-            <div class="px-tileval" style="padding-top:2px; font-family:'Consolas','SF Mono',monospace; font-size:12.5px; font-weight:700; color:#11161f;">GhostDAG</div>
-          </td>
-          <td class="px-vrule px-spec" width="25%" valign="top" style="width:25%; text-align:center; padding:0 6px; border-left:1px solid #e6e9f0;">
-            <div style="font-family:'Segoe UI', Arial, sans-serif; font-size:8px; font-weight:700; letter-spacing:1px; color:#f58622; text-transform:uppercase;">Shielded&nbsp;by</div>
-            <div class="px-tileval" style="padding-top:2px; font-family:'Consolas','SF Mono',monospace; font-size:12.5px; font-weight:700; color:#11161f;">zk&#8209;SNARKs</div>
-          </td>
-          <td class="px-vrule px-spec" width="25%" valign="top" style="width:25%; text-align:center; padding:0 6px; border-left:1px solid #e6e9f0;">
-            <div style="font-family:'Segoe UI', Arial, sans-serif; font-size:8px; font-weight:700; letter-spacing:1px; color:#f58622; text-transform:uppercase;">Compute&nbsp;&amp;&nbsp;Inference</div>
-            <div class="px-tileval" style="padding-top:2px; font-family:'Consolas','SF Mono',monospace; font-size:12.5px; font-weight:700; color:#11161f;">NEURAX</div>
-          </td>
+        <tr>${specRow(s.specTiles)}
         </tr>
       </table>
     </td>
@@ -151,43 +208,10 @@ ${findMeHere(u.socials)}
         <tr>
           <td style="padding:0 0 13px 0; font-family:'Segoe UI', Arial, sans-serif; font-size:11.5px; line-height:1.4;">
             <span style="display:inline-block; width:84px; font-size:9.5px; font-weight:700; color:#f58622; text-transform:uppercase; letter-spacing:1px;">&#9656;&nbsp;Network</span>
-            <a class="px-link" href="https://pyraxchain.com" style="color:#1c63a6; text-decoration:none; font-weight:600;">pyraxchain.com</a>
-            <span class="px-sep" style="color:#c4cad4;">&nbsp;&middot;&nbsp;</span>
-            <a class="px-link2" href="https://explorer.pyraxchain.com" style="color:#3a4453; text-decoration:none;">Explorer</a>
-            <span class="px-sep" style="color:#c4cad4;">&nbsp;&middot;&nbsp;</span>
-            <a class="px-link2" href="https://nodes.pyraxchain.com" style="color:#3a4453; text-decoration:none;">Nodes</a>
-            <span class="px-sep" style="color:#c4cad4;">&nbsp;&middot;&nbsp;</span>
-            <a class="px-link2" href="https://pyraxchain.com/docs.html" style="color:#3a4453; text-decoration:none;">Docs</a>
+            ${networkRow(s.networkLinks)}
           </td>
         </tr>
-        <tr>
-          <td style="padding:1px 0 13px 0; font-family:'Segoe UI', Arial, sans-serif;">
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-              <tr>
-                <td style="width:84px; font-size:9.5px; font-weight:700; color:#f58622; text-transform:uppercase; letter-spacing:1px; vertical-align:middle;">&#9656;&nbsp;Community</td>
-                <td style="vertical-align:middle;"><a href="https://www.facebook.com/groups/pyraxchain" style="text-decoration:none;"><img src="${CDN}/social/v2/icon-facebook.png" width="18" height="18" alt="Facebook" title="PYRAX on Facebook" style="display:block; width:18px; height:18px; border:0; outline:none;"></a></td>
-                <td style="width:16px; font-size:0; line-height:0;">&nbsp;</td>
-                <td style="vertical-align:middle;"><a href="https://x.com/PYRAX_Official" style="text-decoration:none;"><img class="px-ico-l" src="${CDN}/social/v2/icon-x.png" width="20" height="18" alt="X" title="PYRAX on X" style="display:block; width:20px; height:18px; border:0; outline:none;"><img class="px-ico-d" src="${CDN}/social/v2/icon-x-dark.png" width="20" height="18" alt="X" title="PYRAX on X" style="display:none; width:20px; height:18px; border:0; outline:none;"></a></td>
-                <td style="width:16px; font-size:0; line-height:0;">&nbsp;</td>
-                <td style="vertical-align:middle;"><a href="https://t.me/+3DreJAHGxqhjYWQx" style="text-decoration:none;"><img src="${CDN}/social/v2/icon-telegram.png" width="18" height="18" alt="Telegram" title="PYRAX on Telegram" style="display:block; width:18px; height:18px; border:0; outline:none;"></a></td>
-                <td style="width:16px; font-size:0; line-height:0;">&nbsp;</td>
-                <td style="vertical-align:middle;"><a href="https://discord.gg/cEX6uQn24" style="text-decoration:none;"><img src="${CDN}/social/v2/icon-discord.png" width="24" height="18" alt="Discord" title="PYRAX on Discord" style="display:block; width:24px; height:18px; border:0; outline:none;"></a></td>
-                <td style="width:16px; font-size:0; line-height:0;">&nbsp;</td>
-                <td style="vertical-align:middle;"><a href="https://www.youtube.com/@PYRAXNETWORK" style="text-decoration:none;"><img src="${CDN}/social/v2/icon-youtube.png" width="26" height="18" alt="YouTube" title="PYRAX on YouTube" style="display:block; width:26px; height:18px; border:0; outline:none;"></a></td>
-                <td style="width:16px; font-size:0; line-height:0;">&nbsp;</td>
-                <td style="vertical-align:middle;"><a href="https://github.com/PYRAX-NETWORK" style="text-decoration:none;"><img class="px-ico-l" src="${CDN}/social/v2/icon-github.png" width="19" height="18" alt="GitHub" title="PYRAX on GitHub" style="display:block; width:19px; height:18px; border:0; outline:none;"><img class="px-ico-d" src="${CDN}/social/v2/icon-github-dark.png" width="19" height="18" alt="GitHub" title="PYRAX on GitHub" style="display:none; width:19px; height:18px; border:0; outline:none;"></a></td>
-                <td style="width:16px; font-size:0; line-height:0;">&nbsp;</td>
-                <td style="vertical-align:middle;"><a href="https://www.linkedin.com/company/pyrax-llc/" style="text-decoration:none;"><img src="${CDN}/social/v2/icon-linkedin.png" width="18" height="18" alt="LinkedIn" title="PYRAX on LinkedIn" style="display:block; width:18px; height:18px; border:0; outline:none;"></a></td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:0; font-family:'Segoe UI', Arial, sans-serif; font-size:11.5px; line-height:1.4;">
-            <span style="display:inline-block; width:84px; font-size:9.5px; font-weight:700; color:#f58622; text-transform:uppercase; letter-spacing:1px;">&#9656;&nbsp;Office</span>
-            <a class="px-link2" href="https://maps.google.com/?q=30+N+Gould+St+Ste+N,+Sheridan,+WY+82801" style="color:#3a4453; text-decoration:none;">30 N Gould St Ste N, Sheridan, WY 82801</a>
-          </td>
-        </tr>
+${communityRow(s.community)}${officeRow(s.office)}
       </table>
     </td>
   </tr>
@@ -200,16 +224,10 @@ ${bookingBanner(u.bookingUrl)}
 
   <tr>
     <td class="px-disc" style="padding:9px 4px 0 4px; font-family:'Segoe UI', Arial, sans-serif; font-size:9.5px; line-height:1.5; color:#8a94a3;">
-      <p style="margin:0 0 5px 0;">
-        <strong class="px-disc-strong" style="color:#6b7482;">Confidentiality</strong> &mdash; This email and any attachments are confidential and intended only for the named recipient. If you received it in error, please notify the sender and delete it; do not copy, forward, or act on its contents.
-      </p>
-      <p style="margin:0 0 5px 0;">
-        <strong class="px-disc-strong" style="color:#6b7482;">No financial advice</strong> &mdash; Nothing here is financial, investment, legal, or tax advice, nor an offer or solicitation to buy or sell any digital asset. PYRX is a utility token of the PYRAX network; digital assets are volatile and carry the risk of total loss. PYRAX&nbsp;LLC makes no price or market&#8209;cap predictions &mdash; do your own research.
-      </p>
-      <p style="margin:0 0 5px 0;">
-        <strong class="px-disc-strong" style="color:#6b7482;">Security</strong> &mdash; PYRAX may contact you through official channels, including email and, where the law permits, direct outreach such as a phone call. We will never ask for your seed phrase or private keys, request funds, or send unsolicited social&#8209;media direct messages asking you to connect a wallet, send crypto, or share private credentials &mdash; treat any message that does as a scam. Verify every link against <span class="px-disc-strong" style="color:#6b7482;">pyraxchain.com</span> before acting; our only official channels are the ones listed above.
-      </p>
-      <p style="margin:0; color:#aab2bf;">&copy; 2026 PYRAX&nbsp;LLC. All rights reserved.</p>
+      ${discPara("Confidentiality", s.disclaimer.confidentiality)}
+      ${discPara("No financial advice", s.disclaimer.noAdvice)}
+      ${discPara("Security", s.disclaimer.security)}
+      <p style="margin:0; color:#aab2bf;">${esc(s.copyright)}</p>
     </td>
   </tr>
 
@@ -247,7 +265,7 @@ function styleBlock(theme: SignatureTheme): string {
 
 /** Full standalone HTML document. Background is transparent (the signature sits on the email's own
  *  background). `theme`: "auto" for the real adaptive signature; "light"/"dark" force the preview. */
-export function renderSignatureDoc(u: SignatureUser, theme: SignatureTheme = "auto"): string {
+export function renderSignatureDoc(u: SignatureUser, theme: SignatureTheme = "auto", s: SignatureSettings = DEFAULT_SIGNATURE_SETTINGS): string {
   const cs = theme === "auto" ? "light dark" : theme;
   return `<!DOCTYPE html>
 <html lang="en">
@@ -261,7 +279,7 @@ export function renderSignatureDoc(u: SignatureUser, theme: SignatureTheme = "au
 <style>${styleBlock(theme)}</style>
 </head>
 <body style="margin:0; padding:24px; background:transparent;">
-${renderSignatureInner(u)}
+${renderSignatureInner(u, s)}
 </body>
 </html>`;
 }

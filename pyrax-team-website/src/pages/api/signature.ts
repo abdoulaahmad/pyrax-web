@@ -6,6 +6,7 @@
 //   ?download=1   adds Content-Disposition so the browser saves it as pyrax-signature.htm
 import type { APIRoute } from "astro";
 import { sessionUser, SESSION_COOKIE } from "../../server/auth";
+import { getSignatureSettings } from "../../server/db";
 import { renderSignatureDoc, renderSignatureInner, type SignatureUser, type SignatureTheme } from "../../server/signature";
 
 export const prerender = false;
@@ -21,8 +22,9 @@ export const GET: APIRoute = async ({ url, cookies }) => {
   // Preview themes force a fixed look for the portal only; copy + .htm stay OS-adaptive ("auto").
   const p = url.searchParams.get("preview");
   const theme: SignatureTheme = p === "light" || p === "dark" ? p : "auto";
+  const settings = await getSignatureSettings();
   const inner = url.searchParams.get("format") === "inner";
-  const html = inner ? renderSignatureInner(su) : renderSignatureDoc(su, theme);
+  const html = inner ? renderSignatureInner(su, settings) : renderSignatureDoc(su, theme, settings);
   const headers: Record<string, string> = { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" };
   if (url.searchParams.get("download")) headers["content-disposition"] = 'attachment; filename="pyrax-signature.htm"';
   return new Response(html, { status: 200, headers });

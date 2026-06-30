@@ -7,6 +7,7 @@
 import pg from "pg";
 import type { Permission } from "../lib/permissions";
 import { newUserId } from "./crypto";
+import { DEFAULT_SIGNATURE_SETTINGS, sanitizeSettings, type SignatureSettings } from "../lib/signature-settings";
 
 const URL_RAW = process.env.DATABASE_URL || process.env.DATABASE_URL_TEAM_PYRAX || "";
 // DO managed PG presents a CA the node trust store doesn't have; the connection is still TLS.
@@ -88,6 +89,14 @@ export function init(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
       -- Case-insensitive email uniqueness: exactly one account per address (we also lowercase on write).
       CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_lower ON users (lower(email));
+      -- Company-wide email-signature design (single row, edited by Signature Managers).
+      CREATE TABLE IF NOT EXISTS signature_settings (
+        id         INT PRIMARY KEY DEFAULT 1,
+        data       JSONB NOT NULL,
+        updated_at BIGINT NOT NULL,
+        updated_by TEXT,
+        CONSTRAINT signature_settings_single_row CHECK (id = 1)
+      );
     `);
     // Seed / enforce the immutable superuser. Profile details are placeholders the founder
     // can edit on first login; the superuser flag + active status are always enforced.
@@ -122,6 +131,23 @@ export async function listUsers(): Promise<UserRow[]> {
 }
 export async function touchLogin(id: string): Promise<void> {
   await db().query("UPDATE users SET last_login = $1, status = 'active' WHERE id = $2", [Date.now(), id]);
+}
+
+/** The company-wide signature design (defaults until a manager saves one). Always sanitized. */
+export async function getSignatureSettings(): Promise<SignatureSettings> {
+  await init();
+  const r = await db().query("SELECT data FROM signature_settings WHERE id = 1");
+  return r.rows[0] ? sanitizeSettings(r.rows[0].data) : DEFAULT_SIGNATURE_SETTINGS;
+}
+
+/** Save the company-wide signature design. Takes effect for every member's signature immediately. */
+export async function setSignatureSettings(s: SignatureSettings, updatedBy: string): Promise<void> {
+  await init();
+  await db().query(
+    `INSERT INTO signature_settings (id, data, updated_at, updated_by) VALUES (1, $1::jsonb, $2, $3)
+     ON CONFLICT (id) DO UPDATE SET data = $1::jsonb, updated_at = $2, updated_by = $3`,
+    [JSON.stringify(s), Date.now(), updatedBy],
+  );
 }
 
 /** Whitelist (invite) a new member. Email is stored lowercased and is UNIQUE (case-insensitive),

@@ -4,6 +4,7 @@ import { Card, Button, StatTile, Badge, PageHeader, Icon } from "./ui";
 import { can, canGrant, type AccessSubject, type Permission, PERMISSIONS, permissionGroups, PRESETS, isSuperuserOnly } from "../lib/permissions";
 import { SOCIAL_FIELDS, validateProfile, formatPhone, validatePhone, COMPANY_EMAIL_DOMAIN, type MemberProfile } from "../lib/profile";
 import { type Member } from "../lib/mock";
+import { COMMUNITY_KEYS, COMMUNITY_LABELS, type SignatureSettings } from "../lib/signature-settings";
 
 function Locked({ what }: { what: string }) {
   return (
@@ -450,6 +451,142 @@ export function Signature({ onEditProfile }: { onEditProfile?: () => void }) {
             <div className="text-sm font-semibold">Make it yours</div>
             <p className="mt-2 text-sm text-muted">Your name, title, email, phone, social links, and Microsoft Bookings button all come from your profile. Empty fields are hidden automatically.</p>
             <Button variant="ghost" className="mt-3" onClick={onEditProfile}><Icon.user className="h-4 w-4" /> Edit my profile</Button>
+          </Card>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ============================================================== Signature Studio (manager) */
+export function SignatureStudio({ subject }: { subject: AccessSubject }) {
+  if (!can(subject, "signature.manage")) return <Locked what="the Signature Studio" />;
+  const [s, setS] = useState<SignatureSettings | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [preview, setPreview] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    fetch("/api/signature-settings", { headers: { accept: "application/json" } })
+      .then((r) => r.json()).then((d) => { if (d?.ok) setS(d.settings); else setErr(d.error || "Couldn't load the design."); })
+      .catch(() => setErr("Network error loading the design."));
+  }, []);
+
+  // Debounced live preview of the (unsaved) draft using the manager's own profile.
+  useEffect(() => {
+    if (!s) return;
+    const id = window.setTimeout(() => {
+      fetch("/api/signature-settings/preview", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ settings: s, theme }) })
+        .then((r) => r.text()).then(setPreview).catch(() => {});
+    }, 300);
+    return () => window.clearTimeout(id);
+  }, [s, theme]);
+
+  function patch(p: Partial<SignatureSettings>) { setS((cur) => (cur ? { ...cur, ...p } : cur)); setSaved(false); }
+  async function save() {
+    if (!s) return; setBusy(true); setErr(""); setSaved(false);
+    try {
+      const res = await fetch("/api/signature-settings", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ settings: s }) });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok || !d.ok) { setErr(d.error || "Couldn't publish the design."); setBusy(false); return; }
+      setS(d.settings); setSaved(true);
+    } catch { setErr("Network error — please try again."); }
+    setBusy(false);
+  }
+
+  if (!s) return <Card className="p-10 text-center text-sm text-muted"><span className="mr-2 inline-block h-4 w-4 animate-spin-slow rounded-full border-2 border-line border-t-[color:var(--color-brand)] align-middle" />{err || "Loading the company design…"}</Card>;
+
+  return (
+    <>
+      <PageHeader title="Signature Studio" subtitle="The shared company email-signature design — every member's signature updates from here."
+        action={<div className="flex items-center gap-3">{saved && <span className="text-sm text-[color:var(--color-positive)]">Published ✓</span>}<Button variant="primary" onClick={save} disabled={busy}>{busy ? "Publishing…" : "Save + publish"}</Button></div>} />
+      {err && <p className="mb-3 text-sm text-[color:var(--color-negative)]">{err}</p>}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* editor */}
+        <div className="space-y-4">
+          <Card className="p-5">
+            <div className="text-sm font-semibold">Tagline</div>
+            <textarea className="input mt-2" rows={2} value={s.tagline} onChange={(e) => patch({ tagline: e.target.value })} />
+          </Card>
+
+          <Card className="p-5">
+            <div className="text-sm font-semibold">Spec tiles</div>
+            <p className="mt-1 text-xs text-faint">The readout row. Blank a tile to hide it.</p>
+            <div className="mt-3 space-y-2">
+              {s.specTiles.map((t, i) => (
+                <div key={i} className="grid grid-cols-2 gap-2">
+                  <input className="input" value={t.label} placeholder="Label" onChange={(e) => { const a = [...s.specTiles]; a[i] = { ...a[i], label: e.target.value }; patch({ specTiles: a }); }} />
+                  <input className="input" value={t.value} placeholder="Value" onChange={(e) => { const a = [...s.specTiles]; a[i] = { ...a[i], value: e.target.value }; patch({ specTiles: a }); }} />
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card className="p-5">
+            <div className="text-sm font-semibold">Network links</div>
+            <p className="mt-1 text-xs text-faint">First link is primary (bold). https only.</p>
+            <div className="mt-3 space-y-2">
+              {s.networkLinks.map((l, i) => (
+                <div key={i} className="flex gap-2">
+                  <input className="input w-1/3" value={l.label} placeholder="Label" onChange={(e) => { const a = [...s.networkLinks]; a[i] = { ...a[i], label: e.target.value }; patch({ networkLinks: a }); }} />
+                  <input className="input flex-1" value={l.href} placeholder="https://…" onChange={(e) => { const a = [...s.networkLinks]; a[i] = { ...a[i], href: e.target.value }; patch({ networkLinks: a }); }} />
+                  <button type="button" className="chip card-hover text-faint" onClick={() => patch({ networkLinks: s.networkLinks.filter((_, j) => j !== i) })}>✕</button>
+                </div>
+              ))}
+              {s.networkLinks.length < 6 && <button type="button" className="chip card-hover" onClick={() => patch({ networkLinks: [...s.networkLinks, { label: "", href: "" }] })}>+ Add link</button>}
+            </div>
+          </Card>
+
+          <Card className="p-5">
+            <div className="text-sm font-semibold">Community</div>
+            <p className="mt-1 text-xs text-faint">Official PYRAX accounts. Leave blank to hide an icon. https only.</p>
+            <div className="mt-3 space-y-2">
+              {COMMUNITY_KEYS.map((k) => (
+                <div key={k} className="flex items-center gap-2">
+                  <span className="w-20 shrink-0 text-xs text-muted">{COMMUNITY_LABELS[k]}</span>
+                  <input className="input flex-1" value={s.community[k]} placeholder="https://…" onChange={(e) => patch({ community: { ...s.community, [k]: e.target.value } })} />
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card className="p-5 space-y-2">
+            <div className="text-sm font-semibold">Office</div>
+            <input className="input" value={s.office.label} placeholder="Address" onChange={(e) => patch({ office: { ...s.office, label: e.target.value } })} />
+            <input className="input" value={s.office.mapHref} placeholder="https://maps.google.com/…" onChange={(e) => patch({ office: { ...s.office, mapHref: e.target.value } })} />
+          </Card>
+
+          <Card className="p-5 space-y-3">
+            <div className="text-sm font-semibold">Disclaimer</div>
+            {(["confidentiality", "noAdvice", "security"] as const).map((k) => (
+              <div key={k}>
+                <label className="label">{k === "noAdvice" ? "No financial advice" : k === "confidentiality" ? "Confidentiality" : "Security"}</label>
+                <textarea className="input" rows={k === "security" ? 4 : 3} value={s.disclaimer[k]} onChange={(e) => patch({ disclaimer: { ...s.disclaimer, [k]: e.target.value } })} />
+              </div>
+            ))}
+            <div>
+              <label className="label">Copyright</label>
+              <input className="input" value={s.copyright} onChange={(e) => patch({ copyright: e.target.value })} />
+            </div>
+          </Card>
+
+          <p className="text-xs leading-relaxed text-faint">After publishing, ask the team to re-copy their signature from “My Signature” to pick up layout/text changes (image-only re-skins update automatically in clients that re-fetch).</p>
+        </div>
+
+        {/* live preview */}
+        <div className="lg:sticky lg:top-20 h-fit">
+          <Card className="overflow-hidden p-0">
+            <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-faint">Live preview</span>
+              <div className="flex items-center gap-0.5 rounded-lg border border-line p-0.5 text-xs">
+                {(["light", "dark"] as const).map((t) => <button key={t} onClick={() => setTheme(t)} className={`rounded-md px-2.5 py-1 capitalize transition ${theme === t ? "bg-[rgba(245,134,34,0.16)] text-ink" : "text-faint hover:text-muted"}`}>{t}</button>)}
+              </div>
+            </div>
+            <div className={theme === "light" ? "bg-[#eef1f7]" : "bg-[#0b0d13]"}>
+              <iframe title="Signature design preview" srcDoc={preview} className="w-full" style={{ height: 560, background: "transparent", border: 0 }} />
+            </div>
           </Card>
         </div>
       </div>

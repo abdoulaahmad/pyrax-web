@@ -22,6 +22,7 @@ export const Icon: Record<string, (p: { className?: string }) => React.ReactNode
   users: (p) => (<svg viewBox="0 0 24 24" className={p.className} {...P}><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3.2 3.2 0 0 1 0 6.3"/><path d="M17.5 14.5A5.5 5.5 0 0 1 21 20"/></svg>),
   power: (p) => (<svg viewBox="0 0 24 24" className={p.className} {...P}><path d="M12 3v8"/><path d="M6.5 6.5a8 8 0 1 0 11 0"/></svg>),
   activity: (p) => (<svg viewBox="0 0 24 24" className={p.className} {...P}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>),
+  edit: (p) => (<svg viewBox="0 0 24 24" className={p.className} {...P}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>),
   shield: (p) => (<svg viewBox="0 0 24 24" className={p.className} {...P}><path d="M12 3 5 6v5c0 4.5 3 7.8 7 9 4-1.2 7-4.5 7-9V6l-7-3Z"/><path d="m9.5 12 1.8 1.8L15 10"/></svg>),
   user: (p) => (<svg viewBox="0 0 24 24" className={p.className} {...P}><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>),
   alert: (p) => (<svg viewBox="0 0 24 24" className={p.className} {...P}><path d="M12 3 2 20h20L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg>),
