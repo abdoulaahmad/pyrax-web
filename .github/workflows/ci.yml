@@ -30,8 +30,7 @@ jobs:
           - { dir: pyrax-website, pm: pnpm }
           - { dir: pyrax-nodes, pm: npm }
           - { dir: pyrax-devnet-portal, pm: npm }
-          - { dir: pyrax-explorer, pm: npm }
-          - { dir: pyrax-explorer/server, pm: npm }
+          - { dir: pyrax-explorer-app, pm: npm }
           - { dir: pyrax-team-website, pm: npm }
     name: build (${{ matrix.dir }})
     steps:
@@ -60,8 +59,9 @@ jobs:
         working-directory: ${{ matrix.dir }}
         run: ${{ matrix.pm }} run --if-present test
 
-  # The faucet + relay are dependency-free ESM services (no package.json / build step).
-  # Syntax-check them so a typo can't ship to the droplet on the next manual deploy.
+  # The faucet + relay are dependency-free ESM services (no package.json / build step), and the
+  # explorer indexer is a standalone Node service deployed apart from the SSR app. Syntax-check
+  # them all so a typo can't ship to the droplet on the next manual deploy.
   scripts-syntax:
     runs-on: ubuntu-latest
     steps:
@@ -72,7 +72,7 @@ jobs:
       - name: node --check the standalone services
         run: |
           set -euo pipefail
-          for f in faucet/*.mjs relay/*.mjs pyrax-tunnel-relay/*.mjs; do
+          for f in faucet/*.mjs relay/*.mjs pyrax-tunnel-relay/*.mjs pyrax-explorer-app/indexer/*.js; do
             [ -e "$f" ] || continue
             echo "checking $f"
             node --check "$f"
