@@ -9,6 +9,9 @@ const SENDER_NAME = process.env.BREVO_DEVNET_SENDER_NAME || "PYRAX Devnet";
 const PUBLIC_URL = process.env.PUBLIC_URL || "https://devnet.pyraxchain.com";
 const CDN = "https://pyrax.tor1.cdn.digitaloceanspaces.com/email";
 const OTP_TEMPLATE_ID = Number(process.env.BREVO_DEVNET_OTP_TEMPLATE_ID || 0);
+const INVITE_TEMPLATE_ID = Number(process.env.BREVO_DEVNET_INVITE_TEMPLATE_ID || 0);
+const RELEASE_TEMPLATE_ID = Number(process.env.BREVO_DEVNET_RELEASE_TEMPLATE_ID || 0);
+const NOTIFY_TEMPLATE_ID = Number(process.env.BREVO_DEVNET_NOTIFY_TEMPLATE_ID || 0);
 
 const C = { bg: "#06070b", card: "#0e1018", box: "#05060a", line: "#222838", ink: "#f7f9fd", muted: "#9aa4ba", faint: "#6a7286", gold: "#fcd03d", brand: "#f58622" };
 
@@ -78,15 +81,20 @@ async function sendEmail(to: string, subject: string, html: string): Promise<boo
     return true;
   } catch (e) { console.error("[email] send failed:", e); return false; }
 }
-async function sendTemplate(to: string, templateId: number, params: Record<string, unknown>): Promise<boolean> {
-  if (!API_KEY) return false;
+/** Send a Brevo stored template. The sender + design live in the template; we only inject params.
+ *  An optional `subject` overrides the template's default subject (for dynamic ones like releases). */
+async function sendTemplate(to: string, templateId: number, params: Record<string, unknown>, subject?: string): Promise<boolean> {
+  if (!API_KEY) { console.warn("[email] BREVO_API_KEY not set — skipping template", templateId, "->", to); return false; }
   try {
+    const body: Record<string, unknown> = { templateId, params, to: [{ email: to }] };
+    if (subject) body.subject = subject;
     const res = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST", headers: { "api-key": API_KEY, "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({ templateId, params, to: [{ email: to }] }),
+      body: JSON.stringify(body),
     });
-    return res.ok;
-  } catch { return false; }
+    if (!res.ok) { console.error("[email] Brevo template", templateId, res.status, await res.text().catch(() => "")); return false; }
+    return true;
+  } catch (e) { console.error("[email] template send failed:", e); return false; }
 }
 
 function fmtExpiry(ms: number): string {
@@ -103,10 +111,33 @@ function renderNotify(title: string, body: string, path: string): string {
     </td></tr></table>
     <p style="margin:16px 0 0;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:${C.faint};line-height:1.6;">Manage notifications from your portal settings.</p>`);
 }
-/** Issue Council / activity notification (mention, reply, accepted bug, …). */
-export const sendIssueNotify = (to: string, title: string, body: string, path = "/app") => sendEmail(to, `PYRAX Devnet — ${title}`, renderNotify(title, body, path));
+// Every transactional email prefers its Brevo stored template (on-brand, copy-managed in Brevo) and
+// falls back to the inline HTML render only if that template id isn't configured.
 
+/** One-time sign-in code. */
 export const sendOtp = (to: string, code: string, expiresAt: number) =>
   OTP_TEMPLATE_ID ? sendTemplate(to, OTP_TEMPLATE_ID, { otp: code, expires: fmtExpiry(expiresAt) }) : sendEmail(to, "Your PYRAX Devnet sign-in code", renderOtp(code, fmtExpiry(expiresAt)));
-export const sendInvite = (to: string, token: string) => sendEmail(to, "Your PYRAX Devnet closed-alpha invite", renderInvite(token));
-export const sendReleaseAlert = (to: string, version: string, title: string, notes: string, downloadUrl?: string) => sendEmail(to, `PYRAX Devnet — new build ${version}`, renderRelease(version, title, notes, downloadUrl));
+
+/** Closed-alpha invite (NEVER mentions rewards/PYRX — testers learn of those on the dashboard). */
+export const sendInvite = (to: string, token: string) => {
+  const link = `${PUBLIC_URL}/join?token=${encodeURIComponent(token)}`;
+  return INVITE_TEMPLATE_ID
+    ? sendTemplate(to, INVITE_TEMPLATE_ID, { link }, "Your PYRAX Devnet closed-alpha invite")
+    : sendEmail(to, "Your PYRAX Devnet closed-alpha invite", renderInvite(token));
+};
+
+/** New-build release alert (fan-out from the Releases admin). */
+export const sendReleaseAlert = (to: string, version: string, title: string, notes: string, downloadUrl?: string) => {
+  const heading = title || "A new build is available";
+  return RELEASE_TEMPLATE_ID
+    ? sendTemplate(to, RELEASE_TEMPLATE_ID, { version, title: heading, notes, downloadUrl: downloadUrl || "" }, `PYRAX Devnet — new build ${version}`)
+    : sendEmail(to, `PYRAX Devnet — new build ${version}`, renderRelease(version, title, notes, downloadUrl));
+};
+
+/** Issue Council / activity notification (mention, reply, accepted bug, …). */
+export const sendIssueNotify = (to: string, title: string, body: string, path = "/app") => {
+  const link = `${PUBLIC_URL}${path}`;
+  return NOTIFY_TEMPLATE_ID
+    ? sendTemplate(to, NOTIFY_TEMPLATE_ID, { title, body, link }, `PYRAX Devnet — ${title}`)
+    : sendEmail(to, `PYRAX Devnet — ${title}`, renderNotify(title, body, path));
+};

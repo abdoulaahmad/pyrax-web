@@ -29,11 +29,17 @@ Remaining items below are config/deploy/integration that need you or a later app
 - **Inferno app + CLI** — pairing + heartbeat to be implemented during the app rebuild. Portal side
   is done + a simulator stands in (`scripts/node-simulator.mjs`, spec in `docs/NODE-INTEGRATION.md`).
 - **Reward cron** — `/api/admin/run-rewards` is a manual monthly runner; wire a real cron at deploy.
-- **Brevo stored templates** — DONE. The devnet sign-in OTP now sends via the stored template
-  **id=2** ("PYRAX Devnet — Sign-in code"), same card/flame-bar design as the team template (id=1),
-  rebranded for devnet, params `{{params.otp}}` / `{{params.expires}}`. Recorded as
-  `BREVO_DEVNET_OTP_TEMPLATE_ID=2`; `sendOtp` uses it (inline HTML remains as a fallback only).
-  To re-sync the design after editing `src/server/otp-template.html`, re-run the creator script.
+- **Brevo stored templates** — DONE for ALL transactional email. Every devnet email now sends via an
+  on-brand stored template (same premium card/flame-bar/divider design); inline HTML stays only as a
+  fallback if an id is unset:
+  - sign-in OTP → **id=2** (`{{params.otp}}` / `{{params.expires}}`)
+  - closed-alpha invite → **id=3** (`{{params.link}}`) — sent by the team site's `sendDevnetInvite`
+  - new-build release alert → **id=4** (`{{params.version}}` / `title` / `notes` / `downloadUrl`, with
+    a `{% if params.downloadUrl %}` Update button)
+  - Issue Council / activity notify (mention, reply, accepted bug) → **id=5** (`{{params.title}}` /
+    `body` / `link`)
+  Recorded as `BREVO_DEVNET_{OTP,INVITE,RELEASE,NOTIFY}_TEMPLATE_ID` in `.env`. Source HTML in
+  `src/server/*-template.html`; re-run `create-brevo-devnet-templates.mjs` to re-sync after edits.
 
 ## Deploy (via pyrax-infra, like the team site)
 - New `devnet-portal` image + deploy workflow + compose in pyrax-infra; DNS `devnet.pyraxchain.com`;

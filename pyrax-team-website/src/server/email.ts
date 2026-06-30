@@ -96,14 +96,17 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
   }
 }
 
-/** Send a Brevo stored template by id, substituting {{params.*}}. */
-export async function sendTemplate(to: string, templateId: number, params: Record<string, unknown>): Promise<boolean> {
+/** Send a Brevo stored template by id, substituting {{params.*}}. Optional `subject` overrides the
+ *  template's default subject. */
+export async function sendTemplate(to: string, templateId: number, params: Record<string, unknown>, subject?: string): Promise<boolean> {
   if (!API_KEY) { console.warn("[email] BREVO_API_KEY not set — skipping template send to", to); return false; }
   try {
+    const body: Record<string, unknown> = { templateId, params, to: [{ email: to }] };
+    if (subject) body.subject = subject;
     const res = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: { "api-key": API_KEY, "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({ templateId, params, to: [{ email: to }] }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) { console.error("[email] Brevo template", res.status, await res.text().catch(() => "")); return false; }
     return true;
@@ -145,4 +148,11 @@ function renderDevnetInvite(token: string): string {
   </table>
 </td></tr></table></body></html>`;
 }
-export const sendDevnetInvite = (to: string, token: string) => sendEmail(to, "Your PYRAX Devnet closed-alpha invite", renderDevnetInvite(token));
+// Prefer the shared Brevo devnet invite template (same id the portal uses); fall back to inline HTML.
+const DEVNET_INVITE_TEMPLATE_ID = Number(process.env.BREVO_DEVNET_INVITE_TEMPLATE_ID || 0);
+export const sendDevnetInvite = (to: string, token: string) => {
+  const link = `${DEVNET_URL}/join?token=${encodeURIComponent(token)}`;
+  return DEVNET_INVITE_TEMPLATE_ID
+    ? sendTemplate(to, DEVNET_INVITE_TEMPLATE_ID, { link }, "Your PYRAX Devnet closed-alpha invite")
+    : sendEmail(to, "Your PYRAX Devnet closed-alpha invite", renderDevnetInvite(token));
+};
