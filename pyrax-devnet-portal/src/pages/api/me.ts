@@ -1,16 +1,24 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import type { APIRoute } from "astro";
 import { requireTester } from "../../server/guard";
-import { updateTesterProfile } from "../../server/db";
+import { updateTesterProfile, getLegalStatus } from "../../server/db";
+import { currentSessionStart, SESSION_COOKIE } from "../../server/auth";
 import { json, publicTester } from "../../server/http";
 import { validateWallet, clampSessionDays } from "../../lib/tester";
+import { NDA_VERSION, TOS_VERSION } from "../../lib/legal-docs";
 
 export const prerender = false;
 
 export const GET: APIRoute = async ({ cookies }) => {
   const me = await requireTester(cookies);
   if (!me) return json({ ok: false, tester: null });
-  return json({ ok: true, tester: publicTester(me) });
+  // The superuser is exempt from the signing gate (and from decline-deletion). Everyone else signs
+  // the NDA once (first login) and accepts the Alpha T&C once PER LOGIN (per session).
+  const startedAt = (await currentSessionStart(cookies.get(SESSION_COOKIE)?.value)) ?? Date.now();
+  const legal = me.is_superuser
+    ? { ndaAccepted: true, tosAccepted: true, exempt: true, ndaVersion: NDA_VERSION, tosVersion: TOS_VERSION }
+    : { ...(await getLegalStatus(me.id, startedAt)), exempt: false, ndaVersion: NDA_VERSION, tosVersion: TOS_VERSION };
+  return json({ ok: true, tester: publicTester(me), legal });
 };
 
 /** Update the tester's own settings: display name, payout wallet, session length (<=7d).

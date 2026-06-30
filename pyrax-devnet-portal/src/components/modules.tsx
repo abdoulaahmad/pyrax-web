@@ -4,6 +4,8 @@ import { Card, Button, Badge, PageHeader, Icon, StatTile } from "./ui";
 import { type AccessSubject } from "../lib/permissions";
 import { LEDGER_LABELS, REWARDS, usd } from "../lib/rewards";
 import ChatRoom from "./ChatRoom";
+import { RewardsModal, LegalDocBody } from "./Legal";
+import { NDA, TOS } from "../lib/legal-docs";
 
 const fmt = (n: number) => n.toLocaleString("en-US");
 function osIcon(platform: string): keyof typeof Icon {
@@ -34,6 +36,7 @@ export function Dashboard({ onNavigate }: { onNavigate: (k: string) => void }) {
   const [err, setErr] = useState("");
   const [pair, setPair] = useState<{ code: string; expiresInSec: number } | null>(null);
   const [pairBusy, setPairBusy] = useState(false);
+  const [showRewards, setShowRewards] = useState(false);
   useEffect(() => { fetch("/api/dashboard").then((r) => r.json()).then((x) => { if (x?.ok) setD(x); else setErr("Couldn't load your dashboard."); }).catch(() => setErr("Network error.")); }, []);
   async function linkNode() { setPairBusy(true); try { const r = await (await fetch("/api/node/pair-code", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })).json(); if (r.ok) setPair({ code: r.code, expiresInSec: r.expiresInSec }); } catch {} setPairBusy(false); }
   if (err) return <Card className="p-8 text-center text-sm text-[color:var(--color-negative)]">{err}</Card>;
@@ -44,7 +47,7 @@ export function Dashboard({ onNavigate }: { onNavigate: (k: string) => void }) {
 
   return (
     <>
-      <PageHeader title="Welcome, tester" subtitle={`${d.devnet.devnetName} · ${d.devnet.version} · chain ${d.devnet.chainId}`} />
+      <PageHeader title="Welcome, tester" subtitle={`${d.devnet.devnetName} · ${d.devnet.version} · chain ${d.devnet.chainId}`} action={<Button variant="ghost" onClick={() => setShowRewards(true)}><Icon.trophy className="h-4 w-4 text-gold" /> Rewards &amp; how to earn</Button>} />
 
       {d.foundingRank ? (
         <Card className="mb-4 flex items-center gap-3 border-[color:rgba(245,134,34,0.4)] p-4">
@@ -122,6 +125,48 @@ export function Dashboard({ onNavigate }: { onNavigate: (k: string) => void }) {
           {(!d.leaderboardTop || d.leaderboardTop.length === 0) && <p className="text-xs text-faint">No ranked testers yet — be the first.</p>}
         </div>
       </Card>
+      {showRewards && <RewardsModal onClose={() => setShowRewards(false)} />}
+    </>
+  );
+}
+
+/* ============================================================== Legal pages (read-only) */
+const legalWhen = (ms: number) => new Date(ms).toLocaleString("en-US", { timeZone: "UTC", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }) + " UTC";
+function SignedBanner({ label, rec }: { label: string; rec: any }) {
+  return (
+    <Card className="mb-4 border-[color:rgba(52,211,153,0.4)] bg-[rgba(52,211,153,0.06)] p-4">
+      <div className="flex items-center gap-2 text-sm font-semibold text-[color:var(--color-positive)]"><Icon.check className="h-4 w-4" /> You accepted this {label}</div>
+      <div className="mt-2 grid gap-x-6 gap-y-1 text-sm text-muted sm:grid-cols-2">
+        {rec.recipient_name && <div>Recipient: <span className="text-ink">{rec.recipient_name}</span></div>}
+        {rec.signature && <div>Signature: <span className="text-ink" style={{ fontFamily: "'Segoe Script','Brush Script MT',cursive" }}>{rec.signature}</span></div>}
+        <div>Accepted: <span className="text-ink">{legalWhen(Number(rec.accepted_at))}</span></div>
+        <div>IP address: <span className="font-mono text-ink">{rec.ip || "—"}</span></div>
+      </div>
+    </Card>
+  );
+}
+function useMyLegal() {
+  const [mine, setMine] = useState<any>(null);
+  useEffect(() => { fetch("/api/legal/mine").then((r) => r.json()).then((d) => { if (d.ok) setMine(d); }).catch(() => {}); }, []);
+  return mine;
+}
+export function NdaPage() {
+  const mine = useMyLegal();
+  return (
+    <>
+      <PageHeader title={NDA.title} subtitle={`Version ${NDA.version} · effective ${NDA.effectiveDate}. This is the agreement you signed to join the program — your executed copy is recorded below.`} />
+      {mine?.nda && <SignedBanner label="Non-Disclosure Agreement" rec={mine.nda} />}
+      <Card className="p-6"><LegalDocBody doc={NDA} /></Card>
+    </>
+  );
+}
+export function TosPage() {
+  const mine = useMyLegal();
+  return (
+    <>
+      <PageHeader title={TOS.title} subtitle={`Version ${TOS.version} · effective ${TOS.effectiveDate}. You accept these each time you sign in.`} />
+      {mine?.tos && <SignedBanner label="Alpha Test Program Terms" rec={mine.tos} />}
+      <Card className="p-6"><LegalDocBody doc={TOS} /></Card>
     </>
   );
 }

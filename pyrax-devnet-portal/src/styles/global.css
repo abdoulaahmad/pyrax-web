@@ -126,3 +126,18 @@
   .chip-positive { color:var(--color-positive); border-color:rgba(52,211,153,0.4); background:rgba(52,211,153,0.08); }
   .chip-muted { color:var(--color-faint); }
 }
+
+/* Rendered legal documents (NDA / T&C) — used in the signing modals and the Legal pages. */
+.legal-doc { color: var(--color-muted); font-size: 0.9rem; line-height: 1.7; }
+.legal-doc .lg-h1 { color: var(--color-ink); font-size: 1.05rem; font-weight: 800; margin: 1.6rem 0 0.6rem; letter-spacing: -0.2px; }
+.legal-doc .lg-h1:first-child { margin-top: 0; }
+.legal-doc .lg-h2 { color: var(--color-ink); font-size: 0.95rem; font-weight: 700; margin: 1.2rem 0 0.4rem; }
+.legal-doc .lg-h3 { color: var(--color-ink); font-size: 0.88rem; font-weight: 700; margin: 1rem 0 0.3rem; }
+.legal-doc .lg-p { margin: 0 0 0.75rem; }
+.legal-doc .lg-ul, .legal-doc .lg-ol { margin: 0 0 0.85rem; padding-left: 1.25rem; }
+.legal-doc .lg-ul { list-style: disc; }
+.legal-doc .lg-ol { list-style: decimal; }
+.legal-doc .lg-ul li, .legal-doc .lg-ol li { margin: 0.12rem 0; }
+.legal-doc .lg-hr { border: 0; border-top: 1px solid var(--color-line); margin: 1.4rem 0; }
+.legal-doc strong { color: var(--color-ink); font-weight: 700; }
+.legal-doc a { color: var(--color-brand); text-decoration: none; }

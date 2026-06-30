@@ -161,6 +161,15 @@ export function init(): Promise<void> {
         keys JSONB NOT NULL, created_at BIGINT NOT NULL
       );
       CREATE TABLE IF NOT EXISTS app_settings ( id INT PRIMARY KEY DEFAULT 1, data JSONB NOT NULL, updated_at BIGINT NOT NULL, CONSTRAINT app_settings_one CHECK (id = 1) );
+      -- Signed legal agreements (NDA + Alpha T&C). One row per acceptance; the latest row per
+      -- (tester, doc_type) at the CURRENT version gates portal access. IP + UA captured at signing.
+      CREATE TABLE IF NOT EXISTS legal_acceptances (
+        id TEXT PRIMARY KEY, tester_id TEXT NOT NULL REFERENCES testers(id) ON DELETE CASCADE,
+        doc_type TEXT NOT NULL, doc_version TEXT NOT NULL,
+        recipient_name TEXT, signature TEXT, ip TEXT NOT NULL DEFAULT '', user_agent TEXT NOT NULL DEFAULT '',
+        accepted_at BIGINT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_legal_tester ON legal_acceptances(tester_id, doc_type);
     `);
     await p.query(
       `INSERT INTO testers (id, email, display_name, handle, reward_eligible, is_staff, is_superuser, status, created_at, joined_at)
@@ -572,4 +581,86 @@ export async function awardUptimeForMonth(testerId: string, ym: string, pyrx: nu
   if ((exists.rowCount ?? 0) > 0) return false;
   await addLedger(testerId, "uptime", pyrx, `Uptime — ${ym}`, ref);
   return true;
+}
+
+// ---- legal agreements (NDA + Alpha T&C) ---------------------------------------------------------
+
+/** Record a signed/accepted legal document with the signer's IP + user agent. */
+export async function recordLegalAcceptance(
+  testerId: string, docType: "nda" | "tos", docVersion: string,
+  f: { recipientName?: string | null; signature?: string | null; ip: string; userAgent: string },
+): Promise<void> {
+  await init();
+  await db().query(
+    `INSERT INTO legal_acceptances (id, tester_id, doc_type, doc_version, recipient_name, signature, ip, user_agent, accepted_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+    [id("legal"), testerId, docType, docVersion, f.recipientName ?? null, f.signature ?? null, (f.ip || "").slice(0, 64), (f.userAgent || "").slice(0, 400), Date.now()],
+  );
+}
+
+/** Portal gate status. The NDA is a ONE-TIME sign (any prior acceptance counts forever). The Alpha
+ *  T&C must be accepted once PER LOGIN — satisfied only if there's an acceptance at/after the current
+ *  session's start. Pass the session's created_at as `sessionStartedAt`. */
+export async function getLegalStatus(testerId: string, sessionStartedAt = 0): Promise<{ ndaAccepted: boolean; tosAccepted: boolean }> {
+  await init();
+  const r = await db().query(
+    `SELECT
+       EXISTS(SELECT 1 FROM legal_acceptances WHERE tester_id=$1 AND doc_type='nda') AS nda,
+       EXISTS(SELECT 1 FROM legal_acceptances WHERE tester_id=$1 AND doc_type='tos' AND accepted_at >= $2) AS tos`,
+    [testerId, sessionStartedAt],
+  );
+  return { ndaAccepted: !!r.rows[0].nda, tosAccepted: !!r.rows[0].tos };
+}
+
+/** The tester's own latest signed NDA + T&C (so they can view their executed copy in their account). */
+export async function getMyLegalAcceptances(testerId: string): Promise<{ nda: any | null; tos: any | null }> {
+  await init();
+  const r = await db().query(
+    `SELECT DISTINCT ON (doc_type) doc_type, doc_version, recipient_name, signature, ip, accepted_at
+       FROM legal_acceptances WHERE tester_id=$1 ORDER BY doc_type, accepted_at DESC`,
+    [testerId],
+  );
+  const by: Record<string, any> = {};
+  for (const x of r.rows) by[x.doc_type] = x;
+  return { nda: by.nda || null, tos: by.tos || null };
+}
+
+/** Admin view: every signed agreement with the signer's identity, IP, and timestamp (latest first). */
+export async function listLegalAcceptances(): Promise<any[]> {
+  await init();
+  const r = await db().query(
+    `SELECT la.id, la.doc_type, la.doc_version, la.recipient_name, la.signature, la.ip, la.user_agent, la.accepted_at,
+            t.email, t.handle, t.display_name
+       FROM legal_acceptances la JOIN testers t ON t.id = la.tester_id
+      ORDER BY la.accepted_at DESC LIMIT 1000`,
+  );
+  return r.rows;
+}
+
+/** Fully remove a tester and every record that references them (used when a tester DECLINES the
+ *  legal terms). Cascading FKs cover sessions/nodes/pairing/ledger/push/legal; the rest are cleaned
+ *  explicitly because they store a plain tester/author id (no FK). The superuser is never deletable. */
+export async function deleteTesterFully(testerId: string): Promise<boolean> {
+  await init();
+  const me = await testerById(testerId);
+  if (!me || me.is_superuser) return false;
+  const c = await db().connect();
+  try {
+    await c.query("BEGIN");
+    await c.query("DELETE FROM bug_reactions WHERE tester_id=$1", [testerId]);
+    await c.query("DELETE FROM bug_comments WHERE author_id=$1", [testerId]);
+    await c.query("DELETE FROM bugs WHERE tester_id=$1", [testerId]);
+    await c.query("DELETE FROM reports WHERE tester_id=$1", [testerId]);
+    await c.query("DELETE FROM notifications WHERE tester_id=$1", [testerId]);
+    await c.query("DELETE FROM conversation_members WHERE member_id=$1", [testerId]);
+    await c.query("DELETE FROM chat_messages WHERE author_id=$1", [testerId]);
+    await c.query("DELETE FROM testers WHERE id=$1", [testerId]); // cascades sessions/nodes/pairing/ledger/push/legal
+    await c.query("COMMIT");
+    return true;
+  } catch (e) {
+    await c.query("ROLLBACK").catch(() => {});
+    throw e;
+  } finally {
+    c.release();
+  }
 }

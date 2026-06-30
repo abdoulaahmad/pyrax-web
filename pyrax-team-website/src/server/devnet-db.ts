@@ -155,6 +155,18 @@ export async function searchDevnetTesters(q: string, excludeId: string): Promise
   const r = await db().query("SELECT id, handle, display_name FROM testers WHERE status='active' AND id<>$1 AND handle<>'' AND (lower(handle) LIKE $2 OR lower(display_name) LIKE $2) ORDER BY handle LIMIT 8", [excludeId, s]);
   return r.rows;
 }
+// Signed legal agreements (NDA + Alpha T&C) for the team's compliance view — name, typed signature,
+// IP, and timestamp captured at signing. Read-only here; the portal owns the table.
+export async function listDevnetLegalAcceptances(): Promise<any[]> {
+  const r = await db().query(
+    `SELECT la.id, la.doc_type, la.doc_version, la.recipient_name, la.signature, la.ip, la.user_agent, la.accepted_at,
+            t.email, t.handle, t.display_name
+       FROM legal_acceptances la JOIN testers t ON t.id = la.tester_id
+      ORDER BY la.accepted_at DESC LIMIT 1000`,
+  );
+  return r.rows;
+}
+
 export async function devnetChatRoster(): Promise<any[]> {
   const r = await db().query("SELECT id, handle AS user, display_name AS name, is_staff, permissions FROM testers WHERE status='active' AND handle<>'' ORDER BY is_staff DESC, lower(handle) ASC LIMIT 300");
   return r.rows.map((x: any) => ({ id: x.id, user: x.user, name: x.name, admin: !!x.is_staff, role: x.is_staff ? "admin" : ((x.permissions || []).includes("community.support") ? "support" : "tester") }));

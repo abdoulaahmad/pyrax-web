@@ -97,6 +97,13 @@ export async function sessionTester(sid: string | undefined): Promise<TesterRow 
 export async function destroySession(sid: string | undefined): Promise<void> {
   if (!sid) return; await db().query("DELETE FROM sessions WHERE sid_hash=$1", [hmac(sid)]);
 }
+/** Login moment (created_at) of the current session — used to require T&C acceptance once per login. */
+export async function currentSessionStart(sid: string | undefined): Promise<number | null> {
+  if (!sid) return null;
+  await init();
+  const r = await db().query("SELECT created_at FROM sessions WHERE sid_hash=$1 AND expires_at > $2", [hmac(sid), Date.now()]);
+  return r.rows[0] ? Number(r.rows[0].created_at) : null;
+}
 export function cookieOptions(maxAgeMs = MAX_SESSION_DAYS * DAY) {
   return { httpOnly: true, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production", path: "/", maxAge: Math.floor(maxAgeMs / 1000) };
 }

@@ -3,9 +3,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo, Icon, Badge, BrandMark } from "./ui";
 import { can, type Permission } from "../lib/permissions";
-import { Dashboard, Downloads, IssueCouncil, Leaderboard, Chat, Releases, Settings, Triage, Testers } from "./modules";
+import { Dashboard, Downloads, IssueCouncil, Leaderboard, Chat, Releases, Settings, Triage, Testers, NdaPage, TosPage } from "./modules";
+import { LegalGate, type LegalStatus } from "./Legal";
 
-type ModuleKey = "dashboard" | "downloads" | "releases" | "issues" | "leaderboard" | "chat" | "settings" | "triage" | "testers";
+type ModuleKey = "dashboard" | "downloads" | "releases" | "issues" | "leaderboard" | "chat" | "settings" | "triage" | "testers" | "nda" | "tos";
 export interface Me { id: string; email: string; displayName: string; handle: string; payoutWallet: string | null; rewardEligible: boolean; isStaff: boolean; permissions: Permission[]; isSuperuser: boolean; status: string; sessionMaxDays: number; foundingRank: number | null; }
 
 const NAV: { key: ModuleKey; label: string; perm: Permission | null; icon: keyof typeof Icon; group: string }[] = [
@@ -16,6 +17,8 @@ const NAV: { key: ModuleKey; label: string; perm: Permission | null; icon: keyof
   { key: "leaderboard", label: "Leaderboard", perm: null, icon: "trophy", group: "Community" },
   { key: "chat", label: "Chat", perm: null, icon: "chat", group: "Community" },
   { key: "settings", label: "Settings", perm: null, icon: "user", group: "Account" },
+  { key: "nda", label: "NDA", perm: null, icon: "shield", group: "Legal" },
+  { key: "tos", label: "Terms & Conditions", perm: null, icon: "check", group: "Legal" },
   { key: "triage", label: "Triage", perm: "issues.triage", icon: "shield", group: "Admin" },
   { key: "testers", label: "Testers", perm: "testers.view", icon: "users", group: "Admin" },
 ];
@@ -52,10 +55,12 @@ export default function Portal() {
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [active, setActive] = useState<ModuleKey>("dashboard");
+  const [legal, setLegal] = useState<LegalStatus | null>(null);
+  const [gateDone, setGateDone] = useState(false);
 
   useEffect(() => {
     fetch("/api/me", { headers: { accept: "application/json" } }).then((r) => r.json())
-      .then((d) => { if (!d.ok || !d.tester) { window.location.href = "/"; return; } setMe(d.tester); setLoading(false); })
+      .then((d) => { if (!d.ok || !d.tester) { window.location.href = "/"; return; } setMe(d.tester); setLegal(d.legal || { ndaAccepted: true, tosAccepted: true, exempt: true }); setLoading(false); })
       .catch(() => { window.location.href = "/"; });
   }, []);
 
@@ -108,12 +113,15 @@ export default function Portal() {
       case "settings": return <Settings me={meUser} onSaved={(t) => setMe({ ...meUser, ...t })} />;
       case "triage": return <Triage subject={subject} />;
       case "testers": return <Testers subject={subject} />;
+      case "nda": return <NdaPage />;
+      case "tos": return <TosPage />;
       default: return null;
     }
   }
 
   return (
     <div className="flex min-h-screen">
+      {legal && !gateDone && <LegalGate legal={legal} displayName={meUser.displayName} onComplete={() => setGateDone(true)} />}
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-line bg-[rgba(8,10,17,0.7)] p-4 backdrop-blur md:flex">
         <div className="px-2 py-2"><Logo tag="Devnet" /></div>
         <nav className="mt-5 flex-1 space-y-5 overflow-y-auto"><NavList pillId="navpill-d" /></nav>
