@@ -27,7 +27,8 @@ async function subscribePush(): Promise<any | null> {
   } catch { return null; }
 }
 
-export default function NotifyForm({ compact = false }: { compact?: boolean }) {
+export default function NotifyForm({ compact = false, purpose = "general" }: { compact?: boolean; purpose?: "general" | "downloads" }) {
+  const downloadsMode = purpose === "downloads";
   const [email, setEmail] = useState("");
   const [portal, setPortal] = useState(true);
   const [updates, setUpdates] = useState(true);
@@ -40,12 +41,13 @@ export default function NotifyForm({ compact = false }: { compact?: boolean }) {
     e.preventDefault();
     setErr("");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) { setErr("Enter a valid email address."); return; }
-    if (!portal && !updates && !wantPush) { setErr("Pick at least one thing to be notified about."); return; }
+    if (!downloadsMode && !portal && !updates && !wantPush) { setErr("Pick at least one thing to be notified about."); return; }
     setBusy(true);
     let push: any = null;
     if (wantPush) { push = await subscribePush(); if (!push) setErr("Browser notifications were blocked or aren't supported — we'll still email you."); }
+    const body = downloadsMode ? { email: email.trim(), downloads: true, push } : { email: email.trim(), portal, updates, push };
     try {
-      const r = await (await fetch("/api/notify/subscribe", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: email.trim(), portal, updates, push }) })).json();
+      const r = await (await fetch("/api/notify/subscribe", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })).json();
       if (!r.ok) { setErr(r.error || "Couldn't save your subscription."); setBusy(false); return; }
       setDone({ email: !!r.email, push: !!r.push });
     } catch { setErr("Network error — please try again."); }
@@ -53,29 +55,28 @@ export default function NotifyForm({ compact = false }: { compact?: boolean }) {
   }
 
   if (done) {
+    const what = downloadsMode ? "official downloads open" : portal && updates ? "the portal opens or an app updates" : portal ? "the portal opens" : "an app updates";
     return (
       <div className={`card ${compact ? "p-5" : "p-7"} text-center`}>
         <div className="mx-auto mb-2 grid h-11 w-11 place-items-center rounded-full bg-[rgba(52,211,153,0.12)] text-2xl">✓</div>
         <div className="text-lg font-bold">You're on the list</div>
-        <p className="mx-auto mt-1 max-w-sm text-sm text-muted">
-          {done.email ? "We'll email you" : "We'll notify you"}{done.push ? " and send a browser notification" : ""} the moment {portal && updates ? "the portal opens or an app updates" : portal ? "the portal opens" : "an app updates"}. Thanks for your interest in PYRAX.
-        </p>
+        <p className="mx-auto mt-1 max-w-sm text-sm text-muted">{done.email ? "We'll email you" : "We'll notify you"}{done.push ? " and send a browser notification" : ""} the moment {what}. Thanks for your interest in PYRAX.</p>
       </div>
     );
   }
 
   return (
     <form onSubmit={submit} className={`card ${compact ? "p-5" : "p-7"}`}>
-      {!compact && <div className="mb-3"><div className="text-lg font-bold">Get notified</div><p className="text-sm text-muted">We'll let you know when the portal opens and when a new app ships.</p></div>}
+      {!compact && <div className="mb-3"><div className="text-lg font-bold">{downloadsMode ? "Get notified when downloads open" : "Get notified"}</div><p className="text-sm text-muted">{downloadsMode ? "We'll email you the moment official public node downloads go live." : "We'll let you know when the portal opens and when a new app ships."}</p></div>}
       <label className="label">Email address</label>
       <input className="input" type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => { setEmail(e.target.value); setErr(""); }} />
       <div className="mt-4 space-y-2.5">
-        <label className="flex cursor-pointer items-center gap-2.5 text-sm text-muted"><input type="checkbox" className="h-4 w-4 accent-[color:var(--color-brand)]" checked={portal} onChange={(e) => setPortal(e.target.checked)} /> Notify me when the <span className="text-ink">portal opens</span></label>
-        <label className="flex cursor-pointer items-center gap-2.5 text-sm text-muted"><input type="checkbox" className="h-4 w-4 accent-[color:var(--color-brand)]" checked={updates} onChange={(e) => setUpdates(e.target.checked)} /> Notify me when an <span className="text-ink">app is updated</span></label>
+        {!downloadsMode && <label className="flex cursor-pointer items-center gap-2.5 text-sm text-muted"><input type="checkbox" className="h-4 w-4 accent-[color:var(--color-brand)]" checked={portal} onChange={(e) => setPortal(e.target.checked)} /> Notify me when the <span className="text-ink">portal opens</span></label>}
+        {!downloadsMode && <label className="flex cursor-pointer items-center gap-2.5 text-sm text-muted"><input type="checkbox" className="h-4 w-4 accent-[color:var(--color-brand)]" checked={updates} onChange={(e) => setUpdates(e.target.checked)} /> Notify me when an <span className="text-ink">app is updated</span></label>}
         <label className="flex cursor-pointer items-center gap-2.5 text-sm text-muted"><input type="checkbox" className="h-4 w-4 accent-[color:var(--color-brand)]" checked={wantPush} onChange={(e) => setWantPush(e.target.checked)} /> Also send me a <span className="text-ink">browser notification</span></label>
       </div>
       {err && <p className="mt-3 text-sm text-[color:var(--color-warning)]">{err}</p>}
-      <button type="submit" disabled={busy} className="btn btn-primary mt-4 w-full justify-center">{busy ? "Subscribing…" : "Notify me"}</button>
+      <button type="submit" disabled={busy} className="btn btn-primary mt-4 w-full justify-center">{busy ? "Subscribing…" : downloadsMode ? "Notify me when downloads open" : "Notify me"}</button>
       <p className="mt-2 text-center text-xs text-faint">No spam. Unsubscribe anytime. We self-host our notification workers.</p>
     </form>
   );

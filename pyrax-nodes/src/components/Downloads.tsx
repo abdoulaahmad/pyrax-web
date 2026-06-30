@@ -5,6 +5,7 @@
 // on every button. Also links to the "notify me when an app updates" signup.
 import React, { useEffect, useMemo, useState } from "react";
 import { platformIcon } from "./ui";
+import NotifyForm from "./NotifyForm";
 
 interface DownloadItem { product: string; platform: string; arch?: string; url: string; version?: string; note?: string }
 
@@ -18,8 +19,12 @@ const DEFAULTS: DownloadItem[] = [
 
 export default function Downloads() {
   const [items, setItems] = useState<DownloadItem[] | null>(null);
+  const [gate, setGate] = useState<{ open: boolean; message: string } | null>(null);
   useEffect(() => {
-    fetch("/api/site").then((r) => r.json()).then((d) => { setItems(d.ok && d.downloads?.length ? d.downloads : DEFAULTS); }).catch(() => setItems(DEFAULTS));
+    fetch("/api/site").then((r) => r.json()).then((d) => {
+      setGate({ open: d.downloadsOpen !== false, message: d.downloadsMessage || "Public node downloads open when the testnet goes live." });
+      setItems(d.ok && d.downloads?.length ? d.downloads : DEFAULTS);
+    }).catch(() => { setGate({ open: true, message: "" }); setItems(DEFAULTS); });
   }, []);
 
   const groups = useMemo(() => {
@@ -27,6 +32,28 @@ export default function Downloads() {
     for (const it of items || []) (g[it.product] ||= []).push(it);
     return Object.entries(g);
   }, [items]);
+
+  // Team kill-switch: the link stays in the nav, but the page shows a notice + a signup to be
+  // emailed when official public downloads open.
+  if (gate && !gate.open) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
+        <div className="grid items-center gap-10 md:grid-cols-2">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-[rgba(255,255,255,0.03)] px-3 py-1 text-xs font-medium text-muted"><span className="h-2 w-2 rounded-full bg-[color:var(--color-warning)]" /> Downloads not yet open</span>
+            <h1 className="mt-5 text-3xl font-extrabold sm:text-5xl">Download a PYRAX node</h1>
+            <p className="mt-4 text-lg leading-relaxed text-muted">{gate.message}</p>
+            <ul className="mt-5 space-y-2 text-sm text-muted">
+              <li className="flex items-center gap-2"><span className="text-[color:var(--color-positive)]">✓</span> Official, checksum-verified public builds</li>
+              <li className="flex items-center gap-2"><span className="text-[color:var(--color-positive)]">✓</span> Windows · macOS · Linux + CLI</li>
+              <li className="flex items-center gap-2"><span className="text-[color:var(--color-positive)]">✓</span> One email the moment they go live</li>
+            </ul>
+          </div>
+          <NotifyForm purpose="downloads" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">

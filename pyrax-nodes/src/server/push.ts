@@ -25,19 +25,20 @@ function init(): Promise<void> {
   if (!ready) ready = (async () => {
     await db().query(`CREATE TABLE IF NOT EXISTS push_subscriptions (
       endpoint TEXT PRIMARY KEY, keys JSONB NOT NULL, email TEXT,
-      portal BOOLEAN NOT NULL DEFAULT TRUE, updates BOOLEAN NOT NULL DEFAULT TRUE, created_at BIGINT NOT NULL );`);
+      portal BOOLEAN NOT NULL DEFAULT TRUE, updates BOOLEAN NOT NULL DEFAULT TRUE, downloads BOOLEAN NOT NULL DEFAULT TRUE, created_at BIGINT NOT NULL );`);
+    await db().query(`ALTER TABLE push_subscriptions ADD COLUMN IF NOT EXISTS downloads BOOLEAN NOT NULL DEFAULT TRUE;`);
   })();
   return ready;
 }
 
-export async function savePushSub(sub: { endpoint: string; keys: any }, prefs: { email?: string; portal: boolean; updates: boolean }): Promise<boolean> {
+export async function savePushSub(sub: { endpoint: string; keys: any }, prefs: { email?: string; portal: boolean; updates: boolean; downloads?: boolean }): Promise<boolean> {
   if (!connectionString || !sub?.endpoint || !sub?.keys) return false;
   try {
     await init();
     await db().query(
-      `INSERT INTO push_subscriptions (endpoint, keys, email, portal, updates, created_at) VALUES ($1,$2::jsonb,$3,$4,$5,$6)
-       ON CONFLICT (endpoint) DO UPDATE SET keys=$2::jsonb, email=COALESCE($3,push_subscriptions.email), portal=$4, updates=$5`,
-      [sub.endpoint, JSON.stringify(sub.keys), prefs.email || null, prefs.portal, prefs.updates, Date.now()],
+      `INSERT INTO push_subscriptions (endpoint, keys, email, portal, updates, downloads, created_at) VALUES ($1,$2::jsonb,$3,$4,$5,$6,$7)
+       ON CONFLICT (endpoint) DO UPDATE SET keys=$2::jsonb, email=COALESCE($3,push_subscriptions.email), portal=$4, updates=$5, downloads=$6`,
+      [sub.endpoint, JSON.stringify(sub.keys), prefs.email || null, prefs.portal, prefs.updates, prefs.downloads ?? true, Date.now()],
     );
     return true;
   } catch { return false; }
@@ -49,11 +50,12 @@ export async function deletePushSub(endpoint: string): Promise<void> {
 }
 
 /** Broadcast a push to subscribers opted into `kind`. Returns how many were delivered. Prunes dead subs. */
-export async function sendPushToAll(payload: { title: string; body: string; url?: string }, kind: "portal" | "updates"): Promise<number> {
+export async function sendPushToAll(payload: { title: string; body: string; url?: string }, kind: "portal" | "updates" | "downloads"): Promise<number> {
   if (!vapidOk || !connectionString) return 0;
   try {
     await init();
-    const r = await db().query(`SELECT endpoint, keys FROM push_subscriptions WHERE ${kind === "portal" ? "portal" : "updates"} = TRUE`);
+    const col = kind === "portal" ? "portal" : kind === "downloads" ? "downloads" : "updates";
+    const r = await db().query(`SELECT endpoint, keys FROM push_subscriptions WHERE ${col} = TRUE`);
     let sent = 0;
     const data = JSON.stringify({ title: payload.title, body: payload.body, url: payload.url || "https://nodes.pyraxchain.com" });
     await Promise.all(r.rows.map(async (row: any) => {

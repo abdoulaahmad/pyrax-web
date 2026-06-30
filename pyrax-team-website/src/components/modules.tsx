@@ -936,6 +936,20 @@ export function NetworkManagement({ subject }: { subject: AccessSubject }) {
 
       {canDl && (
         <Card className="mb-4 p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div><h3 className="text-base font-bold">Downloads availability</h3><p className="text-xs text-muted">Disable the public Downloads page until the testnet goes live. The nav link stays; visitors see your message + a “notify me when downloads open” signup.</p></div>
+            <Badge tone={s.downloadsOpen ? "positive" : "warning"}>{s.downloadsOpen ? "Open" : "Disabled"}</Badge>
+          </div>
+          <div className="mt-3"><Button variant={s.downloadsOpen ? "danger" : "primary"} onClick={() => save({ downloadsOpen: !s.downloadsOpen }, s.downloadsOpen ? "Downloads disabled." : "Downloads opened.")} disabled={busy}>{s.downloadsOpen ? "Disable downloads" : "Open downloads"}</Button></div>
+          <div className="mt-4"><div className="label">“Downloads disabled” message</div>
+            <textarea className="input min-h-[64px]" value={s.downloadsMessage || ""} onChange={(e) => setS({ ...s, downloadsMessage: e.target.value })} />
+            <div className="mt-2"><Button onClick={() => save({ downloadsMessage: s.downloadsMessage })} disabled={busy}>Save message</Button></div>
+          </div>
+        </Card>
+      )}
+
+      {canDl && (
+        <Card className="mb-4 p-5">
           <div className="flex items-center justify-between"><h3 className="text-base font-bold">Public downloads</h3><Button onClick={() => setDls([...dls, { product: "Inferno Node App", platform: "Windows", url: "https://", version: "latest" }])}>+ Add</Button></div>
           <p className="text-xs text-muted">Shown on the public Downloads page with OS icons. Empty falls back to built-in defaults.</p>
           <div className="mt-3 space-y-2">
@@ -958,8 +972,8 @@ export function NetworkManagement({ subject }: { subject: AccessSubject }) {
         <Card className="p-5">
           <h3 className="text-base font-bold">Send a notification</h3>
           <p className="text-xs text-muted">Email + browser-push everyone on the notify list who opted into this type. Uses the on-brand Brevo template.</p>
-          <div className="mt-3 flex gap-2">
-            {[["updates", "App update"], ["portal", "Portal opened"]].map(([k, l]) => (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[["updates", "App update"], ["portal", "Portal opened"], ["downloads", "Downloads opened"]].map(([k, l]) => (
               <button key={k} onClick={() => setBKind(k)} className={`rounded-lg border px-3 py-1.5 text-sm ${bKind === k ? "border-[color:var(--color-brand)] bg-[rgba(245,134,34,0.08)] text-ink" : "border-line text-muted"}`}>{l}</button>
             ))}
           </div>

@@ -8,7 +8,7 @@ export const prerender = false;
 
 export const GET: APIRoute = async () => {
   const s = await getSiteSettings();
-  return new Response(JSON.stringify({ ok: true, open: s.open, closedMessage: s.closedMessage, defaultNetwork: s.defaultNetwork, downloads: s.downloads, updatedAt: s.updatedAt }), {
+  return new Response(JSON.stringify({ ok: true, open: s.open, closedMessage: s.closedMessage, defaultNetwork: s.defaultNetwork, downloads: s.downloads, downloadsOpen: s.downloadsOpen, downloadsMessage: s.downloadsMessage, updatedAt: s.updatedAt }), {
     headers: { "content-type": "application/json", "cache-control": "no-store" },
   });
 };

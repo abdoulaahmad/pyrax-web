@@ -33,7 +33,12 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
     if ("closedMessage" in b) patch.closedMessage = String(b.closedMessage ?? "").slice(0, 600);
     if ("defaultNetwork" in b && NETWORKS.some((n) => n.label === b.defaultNetwork)) patch.defaultNetwork = b.defaultNetwork;
   }
-  // downloads require network.downloads
+  // downloads list + the downloads kill-switch require network.downloads
+  if ("downloadsOpen" in b || "downloadsMessage" in b) {
+    if (!can(subj, "network.downloads")) return json({ ok: false, error: "Forbidden." }, 403);
+    if ("downloadsOpen" in b) patch.downloadsOpen = !!b.downloadsOpen;
+    if ("downloadsMessage" in b) patch.downloadsMessage = String(b.downloadsMessage ?? "").slice(0, 600);
+  }
   if ("downloads" in b) {
     if (!can(subj, "network.downloads")) return json({ ok: false, error: "Forbidden." }, 403);
     const list = Array.isArray(b.downloads) ? b.downloads : [];

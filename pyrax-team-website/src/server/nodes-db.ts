@@ -6,13 +6,15 @@
 import pg from "pg";
 
 export interface DownloadItem { product: string; platform: string; arch?: string; url: string; version?: string; note?: string }
-export interface NodesSettings { open: boolean; closedMessage: string; defaultNetwork: string; downloads: DownloadItem[]; updatedAt: number; updatedBy: string | null }
+export interface NodesSettings { open: boolean; closedMessage: string; defaultNetwork: string; downloads: DownloadItem[]; downloadsOpen: boolean; downloadsMessage: string; updatedAt: number; updatedBy: string | null }
 
 const DEFAULTS: NodesSettings = {
   open: true,
   closedMessage: "The PYRAX Nodes portal is opening soon. Leave your email below and we'll notify you the moment it's live.",
   defaultNetwork: "forge",
   downloads: [],
+  downloadsOpen: true,
+  downloadsMessage: "Public node downloads open when the PYRAX testnet goes live. Join the list and we'll email you the moment official downloads are available.",
   updatedAt: 0,
   updatedBy: null,
 };

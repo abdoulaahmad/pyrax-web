@@ -11,13 +11,17 @@ const H = { "api-key": API_KEY, "content-type": "application/json", accept: "app
 
 export const brevoConfigured = () => !!API_KEY && !!LIST_ID;
 
-/** Add or update a subscriber on the notify list with their two opt-in preferences. */
-export async function upsertNotifyContact(email: string, prefs: { portal: boolean; updates: boolean }): Promise<{ ok: boolean; error?: string }> {
+/** Add or update a subscriber on the notify list with their opt-in preferences. */
+export async function upsertNotifyContact(email: string, prefs: { portal?: boolean; updates?: boolean; downloads?: boolean }): Promise<{ ok: boolean; error?: string }> {
   if (!API_KEY || !LIST_ID) return { ok: false, error: "Email notifications aren't configured yet." };
   try {
+    const attributes: Record<string, boolean> = {};
+    if (prefs.portal !== undefined) attributes.NOTIFY_PORTAL = prefs.portal;
+    if (prefs.updates !== undefined) attributes.NOTIFY_UPDATES = prefs.updates;
+    if (prefs.downloads !== undefined) attributes.NOTIFY_DOWNLOADS = prefs.downloads;
     const r = await fetch("https://api.brevo.com/v3/contacts", {
       method: "POST", headers: H,
-      body: JSON.stringify({ email, attributes: { NOTIFY_PORTAL: prefs.portal, NOTIFY_UPDATES: prefs.updates }, listIds: [LIST_ID], updateEnabled: true }),
+      body: JSON.stringify({ email, attributes, listIds: [LIST_ID], updateEnabled: true }),
     });
     if (r.ok || r.status === 204) return { ok: true };
     const b = await r.json().catch(() => ({}));
@@ -40,7 +44,7 @@ export async function sendNotifyEmail(to: string, params: { title: string; body:
 }
 
 /** Fetch the notify-list subscribers (paged) filtered by an opt-in attribute, for broadcasts. */
-export async function listNotifyContacts(optIn: "NOTIFY_PORTAL" | "NOTIFY_UPDATES"): Promise<string[]> {
+export async function listNotifyContacts(optIn: "NOTIFY_PORTAL" | "NOTIFY_UPDATES" | "NOTIFY_DOWNLOADS"): Promise<string[]> {
   if (!API_KEY || !LIST_ID) return [];
   const out: string[] = [];
   let offset = 0;

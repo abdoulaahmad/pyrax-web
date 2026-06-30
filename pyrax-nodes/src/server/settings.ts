@@ -13,6 +13,8 @@ export interface SiteSettings {
   closedMessage: string;
   defaultNetwork: NetLabel;      // default network shown across all marketing sites
   downloads: DownloadItem[];
+  downloadsOpen: boolean;        // false = Downloads page disabled (link stays, shows a notice + signup)
+  downloadsMessage: string;
   updatedAt: number;
   updatedBy: string | null;
 }
@@ -22,6 +24,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   closedMessage: "The PYRAX Nodes portal is opening soon. Leave your email below and we'll notify you the moment it's live.",
   defaultNetwork: "forge",
   downloads: [],
+  downloadsOpen: true,
+  downloadsMessage: "Public node downloads open when the PYRAX testnet goes live. Join the list and we'll email you the moment official downloads are available.",
   updatedAt: 0,
   updatedBy: null,
 };

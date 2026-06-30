@@ -22,7 +22,7 @@ function authorized(req: Request): boolean {
 export const POST: APIRoute = async ({ request }) => {
   if (!authorized(request)) return json({ ok: false, error: "unauthorized" }, 401);
   const b = await request.json().catch(() => ({}));
-  const kind = b?.kind === "updates" ? "updates" : "portal";
+  const kind = b?.kind === "updates" ? "updates" : b?.kind === "downloads" ? "downloads" : "portal";
   const title = String(b?.title ?? "").trim().slice(0, 140);
   const body = String(b?.body ?? "").trim().slice(0, 2000);
   const link = b?.link ? String(b.link).slice(0, 400) : "https://nodes.pyraxchain.com";
@@ -30,7 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (!title || !body) return json({ ok: false, error: "title and body are required" }, 422);
 
   // email the opted-in subscribers (transactional template), and push to opted-in subscribers
-  const attr = kind === "updates" ? "NOTIFY_UPDATES" : "NOTIFY_PORTAL";
+  const attr = kind === "updates" ? "NOTIFY_UPDATES" : kind === "downloads" ? "NOTIFY_DOWNLOADS" : "NOTIFY_PORTAL";
   const emails = await listNotifyContacts(attr as any);
   let emailed = 0;
   for (let i = 0; i < emails.length; i += 20) {
