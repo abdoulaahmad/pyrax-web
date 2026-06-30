@@ -10,7 +10,7 @@ the Inferno app / CLI side is **stubbed** here as a spec — to be implemented d
 
    ```http
    POST /api/node/pair
-   { "code": "ABCD2345", "app": "inferno", "appVersion": "0.4.0", "nodeVersion": "0.4.0", "label": "My Node" }
+   { "code": "ABCD2345", "app": "inferno", "appVersion": "0.1.0", "nodeVersion": "0.1.0", "label": "My Node" }
    → 200 { "ok": true, "nodePk": "node_…", "nodeToken": "<secret>", "heartbeatEverySec": 30, "foundingRank": 1|null }
    ```
 
@@ -22,7 +22,7 @@ the Inferno app / CLI side is **stubbed** here as a spec — to be implemented d
    ```http
    POST /api/node/heartbeat
    Authorization: Bearer <nodeToken>
-   { "height": 123456, "peers": 9, "appVersion": "0.4.0", "nodeVersion": "0.4.0" }
+   { "height": 123456, "peers": 9, "appVersion": "0.1.0", "nodeVersion": "0.1.0" }
    → 200 { "ok": true, "nextSec": 30 }
    ```
 

@@ -10,7 +10,7 @@ if (!code) { console.error("Usage: node scripts/node-simulator.mjs <PAIRING_CODE
 
 const pair = await (await fetch(`${portal}/api/node/pair`, {
   method: "POST", headers: { "content-type": "application/json" },
-  body: JSON.stringify({ code, app: "inferno-sim", appVersion: "0.4.0", nodeVersion: "0.4.0", label: "Simulated Node" }),
+  body: JSON.stringify({ code, app: "inferno-sim", appVersion: "0.1.0", nodeVersion: "0.1.0", label: "Simulated Node" }),
 })).json();
 if (!pair.ok) { console.error("Pair failed:", pair.error); process.exit(1); }
 console.log(`Paired ${pair.nodePk}` + (pair.foundingRank ? ` — Founding Tester #${pair.foundingRank}!` : ""));
@@ -21,7 +21,7 @@ async function beat() {
   try {
     const r = await (await fetch(`${portal}/api/node/heartbeat`, {
       method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + pair.nodeToken },
-      body: JSON.stringify({ height, peers: 8 + Math.floor(Math.random() * 6), appVersion: "0.4.0", nodeVersion: "0.4.0" }),
+      body: JSON.stringify({ height, peers: 8 + Math.floor(Math.random() * 6), appVersion: "0.1.0", nodeVersion: "0.1.0" }),
     })).json();
     console.log(new Date().toISOString(), r.ok ? `heartbeat ok (height ${height})` : `heartbeat error: ${r.error}`);
   } catch (e) { console.log("heartbeat failed:", e.message); }

@@ -210,8 +210,10 @@ export async function acceptInvite(token: string, profile: { display_name: strin
 
 // ---- devnet status settings ----
 const DEFAULT_SETTINGS = {
-  devnetName: "PYRAX Devnet", version: "v0.4.0", chainId: 881109, rpc: "https://sidn-rpc.pyraxchain.com",
-  whatToTest: "Spin up a node, keep it online, and report anything that breaks.", telemetryUrl: "",
+  // The network testers exercise is PYRAX FORGE (the public-facing dev network), chain 710823 —
+  // NOT the team-internal Seed network. Admin-editable from the team-site devnet status panel.
+  devnetName: "PYRAX Forge Network", version: "v0.1.0", chainId: 710823, rpc: "https://pyrax-forge.rpc.pyraxchain.com",
+  whatToTest: "Spin up a Forge node, keep it online, and report anything that breaks.", telemetryUrl: "",
   // Admin-controlled download gate (toggled from the team-site devnet admin dashboard).
   downloadsOpen: true,
   downloadsClosedMessage: "Downloads are temporarily closed by the admin team. You'll be notified the moment they reopen.",
@@ -328,6 +330,77 @@ export async function nodeByToken(token: string): Promise<{ node_pk: string; tes
   await init();
   const r = await db().query("SELECT node_pk, tester_id FROM nodes WHERE token_hash=$1", [sha256(token || "")]);
   return r.rows[0] || null;
+}
+
+// ---- Issue Council (bugs) ----
+export const BUG_STATUSES = ["new", "confirmed", "in_progress", "fixed", "verified", "closed", "duplicate", "wont_fix"] as const;
+export const BUG_SEVERITIES = ["low", "medium", "high", "critical"] as const;
+
+export async function createBug(testerId: string, f: { title: string; description: string; reproSteps: string; expected: string; actual: string; severity: string; component: string; environment: Record<string, any>; attachments: any[] }): Promise<any> {
+  await init();
+  const now = Date.now();
+  const sev = (BUG_SEVERITIES as readonly string[]).includes(f.severity) ? f.severity : "medium";
+  const r = await db().query(
+    `INSERT INTO bugs (id,tester_id,title,description,repro_steps,expected,actual,severity,component,environment,attachments,status,created_at,updated_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11::jsonb,'new',$12,$12) RETURNING *`,
+    [id("bug"), testerId, f.title.slice(0, 160), f.description.slice(0, 8000), f.reproSteps.slice(0, 8000), f.expected.slice(0, 2000), f.actual.slice(0, 2000), sev, f.component.slice(0, 80), JSON.stringify(f.environment || {}), JSON.stringify((f.attachments || []).slice(0, 8)), now],
+  );
+  return r.rows[0];
+}
+export async function listBugs(opts: { status?: string; sort?: string } = {}): Promise<any[]> {
+  await init();
+  const where = opts.status && (BUG_STATUSES as readonly string[]).includes(opts.status) ? "WHERE b.status = $1" : "";
+  const order = opts.sort === "votes" ? "b.votes DESC, b.created_at DESC" : opts.sort === "severity" ? "CASE b.severity WHEN 'critical' THEN 4 WHEN 'high' THEN 3 WHEN 'medium' THEN 2 ELSE 1 END DESC, b.created_at DESC" : "b.created_at DESC";
+  const r = await db().query(`SELECT b.id,b.title,b.severity,b.assigned_severity,b.component,b.status,b.votes,b.confirms,b.bounty_pyrx,b.created_at,b.attachments,t.display_name AS reporter_name,t.handle AS reporter_handle FROM bugs b JOIN testers t ON t.id=b.tester_id ${where} ORDER BY ${order} LIMIT 200`, opts.status && where ? [opts.status] : []);
+  return r.rows;
+}
+export async function getBug(bugId: string, viewerId?: string): Promise<any | null> {
+  await init();
+  const r = await db().query(`SELECT b.*, t.display_name AS reporter_name, t.handle AS reporter_handle FROM bugs b JOIN testers t ON t.id=b.tester_id WHERE b.id=$1`, [bugId]);
+  if (!r.rows[0]) return null;
+  const cm = await db().query(`SELECT c.id,c.body,c.created_at,t.display_name,t.handle,t.is_staff FROM bug_comments c JOIN testers t ON t.id=c.tester_id WHERE c.bug_id=$1 ORDER BY c.created_at ASC`, [bugId]);
+  let mine: string[] = [];
+  if (viewerId) { const mr = await db().query("SELECT kind FROM bug_reactions WHERE bug_id=$1 AND tester_id=$2", [bugId, viewerId]); mine = mr.rows.map((x) => x.kind); }
+  return { ...r.rows[0], comments: cm.rows, myReactions: mine };
+}
+export async function reactBug(bugId: string, testerId: string, kind: "vote" | "confirm"): Promise<{ votes: number; confirms: number; on: boolean }> {
+  await init();
+  const ex = await db().query("SELECT 1 FROM bug_reactions WHERE bug_id=$1 AND tester_id=$2 AND kind=$3", [bugId, testerId, kind]);
+  let on: boolean;
+  if ((ex.rowCount ?? 0) > 0) { await db().query("DELETE FROM bug_reactions WHERE bug_id=$1 AND tester_id=$2 AND kind=$3", [bugId, testerId, kind]); on = false; }
+  else { await db().query("INSERT INTO bug_reactions (bug_id,tester_id,kind,created_at) VALUES ($1,$2,$3,$4)", [bugId, testerId, kind, Date.now()]); on = true; }
+  const c = await db().query("SELECT COUNT(*) FILTER (WHERE kind='vote') AS votes, COUNT(*) FILTER (WHERE kind='confirm') AS confirms FROM bug_reactions WHERE bug_id=$1", [bugId]);
+  const votes = Number(c.rows[0].votes), confirms = Number(c.rows[0].confirms);
+  await db().query("UPDATE bugs SET votes=$2, confirms=$3, updated_at=$4 WHERE id=$1", [bugId, votes, confirms, Date.now()]);
+  return { votes, confirms, on };
+}
+export async function addBugComment(bugId: string, testerId: string, body: string): Promise<any> {
+  await init();
+  const r = await db().query("INSERT INTO bug_comments (id,bug_id,tester_id,body,created_at) VALUES ($1,$2,$3,$4,$5) RETURNING id,body,created_at", [id("c"), bugId, testerId, body.slice(0, 4000), Date.now()]);
+  return r.rows[0];
+}
+/** Staff triage: set status/severity + award the bug bounty once (idempotent by ledger ref). */
+export async function triageBug(bugId: string, f: { status?: string; assignedSeverity?: string; bountyPyrx?: number }): Promise<any | null> {
+  await init();
+  const cur = await db().query("SELECT tester_id, title, bounty_pyrx FROM bugs b JOIN testers t ON t.id=b.tester_id WHERE b.id=$1", [bugId]);
+  if (!cur.rows[0]) return null;
+  const status = f.status && (BUG_STATUSES as readonly string[]).includes(f.status) ? f.status : undefined;
+  const sev = f.assignedSeverity && (BUG_SEVERITIES as readonly string[]).includes(f.assignedSeverity) ? f.assignedSeverity : undefined;
+  const bounty = typeof f.bountyPyrx === "number" && f.bountyPyrx > 0 ? Math.round(f.bountyPyrx) : undefined;
+  const r = await db().query(
+    `UPDATE bugs SET status=COALESCE($2,status), assigned_severity=COALESCE($3,assigned_severity), bounty_pyrx=COALESCE($4,bounty_pyrx), updated_at=$5 WHERE id=$1 RETURNING *`,
+    [bugId, status ?? null, sev ?? null, bounty ?? null, Date.now()],
+  );
+  if (bounty) {
+    const reporter = cur.rows[0].tester_id;
+    const ref = `bug:${bugId}`;
+    const paid = await db().query("SELECT 1 FROM earnings_ledger WHERE ref=$1", [ref]);
+    if ((paid.rowCount ?? 0) === 0) {
+      const t = await testerById(reporter);
+      if (t?.reward_eligible) await addLedger(reporter, "bug", bounty, cur.rows[0].title, ref);
+    }
+  }
+  return r.rows[0];
 }
 
 /** Award the monthly uptime reward once per tester per month (idempotent by ledger ref). */

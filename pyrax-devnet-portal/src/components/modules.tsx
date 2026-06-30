@@ -213,10 +213,157 @@ export function Settings({ me, onSaved }: { me: any; onSaved: (t: any) => void }
   );
 }
 
-/* ============================================================== Placeholders (built next) */
-export function IssueCouncil(_: { me: any; subject: AccessSubject }) {
-  return <><PageHeader title="Issue Council" subtitle="Report bugs, add reproduction steps, attach logs/video, and confirm others' reports." /><ComingSoon title="The Issue Council is being wired up" detail="You'll file bugs with repro steps + attachments, confirm/upvote others' reports, and track them New → Confirmed → Fixed → Verified. Bug bounties pay out here." /></>;
+/* ============================================================== Issue Council */
+const SEV: Record<string, { tone: any; label: string }> = { critical: { tone: "danger", label: "Critical" }, high: { tone: "warning", label: "High" }, medium: { tone: "brand", label: "Medium" }, low: { tone: "muted", label: "Low" } };
+const STATUS: Record<string, string> = { new: "New", confirmed: "Confirmed", in_progress: "In Progress", fixed: "Fixed", verified: "Verified", closed: "Closed", duplicate: "Duplicate", wont_fix: "Won't Fix" };
+const can2 = (subject: AccessSubject, p: any) => subject.isSuperuser || subject.permissions.includes(p);
+
+function Drawer({ title, children, onClose, wide }: { title: string; children: React.ReactNode; onClose: () => void; wide?: boolean }) {
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div className={`h-full w-full ${wide ? "max-w-2xl" : "max-w-lg"} overflow-y-auto border-l border-line bg-[rgba(8,10,17,0.97)] p-6 shadow-2xl`} onClick={(e) => e.stopPropagation()}>
+        <div className="mb-5 flex items-center justify-between"><h2 className="text-lg font-bold">{title}</h2><button onClick={onClose} className="text-faint hover:text-ink">✕</button></div>
+        {children}
+      </div>
+    </div>
+  );
 }
+
+export function IssueCouncil({ me, subject }: { me: any; subject: AccessSubject }) {
+  const [bugs, setBugs] = useState<any[] | null>(null);
+  const [status, setStatus] = useState(""); const [sort, setSort] = useState("recent");
+  const [creating, setCreating] = useState(false); const [openId, setOpenId] = useState<string | null>(null);
+  async function load() { const q = new URLSearchParams(); if (status) q.set("status", status); if (sort) q.set("sort", sort); const d = await (await fetch("/api/bugs?" + q)).json(); setBugs(d.ok ? d.bugs : []); }
+  useEffect(() => { load(); }, [status, sort]);
+  return (
+    <>
+      <PageHeader title="Issue Council" subtitle="Report bugs with repro steps + attachments, confirm others, and track them to Verified."
+        action={can2(subject, "issues.submit") && <Button variant="primary" onClick={() => setCreating(true)}><Icon.plus className="h-4 w-4" /> Report a bug</Button>} />
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <select className="input w-auto py-1.5 text-sm" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">All statuses</option>{Object.entries(STATUS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
+        <select className="input w-auto py-1.5 text-sm" value={sort} onChange={(e) => setSort(e.target.value)}><option value="recent">Most recent</option><option value="votes">Most votes</option><option value="severity">Severity</option></select>
+      </div>
+      {!bugs ? <Card className="p-8 text-center text-sm text-muted">Loading…</Card> : bugs.length === 0 ? <Card className="p-8 text-center text-sm text-muted">No reports yet — be the first to file one.</Card> : (
+        <div className="space-y-2">
+          {bugs.map((b) => (
+            <Card key={b.id} hover className="cursor-pointer p-4" onClick={() => setOpenId(b.id)}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2"><Badge tone={SEV[b.assigned_severity || b.severity]?.tone}>{SEV[b.assigned_severity || b.severity]?.label}</Badge><Badge>{STATUS[b.status]}</Badge>{b.bounty_pyrx > 0 && <Badge tone="brand">{fmt(Number(b.bounty_pyrx))} PYRX</Badge>}</div>
+                  <div className="mt-1.5 truncate font-semibold">{b.title}</div>
+                  <div className="text-xs text-faint">{b.component ? b.component + " · " : ""}by {b.reporter_handle ? "@" + b.reporter_handle : b.reporter_name} · {ago(Number(b.created_at))}</div>
+                </div>
+                <div className="shrink-0 text-right text-xs text-faint"><div>▲ {b.votes} votes</div><div>✓ {b.confirms} repro</div>{(b.attachments?.length || 0) > 0 && <div>📎 {b.attachments.length}</div>}</div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+      {creating && <BugForm onClose={() => setCreating(false)} onCreated={() => { setCreating(false); load(); }} />}
+      {openId && <BugDetail id={openId} me={me} subject={subject} onClose={() => setOpenId(null)} onChanged={load} />}
+    </>
+  );
+}
+
+function BugForm({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const [f, setF] = useState<any>({ title: "", severity: "medium", component: "", description: "", reproSteps: "", expected: "", actual: "" });
+  const [atts, setAtts] = useState<any[]>([]); const [busy, setBusy] = useState(false); const [up, setUp] = useState(false);
+  const [errs, setErrs] = useState<Record<string, string>>({}); const [note, setNote] = useState("");
+  const set = (k: string, v: string) => setF({ ...f, [k]: v });
+  async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []); if (!files.length) return; setUp(true); setNote("");
+    for (const file of files) {
+      try {
+        const sign = await (await fetch("/api/uploads/sign", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ filename: file.name, contentType: file.type, size: file.size }) })).json();
+        if (!sign.ok) { setNote(sign.reason === "unconfigured" ? "Attachments aren't configured yet — you can still submit text." : sign.error || "Upload failed."); continue; }
+        const put = await fetch(sign.url, { method: "PUT", headers: { ...sign.headers, "content-type": file.type }, body: file });
+        if (!put.ok) { setNote("Upload to storage failed."); continue; }
+        setAtts((a) => [...a, { url: sign.publicUrl, type: sign.kind, name: file.name, size: file.size }]);
+      } catch { setNote("Upload failed."); }
+    }
+    setUp(false);
+  }
+  async function submit() {
+    setBusy(true); setErrs({});
+    const res = await fetch("/api/bugs", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...f, attachments: atts, environment: { ua: navigator.userAgent } }) });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok || !d.ok) { setErrs(d.errors || { _: d.error || "Couldn't submit." }); setBusy(false); return; }
+    onCreated();
+  }
+  return (
+    <Drawer title="Report a bug" onClose={onClose} wide>
+      <div className="space-y-3">
+        <div><label className="label">Title</label><input className="input" value={f.title} onChange={(e) => set("title", e.target.value)} placeholder="Short summary of the bug" />{errs.title && <p className="mt-1 text-xs text-[color:var(--color-negative)]">{errs.title}</p>}</div>
+        <div className="grid grid-cols-2 gap-3">
+          <div><label className="label">Severity</label><select className="input" value={f.severity} onChange={(e) => set("severity", e.target.value)}>{Object.keys(SEV).map((s) => <option key={s} value={s}>{SEV[s].label}</option>)}</select></div>
+          <div><label className="label">Component</label><input className="input" value={f.component} onChange={(e) => set("component", e.target.value)} placeholder="e.g. Inferno, RPC, wallet" /></div>
+        </div>
+        <div><label className="label">What happened?</label><textarea className="input" rows={3} value={f.description} onChange={(e) => set("description", e.target.value)} /></div>
+        <div><label className="label">Steps to reproduce</label><textarea className="input" rows={4} value={f.reproSteps} onChange={(e) => set("reproSteps", e.target.value)} placeholder={"1. …\n2. …\n3. …"} />{errs.reproSteps && <p className="mt-1 text-xs text-[color:var(--color-negative)]">{errs.reproSteps}</p>}</div>
+        <div className="grid grid-cols-2 gap-3">
+          <div><label className="label">Expected</label><textarea className="input" rows={2} value={f.expected} onChange={(e) => set("expected", e.target.value)} /></div>
+          <div><label className="label">Actual</label><textarea className="input" rows={2} value={f.actual} onChange={(e) => set("actual", e.target.value)} /></div>
+        </div>
+        <div>
+          <label className="label">Attachments <span className="font-normal text-faint">(video, logs, images)</span></label>
+          <input type="file" multiple onChange={onFiles} className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border file:border-line file:bg-transparent file:px-3 file:py-1.5 file:text-sm file:text-ink" />
+          {up && <p className="mt-1 text-xs text-faint">Uploading…</p>}
+          {note && <p className="mt-1 text-xs text-[color:var(--color-warning)]">{note}</p>}
+          {atts.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{atts.map((a, i) => <span key={i} className="chip">📎 {a.name}</span>)}</div>}
+        </div>
+        {errs._ && <p className="text-sm text-[color:var(--color-negative)]">{errs._}</p>}
+        <div className="flex gap-3 pt-1"><Button variant="primary" onClick={submit} disabled={busy || up}>{busy ? "Submitting…" : "Submit report"}</Button><Button onClick={onClose}>Cancel</Button></div>
+      </div>
+    </Drawer>
+  );
+}
+
+function BugDetail({ id, me, subject, onClose, onChanged }: { id: string; me: any; subject: AccessSubject; onClose: () => void; onChanged: () => void }) {
+  const [b, setB] = useState<any>(null); const [comment, setComment] = useState(""); const [busy, setBusy] = useState(false);
+  async function load() { const d = await (await fetch("/api/bugs/" + id)).json(); if (d.ok) setB(d.bug); }
+  useEffect(() => { load(); }, [id]);
+  async function react(kind: string) { const d = await (await fetch(`/api/bugs/react?id=${id}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind }) })).json(); if (d.ok) { setB((x: any) => ({ ...x, votes: d.votes, confirms: d.confirms, myReactions: d.on ? [...(x.myReactions || []), kind] : (x.myReactions || []).filter((k: string) => k !== kind) })); onChanged(); } }
+  async function addComment() { if (!comment.trim()) return; const d = await (await fetch(`/api/bugs/comment?id=${id}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ body: comment }) })).json(); if (d.ok) { setB((x: any) => ({ ...x, comments: d.comments })); setComment(""); } }
+  async function triage(patch: any) { setBusy(true); const d = await (await fetch("/api/bugs/" + id, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(patch) })).json(); if (d.ok) { await load(); onChanged(); } setBusy(false); }
+  if (!b) return <Drawer title="Bug" onClose={onClose} wide><p className="text-sm text-muted">Loading…</p></Drawer>;
+  const sev = b.assigned_severity || b.severity;
+  const mine = b.myReactions || [];
+  return (
+    <Drawer title={b.title} onClose={onClose} wide>
+      <div className="flex flex-wrap items-center gap-2"><Badge tone={SEV[sev]?.tone}>{SEV[sev]?.label}</Badge><Badge>{STATUS[b.status]}</Badge>{b.bounty_pyrx > 0 && <Badge tone="brand">{fmt(Number(b.bounty_pyrx))} PYRX bounty</Badge>}<span className="text-xs text-faint">by {b.reporter_handle ? "@" + b.reporter_handle : b.reporter_name} · {ago(Number(b.created_at))}</span></div>
+      <div className="mt-3 flex gap-2">
+        <Button onClick={() => react("vote")} className={mine.includes("vote") ? "chip-brand" : ""}>▲ {b.votes} Vote</Button>
+        <Button onClick={() => react("confirm")} className={mine.includes("confirm") ? "chip-brand" : ""}>✓ {b.confirms} I can reproduce</Button>
+      </div>
+      {b.component && <p className="mt-3 text-xs text-faint">Component: <span className="text-muted">{b.component}</span></p>}
+      {b.description && <Section title="What happened">{b.description}</Section>}
+      <Section title="Steps to reproduce">{b.repro_steps}</Section>
+      {(b.expected || b.actual) && <div className="mt-3 grid grid-cols-2 gap-3"><MiniBox title="Expected" body={b.expected} /><MiniBox title="Actual" body={b.actual} /></div>}
+      {(b.attachments?.length || 0) > 0 && (
+        <div className="mt-4"><div className="label">Attachments</div><div className="mt-1 grid grid-cols-2 gap-2">
+          {b.attachments.map((a: any, i: number) => a.type === "image" ? <a key={i} href={a.url} target="_blank" rel="noreferrer"><img src={a.url} className="h-24 w-full rounded-lg border border-line object-cover" /></a> : a.type === "video" ? <video key={i} src={a.url} controls className="h-24 w-full rounded-lg border border-line" /> : <a key={i} href={a.url} target="_blank" rel="noreferrer" className="chip">📎 {a.name}</a>)}
+        </div></div>
+      )}
+      {can2(subject, "issues.triage") && (
+        <Card className="mt-4 p-4">
+          <div className="text-sm font-semibold">Triage</div>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <select className="input py-1.5 text-sm" value={b.status} onChange={(e) => triage({ status: e.target.value })} disabled={busy}>{Object.entries(STATUS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
+            <select className="input py-1.5 text-sm" value={sev} onChange={(e) => triage({ assignedSeverity: e.target.value })} disabled={busy}>{Object.keys(SEV).map((s) => <option key={s} value={s}>{SEV[s].label}</option>)}</select>
+          </div>
+          <div className="mt-2 flex items-center gap-2"><input id="bounty" className="input py-1.5 text-sm" placeholder="Bounty PYRX" type="number" /><Button onClick={() => { const v = Number((document.getElementById("bounty") as HTMLInputElement)?.value); if (v > 0) triage({ bountyPyrx: v }); }} disabled={busy}>Award bounty</Button></div>
+          <p className="mt-1 text-xs text-faint">Bounty pays the reporter once (idempotent).</p>
+        </Card>
+      )}
+      <div className="mt-5"><div className="label">Comments</div>
+        <div className="mt-2 space-y-2">{(b.comments || []).map((c: any) => <div key={c.id} className="rounded-lg border border-line p-2.5 text-sm"><div className="text-xs text-faint">{c.handle ? "@" + c.handle : c.display_name}{c.is_staff && <span className="ml-1 text-[color:var(--color-brand)]">· Admin</span>} · {ago(Number(c.created_at))}</div><div className="mt-0.5 whitespace-pre-wrap">{c.body}</div></div>)}{(b.comments || []).length === 0 && <p className="text-xs text-faint">No comments yet.</p>}</div>
+        <div className="mt-2 flex gap-2"><input className="input" value={comment} onChange={(e) => setComment(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addComment()} placeholder="Add a comment…" /><Button onClick={addComment}>Send</Button></div>
+      </div>
+    </Drawer>
+  );
+}
+function Section({ title, children }: { title: string; children: React.ReactNode }) { return <div className="mt-3"><div className="label">{title}</div><div className="mt-1 whitespace-pre-wrap rounded-lg border border-line bg-[rgba(5,6,9,0.4)] p-3 text-sm text-muted">{children}</div></div>; }
+function MiniBox({ title, body }: { title: string; body: string }) { return <div><div className="label">{title}</div><div className="mt-1 whitespace-pre-wrap rounded-lg border border-line p-2.5 text-sm text-muted">{body || "—"}</div></div>; }
 export function Chat(_: { me: any }) {
   return <><PageHeader title="Chat" subtitle="Realtime tester community chat." /><ComingSoon title="Realtime chat is being wired up" detail="A WebSocket community chat with @mentions, emojis + GIFs — shared with the PYRAX team (who appear as Admins). Your username is your Telegram handle." /></>;
 }
