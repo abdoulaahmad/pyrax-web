@@ -9,7 +9,7 @@
 import { LINKS } from "@pyrax/shared";
 
 // Single source of truth for the chrome/nav — defined in @pyrax/shared/content.ts. Change the nav THERE.
-export { SITE, LINKS, NAV, MEGA, NETWORKS, DEVNET2_LAUNCH_ISO } from "@pyrax/shared";
+export { SITE, LINKS, NAV, MEGA, NETWORKS, FORGE_LAUNCH_ISO } from "@pyrax/shared";
 export type { NavLink, MegaItem, MegaAction, MegaSpotlight, Mega } from "@pyrax/shared";
 
 // Headline stats (accurate, from the AMA / ratified tokenomics).
@@ -141,7 +141,7 @@ export const ROADMAP: { shipped: { title: string; desc: string }[]; inProgress: 
     { title: "Anonymous file & media", desc: "End-to-end file and live-media sharing over the live mixnet, with Files + Cast in the apps." },
     { title: "Smart contracts — three VMs", desc: "EVM, WASM and Cairo, L1-integrated; full Ethereum JSON-RPC (filters + subscriptions); precompiles + the L1↔rollup bridge; cross-VM calls; EIP-1559; CREATE2 — 351 tests, clean." },
     { title: "NEURAX substrate", desc: "On-chain escrow + the 4B AI-compute pool + the VRAM/tier scheduler + the model registry; the verification ladder; image + GPU pooling; audio, Spatial & video; the local runtime + the in-app NEURAX tab." },
-    { title: "Tokenomics — ratified & coded", desc: "The 50B cap, the genesis allocation, capped halving emissions, the fee split, staking params, and the five networks." },
+    { title: "Tokenomics — ratified & coded", desc: "The 50B cap, the genesis allocation, capped halving emissions, the fee split, staking params, and the four networks." },
   ],
   inProgress: [
     { title: "PYRAX Copilot + the NEURAX gateway", desc: "The local coding copilot (guard-before-agent; no testnet/mainnet signing key) and the gateway that routes marketplace jobs into the real on-chain escrow path." },

@@ -35,8 +35,8 @@ export const LINKS = {
   telegram: SOCIAL.telegram,
 } as const;
 
-// Devnet 2.0 launch target (viewer-local time) — reused by any site that runs the countdown.
-export const DEVNET2_LAUNCH_ISO = "2026-07-01T05:00:00";
+// Pyrax Forge Network launch target (viewer-local time) — reused by any site that runs the countdown.
+export const FORGE_LAUNCH_ISO = "2026-07-01T05:00:00";
 
 export type NavLink = { label: string; href: string };
 

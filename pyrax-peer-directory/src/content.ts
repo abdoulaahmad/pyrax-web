@@ -14,11 +14,10 @@ import { cmdkEntry, type CmdkEntry } from "@pyrax/shared";
  * drives which network's peers are shown. Chain IDs mirror @pyrax/shared NETWORKS exactly.
  */
 export const CHAIN_TO_SSE: Record<number, string> = {
-  881109: "internal-devnet-simulated",
-  429294: "internal-devnet-live",
-  710823: "devnet2",
-  104928: "testnet",
-  563821: "mainnet",
+  881109: "seed",
+  710823: "forge",
+  104928: "rise",
+  563821: "one",
 };
 
 /** The directory's own pages, surfaced first in the shared ⌘K command palette. */

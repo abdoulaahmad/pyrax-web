@@ -25,10 +25,10 @@ interface Peer {
 
 /** All known networks + labels; the dropdown is filtered to the ENABLED set. */
 const ALL_NETWORKS: { id: string; label: string }[] = [
-  { id: "internal-devnet-simulated", label: "Pyrax Seed Network" },
-  { id: "devnet2", label: "Pyrax Forge Network" },
-  { id: "testnet", label: "Pyrax Rise Network" },
-  { id: "mainnet", label: "Pyrax One Network" },
+  { id: "seed", label: "Pyrax Seed Network" },
+  { id: "forge", label: "Pyrax Forge Network" },
+  { id: "rise", label: "Pyrax Rise Network" },
+  { id: "one", label: "Pyrax One Network" },
 ];
 
 // The dropdown lists ALL networks (uniform with pyraxchain.com's selector); `enabledSet`

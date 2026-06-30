@@ -185,7 +185,7 @@ services:
       - "30303:30303"
     command:
       - "--network"
-      - "internal-devnet-simulated"
+      - "seed"
       - "--datadir"
       - "/home/pyrax/pyrax-data"
       - "--rpc-bind"

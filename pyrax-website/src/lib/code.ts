@@ -2,7 +2,7 @@
 //
 // The developer code-examples used by the in-site docs (the /build page). Every snippet is
 // verbatim-from-docs or minimal-standard-and-correct (see the assessment brief). Default network in
-// examples = Devnet2 (chain id 710823 = 0xad8a7). Native token PYRX (18 decimals). Brand-only NEURAX
+// examples = Pyrax Forge Network (chain id 710823 = 0xad8a7). Native token PYRX (18 decimals). Brand-only NEURAX
 // names. This module also renders code blocks (with copy) + language tabs.
 
 import { esc, icon } from "./ui.js";
@@ -19,8 +19,8 @@ export const EX_ADD_METAMASK: Snippet = {
   method: "wallet_addEthereumChain",
   params: [
     {
-      chainId: "0xad8a7", // 710823 — Devnet2
-      chainName: "PYRAX Devnet2",
+      chainId: "0xad8a7", // 710823 — Pyrax Forge Network
+      chainName: "PYRAX Forge",
       nativeCurrency: { name: "PYRX", symbol: "PYRX", decimals: 18 },
       rpcUrls: ["http://127.0.0.1:8545"],
     },
@@ -33,14 +33,14 @@ export const EX_VIEM_CLIENT: Snippet = {
   title: "viem — chain definition + client",
   code: `import { createPublicClient, http, defineChain } from "viem";
 
-export const pyraxDevnet2 = defineChain({
+export const pyraxForge = defineChain({
   id: 710823,
-  name: "PYRAX Devnet 2",
+  name: "PYRAX Forge",
   nativeCurrency: { name: "PYRAX", symbol: "PYRX", decimals: 18 },
   rpcUrls: { default: { http: ["http://127.0.0.1:8545"] } },
 });
 
-const client = createPublicClient({ chain: pyraxDevnet2, transport: http() });
+const client = createPublicClient({ chain: pyraxForge, transport: http() });
 
 const chainId = await client.getChainId();         // 710823
 const blockNumber = await client.getBlockNumber();  // bigint, the current blue score
@@ -56,12 +56,12 @@ import "@nomicfoundation/hardhat-toolbox";
 const config: HardhatUserConfig = {
   solidity: "0.8.24",
   networks: {
-    pyraxDevnet2: {
+    pyraxForge: {
       url: "http://127.0.0.1:8545",
       chainId: 710823,
       accounts: [process.env.PYRAX_PRIVATE_KEY ?? ""],
     },
-    pyraxTestnet: {
+    pyraxRise: {
       url: "http://127.0.0.1:8545",
       chainId: 104928,
       accounts: [process.env.PYRAX_PRIVATE_KEY ?? ""],
@@ -81,8 +81,8 @@ out = "out"
 libs = ["lib"]
 
 [rpc_endpoints]
-pyrax_devnet2 = "http://127.0.0.1:8545"
-pyrax_testnet = "http://127.0.0.1:8545"   # your testnet node's RPC URL`,
+pyrax_forge = "http://127.0.0.1:8545"
+pyrax_rise = "http://127.0.0.1:8545"   # your Rise network node's RPC URL`,
 };
 
 export const EX_BUILD_NODE: Snippet = {
@@ -142,16 +142,16 @@ export const EX_VIEM_DEPLOY: Snippet = {
 import { privateKeyToAccount } from "viem/accounts";
 import { readFileSync } from "node:fs";
 
-export const pyraxDevnet2 = defineChain({
+export const pyraxForge = defineChain({
   id: 710823,
-  name: "PYRAX Devnet2",
+  name: "PYRAX Forge",
   nativeCurrency: { name: "PYRAX", symbol: "PYRX", decimals: 18 },
   rpcUrls: { default: { http: ["http://127.0.0.1:8545"] } },
 });
 
 const account = privateKeyToAccount("0x<your-funded-private-key>");
-const publicClient = createPublicClient({ chain: pyraxDevnet2, transport: http() });
-const walletClient = createWalletClient({ account, chain: pyraxDevnet2, transport: http() });
+const publicClient = createPublicClient({ chain: pyraxForge, transport: http() });
+const walletClient = createWalletClient({ account, chain: pyraxForge, transport: http() });
 
 const abi = JSON.parse(readFileSync("build/Counter.abi", "utf8"));
 const bytecode = "0x" + readFileSync("build/Counter.bin", "utf8").trim();
@@ -172,7 +172,7 @@ export const EX_ETHERS_DEPLOY: Snippet = {
   title: "Send a PYRX transfer with ethers v6",
   code: `import { JsonRpcProvider, Wallet, Network, parseEther } from "ethers";
 
-const network = Network.from({ name: "pyrax-devnet2", chainId: 710823 });
+const network = Network.from({ name: "pyrax-forge", chainId: 710823 });
 const provider = new JsonRpcProvider("http://127.0.0.1:8545", network, {
   staticNetwork: network,
 });

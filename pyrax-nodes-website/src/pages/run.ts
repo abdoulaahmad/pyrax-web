@@ -12,7 +12,7 @@ const WHY = [
 
 const STEPS = [
   { n: 1, title: "Get the node app", body: "Download the desktop node app for your OS, or grab the <code>pyrax-node</code> CLI binary. The app supervises the node, miner, and compute sidecars for you." },
-  { n: 2, title: "Pick a network", body: "Choose the network to join (Internal Devnet to experiment, or a public network once live). The node fetches peers and starts syncing automatically." },
+  { n: 2, title: "Pick a network", body: "Choose the network to join (the Pyrax Seed Network to experiment, or a public network once live). The node fetches peers and starts syncing automatically." },
   { n: 3, title: "Start the node", body: "Hit Start (or run the binary). It discovers peers, downloads the DAG, and begins validating. Watch it appear on the dashboard globe." },
   { n: 4, title: "Mine / stake / earn (optional)", body: "Turn on TriStream mining or stake to run a validator. Toggle NEURAX compute to rent your GPU to AI jobs and earn PYRX." },
 ];

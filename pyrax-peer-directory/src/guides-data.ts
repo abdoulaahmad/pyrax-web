@@ -61,7 +61,7 @@ export const GUIDES: Guide[] = [
           {
             type: "steps",
             items: [
-              { title: "Pick your network", body: "On the directory, choose your network (e.g. Internal Devnet 1.0) from the dropdown so you only see peers on the same chain." },
+              { title: "Pick your network", body: "On the directory, choose your network (e.g. Pyrax Seed Network) from the dropdown so you only see peers on the same chain." },
               { title: "Copy a peer's Dial address", body: "Each card has a Dial field — a multiaddr like /ip4/203.0.113.7/tcp/30303/p2p/12D3KooW…. Click its copy button. This is the only value you need; the relay key is reference-only and isn't pasted anywhere." },
               { title: "Paste it into the app's Connect tab", body: "In the PYRAX desktop app, open Connect, paste the Dial address into \"Peers to dial\" (one per line — you can add several), and click Apply. The node restarts and dials your peer." },
               { title: "You're connected", body: "Within a few seconds the Peers tab shows the new connection and your node begins syncing. Once you're reachable, others auto-discover you too." },

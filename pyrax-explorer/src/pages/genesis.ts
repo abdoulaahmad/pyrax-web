@@ -30,8 +30,8 @@ const GENESIS_ALLOC: Alloc[] = [
   { label: "Faucet operator", address: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", amount: "1000000000", note: "Public faucet dispensing wallet", tone: "brand" },
   { label: "Dev / team", address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", amount: "1000000000", note: "General team testing" },
 ];
-// Networks that carry the uniform dev/test allocation above (NOT mainnet 563821).
-const DEV_TEST_CHAINS = new Set([881109, 429294, 710823, 104928]);
+// Networks that carry the uniform dev/test allocation above (NOT the Pyrax One Network 563821).
+const DEV_TEST_CHAINS = new Set([881109, 710823, 104928]);
 
 function frame(): void {
   main.innerHTML = `

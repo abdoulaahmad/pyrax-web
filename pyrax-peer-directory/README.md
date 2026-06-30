@@ -7,9 +7,9 @@ reachable PYRAX nodes, **per network**, fed by a hardened **app-only** announce
 API. It powers zero-config peer discovery for the **Inferno Node** and **Ember**
 desktop apps.
 
-- **Live per network** — a dropdown selects **Internal Devnet (Simulated) ·
-  Internal Devnet (Live) · Devnet2 · Testnet · Mainnet** (plain `devnet` / chain
-  id 70001 was retired — `devnet2` is our only public devnet). The list updates in
+- **Live per network** — a dropdown selects **Pyrax Seed Network · Pyrax Forge
+  Network · Pyrax Rise Network · Pyrax One Network** (plain `devnet` / chain
+  id 70001 was retired — `forge` is our only public dev network). The list updates in
   **real time** over Server-Sent Events: a node goes
   offline → it disappears at TTL; comes back → it reappears. No refresh.
 - **Ultra-modern, HD, mobile-first** — a configless **Tailwind CSS v4** frontend
@@ -53,7 +53,7 @@ Open `http://localhost:8787`.
 | `TTL_MS` | `30000` | A node is "online" this long after its last heartbeat. |
 | `SITE_ORIGIN` | `http://localhost:$PORT` | The public site origin (same-origin read access + CORS). Set to `https://peers.pyraxchain.com`. |
 | `PYRAX_DIRECTORY_SECRET` | dev default | HMAC key shared with the apps. **Set in production.** |
-| `PYRAX_ENABLED_NETWORKS` | `internal-devnet-simulated` | **Network enablement gate** — comma-separated. Only these networks accept announces / serve reads; everything else is rejected (announce → **403**, read → **400**) and hidden from the website dropdown. **Add a network here only when it launches** (e.g. `devnet2,testnet`). |
+| `PYRAX_ENABLED_NETWORKS` | `seed` | **Network enablement gate** — comma-separated. Only these networks accept announces / serve reads; everything else is rejected (announce → **403**, read → **400**) and hidden from the website dropdown. **Add a network here only when it launches** (e.g. `forge,rise`). |
 | `TRUST_PROXY` | unset | When set, trust `X-Forwarded-For` (only behind a known proxy/load balancer). The forwarded value is validated as an IP (`net.isIP`); junk falls back to the socket address. |
 | `PYRAX_GEO_URL` | `http://ip-api.com/json` | Country-flag geolocation provider. Each **public** peer IP is sent once (cached, TTL'd) to this third party to resolve its country; private/loopback IPs are never sent. Point at a paid/HTTPS provider if you prefer. |
 | `PYRAX_GEO_DISABLE` | unset | Set to `1` (or set `PYRAX_GEO_URL=""`) to disable geolocation entirely — no peer IP is ever sent to a third party. |
@@ -62,7 +62,7 @@ Open `http://localhost:8787`.
 
 So the public can never discover/join a network that isn't running yet, the
 directory only handles the networks in `PYRAX_ENABLED_NETWORKS` (default
-**`internal-devnet-simulated`** only). The apps mirror this independently
+**`seed`** only). The apps mirror this independently
 (`NETWORK_STATUS` in `pyrax-node-app/shared/variant.ts`) — flip a network to
 `"live"` **and** add it to `PYRAX_ENABLED_NETWORKS` when it launches.
 
@@ -75,7 +75,7 @@ directory only handles the networks in `PYRAX_ENABLED_NETWORKS` (default
 | `GET /api/peers/stream?network=…` | same-origin / HMAC | The same set pushed over SSE as nodes come/go. |
 | `GET /api/health` | public | `{ ok, networks, live }`. |
 
-`network` ∈ `internal-devnet-simulated · internal-devnet-live · devnet2 · testnet · mainnet`.
+`network` ∈ `seed · forge · rise · one`.
 
 ## Test
 

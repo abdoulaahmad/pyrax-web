@@ -42,7 +42,6 @@ export const SOCIAL = {
 //     pyrax-forge.rpc / pyrax-rise.rpc / pyrax-one.rpc.pyraxchain.com.
 export const RPC_BY_CHAIN: Record<number, string> = {
   881109: "https://pyrax-seed.rpc.pyraxchain.com", // Pyrax Seed — public read RPC for the explorer/live-status
-  429294: "", // (retired)
   710823: "", // Pyrax Forge — wire to pyrax-forge.rpc.pyraxchain.com at launch
   104928: "", // Pyrax Rise — wire to pyrax-rise.rpc.pyraxchain.com at launch
   563821: "", // Pyrax One — wire to pyrax-one.rpc.pyraxchain.com only after the audit gate

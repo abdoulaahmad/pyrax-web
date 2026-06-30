@@ -2,10 +2,9 @@
   "listen": "0.0.0.0:8799",
   "sink": "0x000000000000000000000000000000000000dEaD",
   "networks": [
-    { "name": "internal-devnet-simulated", "rpc": "http://node:8545", "spender": "marketing" },
-    { "name": "internal-devnet-live", "rpc": "", "spender": "marketing" },
-    { "name": "devnet2", "rpc": "", "spender": "marketing" },
-    { "name": "testnet", "rpc": "", "spender": "marketing" },
-    { "name": "mainnet", "rpc": "", "spender": "spender-mainnet" }
+    { "name": "seed", "rpc": "http://node:8545", "spender": "marketing" },
+    { "name": "forge", "rpc": "", "spender": "marketing" },
+    { "name": "rise", "rpc": "", "spender": "marketing" },
+    { "name": "one", "rpc": "", "spender": "spender-mainnet" }
   ]
 }

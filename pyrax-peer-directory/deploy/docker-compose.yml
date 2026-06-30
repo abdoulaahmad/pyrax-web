@@ -21,7 +21,7 @@ services:
       # MUST match the secret the PYRAX apps sign /api/announce with, or every
       # announce is rejected and no peers ever appear.
       - PYRAX_DIRECTORY_SECRET=${PYRAX_DIRECTORY_SECRET:?set PYRAX_DIRECTORY_SECRET in .env}
-      - PYRAX_ENABLED_NETWORKS=${PYRAX_ENABLED_NETWORKS:-internal-devnet-simulated,devnet2,testnet,mainnet}
+      - PYRAX_ENABLED_NETWORKS=${PYRAX_ENABLED_NETWORKS:-seed,forge,rise,one}
       - SITE_ORIGIN=https://${DIRECTORY_DOMAIN:-peers.pyraxchain.com}
       # Behind Caddy: honor X-Forwarded-For so the dial multiaddr is built from
       # the announcing node's REAL public IP, not Caddy's container IP.

@@ -119,7 +119,7 @@ const networks = sec(
   "networks",
   "Reference",
   "Networks & endpoints",
-  "Five networks share one codebase. Chain IDs are shown in decimal; the public dev network today is Devnet2. The faucet drips 500 PYRX per claim (12-hour cooldown) on the test networks — never on Mainnet.",
+  "Four networks share one codebase. Chain IDs are shown in decimal; the public dev network today is the Pyrax Forge Network. The faucet drips 500 PYRX per claim (12-hour cooldown) on the test networks — never on the Pyrax One Network.",
   `<div class="card overflow-x-auto !p-0">
     <table class="w-full text-left text-sm">
       <thead class="text-[var(--color-faint)]">

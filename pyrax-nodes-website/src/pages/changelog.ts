@@ -26,7 +26,7 @@ const RELEASES: Release[] = [
       {
         label: "Important — full chain reset",
         items: [
-          "Internal Devnet 1.0 has been wiped to a brand-new genesis (block 0). All previous on-chain balances — mined rewards, faucet drips, and past activity — are reset to the fresh genesis allocation. When you update, fully uninstall the old app and wipe its data when prompted, then install 0.3.0 to sync the new chain (the in-app prompt walks you through it).",
+          "The Pyrax Seed Network has been wiped to a brand-new genesis (block 0). All previous on-chain balances — mined rewards, faucet drips, and past activity — are reset to the fresh genesis allocation. When you update, fully uninstall the old app and wipe its data when prompted, then install 0.3.0 to sync the new chain (the in-app prompt walks you through it).",
         ],
       },
       {
@@ -61,7 +61,7 @@ const RELEASES: Release[] = [
       {
         label: "Mining & rewards",
         items: [
-          "New one-tap “Mine to my wallet” switch on every node — turn it on and the node mines with your wallet as the reward address, so you earn block rewards directly to your wallet on Internal Devnet 1.0.",
+          "New one-tap “Mine to my wallet” switch on every node — turn it on and the node mines with your wallet as the reward address, so you earn block rewards directly to your wallet on the Pyrax Seed Network.",
           "Your own transactions now confirm — a mining node seals the transactions you send from its wallet (a non-mining node accepts them but never seals them), so your activity actually lands on-chain and shows on the explorer.",
           "The switch sets the reward address and enables mining together, then restarts the node so it takes effect immediately — no separate steps. Mining stays off by default for network stability.",
         ],

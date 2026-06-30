@@ -45,23 +45,23 @@ const MAX_BODY = 4096;
 /** The public site origin (for same-origin read access + CORS). */
 const SITE_ORIGIN = process.env.SITE_ORIGIN ?? `http://localhost:${PORT}`;
 
-// Known networks (devnet2 is the only public devnet — plain `devnet` removed).
-// The internal devnet is split in two: `internal-devnet-simulated` (instant-seal)
-// and `internal-devnet-live` (full real PoW/PoS).
+// Known PYRAX networks. `seed` is the dev-team simulated network; `forge` is the
+// public-facing development network; `rise` is the public test network; `one` is the
+// production network. (The retired plain `devnet` and the deleted internal live
+// network are both gone.)
 const NETWORKS = new Set([
-  "internal-devnet-simulated",
-  "internal-devnet-live",
-  "devnet2",
-  "testnet",
-  "mainnet",
+  "seed",
+  "forge",
+  "rise",
+  "one",
 ]);
 
 // **Enablement control**: only these networks accept announces / serve reads —
 // so the public can't discover/join a network that isn't launched yet. Set
-// `PYRAX_ENABLED_NETWORKS=devnet2,testnet,…` as each network goes live. Default:
-// internal-devnet-simulated only (the dev-team seed network).
+// `PYRAX_ENABLED_NETWORKS=forge,rise,…` as each network goes live. Default:
+// seed only (the dev-team simulated network).
 const ENABLED = new Set(
-  (process.env.PYRAX_ENABLED_NETWORKS ?? "internal-devnet-simulated")
+  (process.env.PYRAX_ENABLED_NETWORKS ?? "seed")
     .split(",")
     .map((s) => s.trim())
     .filter((n) => NETWORKS.has(n)),

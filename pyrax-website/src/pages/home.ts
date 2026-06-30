@@ -8,7 +8,7 @@ import { wireMotion } from "../lib/motion.js";
 import { mountCarousel, wireCountdown } from "../lib/carousel.js";
 import {
   LINKS,
-  DEVNET2_LAUNCH_ISO,
+  FORGE_LAUNCH_ISO,
   NETWORK_FEATURES,
   NEURAX_PILLARS,
   NEURAX_MODALITIES,
@@ -28,7 +28,7 @@ import { icon, heading, featureCard, orbClass } from "../lib/ui.js";
  * card (token stats), count-up on the designed numbers, subtle parallax on hero art.
  * -------------------------------------------------------------------------- */
 
-// 1) HERO CAROUSEL — auto-cycling flagship slides: PYRAX · Devnet 2.0 (with a live launch
+// 1) HERO CAROUSEL — auto-cycling flagship slides: PYRAX · Pyrax Forge Network (with a live launch
 // countdown) · Genesis Sponsorship · NEURAX. ONE hero-aurora for the whole section; each slide
 // has one text-anim word. Slide 1 keeps the count-up stats (it's the visible-at-load slide).
 const SLIDES = 4;
@@ -82,11 +82,11 @@ const slidePyrax = slideWrap(
 
 const slideDevnet = slideWrap(
   2,
-  "Devnet 2.0 — now recruiting",
+  "Pyrax Forge Network — now recruiting",
   `
     <div>
-      <span class="chip"><span class="h-1.5 w-1.5 rounded-full bg-[var(--color-positive)] animate-pulse-glow"></span> Devnet 2.0 · Now recruiting</span>
-      <h2 class="${titleCls}">Run your own node.<br class="hidden sm:block" /> <span class="brand-text text-anim">Shape Devnet 2.0.</span></h2>
+      <span class="chip"><span class="h-1.5 w-1.5 rounded-full bg-[var(--color-positive)] animate-pulse-glow"></span> Pyrax Forge Network · Now recruiting</span>
+      <h2 class="${titleCls}">Run your own node.<br class="hidden sm:block" /> <span class="brand-text text-anim">Shape the Pyrax Forge Network.</span></h2>
       <p class="${ledeCls}">Be among the first to shape the future of decentralized technology. Sign up to run your own PYRAX node — no coding required, on a standard home computer.</p>
       <ul class="hero-trim mt-6 flex flex-wrap gap-2.5">
         ${["No coding required", "Standard home computer", "Shape the future of PYRAX"]
@@ -94,13 +94,13 @@ const slideDevnet = slideWrap(
           .join("")}
       </ul>
       <div class="mt-8 flex flex-wrap gap-3">
-        <a href="#waitlist" class="btn btn-primary">Sign up for Devnet 2.0 ${icon("arrow", "h-4 w-4")}</a>
+        <a href="#waitlist" class="btn btn-primary">Sign up for the Pyrax Forge Network ${icon("arrow", "h-4 w-4")}</a>
         <a href="${LINKS.whitepaper}" class="btn btn-ghost">Read the whitepaper</a>
       </div>
     </div>
     <div class="mx-auto w-full max-w-md lg:mx-0">
       <div class="countdown-card grad-ring">
-        <div class="text-[0.7rem] font-semibold uppercase tracking-wider text-[var(--color-brand-soft)]">See you at Devnet 2.0 — launching in</div>
+        <div class="text-[0.7rem] font-semibold uppercase tracking-wider text-[var(--color-brand-soft)]">See you at the Pyrax Forge Network — launching in</div>
         <div class="mt-5 grid grid-cols-4 gap-2.5">
           ${[
             ["d", "Days"],
@@ -187,7 +187,7 @@ const hero = `
     <div class="hero-controls mt-6 flex items-center justify-center gap-3">
       <button type="button" class="carousel-arrow" data-prev aria-label="Previous slide">${icon("arrow", "h-4 w-4 rotate-180")}</button>
       <div class="flex items-center gap-1">
-        ${["PYRAX", "Devnet 2.0", "Genesis Sponsorship", "NEURAX"]
+        ${["PYRAX", "Pyrax Forge Network", "Genesis Sponsorship", "NEURAX"]
           .map((l) => `<button type="button" class="carousel-dot" data-dot aria-label="Go to ${l}"></button>`)
           .join("")}
       </div>
@@ -576,4 +576,4 @@ if (liveEl) mountLiveStats(liveEl);
 wireMotion();
 const carouselEl = document.querySelector<HTMLElement>("[data-carousel]");
 if (carouselEl) mountCarousel(carouselEl, { interval: 7000 });
-wireCountdown(DEVNET2_LAUNCH_ISO);
+wireCountdown(FORGE_LAUNCH_ISO);

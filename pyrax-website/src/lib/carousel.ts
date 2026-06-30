@@ -4,7 +4,7 @@
 // clickable dots, prev/next arrows, swipe, and a polite live region. Auto-advance pauses on hover,
 // on keyboard focus within, when the tab is hidden, and when the carousel scrolls out of view; it
 // is disabled entirely under prefers-reduced-motion (the controls still work). Off-screen slides
-// are removed from the tab order. Plus wireCountdown() for the Devnet 2 launch timer.
+// are removed from the tab order. Plus wireCountdown() for the Pyrax Forge Network launch timer.
 
 const reduced = () =>
   typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;

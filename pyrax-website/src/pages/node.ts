@@ -21,13 +21,13 @@ const CLI: Snippet = {
   lang: "bash",
   title: "PYRAX CLI — create & run a node",
   code: `# create an isolated node (auto-picks free, non-clashing ports)
-pyrax node create my-node --network devnet2
+pyrax node create my-node --network forge
 
 # start it (full node: validates, seals, mines & stakes)
 pyrax node start my-node
 
 # run several at once — each is port-isolated
-pyrax node create my-node-2 --network testnet
+pyrax node create my-node-2 --network rise
 pyrax node list`,
 };
 

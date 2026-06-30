@@ -13,9 +13,9 @@ services:
       - ALLOW_ORIGIN=https://explorer.pyraxchain.com
       # Per-network RPCs the indexer ingests. Only wired networks are indexed.
       - RPC_881109=https://sidn-rpc.pyraxchain.com:8811
-      # - RPC_710823=   # Devnet2  (set at launch)
-      # - RPC_104928=   # Testnet  (set at launch)
-      # - RPC_563821=   # Mainnet  (set only after the external audit gate)
+      # - RPC_710823=   # Pyrax Forge Network  (set at launch)
+      # - RPC_104928=   # Pyrax Rise Network  (set at launch)
+      # - RPC_563821=   # Pyrax One Network  (set only after the external audit gate)
     volumes:
       - explorer-data:/data
     ports:

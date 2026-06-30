@@ -11,13 +11,13 @@
 //   FAUCET_DRIP_ASH     drip amount in base units (ash). default 100 PYRX = 100e18
 //   FAUCET_WELCOME_ASH  one-time new-wallet welcome grant in ash. default 1,000,000 PYRX
 //   FAUCET_WINDOW_H     per-address/IP cooldown hours. default 12
-//   FAUCET_NETWORK      label shown in the public HTML UI (e.g. "Internal Devnet 1.0")
+//   FAUCET_NETWORK      label shown in the public HTML UI (e.g. "Pyrax Seed Network")
 //   PYRAX_KEY_PASSPHRASE  unlocks the faucet keystore key (name: "faucet")
 //   PORT                listen port (default 8800)
 //
 // Endpoints:
 //   POST /drip     repeatable public faucet — FAUCET_DRIP_ASH per address, FAUCET_WINDOW_H cooldown.
-//   POST /welcome  ONE-TIME new-wallet grant — FAUCET_WELCOME_ASH, Internal Devnet 1.0 (881109) ONLY,
+//   POST /welcome  ONE-TIME new-wallet grant — FAUCET_WELCOME_ASH, Pyrax Seed Network (881109) ONLY,
 //                  once per address for life. Called automatically by the apps/CLI/web on wallet creation.
 
 import http from "node:http";
@@ -31,7 +31,7 @@ const RPC = process.env.FAUCET_RPC || "";
 // into the CLI keystore under this name (the public Anvil #2 key it replaced is gone).
 const KEY = process.env.FAUCET_KEY || "seed-faucet";
 const DRIP = (process.env.FAUCET_DRIP_ASH || "100000000000000000000").trim(); // 100 PYRX
-// One-time new-wallet welcome grant. 1,000,000 PYRX = 1e6 * 1e18 ash. Internal Devnet 1.0
+// One-time new-wallet welcome grant. 1,000,000 PYRX = 1e6 * 1e18 ash. Pyrax Seed Network
 // only (play money on the simulated chain), once per address — see POST /welcome.
 const WELCOME = (process.env.FAUCET_WELCOME_ASH || "1000000000000000000000000").trim();
 // Generous per-IP cap on NEW welcome grants per hour — a safety net against a single host
@@ -259,7 +259,7 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
-  // One-time new-wallet WELCOME grant (Internal Devnet 1.0 only). Called automatically by
+  // One-time new-wallet WELCOME grant (Pyrax Seed Network only). Called automatically by
   // the apps/CLI/web when a wallet is created; once per address for life, separate from the
   // repeatable /drip faucet. Idempotent: an address already granted returns ok:true so a
   // re-run of wallet creation never errors or double-funds.
@@ -278,9 +278,9 @@ const server = http.createServer((req, res) => {
       } catch {
         return send(res, 400, { error: "bad request" });
       }
-      // Devnet1-only by design — every other network uses the normal repeatable faucet.
+      // Seed-network-only by design — every other network uses the normal repeatable faucet.
       if (chainId !== DEFAULT_CHAIN) {
-        return send(res, 400, { error: "the welcome grant is only on Internal Devnet 1.0" });
+        return send(res, 400, { error: "the welcome grant is only on the Pyrax Seed Network" });
       }
       const kind = addrKind(address);
       if (!kind) return send(res, 400, { error: "enter a valid 0x… address (transparent or shielded)" });

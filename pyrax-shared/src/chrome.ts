@@ -146,7 +146,7 @@ function headerHtml(active: string): string {
         <!-- mobile-only at-a-glance network status (desktop has the full selector on the right) -->
         <button type="button" id="netmini" class="net-mini inline-flex min-w-0 items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-[color-mix(in_oklab,var(--color-elevated)_60%,transparent)] px-2.5 py-1 text-xs font-medium text-[var(--color-muted)] lg:hidden" aria-label="Network status — open menu">
           <span class="status-dot net-dot shrink-0" data-net-trigger-dot aria-hidden="true"></span>
-          <span class="max-w-[6.5rem] truncate" data-net-trigger-name>Internal Devnet 1.0</span>
+          <span class="max-w-[6.5rem] truncate" data-net-trigger-name>Pyrax Seed Network</span>
         </button>
       </div>
 

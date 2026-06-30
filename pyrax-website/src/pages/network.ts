@@ -285,7 +285,7 @@ const mesh = `
 
 const networks = `
 <section class="section container-x">
-  ${heading("Five networks, one road to mainnet", "Pre-mainnet — built and tested, audit-gated", "One codebase runs all five. Chain IDs are shown in decimal; the public dev network today is Devnet2. The shared AI-compute pool (4,000,000,000 PYRX) is pre-funded on every network.")}
+  ${heading("Four networks, one road to mainnet", "Pre-mainnet — built and tested, audit-gated", "One codebase runs all four. Chain IDs are shown in decimal; the public dev network today is the Pyrax Forge Network. The shared AI-compute pool (4,000,000,000 PYRX) is pre-funded on every network.")}
   <div class="reveal mt-10 card overflow-x-auto !p-0">
     <table class="w-full text-left text-sm">
       <thead class="text-[var(--color-faint)]">
@@ -311,7 +311,7 @@ const networks = `
       </tbody>
     </table>
   </div>
-  <p class="mt-4 text-xs text-[var(--color-faint)]">The faucet drips on the test networks only (12-hour cooldown) — never on Mainnet, which activates only after the external audit gate.</p>
+  <p class="mt-4 text-xs text-[var(--color-faint)]">The faucet drips on the test networks only (12-hour cooldown) — never on the Pyrax One Network, which activates only after the external audit gate.</p>
 </section>`;
 
 const main = document.getElementById("main");

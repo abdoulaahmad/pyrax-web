@@ -133,7 +133,7 @@ const emissions = `
           "<strong class='text-[var(--color-ink)]'>300 PYRX per block</strong> at start — roughly 100 to each of the three streams.",
           "<strong class='text-[var(--color-ink)]'>Halving every 21,000,000 blocks</strong> (~4 years at the ~6-second mainnet block time).",
           "A <strong class='text-[var(--color-ink)]'>hard 12.5B lifetime cap</strong> from mining. Once issued (~26 years), the chain is fees-only — no endless inflation.",
-          "On Testnet only, rewards ramp 5% → 100% over ~60 days to attract early miners. Mainnet pays full from the start.",
+          "On the Pyrax Rise Network only, rewards ramp 5% → 100% over ~60 days to attract early miners. The Pyrax One Network pays full from the start.",
         ]
           .map((t) => `<li class="flex gap-2">${icon("check", "h-4 w-4 text-[var(--color-positive)] shrink-0 mt-0.5")}<span>${t}</span></li>`)
           .join("")}
@@ -281,7 +281,7 @@ const addresses = `
 <section class="section container-x">
   <div class="card p-7 reveal">
     <h3 class="t-h3">Reserved system addresses</h3>
-    <p class="mt-2 text-sm text-[var(--color-muted)]">Protocol-owned, credit-only accounts seeded at genesis — identical across all five networks. The fee split and the AI-compute pool pay into these sinks directly, so every destination above exists on-chain from block 0.</p>
+    <p class="mt-2 text-sm text-[var(--color-muted)]">Protocol-owned, credit-only accounts seeded at genesis — identical across all four networks. The fee split and the AI-compute pool pay into these sinks directly, so every destination above exists on-chain from block 0.</p>
     <div class="mt-5 grid gap-3 sm:grid-cols-2">
       ${[
         ["PYRAX Treasury", "0x…0200", "Collects the base-fee 50% + tip 20%; funds the AI-compute pool once the network is revenue-positive."],
