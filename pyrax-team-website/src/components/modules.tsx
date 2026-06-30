@@ -594,6 +594,90 @@ export function SignatureStudio({ subject }: { subject: AccessSubject }) {
   );
 }
 
+/* ============================================================== Devnet Management */
+export function DevnetUsers({ subject }: { subject: AccessSubject }) {
+  if (!can(subject, "devnet.manage")) return <Locked what="Devnet Management" />;
+  const [list, setList] = useState<any[] | null>(null);
+  const [email, setEmail] = useState(""); const [handle, setHandle] = useState("");
+  const [busy, setBusy] = useState(false); const [errs, setErrs] = useState<any>({}); const [sent, setSent] = useState("");
+  async function load() { try { const d = await (await fetch("/api/devnet/testers")).json(); setList(d.ok ? d.testers : []); } catch { setList([]); } }
+  useEffect(() => { load(); }, []);
+  async function invite() {
+    setBusy(true); setErrs({}); setSent("");
+    try {
+      const res = await fetch("/api/devnet/invite", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, telegramHandle: handle }) });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok || !d.ok) { setErrs(d.errors || { _: d.error || "Couldn't invite." }); setBusy(false); return; }
+      setSent(`Invite sent to ${email}.`); setEmail(""); setHandle(""); load();
+    } catch { setErrs({ _: "Network error." }); }
+    setBusy(false);
+  }
+  return (
+    <>
+      <PageHeader title="Devnet Users" subtitle="Whitelist closed-alpha testers — they get an email invite to devnet.pyraxchain.com." />
+      <Card className="mb-4 p-5">
+        <div className="text-sm font-semibold">Whitelist a tester</div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <Field label="Email" error={errs.email}><input className="input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tester@example.com" /></Field>
+          <Field label="Telegram @handle" error={errs.telegramHandle}><input className="input" value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="@theirhandle" /></Field>
+        </div>
+        <p className="mt-1 text-xs text-faint">Their Telegram handle becomes their chat username in the tester community.</p>
+        {errs._ && <p className="mt-2 text-sm text-[color:var(--color-negative)]">{errs._}</p>}
+        <div className="mt-4 flex items-center gap-3"><Button variant="primary" onClick={invite} disabled={busy}>{busy ? "Sending…" : "Send invite"}</Button>{sent && <span className="text-sm text-[color:var(--color-positive)]">{sent}</span>}</div>
+      </Card>
+      <Card className="overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="text-left text-xs uppercase tracking-wider text-faint"><tr className="border-b border-line"><th className="p-3">Tester</th><th className="p-3">Status</th><th className="p-3 hidden sm:table-cell">Nodes</th><th className="p-3">PYRX</th></tr></thead>
+          <tbody>
+            {!list ? <tr><td colSpan={4} className="p-6 text-center text-muted">Loading…</td></tr> : list.length === 0 ? <tr><td colSpan={4} className="p-6 text-center text-muted">No testers yet — whitelist your first.</td></tr> :
+              list.map((t, i) => (
+                <tr key={i} className="border-b border-line-soft last:border-0">
+                  <td className="p-3"><div className="font-semibold">{t.handle ? "@" + t.handle : t.email}</div><div className="text-xs text-faint">{t.email}</div></td>
+                  <td className="p-3"><div className="flex flex-wrap gap-1">{t.status === "active" ? <Badge tone="positive">Active</Badge> : <Badge tone="warning">Invited</Badge>}{t.founding_rank && <Badge tone="brand">Founding #{t.founding_rank}</Badge>}</div></td>
+                  <td className="p-3 hidden sm:table-cell text-muted">{t.nodes ?? 0}</td>
+                  <td className="p-3 font-mono text-muted">{(t.pyrx ?? 0).toLocaleString("en-US")}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </Card>
+    </>
+  );
+}
+
+export function DevnetStatus({ subject }: { subject: AccessSubject }) {
+  if (!can(subject, "devnet.manage")) return <Locked what="Devnet Management" />;
+  const [s, setS] = useState<any>(null); const [busy, setBusy] = useState(false); const [saved, setSaved] = useState(false);
+  async function load() { try { const d = await (await fetch("/api/devnet/settings")).json(); if (d.ok) setS(d.settings); } catch {} }
+  useEffect(() => { load(); }, []);
+  function set(k: string, v: any) { setS({ ...s, [k]: v }); setSaved(false); }
+  async function save() { setBusy(true); setSaved(false); try { const res = await fetch("/api/devnet/settings", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ settings: s }) }); const d = await res.json().catch(() => ({})); if (d.ok) { setS(d.settings); setSaved(true); } } catch {} setBusy(false); }
+  if (!s) return <Card className="p-10 text-center text-sm text-muted">Loading…</Card>;
+  return (
+    <>
+      <PageHeader title="Devnet Status" subtitle="Network details testers see + the downloads gate." action={<div className="flex items-center gap-3">{saved && <span className="text-sm text-[color:var(--color-positive)]">Saved ✓</span>}<Button variant="primary" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save"}</Button></div>} />
+      <Card className="mb-4 p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div><div className="text-sm font-semibold">Tester downloads</div><div className="text-xs text-faint">When closed, testers can still log in but can't download Inferno/CLI — they see a notice + are told they'll be alerted when it reopens.</div></div>
+          <button onClick={() => set("downloadsOpen", !s.downloadsOpen)} className={`relative h-7 w-12 shrink-0 rounded-full transition ${s.downloadsOpen ? "bg-[color:var(--color-positive)]" : "bg-line"}`}><span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-all ${s.downloadsOpen ? "left-6" : "left-1"}`} /></button>
+        </div>
+        <div className="mt-2"><Badge tone={s.downloadsOpen ? "positive" : "warning"}>{s.downloadsOpen ? "Open" : "Closed"}</Badge></div>
+        {!s.downloadsOpen && <div className="mt-3"><label className="label">Closed message</label><textarea className="input" rows={2} value={s.downloadsClosedMessage} onChange={(e) => set("downloadsClosedMessage", e.target.value)} /></div>}
+      </Card>
+      <Card className="p-5">
+        <div className="text-sm font-semibold">Network under test</div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <Field label="Network name"><input className="input" value={s.devnetName} onChange={(e) => set("devnetName", e.target.value)} /></Field>
+          <Field label="Version"><input className="input" value={s.version} onChange={(e) => set("version", e.target.value)} /></Field>
+          <Field label="Chain ID"><input className="input" type="number" value={s.chainId} onChange={(e) => set("chainId", e.target.value)} /></Field>
+          <Field label="RPC URL"><input className="input" value={s.rpc} onChange={(e) => set("rpc", e.target.value)} /></Field>
+        </div>
+        <div className="mt-3"><Field label="What to test"><textarea className="input" rows={2} value={s.whatToTest} onChange={(e) => set("whatToTest", e.target.value)} /></Field></div>
+      </Card>
+    </>
+  );
+}
+
 function Field({ label, req, error, children }: { label: string; req?: boolean; error?: string; children: React.ReactNode }) {
   return (
     <div>

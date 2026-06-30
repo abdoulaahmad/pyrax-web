@@ -41,6 +41,11 @@ export const PERMISSIONS = {
   //     permission needed). signature.manage gates editing the SHARED company-wide design. ---
   "signature.manage": { group: "Signature", label: "Manage company signature", desc: "Edit the shared email-signature design that applies to the whole company.", elevated: true },
 
+  // --- Devnet Management: the closed-alpha tester program (devnet.pyraxchain.com) ---
+  "devnet.manage": { group: "Devnet Management", label: "Manage Devnet Users", desc: "Whitelist testers (email + Telegram handle → invite), set devnet status + the downloads gate.", elevated: true },
+  "devnet.issues": { group: "Devnet Management", label: "Devnet Issue Council", desc: "View, comment on, and triage tester bug reports (award bounties).", elevated: true },
+  "devnet.chat": { group: "Devnet Management", label: "Devnet Chat", desc: "Join the tester community chat as an Admin (requires a chat username)." },
+
   // --- Operational ---
   "error_reports.view": { group: "Operations", label: "View error reports", desc: "Read inbound crash/error reports from nodes + apps." },
   "announcements.publish": { group: "Operations", label: "Publish update announcements", desc: "Announce a new app/CLI version to the network." },
@@ -100,6 +105,11 @@ export const PRESETS: Record<string, { label: string; desc: string; permissions:
     label: "Node Operator",
     desc: "Monitor nodes (kill-switch is superuser-only).",
     permissions: ["dashboard.view", "node_control.view"],
+  },
+  devnet_management: {
+    label: "Devnet Management",
+    desc: "Run the closed-alpha tester program: whitelist testers, status, issues + chat.",
+    permissions: ["dashboard.view", "devnet.manage", "devnet.issues", "devnet.chat"],
   },
   signature_manager: {
     label: "Signature Manager",

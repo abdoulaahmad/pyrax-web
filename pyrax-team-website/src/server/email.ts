@@ -119,3 +119,30 @@ export const sendOtp = (to: string, code: string, expiresAt: number) => {
     : sendEmail(to, "Your PYRAX Team sign-in code", renderOtpEmail(code, expires));
 };
 export const sendInvite = (to: string, displayName: string, inviter?: string) => sendEmail(to, "You're invited to PYRAX Team", renderInviteEmail(displayName, inviter));
+
+// ---- Devnet closed-alpha invite (sent from the team-site Devnet Users page) ----
+const DEVNET_URL = process.env.DEVNET_PUBLIC_URL || "https://devnet.pyraxchain.com";
+const CDN = "https://pyrax.tor1.cdn.digitaloceanspaces.com/email";
+function renderDevnetInvite(token: string): string {
+  const year = new Date().getFullYear();
+  const link = `${DEVNET_URL}/join?token=${encodeURIComponent(token)}`;
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>PYRAX Devnet invite</title></head>
+<body style="margin:0;padding:0;background:${C.bg};">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.bg};padding:32px 12px;"><tr><td align="center">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+    <tr><td align="center" style="padding:6px 0 22px;"><img src="${CDN}/pyrax-logo.png" width="148" alt="PYRAX" style="display:block;border:0;width:148px;max-width:60%;height:auto;"></td></tr>
+    <tr><td style="background:${C.card};border:1px solid ${C.line};border-radius:16px;overflow:hidden;">
+      <img src="${CDN}/flame-bar-v2.png" width="560" height="6" alt="" style="display:block;width:100%;height:6px;border:0;">
+      <div style="padding:36px 34px;">
+        <h1 style="margin:0 0 10px;font-family:'Segoe UI',Arial,sans-serif;font-size:23px;font-weight:800;color:${C.ink};">You're in the closed Alpha.</h1>
+        <p style="margin:0 0 22px;font-family:'Segoe UI',Arial,sans-serif;font-size:15px;color:${C.muted};line-height:1.65;">You've been invited to help test the <strong style="color:${C.ink};">PYRAX network</strong> as a closed-alpha tester. Click below to set up your tester account — it takes a minute.</p>
+        <table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:10px;background:${C.brand};"><a href="${link}" style="display:inline-block;padding:14px 28px;font-family:'Segoe UI',Arial,sans-serif;font-size:15px;font-weight:700;color:#1a0f06;text-decoration:none;border-radius:10px;">Accept your invite →</a></td></tr></table>
+        <p style="margin:22px 0 0;font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:${C.muted};line-height:1.6;">You'll run a node via the Inferno app or the CLI, file bug reports, and help shape the network before mainnet.</p>
+        <p style="margin:14px 0 0;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:${C.faint};line-height:1.6;">This invite link is personal to you and expires in 14 days.</p>
+      </div>
+    </td></tr>
+    <tr><td align="center" style="padding:22px 8px;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:${C.faint};line-height:1.7;"><strong style="color:${C.muted};">PYRAX Devnet — Closed Alpha</strong> &nbsp;·&nbsp; <a href="${DEVNET_URL}" style="color:${C.brand};text-decoration:none;font-weight:600;">devnet.pyraxchain.com</a><br>© ${year} PYRAX LLC · Authorized testers only</td></tr>
+  </table>
+</td></tr></table></body></html>`;
+}
+export const sendDevnetInvite = (to: string, token: string) => sendEmail(to, "Your PYRAX Devnet closed-alpha invite", renderDevnetInvite(token));
