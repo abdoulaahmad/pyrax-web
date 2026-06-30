@@ -12,6 +12,8 @@ export interface Peer {
   multiaddr: string;
   relayPubkey?: string;
   kind: "operator" | "seed" | "rpc";
+  /** peerIds this node reports it is currently connected to (real P2P topology, if the node sends it). */
+  peers?: string[];
   lat?: number;
   lon?: number;
   country?: string;

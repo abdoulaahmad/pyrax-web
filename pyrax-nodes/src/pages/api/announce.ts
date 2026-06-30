@@ -28,13 +28,17 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   if (!/^[0-9A-Za-z]{6,128}$/.test(peerId)) return json({ ok: false, error: "bad peerId" }, 400);
   const kind = ["operator", "seed", "rpc"].includes(b.kind) ? b.kind : "operator";
   const relayPubkey = b.relayPubkey ? String(b.relayPubkey).slice(0, 128) : undefined;
+  // Optional REAL connection topology: the peerIds this node reports being connected to right now.
+  const peers = Array.isArray(b.peers)
+    ? b.peers.map((x: any) => String(x)).filter((s: string) => /^[0-9A-Za-z]{6,128}$/.test(s)).slice(0, 64)
+    : undefined;
 
   const xff = (request.headers.get("x-forwarded-for") || "").split(",")[0].trim();
   let ip = (typeof b.ip === "string" && b.ip) ? b.ip : (xff || clientAddress || "");
   ip = ip.replace(/^::ffff:/, "");
   const multiaddr = `/ip4/${ip}/tcp/${port}/p2p/${peerId}`;
 
-  upsertPeer({ peerId, network, ip, port, multiaddr, relayPubkey, kind: kind as any });
+  upsertPeer({ peerId, network, ip, port, multiaddr, relayPubkey, kind: kind as any, peers });
   void geoLookup(ip).then((g) => { if (g) patchGeo(network, peerId, g); });
 
   return json({ ok: true, address: multiaddr, ttlMs: TTL_MS });

@@ -1,253 +1,309 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 //
-// PYRAX Network Map — a single d3-geo canvas renderer with a 2D⇄3D toggle. 3D is a draggable
-// orthographic globe with vector country borders; 2D is a flat Natural-Earth map. Both plot online,
-// geo-located nodes (coloured per network) and draw connection arcs between same-network peers.
-// "Capture" renders a branded PYRAX network-map PNG (logo served from DO Spaces) for download.
-// All assets (world topojson, Earth styling) are local/bundled — no third-party CDN at runtime.
+// PYRAX Network Map. 3D is globe.gl styled IDENTICALLY to the node apps (bundled earth-dark texture,
+// neon-orange country borders, brand atmosphere, colored node dots, animated arcs). 2D is a matching
+// d3-geo flat canvas. Both show: online nodes per network, REAL connection arcs (only edges a node
+// actually reports — no fabrication), capital-city markers (hover = name + timezone), a real-time
+// day/night terminator, a "countries online" panel, and a branded snapshot export at social-media
+// sizes incl. 4K UHD. The 2D/3D choice persists. All assets are bundled — no third-party CDN.
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { geoOrthographic, geoNaturalEarth1, geoPath, geoGraticule10, geoDistance, geoInterpolate, type GeoProjection } from "d3-geo";
-import { feature, mesh } from "topojson-client";
+import Globe from "globe.gl";
+import { geoNaturalEarth1, geoPath, geoGraticule10, geoCircle, geoDistance, geoInterpolate, type GeoProjection } from "d3-geo";
 
 interface NetRow { label: string; name: string; color: string; online: boolean; peers: number }
-interface Peer { peerId: string; network: string; kind: string; lat?: number; lon?: number; country?: string; city?: string }
-interface Node { lng: number; lat: number; net: string; color: string; kind: string; label: string }
+interface Peer { peerId: string; network: string; kind: string; peers?: string[]; lat?: number; lon?: number; country?: string; city?: string }
+interface GNode { peerId: string; lat: number; lng: number; net: string; color: string; kind: string; label: string }
+interface Cap { n: string; c: string; lat: number; lng: number; tz: string }
 
+const P = { primary: "#f58722", bolt: "#4c99cc", violet: "#7c5cff", gold: "#fcd03d", ok: "#34d399", text: "#f6f8fc", dim: "#99a2b5" };
+const BORDER = "rgba(245,135,34,0.45)", BORDER_CAP = "rgba(245,135,34,0.06)", OCEAN = "#070b12", LAND = "#11161f";
+const kindColor = (k: string) => (k === "seed" ? P.bolt : k === "rpc" ? P.violet : P.primary);
 const LOGO_URL = "https://pyrax.tor1.cdn.digitaloceanspaces.com/brand/logo-vertical.png";
-const C = { ocean: "#0a1019", land: "#19212f", border: "rgba(125,145,180,0.38)", grat: "rgba(120,140,170,0.10)", rim: "rgba(245,134,34,0.55)" };
-const SAMPLE: [number, number, string][] = [[40.71,-74],[51.5,-0.12],[35.68,139.69],[1.35,103.82],[-33.86,151.2],[52.52,13.4],[37.77,-122.42],[-23.55,-46.63],[19.07,72.87],[55.75,37.61],[48.85,2.35],[25.2,55.27],[-1.29,36.82],[-34.6,-58.38]];
+const MODE_KEY = "pyrax:map-mode";
+const SHOT_SIZES = [
+  { id: "card", label: "Social card · 1200×630", w: 1200, h: 630 },
+  { id: "wide", label: "16:9 · 1920×1080", w: 1920, h: 1080 },
+  { id: "uhd", label: "4K UHD · 3840×2160", w: 3840, h: 2160 },
+  { id: "square", label: "Square · 1080×1080", w: 1080, h: 1080 },
+  { id: "story", label: "Story 9:16 · 1080×1920", w: 1080, h: 1920 },
+];
+const SAMPLE: [number, number, string][] = [[40.71,-74,"operator"],[51.5,-0.12,"seed"],[35.68,139.69,"operator"],[1.35,103.82,"rpc"],[-33.86,151.2,"operator"],[52.52,13.4,"operator"],[37.77,-122.42,"rpc"],[-23.55,-46.63,"operator"],[19.07,72.87,"operator"],[55.75,37.61,"seed"],[48.85,2.35,"operator"],[25.2,55.27,"rpc"],[-1.29,36.82,"operator"],[-34.6,-58.38,"operator"]];
+
+// Subsolar point (lat,lon where the sun is overhead) for the real-time day/night terminator.
+function subsolar(date: Date): [number, number] {
+  const rad = Math.PI / 180, deg = 180 / Math.PI;
+  const n = date.getTime() / 86400000 + 2440587.5 - 2451545.0;
+  const L = (280.460 + 0.9856474 * n) % 360;
+  const g = ((357.528 + 0.9856003 * n) % 360) * rad;
+  const lambda = (((L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) % 360)) * rad;
+  const eps = (23.439 - 0.0000004 * n) * rad;
+  const decl = Math.asin(Math.sin(eps) * Math.sin(lambda)) * deg;
+  const RA = Math.atan2(Math.cos(eps) * Math.sin(lambda), Math.cos(lambda)) * deg;
+  const GMST = (280.46061837 + 360.98564736629 * n) % 360;
+  let lon = RA - GMST; lon = ((lon + 540) % 360) - 180;
+  return [decl, lon];
+}
+function tzClock(tz: string): string {
+  const m = /UTC([+-])(\d{2}):(\d{2})/.exec(tz); if (!m) return tz;
+  const off = (m[1] === "-" ? -1 : 1) * (+m[2] * 60 + +m[3]);
+  const now = new Date(); const local = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + off * 60000);
+  return `${String(local.getHours()).padStart(2, "0")}:${String(local.getMinutes()).padStart(2, "0")}`;
+}
 
 export default function MapCanvas() {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [mode, setMode] = useState<"3d" | "2d">("3d");
   const [nets, setNets] = useState<NetRow[]>([]);
   const [focus, setFocus] = useState("all");
+  const [paused, setPaused] = useState(false);
+  const [dayNight, setDayNight] = useState(true);
+  const [showCaps, setShowCaps] = useState(true);
   const [preview, setPreview] = useState(false);
   const [isLocal, setIsLocal] = useState(false);
-  const [hover, setHover] = useState<{ x: number; y: number; text: string } | null>(null);
-  const [ready, setReady] = useState(false);
+  const [shot, setShot] = useState("wide");
   const [capturing, setCapturing] = useState(false);
+  const [hover, setHover] = useState<{ x: number; y: number; html: string } | null>(null);
+  const [tick, setTick] = useState(0);
 
-  // refs the render loop reads
-  const worldRef = useRef<{ countries: any; borders: any } | null>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const canvas2dRef = useRef<HTMLCanvasElement>(null);
+  const globeHostRef = useRef<HTMLDivElement>(null);
+  const globeRef = useRef<any>(null);
+  const worldRef = useRef<any>(null);
+  const capsRef = useRef<Cap[]>([]);
   const peersRef = useRef<Peer[]>([]);
-  const netColorRef = useRef<Record<string, string>>({});
-  const netNameRef = useRef<Record<string, string>>({});
-  const rotateRef = useRef<[number, number]>([-10, -25]);
-  const autoRef = useRef(true);
+  const logoRef = useRef<HTMLImageElement | null>(null);
+  const netColor = useRef<Record<string, string>>({});
+  const netName = useRef<Record<string, string>>({});
   const dirtyRef = useRef(true);
   const modeRef = useRef<"3d" | "2d">("3d");
   const focusRef = useRef("all");
   const previewRef = useRef(false);
-  const hitsRef = useRef<{ x: number; y: number; node: Node }[]>([]);
-  const logoRef = useRef<HTMLImageElement | null>(null);
+  const dayNightRef = useRef(true);
+  const showCapsRef = useRef(true);
+  const view2d = useRef({ k: 1, x: 0, y: 0 }); // 2D zoom/pan
+  const hits2d = useRef<{ x: number; y: number; html: string }[]>([]);
 
-  useEffect(() => { modeRef.current = mode; dirtyRef.current = true; }, [mode]);
+  useEffect(() => { modeRef.current = mode; dirtyRef.current = true; try { localStorage.setItem(MODE_KEY, mode); } catch {} }, [mode]);
   useEffect(() => { focusRef.current = focus; dirtyRef.current = true; }, [focus]);
   useEffect(() => { previewRef.current = preview; dirtyRef.current = true; }, [preview]);
-  useEffect(() => { try { setIsLocal(/^(localhost|127\.|0\.0\.0\.0)/.test(location.hostname)); } catch {} }, []);
+  useEffect(() => { dayNightRef.current = dayNight; dirtyRef.current = true; }, [dayNight]);
+  useEffect(() => { showCapsRef.current = showCaps; dirtyRef.current = true; }, [showCaps]);
+  useEffect(() => { try { const m = localStorage.getItem(MODE_KEY); if (m === "2d" || m === "3d") setMode(m); setIsLocal(/^(localhost|127\.|0\.0\.0\.0)/.test(location.hostname)); } catch {} }, []);
 
-  // load world topojson + the branded logo
+  // load world + capitals + logo
   useEffect(() => {
-    fetch("/geo/countries-50m.json").then((r) => r.json()).then((topo) => {
-      worldRef.current = { countries: (feature as any)(topo, topo.objects.countries), borders: (mesh as any)(topo, topo.objects.countries, (a: any, b: any) => a !== b) };
-      dirtyRef.current = true; setReady(true);
-    }).catch(() => setReady(true));
-    const img = new Image(); img.crossOrigin = "anonymous";
-    img.onload = () => { logoRef.current = img; };
-    img.onerror = () => { const f = new Image(); f.onload = () => (logoRef.current = f); f.src = "/brand/logo-vertical.png"; };
-    img.src = LOGO_URL;
+    fetch("/globe/countries.json").then((r) => r.json()).then((j) => { worldRef.current = j; dirtyRef.current = true; }).catch(() => {});
+    fetch("/globe/capitals.json").then((r) => r.json()).then((j) => { capsRef.current = j; dirtyRef.current = true; }).catch(() => {});
+    const img = new Image(); img.crossOrigin = "anonymous"; img.onload = () => (logoRef.current = img); img.onerror = () => { const f = new Image(); f.onload = () => (logoRef.current = f); f.src = "/brand/logo-vertical.png"; }; img.src = LOGO_URL;
   }, []);
 
   // data polling
   useEffect(() => {
     let alive = true;
     const load = () => {
-      fetch("/api/networks").then((r) => r.json()).then((d) => { if (!alive || !d.ok) return; setNets(d.networks); netColorRef.current = Object.fromEntries(d.networks.map((n: NetRow) => [n.label, n.color])); netNameRef.current = Object.fromEntries(d.networks.map((n: NetRow) => [n.label, n.name])); dirtyRef.current = true; }).catch(() => {});
-      fetch("/api/peers?network=all", { headers: { accept: "application/json" } }).then((r) => r.json()).then((d) => { if (alive && d.ok) { peersRef.current = d.peers; dirtyRef.current = true; } }).catch(() => {});
+      fetch("/api/networks").then((r) => r.json()).then((d) => { if (!alive || !d.ok) return; setNets(d.networks); netColor.current = Object.fromEntries(d.networks.map((n: NetRow) => [n.label, n.color])); netName.current = Object.fromEntries(d.networks.map((n: NetRow) => [n.label, n.name])); dirtyRef.current = true; }).catch(() => {});
+      fetch("/api/peers?network=all", { headers: { accept: "application/json" } }).then((r) => r.json()).then((d) => { if (alive && d.ok) { peersRef.current = d.peers; dirtyRef.current = true; setTick((t) => t + 1); } }).catch(() => {});
     };
-    load(); const i = window.setInterval(load, 6000);
-    return () => { alive = false; window.clearInterval(i); };
+    load(); const i = window.setInterval(load, 6000); const clk = window.setInterval(() => setTick((t) => t + 1), 30000);
+    return () => { alive = false; window.clearInterval(i); window.clearInterval(clk); };
   }, []);
 
-  function nodes(): Node[] {
+  function gnodes(): GNode[] {
     const f = focusRef.current;
     if (previewRef.current && isLocal) {
-      const labels = nets.length ? nets : [{ label: "forge", color: "#f58622", name: "PYRAX Forge" } as NetRow];
-      return SAMPLE.filter(() => true).map((c, i) => { const n = labels[i % labels.length]; return { lat: c[0], lng: c[1], net: n.label, color: n.color, kind: "operator", label: `${n.name} · sample` }; })
-        .filter((n) => f === "all" || n.net === f);
+      const labels = nets.length ? nets : [{ label: "forge", color: P.primary, name: "PYRAX Forge" } as NetRow];
+      return SAMPLE.map((c, i) => { const nr = labels[i % labels.length]; return { peerId: "sample" + i, lat: c[0], lng: c[1], net: nr.label, color: nr.color, kind: c[2], label: `${nr.name} · ${c[2]} · sample` }; }).filter((n) => f === "all" || n.net === f);
     }
     return peersRef.current.filter((p) => typeof p.lat === "number" && typeof p.lon === "number" && (f === "all" || p.network === f))
-      .map((p) => ({ lng: p.lon!, lat: p.lat!, net: p.network, color: netColorRef.current[p.network] || "#f58622", kind: p.kind, label: `${netNameRef.current[p.network] || p.network} · ${p.kind}${p.country ? " · " + (p.city ? p.city + ", " : "") + p.country : ""}` }));
+      .map((p) => ({ peerId: p.peerId, lng: p.lon!, lat: p.lat!, net: p.network, color: netColor.current[p.network] || P.primary, kind: p.kind, label: `${netName.current[p.network] || p.network} · ${p.kind}${p.country ? " · " + (p.city ? p.city + ", " : "") + p.country : ""}` }));
   }
 
-  function edges(ns: Node[]): [Node, Node][] {
-    const byNet: Record<string, Node[]> = {};
-    for (const n of ns) (byNet[n.net] ||= []).push(n);
-    const out: [Node, Node][] = []; const seen = new Set<string>();
-    for (const arr of Object.values(byNet)) {
-      for (let i = 0; i < arr.length; i++) {
-        const d = arr.map((o, j) => [j === i ? Infinity : geoDistance([arr[i].lng, arr[i].lat], [o.lng, o.lat]), j] as [number, number]).sort((a, b) => a[0] - b[0]);
-        for (let k = 0; k < Math.min(2, d.length); k++) { const j = d[k][1]; if (!isFinite(d[k][0])) continue; const key = i < j ? `${arr[i].net}:${i}-${j}` : `${arr[i].net}:${j}-${i}`; if (seen.has(key)) continue; seen.add(key); out.push([arr[i], arr[j]]); }
-      }
-    }
-    return out.slice(0, 600);
+  // REAL connection arcs: only edges a node actually reports (same network, both online + located).
+  function arcs(ns: GNode[]): { startLat: number; startLng: number; endLat: number; endLng: number; color: string }[] {
+    const byId = new Map(ns.map((n) => [n.peerId, n]));
+    if (previewRef.current && isLocal) { // illustrative sample mesh so the demo shows arcs
+      const out: any[] = []; for (let i = 0; i < ns.length; i++) { const a = ns[i], b = ns[(i + 1) % ns.length], c = ns[(i + 3) % ns.length]; if (a.net === b.net) out.push({ startLat: a.lat, startLng: a.lng, endLat: b.lat, endLng: b.lng, color: a.color }); if (a.net === c.net) out.push({ startLat: a.lat, startLng: a.lng, endLat: c.lat, endLng: c.lng, color: a.color }); } return out; }
+    const raw = previewRef.current ? [] : peersRef.current;
+    const seen = new Set<string>(); const out: any[] = [];
+    for (const p of raw) { if (!p.peers || !byId.has(p.peerId)) continue; const a = byId.get(p.peerId)!; for (const pid of p.peers) { const b = byId.get(pid); if (!b || b.net !== a.net) continue; const key = a.peerId < pid ? `${a.peerId}|${pid}` : `${pid}|${a.peerId}`; if (seen.has(key)) continue; seen.add(key); out.push({ startLat: a.lat, startLng: a.lng, endLat: b.lat, endLng: b.lng, color: a.color }); } }
+    return out.slice(0, 800);
   }
 
-  function projectionFor(mode: "3d" | "2d", w: number, h: number, pad = 12): GeoProjection {
-    const p = mode === "3d" ? geoOrthographic().rotate(rotateRef.current).clipAngle(90) : geoNaturalEarth1();
-    p.fitExtent([[pad, pad], [w - pad, h - pad]], { type: "Sphere" } as any);
-    return p;
-  }
+  const countryStats = useMemo(() => {
+    const f = focus; const map: Record<string, { total: number; nets: Record<string, number> }> = {};
+    for (const p of peersRef.current) { if (!p.country || (f !== "all" && p.network !== f)) continue; (map[p.country] ||= { total: 0, nets: {} }); map[p.country].total++; map[p.country].nets[p.network] = (map[p.country].nets[p.network] || 0) + 1; }
+    return Object.entries(map).map(([country, v]) => ({ country, ...v })).sort((a, b) => b.total - a.total);
+  }, [tick, focus, nets]);
 
-  // the scene draw — reused by the live canvas and the export
-  function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, mode: "3d" | "2d", proj: GeoProjection, opts: { collectHits?: boolean } = {}) {
-    const path = geoPath(proj, ctx);
-    const world = worldRef.current;
-    // ocean / sphere
-    ctx.beginPath(); (path as any)({ type: "Sphere" });
-    if (mode === "3d") { const c = (proj as any)([(rotateRef.current[0] * -1), (rotateRef.current[1] * -1)]); const cx = c ? c[0] : w / 2, cy = c ? c[1] : h / 2; const g = ctx.createRadialGradient(cx, cy, 10, w / 2, h / 2, Math.min(w, h) * 0.55); g.addColorStop(0, "#0d1622"); g.addColorStop(1, C.ocean); ctx.fillStyle = g; } else ctx.fillStyle = C.ocean;
-    ctx.fill();
-    // graticule
-    ctx.beginPath(); (path as any)(geoGraticule10()); ctx.lineWidth = 0.5; ctx.strokeStyle = C.grat; ctx.stroke();
-    // countries + borders
-    if (world) {
-      ctx.beginPath(); (path as any)(world.countries); ctx.fillStyle = C.land; ctx.fill();
-      ctx.beginPath(); (path as any)(world.borders); ctx.lineWidth = 0.6; ctx.strokeStyle = C.border; ctx.stroke();
-    }
-    // sphere rim glow (3d)
-    if (mode === "3d") { ctx.beginPath(); (path as any)({ type: "Sphere" }); ctx.lineWidth = 1.4; ctx.strokeStyle = C.rim; ctx.shadowColor = "rgba(245,134,34,0.6)"; ctx.shadowBlur = 22; ctx.stroke(); ctx.shadowBlur = 0; }
-    // connections
-    const ns = nodes();
-    const center: [number, number] = [rotateRef.current[0] * -1, rotateRef.current[1] * -1];
-    const visible = (n: Node) => mode === "2d" || geoDistance([n.lng, n.lat], center) < Math.PI / 2 + 0.08;
-    for (const [a, b] of edges(ns)) {
-      if (mode === "3d" && !visible(a) && !visible(b)) continue;
-      const pts = Array.from({ length: 24 }, (_, i) => geoInterpolate([a.lng, a.lat], [b.lng, b.lat])(i / 23));
-      ctx.beginPath(); (path as any)({ type: "LineString", coordinates: pts });
-      ctx.lineWidth = 0.8; ctx.strokeStyle = (netColorRef.current[a.net] || "#f58622") + "44"; ctx.stroke();
-    }
-    // nodes
-    if (opts.collectHits) hitsRef.current = [];
-    for (const n of ns) {
-      if (!visible(n)) continue;
-      const xy = (proj as any)([n.lng, n.lat]); if (!xy) continue;
-      const r = n.kind === "rpc" ? 3.6 : 2.8;
-      ctx.beginPath(); ctx.arc(xy[0], xy[1], r, 0, 6.2832); ctx.fillStyle = n.color; ctx.shadowColor = n.color; ctx.shadowBlur = 12; ctx.fill(); ctx.shadowBlur = 0;
-      ctx.beginPath(); ctx.arc(xy[0], xy[1], r + 2.4, 0, 6.2832); ctx.strokeStyle = n.color + "55"; ctx.lineWidth = 1; ctx.stroke();
-      if (opts.collectHits) hitsRef.current.push({ x: xy[0], y: xy[1], node: n });
-    }
-  }
-
-  // live render loop
+  // ===================== 3D (globe.gl) =====================
   useEffect(() => {
-    if (!ready) return;
-    let raf = 0; const canvas = canvasRef.current!, wrap = wrapRef.current!;
-    const ctx = canvas.getContext("2d")!;
-    let cw = 0, ch = 0, dpr = 1;
-    function resize() { dpr = Math.min(window.devicePixelRatio || 1, 2); cw = wrap.clientWidth; ch = wrap.clientHeight; canvas.width = cw * dpr; canvas.height = ch * dpr; canvas.style.width = cw + "px"; canvas.style.height = ch + "px"; dirtyRef.current = true; }
+    if (mode !== "3d" || !globeHostRef.current || !worldRef.current) return;
+    if (!globeRef.current) {
+      const g = new (Globe as any)(globeHostRef.current, { rendererConfig: { preserveDrawingBuffer: true, antialias: true } })
+        .backgroundColor("rgba(0,0,0,0)").globeImageUrl("/globe/earth-dark.jpg").showGraticules(true).showAtmosphere(true).atmosphereColor(P.primary).atmosphereAltitude(0.18)
+        .polygonsData((worldRef.current.features || [])).polygonCapColor(() => BORDER_CAP).polygonSideColor(() => "rgba(0,0,0,0)").polygonStrokeColor(() => BORDER).polygonAltitude(0.006)
+        .pointLat((d: any) => d.lat).pointLng((d: any) => d.lng).pointColor((d: any) => d.color).pointAltitude(() => 0.01).pointRadius((d: any) => (d.kind === "rpc" ? 0.42 : 0.32)).pointsMerge(false).pointResolution(32)
+        .pointLabel((d: any) => `<div style="font:600 12px Inter,sans-serif;color:#f6f8fc;background:rgba(10,12,19,.96);border:1px solid #232838;border-radius:8px;padding:6px 9px">${d.label}</div>`)
+        .arcColor((d: any) => [d.color + "00", d.color, d.color + "00"]).arcStroke(0.6).arcDashLength(0.45).arcDashGap(0.2).arcDashAnimateTime(1600).arcAltitudeAutoScale(0.4).arcCurveResolution(96).arcStartLat((d: any) => d.startLat).arcStartLng((d: any) => d.startLng).arcEndLat((d: any) => d.endLat).arcEndLng((d: any) => d.endLng)
+        .labelLat((d: any) => d.lat).labelLng((d: any) => d.lng).labelText(() => "").labelDotRadius(0.16).labelColor(() => "rgba(255,255,255,0.45)").labelResolution(2)
+        .labelLabel((d: any) => `<div style="font:600 12px Inter,sans-serif;color:#f6f8fc;background:rgba(10,12,19,.96);border:1px solid #232838;border-radius:8px;padding:6px 9px">${d.n}, ${d.c}<br><span style="color:#99a2b5;font-weight:400">${d.tz} · ${tzClock(d.tz)} local</span></div>`);
+      const ctrl = g.controls(); ctrl.autoRotate = !paused; ctrl.autoRotateSpeed = 0.5; ctrl.enableZoom = true; ctrl.enableRotate = true;
+      g.pointOfView({ lat: 20, lng: 0, altitude: 2.4 });
+      try { g.renderer().setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); } catch {}
+      globeRef.current = g;
+    }
+    const g = globeRef.current;
+    const resize = () => { const w = globeHostRef.current!.clientWidth, h = globeHostRef.current!.clientHeight; g.width(w).height(h); };
+    resize(); window.addEventListener("resize", resize);
+    // update layers + day/night on each tick
+    let raf = 0;
+    const update = () => {
+      const ns = gnodes(); g.pointsData(ns); g.arcsData(arcs(ns)); g.labelsData(showCapsRef.current ? capsRef.current : []);
+      // real-time sun lighting
+      const lights = g.lights?.() || [];
+      const dir = lights.find((l: any) => l.type === "DirectionalLight");
+      const amb = lights.find((l: any) => l.type === "AmbientLight");
+      if (dayNightRef.current && dir) { const [sl, so] = subsolar(new Date()); const c = g.getCoords(sl, so, 1.5); dir.position.set(c.x, c.y, c.z); dir.intensity = 1.25; if (amb) amb.intensity = 0.32; }
+      else { if (dir) dir.intensity = 0.9; if (amb) amb.intensity = 0.85; }
+      raf = requestAnimationFrame(update);
+    };
+    raf = requestAnimationFrame(update);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
+  }, [mode, tick, isLocal]);
+
+  useEffect(() => { if (globeRef.current && mode === "3d") { const c = globeRef.current.controls(); c.autoRotate = !paused; } }, [paused, mode]);
+
+  // ===================== 2D (d3-geo canvas) =====================
+  useEffect(() => {
+    if (mode !== "2d") return;
+    const canvas = canvas2dRef.current!, wrap = wrapRef.current!; const ctx = canvas.getContext("2d")!;
+    let raf = 0, cw = 0, ch = 0, dpr = 1;
+    const resize = () => { dpr = Math.min(window.devicePixelRatio || 1, 2); cw = wrap.clientWidth; ch = wrap.clientHeight; canvas.width = cw * dpr; canvas.height = ch * dpr; canvas.style.width = cw + "px"; canvas.style.height = ch + "px"; dirtyRef.current = true; };
     resize(); window.addEventListener("resize", resize);
     function frame() {
-      if (modeRef.current === "3d" && autoRef.current) { rotateRef.current = [rotateRef.current[0] + 0.18, rotateRef.current[1]]; dirtyRef.current = true; }
       if (dirtyRef.current) {
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, cw, ch);
-        drawScene(ctx, cw, ch, modeRef.current, projectionFor(modeRef.current, cw, ch), { collectHits: true });
-        dirtyRef.current = false;
+        draw2d(ctx, cw, ch, view2d.current, true); dirtyRef.current = false;
       }
       raf = requestAnimationFrame(frame);
     }
     raf = requestAnimationFrame(frame);
-
-    // drag to rotate (3d) / pointer
+    // pan + zoom
     let dragging = false, lx = 0, ly = 0;
-    const down = (e: PointerEvent) => { if (modeRef.current !== "3d") return; dragging = true; autoRef.current = false; lx = e.clientX; ly = e.clientY; (e.target as Element).setPointerCapture?.(e.pointerId); };
+    const down = (e: PointerEvent) => { dragging = true; lx = e.clientX; ly = e.clientY; };
     const move = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
-      if (dragging) { const dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY; const k = 0.3; rotateRef.current = [rotateRef.current[0] + dx * k, Math.max(-90, Math.min(90, rotateRef.current[1] - dy * k))]; dirtyRef.current = true; setHover(null); return; }
+      if (dragging) { view2d.current.x += e.clientX - lx; view2d.current.y += e.clientY - ly; lx = e.clientX; ly = e.clientY; dirtyRef.current = true; setHover(null); return; }
       const mx = e.clientX - rect.left, my = e.clientY - rect.top; let best: any = null, bd = 13 * 13;
-      for (const h of hitsRef.current) { const dd = (h.x - mx) ** 2 + (h.y - my) ** 2; if (dd < bd) { bd = dd; best = h; } }
-      setHover(best ? { x: best.x, y: best.y, text: best.node.label } : null);
+      for (const h of hits2d.current) { const dd = (h.x - mx) ** 2 + (h.y - my) ** 2; if (dd < bd) { bd = dd; best = h; } }
+      setHover(best ? { x: best.x, y: best.y, html: best.html } : null);
     };
     const up = () => { dragging = false; };
-    canvas.addEventListener("pointerdown", down); window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); canvas.removeEventListener("pointerdown", down); window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
-  }, [ready, isLocal]);
+    const wheel = (e: WheelEvent) => { e.preventDefault(); const f = e.deltaY < 0 ? 1.12 : 1 / 1.12; const nk = Math.max(1, Math.min(8, view2d.current.k * f)); const rect = canvas.getBoundingClientRect(); const mx = e.clientX - rect.left, my = e.clientY - rect.top; view2d.current.x = mx - (mx - view2d.current.x) * (nk / view2d.current.k); view2d.current.y = my - (my - view2d.current.y) * (nk / view2d.current.k); view2d.current.k = nk; dirtyRef.current = true; };
+    canvas.addEventListener("pointerdown", down); window.addEventListener("pointermove", move); window.addEventListener("pointerup", up); canvas.addEventListener("wheel", wheel, { passive: false });
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); canvas.removeEventListener("pointerdown", down); window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); canvas.removeEventListener("wheel", wheel); };
+  }, [mode, tick, isLocal]);
 
-  // branded screenshot
+  function draw2d(ctx: CanvasRenderingContext2D, w: number, h: number, view: { k: number; x: number; y: number }, collectHits: boolean) {
+    const world = worldRef.current; if (!world) return;
+    ctx.save(); ctx.translate(view.x, view.y); ctx.scale(view.k, view.k);
+    const proj = geoNaturalEarth1().fitExtent([[12, 12], [w - 12, h - 12]], { type: "Sphere" } as any);
+    const path = geoPath(proj as any, ctx);
+    ctx.beginPath(); (path as any)({ type: "Sphere" }); ctx.fillStyle = OCEAN; ctx.fill();
+    ctx.beginPath(); (path as any)(geoGraticule10()); ctx.lineWidth = 0.4 / view.k; ctx.strokeStyle = "rgba(120,140,170,0.10)"; ctx.stroke();
+    ctx.beginPath(); (path as any)(world); ctx.fillStyle = LAND; ctx.fill(); ctx.lineWidth = 0.7 / view.k; ctx.strokeStyle = BORDER; ctx.stroke();
+    // day/night night cap
+    if (dayNightRef.current) { const [sl, so] = subsolar(new Date()); const night = geoCircle().center([so + 180, -sl]).radius(90)(); ctx.beginPath(); (path as any)(night); ctx.fillStyle = "rgba(2,4,9,0.46)"; ctx.fill(); }
+    const ns = gnodes();
+    for (const a of arcs(ns)) { const pts = Array.from({ length: 20 }, (_, i) => geoInterpolate([a.startLng, a.startLat], [a.endLng, a.endLat])(i / 19)); ctx.beginPath(); (path as any)({ type: "LineString", coordinates: pts }); ctx.lineWidth = 0.7 / view.k; ctx.strokeStyle = a.color + "55"; ctx.stroke(); }
+    if (collectHits) hits2d.current = [];
+    if (showCapsRef.current) for (const c of capsRef.current) { const xy = (proj as any)([c.lng, c.lat]); if (!xy) continue; ctx.beginPath(); ctx.arc(xy[0], xy[1], 1.5 / view.k, 0, 6.2832); ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.fill(); if (collectHits) hits2d.current.push({ x: view.x + xy[0] * view.k, y: view.y + xy[1] * view.k, html: `${c.n}, ${c.c} · ${c.tz} (${tzClock(c.tz)})` }); }
+    for (const n of ns) { const xy = (proj as any)([n.lng, n.lat]); if (!xy) continue; const r = (n.kind === "rpc" ? 3.4 : 2.7) / view.k; ctx.beginPath(); ctx.arc(xy[0], xy[1], r, 0, 6.2832); ctx.fillStyle = n.color; ctx.shadowColor = n.color; ctx.shadowBlur = 10 / view.k; ctx.fill(); ctx.shadowBlur = 0; if (collectHits) hits2d.current.push({ x: view.x + xy[0] * view.k, y: view.y + xy[1] * view.k, html: n.label }); }
+    ctx.restore();
+  }
+
+  // ===================== branded snapshot =====================
   async function capture() {
     setCapturing(true);
     try {
-      const W = 1600, H = 1000;
+      const size = SHOT_SIZES.find((z) => z.id === shot)!; const W = size.w, H = size.h;
       const c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d")!;
+      const headH = Math.round(H * 0.11), footH = Math.round(H * 0.075);
       x.fillStyle = "#06070b"; x.fillRect(0, 0, W, H);
-      const glow = x.createRadialGradient(W / 2, H * 0.46, 60, W / 2, H * 0.46, W * 0.55); glow.addColorStop(0, "rgba(245,134,34,0.12)"); glow.addColorStop(1, "transparent"); x.fillStyle = glow; x.fillRect(0, 0, W, H);
-      // map region (leave header + footer)
-      const proj = (modeRef.current === "3d" ? geoOrthographic().rotate(rotateRef.current).clipAngle(90) : geoNaturalEarth1());
-      (proj as any).fitExtent([[70, 150], [W - 70, H - 120]], { type: "Sphere" });
-      drawScene(x, W, H, modeRef.current, proj as any);
-      // header flame bar
-      const fb = x.createLinearGradient(0, 0, W, 0); fb.addColorStop(0, "#fcd03d"); fb.addColorStop(0.5, "#f58622"); fb.addColorStop(1, "#d75427"); x.fillStyle = fb; x.fillRect(0, 0, W, 7);
-      // logo
-      const logo = logoRef.current; if (logo && logo.width) { const lh = 92, lw = (logo.width / logo.height) * lh; x.drawImage(logo, 54, 40, lw, lh); }
-      // title + subtitle
-      const onlineTotal = nets.reduce((a, n) => a + (n.peers || 0), 0); const onlineNets = nets.filter((n) => n.online).length;
-      const netLabel = focus === "all" ? "All networks" : (netNameRef.current[focus] || focus);
-      x.textAlign = "right"; x.fillStyle = "#f7f9fd"; x.font = "800 38px Inter, Segoe UI, sans-serif"; x.fillText("PYRAX Network Map", W - 54, 70);
-      x.fillStyle = "#9aa4ba"; x.font = "500 20px Inter, Segoe UI, sans-serif"; x.fillText(`${netLabel} · ${onlineTotal} node${onlineTotal === 1 ? "" : "s"} online across ${onlineNets} network${onlineNets === 1 ? "" : "s"}`, W - 54, 102);
-      // footer
-      x.fillStyle = "rgba(255,255,255,0.04)"; x.fillRect(0, H - 64, W, 64);
-      x.textAlign = "left"; x.fillStyle = "#f58622"; x.font = "700 22px Inter, Segoe UI, sans-serif"; x.fillText("nodes.pyraxchain.com", 54, H - 26);
-      x.textAlign = "right"; x.fillStyle = "#6a7286"; x.font = "500 18px Inter, Segoe UI, sans-serif";
-      const dt = new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC";
-      x.fillText(`${mode === "3d" ? "3D globe" : "2D map"} · ${dt}`, W - 54, H - 26);
-      // legend dots
-      let lx2 = 54;
-      x.textAlign = "left"; x.font = "600 16px Inter, sans-serif";
-      for (const n of nets) { x.beginPath(); x.arc(lx2 + 6, H - 88, 6, 0, 6.2832); x.fillStyle = n.color; x.fill(); x.fillStyle = "#9aa4ba"; x.fillText(n.name, lx2 + 18, H - 83); lx2 += x.measureText(n.name).width + 46; }
-
-      await new Promise<void>((res) => c.toBlob((blob) => { if (blob) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `pyrax-network-map-${Date.now()}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); } res(); }, "image/png"));
+      const glow = x.createRadialGradient(W / 2, H * 0.5, 60, W / 2, H * 0.5, W * 0.55); glow.addColorStop(0, "rgba(245,134,34,0.10)"); glow.addColorStop(1, "transparent"); x.fillStyle = glow; x.fillRect(0, 0, W, H);
+      const mapY = headH, mapH = H - headH - footH;
+      if (mode === "3d" && globeRef.current) {
+        const g = globeRef.current; const prevW = g.width(), prevH = g.height();
+        g.width(W).height(mapH); try { g.renderer().render(g.scene(), g.camera()); } catch {}
+        try { const url = g.renderer().domElement.toDataURL("image/png"); await new Promise<void>((res) => { const im = new Image(); im.onload = () => { x.drawImage(im, 0, mapY, W, mapH); res(); }; im.onerror = () => res(); im.src = url; }); } catch {}
+        g.width(prevW).height(prevH);
+      } else {
+        const mc = document.createElement("canvas"); mc.width = W; mc.height = mapH; const mx = mc.getContext("2d")!;
+        // fit the 2D map into the export map region
+        const world = worldRef.current; if (world) { const proj = geoNaturalEarth1().fitExtent([[20, 20], [W - 20, mapH - 20]], { type: "Sphere" } as any); const path = geoPath(proj as any, mx); mx.fillStyle = OCEAN; mx.beginPath(); (path as any)({ type: "Sphere" }); mx.fill(); mx.beginPath(); (path as any)(geoGraticule10()); mx.lineWidth = 0.6; mx.strokeStyle = "rgba(120,140,170,0.10)"; mx.stroke(); mx.beginPath(); (path as any)(world); mx.fillStyle = LAND; mx.fill(); mx.lineWidth = 0.8; mx.strokeStyle = BORDER; mx.stroke(); if (dayNightRef.current) { const [sl, so] = subsolar(new Date()); mx.beginPath(); (path as any)(geoCircle().center([so + 180, -sl]).radius(90)()); mx.fillStyle = "rgba(2,4,9,0.46)"; mx.fill(); } const ns = gnodes(); for (const a of arcs(ns)) { const pts = Array.from({ length: 24 }, (_, i) => geoInterpolate([a.startLng, a.startLat], [a.endLng, a.endLat])(i / 23)); mx.beginPath(); (path as any)({ type: "LineString", coordinates: pts }); mx.lineWidth = 1.1; mx.strokeStyle = a.color + "66"; mx.stroke(); } for (const n of ns) { const xy = (proj as any)([n.lng, n.lat]); if (!xy) continue; mx.beginPath(); mx.arc(xy[0], xy[1], n.kind === "rpc" ? 5 : 4, 0, 6.2832); mx.fillStyle = n.color; mx.shadowColor = n.color; mx.shadowBlur = 14; mx.fill(); mx.shadowBlur = 0; } }
+        x.drawImage(mc, 0, mapY);
+      }
+      // chrome
+      const fb = x.createLinearGradient(0, 0, W, 0); fb.addColorStop(0, "#fcd03d"); fb.addColorStop(0.5, "#f58622"); fb.addColorStop(1, "#d75427"); x.fillStyle = fb; x.fillRect(0, 0, W, Math.max(5, H * 0.006));
+      const logo = logoRef.current; const pad = Math.round(W * 0.03);
+      if (logo && logo.width) { const lh = headH * 0.62, lw = (logo.width / logo.height) * lh; x.drawImage(logo, pad, (headH - lh) / 2, lw, lh); }
+      const onlineTotal = nets.reduce((a, n) => a + (n.peers || 0), 0), onlineNets = nets.filter((n) => n.online).length;
+      const netLabel = focus === "all" ? "All networks" : (netName.current[focus] || focus);
+      x.textAlign = "right"; x.fillStyle = "#f6f8fc"; x.font = `800 ${Math.round(H * 0.034)}px Inter, Segoe UI, sans-serif`; x.fillText("PYRAX Network Map", W - pad, headH * 0.5);
+      x.fillStyle = "#99a2b5"; x.font = `500 ${Math.round(H * 0.019)}px Inter, Segoe UI, sans-serif`; x.fillText(`${netLabel} · ${onlineTotal} node${onlineTotal === 1 ? "" : "s"} online across ${onlineNets} network${onlineNets === 1 ? "" : "s"}`, W - pad, headH * 0.78);
+      x.fillStyle = "rgba(255,255,255,0.03)"; x.fillRect(0, H - footH, W, footH);
+      x.textAlign = "left"; x.fillStyle = "#f58622"; x.font = `700 ${Math.round(H * 0.022)}px Inter, Segoe UI, sans-serif`; x.fillText("nodes.pyraxchain.com", pad, H - footH * 0.45);
+      x.textAlign = "right"; x.fillStyle = "#6a7286"; x.font = `500 ${Math.round(H * 0.017)}px Inter, Segoe UI, sans-serif`; x.fillText(`${mode === "3d" ? "3D globe" : "2D map"} · ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC`, W - pad, H - footH * 0.45);
+      await new Promise<void>((res) => c.toBlob((b) => { if (b) { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = `pyrax-network-map-${size.id}-${Date.now()}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); } res(); }, "image/png"));
     } finally { setCapturing(false); }
   }
 
   const totalOnline = nets.reduce((a, n) => a + (n.peers || 0), 0);
+  const pill = (active: boolean) => `rounded-full border px-3 py-1.5 text-sm transition ${active ? "border-[color:var(--color-brand)] bg-[rgba(245,134,34,0.08)] text-ink" : "border-line text-muted hover:text-ink"}`;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold sm:text-4xl">Network map</h1>
-          <p className="mt-2 max-w-xl text-muted">Every located node online across the PYRAX networks, in real time. {mode === "3d" ? "Drag to spin the globe." : "Flat world view."} Hover a node for details.</p>
-        </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div><h1 className="text-3xl font-extrabold sm:text-4xl">Network map</h1><p className="mt-2 max-w-xl text-muted">Every located node online across the PYRAX networks, in real time — with real connection arcs, capital cities, and a live day/night terminator.</p></div>
         <div className="text-sm text-muted">{totalOnline.toLocaleString()} node{totalOnline === 1 ? "" : "s"} online</div>
       </div>
 
       <div className="mt-5 flex flex-wrap items-center gap-2">
-        {/* 2D / 3D toggle */}
-        <div className="inline-flex overflow-hidden rounded-full border border-line">
-          {(["3d", "2d"] as const).map((m) => (
-            <button key={m} onClick={() => { setMode(m); autoRef.current = m === "3d"; }} className={`px-4 py-1.5 text-sm font-semibold transition ${mode === m ? "bg-[rgba(245,134,34,0.12)] text-ink" : "text-muted hover:text-ink"}`}>{m === "3d" ? "3D Globe" : "2D Map"}</button>
-          ))}
-        </div>
-        <button onClick={() => setFocus("all")} className={`rounded-full border px-3 py-1.5 text-sm transition ${focus === "all" ? "border-[color:var(--color-brand)] bg-[rgba(245,134,34,0.08)] text-ink" : "border-line text-muted hover:text-ink"}`}>All</button>
-        {nets.map((n) => (
-          <button key={n.label} onClick={() => setFocus(n.label)} className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition ${focus === n.label ? "border-[color:var(--color-brand)] bg-[rgba(245,134,34,0.08)] text-ink" : "border-line text-muted hover:text-ink"}`}>
-            <span className="h-2.5 w-2.5 rounded-full" style={{ background: n.color, boxShadow: `0 0 8px ${n.color}` }} />{n.name}<span className="text-xs text-faint">{n.online ? n.peers : "·"}</span>
-          </button>
-        ))}
+        <div className="inline-flex overflow-hidden rounded-full border border-line">{(["3d", "2d"] as const).map((m) => (<button key={m} onClick={() => setMode(m)} className={`px-4 py-1.5 text-sm font-semibold transition ${mode === m ? "bg-[rgba(245,134,34,0.12)] text-ink" : "text-muted hover:text-ink"}`}>{m === "3d" ? "3D Globe" : "2D Map"}</button>))}</div>
+        <button onClick={() => setFocus("all")} className={pill(focus === "all")}>All</button>
+        {nets.map((n) => (<button key={n.label} onClick={() => setFocus(n.label)} className={`flex items-center gap-2 ${pill(focus === n.label)}`}><span className="h-2.5 w-2.5 rounded-full" style={{ background: n.color, boxShadow: `0 0 8px ${n.color}` }} />{n.name}<span className="text-xs text-faint">{n.online ? n.peers : "·"}</span></button>))}
+        {mode === "3d" && <button onClick={() => setPaused((v) => !v)} className={pill(paused)}>{paused ? "▶ Play" : "⏸ Pause"}</button>}
+        <button onClick={() => setDayNight((v) => !v)} className={pill(dayNight)} title="Real-time day/night">🌓 Day/Night</button>
+        <button onClick={() => setShowCaps((v) => !v)} className={pill(showCaps)}>🏙 Capitals</button>
+        {isLocal && <button onClick={() => setPreview((v) => !v)} className={`rounded-full border px-3 py-1.5 text-xs transition ${preview ? "border-[color:var(--color-gold)] text-[color:var(--color-gold)]" : "border-line text-faint hover:text-ink"}`}>{preview ? "● sample" : "○ preview"}</button>}
         <div className="ml-auto flex items-center gap-2">
-          {isLocal && <button onClick={() => setPreview((v) => !v)} className={`rounded-full border px-3 py-1.5 text-xs transition ${preview ? "border-[color:var(--color-gold)] text-[color:var(--color-gold)]" : "border-line text-faint hover:text-ink"}`}>{preview ? "● sample nodes" : "○ preview"}</button>}
-          <button onClick={capture} disabled={capturing} className="btn btn-primary py-1.5 text-sm">{capturing ? "Capturing…" : "📸 Capture map"}</button>
+          <select value={shot} onChange={(e) => setShot(e.target.value)} className="rounded-lg border border-line bg-[rgba(5,6,9,0.6)] px-2 py-1.5 text-xs text-muted">{SHOT_SIZES.map((z) => <option key={z.id} value={z.id}>{z.label}</option>)}</select>
+          <button onClick={capture} disabled={capturing} className="btn btn-primary py-1.5 text-sm">{capturing ? "Rendering…" : "📸 Capture"}</button>
         </div>
       </div>
 
-      <div className="relative mt-5 overflow-hidden rounded-2xl border border-line bg-[radial-gradient(circle_at_50%_35%,rgba(245,134,34,0.05),transparent_60%)]">
-        <div ref={wrapRef} className="h-[60vh] min-h-[440px] w-full">
-          <canvas ref={canvasRef} className={mode === "3d" ? "cursor-grab active:cursor-grabbing" : "cursor-default"} />
+      <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_300px]">
+        <div className="relative overflow-hidden rounded-2xl border border-line bg-[radial-gradient(circle_at_50%_35%,rgba(245,134,34,0.05),transparent_60%)]">
+          <div ref={wrapRef} className="h-[62vh] min-h-[460px] w-full">
+            {mode === "3d" ? <div ref={globeHostRef} className="h-full w-full" /> : <canvas ref={canvas2dRef} className="h-full w-full cursor-grab active:cursor-grabbing" />}
+          </div>
+          {hover && <div className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-lg border border-line bg-[rgba(10,12,19,0.96)] px-2.5 py-1.5 text-xs text-ink shadow-xl" style={{ left: hover.x, top: hover.y - 8 }} dangerouslySetInnerHTML={{ __html: hover.html }} />}
+          {gnodes().length === 0 && <div className="pointer-events-none absolute inset-x-0 bottom-6 text-center text-sm text-faint">Waiting for located nodes to come online…{isLocal ? " (use “preview” to populate)" : ""}</div>}
         </div>
-        {hover && <div className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-lg border border-line bg-[rgba(10,12,19,0.96)] px-2.5 py-1.5 text-xs text-ink shadow-xl" style={{ left: hover.x, top: hover.y - 8 }}>{hover.text}</div>}
-        {!ready && <div className="absolute inset-0 grid place-items-center text-sm text-muted">Loading map…</div>}
-        {ready && nodes().length === 0 && <div className="pointer-events-none absolute inset-x-0 bottom-6 text-center text-sm text-faint">Waiting for located nodes to come online…{isLocal ? " (use “preview” to populate the map)" : ""}</div>}
+
+        {/* Countries online */}
+        <aside className="rounded-2xl border border-line bg-[rgba(8,10,17,0.5)] p-4">
+          <div className="flex items-center justify-between"><h3 className="text-sm font-bold">Countries online</h3><span className="text-xs text-faint">{countryStats.length}</span></div>
+          <p className="mt-0.5 text-[0.7rem] text-faint">{focus === "all" ? "All networks" : (netName.current[focus] || focus)}</p>
+          <div className="mt-3 max-h-[52vh] space-y-1.5 overflow-y-auto pr-1">
+            {countryStats.length === 0 ? <p className="text-xs text-faint">No located nodes yet.</p> : countryStats.map((cs) => (
+              <div key={cs.country} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm odd:bg-[rgba(255,255,255,0.02)]">
+                <span className="min-w-0 truncate text-ink">{cs.country}</span>
+                <span className="flex shrink-0 items-center gap-1.5">{Object.entries(cs.nets).map(([net, n]) => <span key={net} className="h-2 w-2 rounded-full" style={{ background: netColor.current[net] || P.primary, boxShadow: `0 0 5px ${netColor.current[net] || P.primary}` }} title={`${netName.current[net] || net}: ${n}`} />)}<span className="ml-1 font-mono text-xs text-muted">{cs.total}</span></span>
+              </div>
+            ))}
+          </div>
+        </aside>
       </div>
     </div>
   );

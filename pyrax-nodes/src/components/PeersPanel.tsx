@@ -15,6 +15,17 @@ const SEL_KEY = "pyrax:net";
 const ago = (ms: number) => { const s = Math.max(0, Math.floor((Date.now() - ms) / 1000)); return s < 60 ? `${s}s ago` : s < 3600 ? `${Math.floor(s / 60)}m ago` : `${Math.floor(s / 3600)}h ago`; };
 const KIND: Record<string, { tone: any; label: string }> = { operator: { tone: "brand", label: "Operator" }, seed: { tone: "water", label: "Seed" }, rpc: { tone: "positive", label: "RPC" } };
 
+// Localhost-only illustrative peers so the layout can be previewed before real nodes announce.
+const SAMPLE_SEED: [string, string, string, number][] = [
+  ["Ashburn", "United States", "rpc", 30303], ["Frankfurt", "Germany", "operator", 30303], ["Singapore", "Singapore", "operator", 30303],
+  ["London", "United Kingdom", "seed", 30303], ["Tokyo", "Japan", "operator", 30303], ["São Paulo", "Brazil", "operator", 30303],
+  ["Sydney", "Australia", "rpc", 30303], ["Toronto", "Canada", "operator", 30303],
+];
+function samplePeers(network: string): Peer[] {
+  const now = Date.now();
+  return SAMPLE_SEED.map((s, i) => ({ peerId: `12D3KooSample${network}${i}xQmZ`, network, kind: s[2], port: s[3], ip: `203.0.113.${10 + i}`, multiaddr: `/ip4/203.0.113.${10 + i}/tcp/${s[3]}/p2p/12D3KooSample${network}${i}`, relayPubkey: i % 3 === 0 ? `relay${i}pubkeyabc` : undefined, city: s[0], country: s[1], firstSeen: now - (2 + i) * 3600_000, lastSeen: now - (i % 4) * 1000 } as Peer));
+}
+
 function Copy({ text }: { text: string }) {
   const [done, setDone] = useState(false);
   return (
@@ -29,7 +40,11 @@ export default function PeersPanel() {
   const [nets, setNets] = useState<NetRow[]>([]);
   const [sel, setSel] = useState<string>("");
   const [peers, setPeers] = useState<Peer[] | null>(null);
+  const [preview, setPreview] = useState(false);
+  const [isLocal, setIsLocal] = useState(false);
   const selRef = useRef("");
+
+  useEffect(() => { try { setIsLocal(/^(localhost|127\.|0\.0\.0\.0)/.test(location.hostname)); } catch {} }, []);
 
   // resolve initial network: ?net= → localStorage → default (from /api/networks)
   useEffect(() => {
@@ -63,6 +78,7 @@ export default function PeersPanel() {
   function pick(label: string) { setSel(label); selRef.current = label; try { localStorage.setItem(SEL_KEY, label); const u = new URL(location.href); u.searchParams.set("net", label); history.replaceState({}, "", u); } catch {} }
 
   const selNet = useMemo(() => nets.find((n) => n.label === sel), [nets, sel]);
+  const display = preview && isLocal ? samplePeers(sel || "forge") : peers;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
@@ -71,9 +87,9 @@ export default function PeersPanel() {
           <h1 className="text-3xl font-extrabold sm:text-4xl">Peer directory</h1>
           <p className="mt-2 max-w-xl text-muted">Every node currently online on the selected network, announced live over the decentralized peer directory. Copy a dial address to connect manually.</p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted">
-          <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[color:var(--color-positive)] opacity-70" /><span className="relative inline-flex h-2 w-2 rounded-full bg-[color:var(--color-positive)]" /></span>
-          live · refreshes every 5s
+        <div className="flex items-center gap-3 text-sm text-muted">
+          {isLocal && <button onClick={() => setPreview((v) => !v)} className={`rounded-full border px-3 py-1 text-xs transition ${preview ? "border-[color:var(--color-gold)] text-[color:var(--color-gold)]" : "border-line text-faint hover:text-ink"}`}>{preview ? "● sample peers" : "○ preview"}</button>}
+          <span className="flex items-center gap-2"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[color:var(--color-positive)] opacity-70" /><span className="relative inline-flex h-2 w-2 rounded-full bg-[color:var(--color-positive)]" /></span>{preview && isLocal ? "sample preview" : "live · refreshes every 5s"}</span>
         </div>
       </div>
 
@@ -91,9 +107,9 @@ export default function PeersPanel() {
 
       {/* list */}
       <div className="mt-6">
-        {peers === null ? (
+        {display === null ? (
           <div className="card p-10 text-center text-sm text-muted"><span className="mr-2 inline-block h-4 w-4 animate-spin-slow rounded-full border-2 border-line border-t-[color:var(--color-brand)] align-middle" />Discovering peers on {selNet?.name || sel}…</div>
-        ) : peers.length === 0 ? (
+        ) : display.length === 0 ? (
           <div className="card p-10 text-center">
             <div className="text-base font-semibold">No peers online on {selNet?.name || sel} yet</div>
             <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">When a node connects to this network it appears here within ~10 seconds. Be the first — run a node and join the mesh.</p>
@@ -101,10 +117,10 @@ export default function PeersPanel() {
           </div>
         ) : (
           <>
-            <div className="mb-3 text-sm text-muted">{peers.length} peer{peers.length === 1 ? "" : "s"} online on <span className="text-ink">{selNet?.name || sel}</span></div>
+            <div className="mb-3 text-sm text-muted">{display.length} peer{display.length === 1 ? "" : "s"} online on <span className="text-ink">{selNet?.name || sel}</span>{preview && isLocal && <span className="ml-2 text-xs text-[color:var(--color-gold)]">· sample data</span>}</div>
             <div className="grid gap-3 md:grid-cols-2">
               <AnimatePresence mode="popLayout">
-                {peers.map((p) => (
+                {display.map((p) => (
                   <motion.div key={p.peerId} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.2 }}
                     className="card p-4">
                     <div className="flex items-start justify-between gap-3">
