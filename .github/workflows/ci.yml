@@ -32,7 +32,7 @@ jobs:
           - { dir: pyrax-explorer, pm: npm }
           - { dir: pyrax-explorer/server, pm: npm }
           - { dir: pyrax-peer-directory, pm: pnpm }
-          - { dir: team-pyrax, pm: pnpm }
+          - { dir: pyrax-team-website, pm: npm }
     name: build (${{ matrix.dir }})
     steps:
       - uses: actions/checkout@v4

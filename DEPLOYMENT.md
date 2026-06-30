@@ -68,9 +68,9 @@ ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443/tcp && ufw allow 30303/tcp
    - `DROPLET_HOST` = `64.227.8.153`
    - `DROPLET_USER` = `root`
 
-### (c) team-pyrax secrets (the gated team portal)
-The deploy workflow writes these from GitHub secrets into the droplet's root-only `.env`.
-- `DATABASE_URL_TEAM_PYRAX` **(required)** — the DO Managed Postgres **VPC (private)** connection string for the `team_pyrax` database (`postgresql://…@private-…nyc1.db.ondigitalocean.com:25061/team_pyrax?sslmode=require`). The container is stateless; the whitelist/roles/sessions live here. team-pyrax won't start without it.
+### (c) pyrax-team-website secrets (the gated team portal — `team.pyraxchain.com`)
+Deployed via **pyrax-infra** (`team-website-image.yml` + `team-website-deploy.yml`), which writes these from GitHub secrets into the droplet's `/opt/pyrax-team/.env`.
+- `DATABASE_URL_TEAM_PYRAX` **(required)** — the DO Managed Postgres **VPC (private)** connection string for the `team_pyrax` database (`postgresql://…@private-…nyc1.db.ondigitalocean.com:25061/team_pyrax?sslmode=require`). The container is stateless; the whitelist/roles/sessions live here. pyrax-team-website won't start without it.
 - `DATABASE_URL_EXPLORER` **(required for the explorer)** — same, for the `explorer` database.
 - `SESSION_SECRET` **(set this)** — pepper for hashing sign-in tokens/sessions + CSRF. Generate with `openssl rand -hex 32`. Unset → an ephemeral per-boot key (every restart invalidates sessions + pending links).
 - `BREVO_API_KEY` — Brevo transactional-email key for the magic links. Unset → links are written to the container log instead of emailed (sign-in still works for debugging).
@@ -94,7 +94,7 @@ docker compose ps          # all services Up; caddy on 80/443
 
 ## 4. Point DNS — the only thing left
 Create **A records → `64.227.8.153`** for:
-`pyraxchain.com` · `www.pyraxchain.com` · `nodes.pyraxchain.com` · `explorer.pyraxchain.com` · `peers.pyraxchain.com` · `team-pyrax.pyraxchain.com`
+`pyraxchain.com` · `www.pyraxchain.com` · `nodes.pyraxchain.com` · `explorer.pyraxchain.com` · `peers.pyraxchain.com` · `team.pyraxchain.com`
 
 Caddy provisions HTTPS automatically the first time each name resolves to the droplet — no cert steps. Within a minute of DNS propagating, every site is live on HTTPS.
 
@@ -105,4 +105,4 @@ Push to `main` → CI rebuilds the changed images, pushes to GHCR, and rolls the
 
 ## Notes
 - **Explorer indexer is throttled** (`INGEST_BATCH=2`, `RECEIPT_CONCURRENCY=1`, `INGEST_INTERVAL_MS=8000`) so reading the node's public RPC can't starve block production. When the nodes droplet is back, move the indexer there (localhost to the node) and drop the throttle.
-- **State is in DO Managed Postgres** (`team_pyrax` + `explorer` databases) — both containers are now stateless. The indexer is re-buildable from chain; to re-index after a re-genesis, truncate its tables (`psql "$DATABASE_URL_EXPLORER" -c 'TRUNCATE blocks,txns,logs,transfers,tokens,sync_state;'`). team-pyrax's whitelist/roles are durable + backed up by the managed cluster.
+- **State is in DO Managed Postgres** (`team_pyrax` + `explorer` databases) — both containers are now stateless. The indexer is re-buildable from chain; to re-index after a re-genesis, truncate its tables (`psql "$DATABASE_URL_EXPLORER" -c 'TRUNCATE blocks,txns,logs,transfers,tokens,sync_state;'`). pyrax-team-website's whitelist/roles are durable + backed up by the managed cluster.

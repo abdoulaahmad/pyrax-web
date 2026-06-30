@@ -1,0 +1,498 @@
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import React, { useEffect, useMemo, useState } from "react";
+import { Card, Button, StatTile, Badge, PageHeader, Icon } from "./ui";
+import { can, canGrant, type AccessSubject, type Permission, PERMISSIONS, permissionGroups, PRESETS, isSuperuserOnly } from "../lib/permissions";
+import { SOCIAL_FIELDS, validateProfile, formatPhone, validatePhone, COMPANY_EMAIL_DOMAIN, type MemberProfile } from "../lib/profile";
+import { type Member } from "../lib/mock";
+
+function Locked({ what }: { what: string }) {
+  return (
+    <Card className="p-10 text-center">
+      <Icon.shield className="mx-auto h-8 w-8 text-faint" />
+      <p className="mt-3 font-semibold">No access to {what}</p>
+      <p className="mt-1 text-sm text-muted">Ask an admin to grant you this permission.</p>
+    </Card>
+  );
+}
+
+/** Honest placeholder for modules whose backend (live network RPC, release pipeline, node fleet,
+ *  error pipeline) isn't connected yet — shown instead of fabricated data. */
+function ComingSoon({ title, detail }: { title: string; detail: string }) {
+  return (
+    <Card className="p-10 text-center">
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-line bg-[rgba(245,134,34,0.06)]">
+        <svg viewBox="0 0 24 24" className="h-6 w-6 text-faint" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+      </div>
+      <p className="mt-3 font-semibold">{title}</p>
+      <p className="mx-auto mt-1 max-w-md text-sm text-muted">{detail}</p>
+      <div className="mt-3"><Badge tone="warning">Connecting soon</Badge></div>
+    </Card>
+  );
+}
+
+/* ============================================================== Dashboard */
+export function Dashboard({ subject, onNavigate }: { subject: AccessSubject; onNavigate: (k: string) => void }) {
+  // Team count is real (from the DB). The other metrics await their backends — shown as "—".
+  const [team, setTeam] = useState<{ active: number; invited: number } | null>(null);
+  useEffect(() => {
+    if (!can(subject, "users.view")) return;
+    fetch("/api/users", { headers: { accept: "application/json" } })
+      .then((r) => r.json()).then((d) => {
+        if (!d?.ok) return;
+        const u: Member[] = d.users || [];
+        setTeam({ active: u.filter((m) => m.status === "active").length, invited: u.filter((m) => m.status === "invited").length });
+      }).catch(() => {});
+  }, [subject]);
+  const tiles = [
+    can(subject, "users.view") && <StatTile key="t" label="Team members" value={team ? team.active : "—"} sub={team ? `${team.invited} invited` : "loading…"} icon={<Icon.users className="h-5 w-5 text-gold" />} delay={0} />,
+    can(subject, "faucet.view") && <StatTile key="n" label="Live networks" value="—" sub="connecting soon" accent="water" icon={<Icon.activity className="h-5 w-5 text-bolt-bright" />} delay={0.05} />,
+    can(subject, "downloads.view") && <StatTile key="d" label="Products" value="—" sub="connecting soon" icon={<Icon.download className="h-5 w-5 text-gold" />} delay={0.1} />,
+    can(subject, "node_control.view") && <StatTile key="o" label="Nodes online" value="—" sub="connecting soon" accent="positive" icon={<Icon.power className="h-5 w-5 text-positive" />} delay={0.15} />,
+  ].filter(Boolean);
+  return (
+    <>
+      <PageHeader title="Welcome back" subtitle="Your PYRAX team workspace." />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{tiles}</div>
+      <div className="mt-6 grid gap-4 lg:grid-cols-3">
+        <Card className="p-5 lg:col-span-2">
+          <h3 className="text-base font-bold">Quick actions</h3>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {can(subject, "faucet.drip") && <QuickAction icon="droplet" label="Dispense test PYRX" desc="Fund an address from the faucet" onClick={() => onNavigate("faucet")} />}
+            {can(subject, "downloads.view") && <QuickAction icon="download" label="Get the apps" desc="Ember, Inferno + the CLI" onClick={() => onNavigate("downloads")} />}
+            {can(subject, "users.invite") && <QuickAction icon="users" label="Invite a teammate" desc="Whitelist + set their access" onClick={() => onNavigate("team")} />}
+            {can(subject, "node_control.view") && <QuickAction icon="power" label="Monitor nodes" desc="Versions + health" onClick={() => onNavigate("nodes")} />}
+          </div>
+        </Card>
+        <Card className="p-5">
+          <h3 className="text-base font-bold">Your access</h3>
+          <p className="mt-1 text-xs text-muted">{subject.isSuperuser ? "Full access (superuser)." : `${subject.permissions.length} of ${Object.keys(PERMISSIONS).length} permissions.`}</p>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {subject.isSuperuser ? <Badge tone="brand">All permissions</Badge> :
+              subject.permissions.slice(0, 8).map((p) => <Badge key={p}>{PERMISSIONS[p].label}</Badge>)}
+            {!subject.isSuperuser && subject.permissions.length > 8 && <Badge tone="muted">+{subject.permissions.length - 8} more</Badge>}
+          </div>
+        </Card>
+      </div>
+    </>
+  );
+}
+function QuickAction({ icon, label, desc, onClick }: { icon: keyof typeof Icon; label: string; desc: string; onClick: () => void }) {
+  const I = Icon[icon];
+  return (
+    <button onClick={onClick} className="card-hover flex items-center gap-3 rounded-xl border border-line p-3 text-left">
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-[color:rgba(245,134,34,0.3)] bg-[rgba(245,134,34,0.07)]"><I className="h-5 w-5 text-gold" /></div>
+      <div><div className="text-sm font-semibold">{label}</div><div className="text-xs text-faint">{desc}</div></div>
+    </button>
+  );
+}
+
+/* ============================================================== Faucet */
+export function Faucet({ subject }: { subject: AccessSubject }) {
+  if (!can(subject, "faucet.view")) return <Locked what="the faucet" />;
+  return (
+    <>
+      <PageHeader title="Faucet" subtitle="Dispense test PYRX to a wallet on a development network." />
+      <ComingSoon title="The faucet isn't connected yet" detail="Once the team portal is wired to the live PYRAX network RPC, role-holders will dispense rate-limited test PYRX to an address here." />
+    </>
+  );
+}
+
+/* ============================================================== Downloads */
+export function Downloads({ subject }: { subject: AccessSubject }) {
+  if (!can(subject, "downloads.view")) return <Locked what="downloads" />;
+  return (
+    <>
+      <PageHeader title="Downloads" subtitle="Latest signed builds. The download role grants everything — restricted products need their own access." />
+      <ComingSoon title="No builds connected yet" detail="Once the release pipeline is connected, the latest signed Ember, Inferno + CLI builds will be listed here — with individually-restricted products gated to their own access." />
+    </>
+  );
+}
+
+/* ============================================================== Team (granular RBAC) */
+export function Team({ subject }: { subject: AccessSubject }) {
+  if (!can(subject, "users.view")) return <Locked what="team management" />;
+  const [members, setMembers] = useState<Member[] | null>(null);
+  const [editing, setEditing] = useState<Member | null>(null);
+  const [inviting, setInviting] = useState(false);
+  const [err, setErr] = useState("");
+
+  async function load() {
+    try {
+      const res = await fetch("/api/users", { headers: { accept: "application/json" } });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) { setErr(data.error || "Couldn't load the team."); setMembers([]); return; }
+      setMembers(data.users as Member[]);
+    } catch { setErr("Network error loading the team."); setMembers([]); }
+  }
+  useEffect(() => { load(); }, []);
+  const upsert = (u: Member) => setMembers((cur) => {
+    const list = cur ? [...cur] : [];
+    const i = list.findIndex((m) => m.id === u.id);
+    if (i >= 0) { list[i] = u; return list; }
+    return [...list, u];
+  });
+  const dropLocal = (id: string) => setMembers((cur) => (cur || []).filter((m) => m.id !== id));
+
+  return (
+    <>
+      <PageHeader title="Team" subtitle="Members and their granular access."
+        action={can(subject, "users.invite") && <Button variant="primary" onClick={() => setInviting(true)}><Icon.plus className="h-4 w-4" /> Invite member</Button>} />
+      {err && <p className="mb-3 text-sm text-[color:var(--color-negative)]">{err}</p>}
+      <Card className="overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="text-left text-xs uppercase tracking-wider text-faint">
+            <tr className="border-b border-line"><th className="p-3">Member</th><th className="p-3">Position</th><th className="p-3 hidden sm:table-cell">Access</th><th className="p-3">Status</th><th className="p-3"></th></tr>
+          </thead>
+          <tbody>
+            {members === null ? (
+              <tr><td colSpan={5} className="p-6 text-center text-sm text-muted"><span className="mr-2 inline-block h-4 w-4 animate-spin-slow rounded-full border-2 border-line border-t-[color:var(--color-brand)] align-middle" />Loading team…</td></tr>
+            ) : members.length === 0 ? (
+              <tr><td colSpan={5} className="p-6 text-center text-sm text-muted">No members yet — invite your first teammate.</td></tr>
+            ) : members.map((m) => (
+              <tr key={m.id} className="border-b border-line-soft last:border-0">
+                <td className="p-3"><div className="font-semibold">{m.displayName || "—"}</div><div className="text-xs text-faint">{m.email}</div></td>
+                <td className="p-3 text-muted">{m.position || "—"}</td>
+                <td className="p-3 hidden sm:table-cell">{m.isSuperuser ? <Badge tone="brand">Superuser</Badge> : <span className="text-xs text-muted">{m.permissions.length} permissions</span>}</td>
+                <td className="p-3">{m.status === "active" ? <Badge tone="positive">Active</Badge> : <Badge tone="warning">Invited</Badge>}</td>
+                <td className="p-3 text-right">{can(subject, "users.assign_permissions") && !m.isSuperuser && <Button onClick={() => setEditing(m)}>Manage</Button>}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+      {editing && <PermissionDrawer grantor={subject} member={editing} onClose={() => setEditing(null)} onSaved={(u) => { upsert(u); setEditing(null); }} onRemoved={(id) => { dropLocal(id); setEditing(null); }} />}
+      {inviting && <InviteDrawer grantor={subject} onClose={() => setInviting(false)} onInvited={(u) => { upsert(u); setInviting(false); }} />}
+    </>
+  );
+}
+
+/* The granular permission matrix — every permission a checkbox, grouped by module, with presets. */
+function PermissionDrawer({ grantor, member, onClose, onSaved, onRemoved }: { grantor: AccessSubject; member: Member; onClose: () => void; onSaved: (u: Member) => void; onRemoved: (id: string) => void }) {
+  const [perms, setPerms] = useState<Set<Permission>>(new Set(member.permissions));
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const groups = permissionGroups();
+  function toggle(p: Permission) { const n = new Set(perms); n.has(p) ? n.delete(p) : n.add(p); setPerms(n); }
+  function addRole(k: string) { setPerms((prev) => new Set([...prev, ...PRESETS[k].permissions])); }
+  function removeRole(k: string) { setPerms((prev) => { const n = new Set(prev); PRESETS[k].permissions.forEach((p) => n.delete(p)); return n; }); }
+  const hasWholeRole = (k: string) => PRESETS[k].permissions.every((p) => perms.has(p));
+
+  async function save() {
+    setBusy(true); setErr("");
+    try {
+      const res = await fetch(`/api/users/${member.id}`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ permissions: [...perms] }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) { setErr(data.error || "Couldn't save permissions."); setBusy(false); return; }
+      onSaved(data.user as Member);
+    } catch { setErr("Network error — please try again."); setBusy(false); }
+  }
+  async function remove() {
+    if (!window.confirm(`Remove ${member.displayName || member.email} from the portal? This can't be undone.`)) return;
+    setBusy(true); setErr("");
+    try {
+      const res = await fetch(`/api/users/${member.id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) { setErr(data.error || "Couldn't remove member."); setBusy(false); return; }
+      onRemoved(member.id);
+    } catch { setErr("Network error — please try again."); setBusy(false); }
+  }
+  const removeBtn = can(grantor, "users.remove") ? <Button variant="danger" onClick={remove} disabled={busy}>Remove member</Button> : undefined;
+
+  return (
+    <Drawer title={`Manage access — ${member.displayName || member.email}`} onClose={onClose} onSave={save} saveLabel="Save changes" busy={busy} extra={removeBtn}>
+      <div className="mb-4">
+        <div className="label">Roles <span className="font-normal text-faint">· stack as many as you like</span></div>
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(PRESETS).map(([k, v]) => {
+            const on = hasWholeRole(k);
+            return <button key={k} onClick={() => on ? removeRole(k) : addRole(k)} className={`chip card-hover ${on ? "chip-brand" : ""}`} title={v.desc}>{on ? "✓ " : "+ "}{v.label}</button>;
+          })}
+          <button onClick={() => setPerms(new Set())} className="chip card-hover text-faint">Clear all</button>
+        </div>
+        <p className="mt-2 text-xs text-faint">Add any combination of roles, then fine-tune individual permissions below — every permission is independent.</p>
+      </div>
+      {Object.entries(groups).map(([g, list]) => (
+        <div key={g} className="mb-4">
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-faint">{g}</div>
+          <div className="space-y-1.5">
+            {list.map((p) => {
+              const allowed = canGrant(grantor, p);
+              return (
+                <label key={p} className={`flex items-start gap-3 rounded-lg border border-line p-2.5 ${allowed ? "card-hover cursor-pointer" : "opacity-50"}`}>
+                  <input type="checkbox" disabled={!allowed} checked={perms.has(p)} onChange={() => allowed && toggle(p)} className="mt-0.5 h-4 w-4 accent-[color:var(--color-brand)]" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 text-sm font-medium">{PERMISSIONS[p].label}{isSuperuserOnly(p) && <Badge tone="danger">superuser only</Badge>}</div>
+                    <div className="text-xs text-faint">{PERMISSIONS[p].desc}</div>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+      {err && <p className="mb-2 text-sm text-[color:var(--color-negative)]">{err}</p>}
+      <div className="text-xs text-faint">Selected: <span className="text-muted">{perms.size}</span> permissions. Changes apply to <span className="text-muted">{member.displayName || member.email}</span> on save.</div>
+    </Drawer>
+  );
+}
+
+/* The onboarding form — Display Name, Email (@pyraxchain.com), Position (required) + optionals. */
+function InviteDrawer({ grantor, onClose, onInvited }: { grantor: AccessSubject; onClose: () => void; onInvited: (u: Member) => void }) {
+  const [p, setP] = useState<Partial<MemberProfile>>({ socials: {} });
+  const [errs, setErrs] = useState<Record<string, string>>({});
+  const [roles, setRoles] = useState<Set<string>>(new Set(["member"]));
+  const [busy, setBusy] = useState(false);
+  function set(k: keyof MemberProfile, v: string) { setP({ ...p, [k]: v }); }
+  function toggleRole(k: string) { setRoles((prev) => { const n = new Set(prev); n.has(k) ? n.delete(k) : n.add(k); return n; }); }
+  const grantedCount = useMemo(() => { const s = new Set<Permission>(); roles.forEach((k) => PRESETS[k]?.permissions.forEach((pp) => s.add(pp))); return s.size; }, [roles]);
+  async function submit() {
+    const r = validateProfile(p, { enforceDomain: true });
+    setErrs(r.errors);
+    if (!r.ok) return;
+    const perms = new Set<Permission>(); roles.forEach((k) => PRESETS[k]?.permissions.forEach((pp) => perms.add(pp)));
+    setBusy(true);
+    try {
+      const res = await fetch("/api/users", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ displayName: p.displayName, position: p.position, email: p.email, permissions: [...perms] }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) { setErrs(data.errors || { email: data.error || "Couldn't send the invitation." }); setBusy(false); return; }
+      onInvited(data.user as Member);
+    } catch { setErrs({ email: "Network error — please try again." }); setBusy(false); }
+  }
+  return (
+    <Drawer title="Invite a team member" onClose={onClose} onSave={submit} saveLabel="Send invitation" busy={busy}>
+      <div className="space-y-3">
+        <p className="rounded-lg border border-line bg-[rgba(5,6,9,0.5)] p-3 text-xs text-muted">You set the <span className="text-ink">required</span> details. The member adds their own optional info (phone + social links) when they onboard.</p>
+        <Field label="Display name" req error={errs.displayName}><input className="input" value={p.displayName || ""} onChange={(e) => set("displayName", e.target.value)} placeholder="Jane Doe" /></Field>
+        <Field label="Position / title" req error={errs.position}><input className="input" value={p.position || ""} onChange={(e) => set("position", e.target.value)} placeholder="Protocol Engineer" /></Field>
+        <Field label={`Email (@${COMPANY_EMAIL_DOMAIN} only)`} req error={errs.email}><input className="input" value={p.email || ""} onChange={(e) => set("email", e.target.value)} placeholder={`jane@${COMPANY_EMAIL_DOMAIN}`} /></Field>
+        <div className="label pt-1">Initial roles <span className="font-normal text-faint">· add any, they stack</span></div>
+        <div className="flex flex-wrap gap-2">{Object.entries(PRESETS).map(([k, v]) => <button key={k} type="button" onClick={() => toggleRole(k)} className={`chip card-hover ${roles.has(k) ? "chip-brand" : ""}`} title={v.desc}>{roles.has(k) ? "✓ " : "+ "}{v.label}</button>)}</div>
+        <p className="text-xs text-faint">{grantedCount} permissions granted · fully adjustable after they join.</p>
+        <p className="pt-1 text-xs text-faint">They'll get a branded invitation email and verify with a one-time code on first sign-in, then complete their optional profile.</p>
+      </div>
+    </Drawer>
+  );
+}
+
+/* ============================================================== Node Control */
+export function NodeControl({ subject }: { subject: AccessSubject }) {
+  if (!can(subject, "node_control.view")) return <Locked what="node control" />;
+  return (
+    <>
+      <PageHeader title="Node Control" subtitle="Monitor node versions; remotely retire an out-of-date node (last resort)." />
+      <ComingSoon title="Node fleet not connected yet" detail="Live node versions, peer counts + health — and the superuser-only remote kill-switch — appear here once the portal is wired to the node fleet." />
+    </>
+  );
+}
+
+/* ============================================================== Error Reports */
+export function ErrorReports() {
+  return (
+    <>
+      <PageHeader title="Error Reports" subtitle="Inbound crash + error reports from nodes and apps." />
+      <ComingSoon title="No reports connected yet" detail="Inbound crash + error reports from nodes and apps will stream in here once the reporting pipeline is connected." />
+    </>
+  );
+}
+
+/* ============================================================== Profile */
+export function Profile({ member, onSaved }: { member: Member; onSaved?: (u: any) => void }) {
+  const [p, setP] = useState<MemberProfile>({ ...member });
+  const [errs, setErrs] = useState<Record<string, string>>({});
+  const [saved, setSaved] = useState(false);
+  const [busy, setBusy] = useState(false);
+  function set(k: keyof MemberProfile, v: string) { setP({ ...p, [k]: v }); setSaved(false); }
+  function setSocial(k: string, v: string) { setP({ ...p, socials: { ...p.socials, [k]: v } }); setSaved(false); }
+  async function save() {
+    const r = validateProfile(p, { enforceDomain: true });
+    setErrs(r.errors);
+    if (!r.ok) return;
+    setBusy(true); setSaved(false);
+    try {
+      const res = await fetch("/api/me", { method: "PUT", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ displayName: p.displayName, position: p.position, phone: p.phone || "", bookingUrl: p.bookingUrl || "", socials: p.socials || {} }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) { setErrs(data.errors || { _: data.error || "Couldn't save — please try again." }); setBusy(false); return; }
+      setP({ ...p, ...data.user }); setSaved(true); onSaved?.(data.user);
+    } catch { setErrs({ _: "Network error — please try again." }); }
+    setBusy(false);
+  }
+  return (
+    <>
+      <PageHeader title="My Profile" subtitle="Your details. Email is fixed by your invitation." />
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="p-5 lg:col-span-2">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Display name" req error={errs.displayName}><input className="input" value={p.displayName} onChange={(e) => set("displayName", e.target.value)} /></Field>
+            <Field label="Position / title" req error={errs.position}><input className="input" value={p.position} onChange={(e) => set("position", e.target.value)} /></Field>
+            <Field label="Email"><input className="input opacity-60" value={p.email} readOnly /></Field>
+            <PhoneInput value={p.phone || ""} onChange={(v) => set("phone", v)} error={errs.phone} />
+          </div>
+          <div className="mt-5">
+            <Field label="Microsoft Bookings link" error={errs.bookingUrl}>
+              <input className="input" inputMode="url" value={p.bookingUrl || ""} onChange={(e) => set("bookingUrl", e.target.value)} placeholder="https://outlook.office.com/bookwithme/…" />
+            </Field>
+            <p className="mt-2 text-xs leading-relaxed text-faint">Optional — when set, a “Book a meeting with me” button is added to your email signature.</p>
+          </div>
+          <div className="label mt-6">Social links <span className="font-normal text-faint">(optional · personal, not company)</span></div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {SOCIAL_FIELDS.map((f) => <Field key={f.key} label={f.label} error={errs[`social.${f.key}`]}><input className="input" value={p.socials?.[f.key] || ""} onChange={(e) => setSocial(f.key, e.target.value)} placeholder={f.placeholder} /></Field>)}
+          </div>
+          {errs._ && <p className="mt-3 text-sm text-[color:var(--color-negative)]">{errs._}</p>}
+          <div className="mt-5 flex items-center gap-3"><Button variant="primary" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save changes"}</Button>{saved && <span className="text-sm text-[color:var(--color-positive)]">Saved ✓</span>}</div>
+        </Card>
+        <Card className="p-5 h-fit">
+          <div className="grid h-16 w-16 place-items-center rounded-2xl flame-bar text-2xl font-extrabold text-[#1a0f06]">{member.displayName.split(" ").map((s) => s[0]).join("").slice(0, 2)}</div>
+          <div className="mt-3 text-lg font-bold">{member.displayName}</div>
+          <div className="text-sm text-muted">{member.position}</div>
+          <div className="mt-3 flex flex-wrap gap-1.5">{member.isSuperuser ? <Badge tone="brand">Superuser</Badge> : <Badge>{member.permissions.length} permissions</Badge>}</div>
+        </Card>
+      </div>
+    </>
+  );
+}
+
+/* ---- small shared bits ---- */
+/* ============================================================== My Signature */
+export function Signature({ onEditProfile }: { onEditProfile?: () => void }) {
+  const [doc, setDoc] = useState("");     // full HTML doc → preview iframe
+  const [inner, setInner] = useState(""); // <table> block → clipboard
+  const [theme, setTheme] = useState<"light" | "dark">("light"); // PREVIEW backdrop only
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [err, setErr] = useState("");
+
+  // Clipboard copy uses the real adaptive signature — fetched once.
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/signature?format=inner").then((r) => r.text()).then((i) => { if (alive) setInner(i); }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
+  // Preview doc re-fetches per theme so it renders deterministically (not based on the viewer's OS).
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    fetch(`/api/signature?format=doc&preview=${theme}`)
+      .then((r) => { if (!r.ok) throw new Error(); return r.text(); })
+      .then((d) => { if (alive) { setDoc(d); setLoading(false); } })
+      .catch(() => { if (alive) { setErr("Couldn't load your signature — please refresh."); setLoading(false); } });
+    return () => { alive = false; };
+  }, [theme]);
+
+  async function copy() {
+    setErr("");
+    try {
+      if (navigator.clipboard && "write" in navigator.clipboard && typeof ClipboardItem !== "undefined") {
+        await navigator.clipboard.write([new ClipboardItem({
+          "text/html": new Blob([inner], { type: "text/html" }),
+          "text/plain": new Blob([inner], { type: "text/plain" }),
+        })]);
+      } else {
+        await navigator.clipboard.writeText(inner);
+      }
+      setCopied(true); setTimeout(() => setCopied(false), 2600);
+    } catch { setErr("Copy was blocked by your browser — use “Download .htm” instead."); }
+  }
+
+  const Step = ({ n, children }: { n: number; children: React.ReactNode }) => (
+    <li className="flex gap-3"><span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[rgba(245,134,34,0.14)] text-[11px] font-bold text-[color:var(--color-brand)]">{n}</span><span className="text-sm text-muted">{children}</span></li>
+  );
+
+  return (
+    <>
+      <PageHeader title="My Signature" subtitle="Your personalized PYRAX email signature — built automatically from your profile." />
+      <div className="grid gap-4 lg:grid-cols-5">
+        {/* Preview */}
+        <Card className="overflow-hidden p-0 lg:col-span-3">
+          <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
+            <span className="text-xs font-semibold uppercase tracking-wider text-faint">Live preview</span>
+            <div className="flex items-center gap-0.5 rounded-lg border border-line p-0.5 text-xs">
+              {(["light", "dark"] as const).map((t) => (
+                <button key={t} onClick={() => setTheme(t)} className={`rounded-md px-2.5 py-1 capitalize transition ${theme === t ? "bg-[rgba(245,134,34,0.16)] text-ink" : "text-faint hover:text-muted"}`}>{t}</button>
+              ))}
+            </div>
+          </div>
+          {/* The signature itself is transparent; this canvas just mimics a light/dark email background. */}
+          <div className={theme === "light" ? "bg-[#eef1f7]" : "bg-[#0b0d13]"}>
+            {loading ? (
+              <div className="grid h-[540px] place-items-center text-sm text-muted"><span className="h-4 w-4 animate-spin-slow rounded-full border-2 border-line border-t-[color:var(--color-brand)]" /></div>
+            ) : (
+              <iframe title="Email signature preview" srcDoc={doc} className="w-full" style={{ height: 540, background: "transparent", border: 0 }} />
+            )}
+          </div>
+          <div className="border-t border-line px-4 py-2 text-xs text-faint">Transparent background · adapts to light &amp; dark email apps automatically.</div>
+        </Card>
+
+        {/* Actions + install */}
+        <div className="space-y-4 lg:col-span-2">
+          <Card className="p-5">
+            <div className="text-sm font-semibold">Install your signature</div>
+            <div className="mt-3 flex flex-col gap-2">
+              <Button variant="primary" className="justify-center" onClick={copy} disabled={loading}>{copied ? "Copied ✓" : "Copy signature"}</Button>
+              <a className="btn btn-ghost justify-center" href="/api/signature?download=1">Download .htm</a>
+            </div>
+            {err && <p className="mt-3 text-sm text-[color:var(--color-negative)]">{err}</p>}
+            <p className="mt-3 text-xs leading-relaxed text-faint">Tip: “Copy signature” pastes the full styled layout straight into your email app’s signature box. Use the .htm file for the Outlook desktop “insert from file” method.</p>
+          </Card>
+
+          <Card className="p-5">
+            <div className="text-sm font-semibold">How to add it</div>
+            <ol className="mt-3 space-y-2.5">
+              <Step n={1}>Click <span className="text-ink">Copy signature</span> above.</Step>
+              <Step n={2}>Open your email signature settings — <span className="text-ink">Outlook</span> (File ▸ Options ▸ Mail ▸ Signatures), <span className="text-ink">Outlook on the web / Gmail</span> (Settings ▸ Signature), or <span className="text-ink">Apple Mail</span> (Settings ▸ Signatures).</Step>
+              <Step n={3}>Paste into the signature box and save.</Step>
+              <Step n={4}>When the company design changes, you’ll be asked to re-copy it here.</Step>
+            </ol>
+          </Card>
+
+          <Card className="p-5">
+            <div className="text-sm font-semibold">Make it yours</div>
+            <p className="mt-2 text-sm text-muted">Your name, title, email, phone, social links, and Microsoft Bookings button all come from your profile. Empty fields are hidden automatically.</p>
+            <Button variant="ghost" className="mt-3" onClick={onEditProfile}><Icon.user className="h-4 w-4" /> Edit my profile</Button>
+          </Card>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function Field({ label, req, error, children }: { label: string; req?: boolean; error?: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="label">{label} {req && <span className="text-[color:var(--color-ember)]">*</span>}</label>
+      {children}
+      {error && <p className="mt-1 text-xs text-[color:var(--color-negative)]">{error}</p>}
+    </div>
+  );
+}
+
+/** Phone field that live-formats to "+1 (825) 882-5915" and verifies the country code is real.
+ *  Forward typing auto-formats; deletes pass through naturally; blur snaps to canonical form. */
+function PhoneInput({ value, onChange, error }: { value: string; onChange: (v: string) => void; error?: string }) {
+  const digits = value.replace(/\D/g, "");
+  const live = !error && digits.length >= 7 ? validatePhone(value) : null;
+  const shown = error || (live && !live.ok ? live.error : "");
+  function handle(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.value;
+    if (raw.length < value.length) { onChange(raw); return; } // allow natural backspace/delete
+    onChange(formatPhone(raw));
+  }
+  return (
+    <Field label="Telephone" error={shown}>
+      <input className="input" inputMode="tel" autoComplete="tel" placeholder="+1 (825) 882-5915"
+        value={value} onChange={handle} onBlur={() => { if (value.trim()) onChange(formatPhone(value)); }} />
+    </Field>
+  );
+}
+function Drawer({ title, children, onClose, onSave, saveLabel = "Save", busy, extra }: { title: string; children: React.ReactNode; onClose: () => void; onSave: () => void; saveLabel?: string; busy?: boolean; extra?: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div className="h-full w-full max-w-lg overflow-y-auto border-l border-line bg-[rgba(8,10,17,0.96)] p-6 shadow-2xl animate-[rise_.3s] " onClick={(e) => e.stopPropagation()}>
+        <div className="mb-5 flex items-center justify-between"><h2 className="text-lg font-bold">{title}</h2><button onClick={onClose} className="text-faint hover:text-ink">✕</button></div>
+        {children}
+        <div className="mt-6 flex items-center gap-3"><Button variant="primary" onClick={onSave} disabled={busy}>{busy ? "Working…" : saveLabel}</Button><Button onClick={onClose} disabled={busy}>Cancel</Button>{extra && <div className="ml-auto">{extra}</div>}</div>
+      </div>
+    </div>
+  );
+}
