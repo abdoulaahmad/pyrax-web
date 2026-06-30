@@ -39,7 +39,9 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
 
   const phone = phoneRaw ? validatePhone(phoneRaw).formatted : null;
   const booking = validateBookingUrl(bookingRaw).url || null;
-  const updated = await updateUserProfile(user.id, { display_name: displayName, position, phone, booking_url: booking, socials });
+  // Chat username (for the Devnet community chat) — handle-safe; empty allowed.
+  const chatUsername = String(body?.chatUsername ?? "").trim().replace(/^@/, "").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 20) || null;
+  const updated = await updateUserProfile(user.id, { display_name: displayName, position, phone, booking_url: booking, chat_username: chatUsername, socials });
   if (!updated) return json({ ok: false, error: "Could not save your profile." }, 500);
   return json({ ok: true, user: publicUser(updated) });
 };

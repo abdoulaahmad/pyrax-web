@@ -25,6 +25,7 @@ export interface UserRow {
   position: string;
   phone: string | null;
   booking_url: string | null;
+  chat_username: string | null;
   socials: Record<string, string>;
   permissions: Permission[];
   is_superuser: boolean;
@@ -57,6 +58,7 @@ export function init(): Promise<void> {
         position     TEXT NOT NULL DEFAULT '',
         phone        TEXT,
         booking_url  TEXT,
+        chat_username TEXT,
         socials      JSONB NOT NULL DEFAULT '{}'::jsonb,
         permissions  JSONB NOT NULL DEFAULT '[]'::jsonb,
         is_superuser BOOLEAN NOT NULL DEFAULT FALSE,
@@ -67,6 +69,7 @@ export function init(): Promise<void> {
         last_login   BIGINT
       );
       ALTER TABLE users ADD COLUMN IF NOT EXISTS booking_url TEXT;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS chat_username TEXT;
       CREATE TABLE IF NOT EXISTS login_otps (
         code_hash  TEXT PRIMARY KEY,
         email      TEXT NOT NULL,
@@ -184,13 +187,13 @@ export async function removeUser(id: string): Promise<boolean> {
 /** Update a member's OWN editable profile fields (never email/permissions/superuser). */
 export async function updateUserProfile(
   id: string,
-  f: { display_name: string; position: string; phone: string | null; booking_url: string | null; socials: Record<string, string> },
+  f: { display_name: string; position: string; phone: string | null; booking_url: string | null; chat_username: string | null; socials: Record<string, string> },
 ): Promise<UserRow | null> {
   await init();
   const r = await db().query(
-    `UPDATE users SET display_name = $2, position = $3, phone = $4, booking_url = $5, socials = $6::jsonb
+    `UPDATE users SET display_name = $2, position = $3, phone = $4, booking_url = $5, chat_username = $6, socials = $7::jsonb
      WHERE id = $1 RETURNING *`,
-    [id, f.display_name, f.position, f.phone, f.booking_url, JSON.stringify(f.socials)],
+    [id, f.display_name, f.position, f.phone, f.booking_url, f.chat_username, JSON.stringify(f.socials)],
   );
   return r.rows[0] ? rowToUser(r.rows[0]) : null;
 }

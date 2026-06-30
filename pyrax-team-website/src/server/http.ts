@@ -9,7 +9,7 @@ export function json(data: unknown, status = 200): Response {
 export function publicUser(u: UserRow) {
   return {
     id: u.id, email: u.email, displayName: u.display_name, position: u.position,
-    phone: u.phone, bookingUrl: u.booking_url, socials: u.socials, permissions: u.permissions,
+    phone: u.phone, bookingUrl: u.booking_url, chatUsername: u.chat_username, socials: u.socials, permissions: u.permissions,
     isSuperuser: u.is_superuser, status: u.status,
   };
 }

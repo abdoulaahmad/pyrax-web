@@ -5,6 +5,7 @@ import { can, canGrant, type AccessSubject, type Permission, PERMISSIONS, permis
 import { SOCIAL_FIELDS, validateProfile, formatPhone, validatePhone, COMPANY_EMAIL_DOMAIN, type MemberProfile } from "../lib/profile";
 import { type Member } from "../lib/mock";
 import { COMMUNITY_KEYS, COMMUNITY_LABELS, type SignatureSettings } from "../lib/signature-settings";
+import ChatRoom from "./ChatRoom";
 
 function Locked({ what }: { what: string }) {
   return (
@@ -302,6 +303,7 @@ export function Profile({ member, onSaved }: { member: Member; onSaved?: (u: any
   const [errs, setErrs] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [chatUsername, setChatUsername] = useState((member as any).chatUsername || "");
   function set(k: keyof MemberProfile, v: string) { setP({ ...p, [k]: v }); setSaved(false); }
   function setSocial(k: string, v: string) { setP({ ...p, socials: { ...p.socials, [k]: v } }); setSaved(false); }
   async function save() {
@@ -311,7 +313,7 @@ export function Profile({ member, onSaved }: { member: Member; onSaved?: (u: any
     setBusy(true); setSaved(false);
     try {
       const res = await fetch("/api/me", { method: "PUT", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ displayName: p.displayName, position: p.position, phone: p.phone || "", bookingUrl: p.bookingUrl || "", socials: p.socials || {} }) });
+        body: JSON.stringify({ displayName: p.displayName, position: p.position, phone: p.phone || "", bookingUrl: p.bookingUrl || "", chatUsername, socials: p.socials || {} }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) { setErrs(data.errors || { _: data.error || "Couldn't save — please try again." }); setBusy(false); return; }
       setP({ ...p, ...data.user }); setSaved(true); onSaved?.(data.user);
@@ -334,6 +336,12 @@ export function Profile({ member, onSaved }: { member: Member; onSaved?: (u: any
               <input className="input" inputMode="url" value={p.bookingUrl || ""} onChange={(e) => set("bookingUrl", e.target.value)} placeholder="https://outlook.office.com/bookwithme/…" />
             </Field>
             <p className="mt-2 text-xs leading-relaxed text-faint">Optional — when set, a “Book a meeting with me” button is added to your email signature.</p>
+          </div>
+          <div className="mt-5">
+            <Field label="Devnet chat username">
+              <div className="relative"><span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint">@</span><input className="input pl-7" value={chatUsername} onChange={(e) => { setChatUsername(e.target.value); setSaved(false); }} placeholder="yourname" /></div>
+            </Field>
+            <p className="mt-2 text-xs leading-relaxed text-faint">Your name in the Devnet tester community chat (you appear as an Admin). Required to post there.</p>
           </div>
           <div className="label mt-6">Social links <span className="font-normal text-faint">(optional · personal, not company)</span></div>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -674,6 +682,99 @@ export function DevnetStatus({ subject }: { subject: AccessSubject }) {
         </div>
         <div className="mt-3"><Field label="What to test"><textarea className="input" rows={2} value={s.whatToTest} onChange={(e) => set("whatToTest", e.target.value)} /></Field></div>
       </Card>
+    </>
+  );
+}
+
+const DSEV: Record<string, { tone: any; label: string }> = { critical: { tone: "danger", label: "Critical" }, high: { tone: "warning", label: "High" }, medium: { tone: "brand", label: "Medium" }, low: { tone: "muted", label: "Low" } };
+const DSTATUS: Record<string, string> = { new: "New", confirmed: "Confirmed", in_progress: "In Progress", fixed: "Fixed", verified: "Verified", closed: "Closed", duplicate: "Duplicate", wont_fix: "Won't Fix" };
+const dago = (ms: number) => { const s = Math.floor((Date.now() - ms) / 1000); if (s < 60) return s + "s ago"; if (s < 3600) return Math.floor(s / 60) + "m ago"; if (s < 86400) return Math.floor(s / 3600) + "h ago"; return Math.floor(s / 86400) + "d ago"; };
+
+export function DevnetIssues({ subject }: { subject: AccessSubject }) {
+  if (!can(subject, "devnet.issues")) return <Locked what="the Devnet Issue Council" />;
+  const [bugs, setBugs] = useState<any[] | null>(null);
+  const [status, setStatus] = useState(""); const [sort, setSort] = useState("recent"); const [openId, setOpenId] = useState<string | null>(null);
+  async function load() { const q = new URLSearchParams(); if (status) q.set("status", status); if (sort) q.set("sort", sort); const d = await (await fetch("/api/devnet/bugs?" + q)).json(); setBugs(d.ok ? d.bugs : []); }
+  useEffect(() => { load(); }, [status, sort]);
+  return (
+    <>
+      <PageHeader title="Devnet Issue Council" subtitle="Tester bug reports — comment, set criticality, and award bounties (paid from marketing)." />
+      <div className="mb-3 flex flex-wrap gap-2">
+        <select className="input w-auto py-1.5 text-sm" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">All statuses</option>{Object.entries(DSTATUS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
+        <select className="input w-auto py-1.5 text-sm" value={sort} onChange={(e) => setSort(e.target.value)}><option value="recent">Most recent</option><option value="votes">Most votes</option><option value="severity">Severity</option></select>
+      </div>
+      {!bugs ? <Card className="p-8 text-center text-sm text-muted">Loading…</Card> : bugs.length === 0 ? <Card className="p-8 text-center text-sm text-muted">No reports yet.</Card> : (
+        <div className="space-y-2">{bugs.map((b) => (
+          <Card key={b.id} hover className="cursor-pointer p-4" onClick={() => setOpenId(b.id)}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2"><Badge tone={DSEV[b.assigned_severity || b.severity]?.tone}>{DSEV[b.assigned_severity || b.severity]?.label}</Badge><Badge>{DSTATUS[b.status]}</Badge>{b.bounty_pyrx > 0 && <Badge tone="brand">{Number(b.bounty_pyrx).toLocaleString("en-US")} PYRX</Badge>}</div>
+                <div className="mt-1.5 truncate font-semibold">{b.title}</div>
+                <div className="text-xs text-faint">{b.component ? b.component + " · " : ""}by {b.reporter_handle ? "@" + b.reporter_handle : b.reporter_name} · {dago(Number(b.created_at))}</div>
+              </div>
+              <div className="shrink-0 text-right text-xs text-faint"><div>▲ {b.votes}</div><div>✓ {b.confirms}</div></div>
+            </div>
+          </Card>
+        ))}</div>
+      )}
+      {openId && <DevnetBugDetail id={openId} onClose={() => setOpenId(null)} onChanged={load} />}
+    </>
+  );
+}
+function DevnetBugDetail({ id, onClose, onChanged }: { id: string; onClose: () => void; onChanged: () => void }) {
+  const [b, setB] = useState<any>(null); const [comment, setComment] = useState(""); const [busy, setBusy] = useState(false);
+  async function load() { const d = await (await fetch("/api/devnet/bugs/" + id)).json(); if (d.ok) setB(d.bug); }
+  useEffect(() => { load(); }, [id]);
+  async function addComment() { if (!comment.trim()) return; const d = await (await fetch(`/api/devnet/bugs/comment?id=${id}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ body: comment }) })).json(); if (d.ok) { setB((x: any) => ({ ...x, comments: d.comments })); setComment(""); } }
+  async function triage(p: any) { setBusy(true); const d = await (await fetch("/api/devnet/bugs/" + id, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(p) })).json(); if (d.ok) { setB(d.bug); onChanged(); } setBusy(false); }
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div className="h-full w-full max-w-2xl overflow-y-auto border-l border-line bg-[rgba(8,10,17,0.97)] p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-4 flex items-center justify-between"><h2 className="text-lg font-bold">{b?.title || "Bug"}</h2><button onClick={onClose} className="text-faint hover:text-ink">✕</button></div>
+        {!b ? <p className="text-sm text-muted">Loading…</p> : (() => { const sev = b.assigned_severity || b.severity; return <>
+          <div className="flex flex-wrap items-center gap-2"><Badge tone={DSEV[sev]?.tone}>{DSEV[sev]?.label}</Badge><Badge>{DSTATUS[b.status]}</Badge>{b.bounty_pyrx > 0 && <Badge tone="brand">{Number(b.bounty_pyrx).toLocaleString("en-US")} PYRX</Badge>}<span className="text-xs text-faint">by {b.reporter_handle ? "@" + b.reporter_handle : b.reporter_name} · {dago(Number(b.created_at))}</span></div>
+          {b.component && <p className="mt-3 text-xs text-faint">Component: <span className="text-muted">{b.component}</span></p>}
+          {b.description && <div className="mt-3"><div className="label">What happened</div><div className="mt-1 whitespace-pre-wrap rounded-lg border border-line bg-[rgba(5,6,9,0.4)] p-3 text-sm text-muted">{b.description}</div></div>}
+          <div className="mt-3"><div className="label">Steps to reproduce</div><div className="mt-1 whitespace-pre-wrap rounded-lg border border-line bg-[rgba(5,6,9,0.4)] p-3 text-sm text-muted">{b.repro_steps}</div></div>
+          {(b.attachments?.length || 0) > 0 && <div className="mt-3"><div className="label">Attachments</div><div className="mt-1 grid grid-cols-2 gap-2">{b.attachments.map((a: any, i: number) => a.type === "image" ? <a key={i} href={a.url} target="_blank" rel="noreferrer"><img src={a.url} className="h-24 w-full rounded-lg border border-line object-cover" /></a> : a.type === "video" ? <video key={i} src={a.url} controls className="h-24 w-full rounded-lg border border-line" /> : <a key={i} href={a.url} target="_blank" rel="noreferrer" className="chip">📎 {a.name}</a>)}</div></div>}
+          <Card className="mt-4 p-4">
+            <div className="text-sm font-semibold">Triage</div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <select className="input py-1.5 text-sm" value={b.status} onChange={(e) => triage({ status: e.target.value })} disabled={busy}>{Object.entries(DSTATUS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
+              <select className="input py-1.5 text-sm" value={sev} onChange={(e) => triage({ assignedSeverity: e.target.value })} disabled={busy}>{Object.keys(DSEV).map((s) => <option key={s} value={s}>{DSEV[s].label}</option>)}</select>
+            </div>
+            <p className="mt-1 text-xs text-faint">Marking a bug Confirmed/Verified auto-awards the criticality bounty to the reporter (once).</p>
+          </Card>
+          <div className="mt-5"><div className="label">Comments</div>
+            <div className="mt-2 space-y-2">{(b.comments || []).map((c: any) => <div key={c.id} className="rounded-lg border border-line p-2.5 text-sm"><div className="text-xs text-faint">{c.handle ? "@" + c.handle : c.display_name}{c.is_staff && <span className="ml-1 text-[color:var(--color-brand)]">· Admin</span>} · {dago(Number(c.created_at))}</div><div className="mt-0.5 whitespace-pre-wrap">{c.body}</div></div>)}{(b.comments || []).length === 0 && <p className="text-xs text-faint">No comments yet.</p>}</div>
+            <div className="mt-2 flex gap-2"><input className="input" value={comment} onChange={(e) => setComment(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addComment()} placeholder="Reply as PYRAX team…" /><Button onClick={addComment}>Send</Button></div>
+          </div>
+        </>; })()}
+      </div>
+    </div>
+  );
+}
+
+/** The shared Devnet community chat, embedded in the team portal. Team members appear to testers as
+ *  blue "Admin" badges. Requires the devnet.chat permission and a chat username on the profile. */
+export function DevnetChat({ subject }: { subject: AccessSubject }) {
+  if (!can(subject, "devnet.chat")) return <Locked what="the Devnet community chat" />;
+  const [gate, setGate] = useState<"loading" | "ok" | "no-username">("loading");
+  useEffect(() => { fetch("/api/devnet-chat/token").then((r) => r.json()).then((d) => setGate(d.ok ? "ok" : (d.error?.includes("chat username") ? "no-username" : "ok"))).catch(() => setGate("ok")); }, []);
+  return (
+    <>
+      <PageHeader title="Devnet Chat" subtitle="Talk with testers in the shared community chat — you appear as a PYRAX Admin." />
+      {gate === "loading" ? <Card className="p-8 text-center text-sm text-muted">Connecting…</Card>
+        : gate === "no-username" ? (
+          <Card className="p-6 text-sm">
+            <div className="font-semibold text-ink">Set a chat username first</div>
+            <p className="mt-1 text-muted">Add a <span className="text-[color:var(--color-brand)]">Devnet chat username</span> on your <span className="font-medium">Profile</span> to post in the community chat. Testers will see you as an Admin.</p>
+          </Card>
+        ) : (
+          <Card className="overflow-hidden p-0" style={{ height: "calc(100vh - 220px)", minHeight: 480 }}>
+            <ChatRoom apiBase="/api/devnet-chat" />
+          </Card>
+        )}
     </>
   );
 }

@@ -11,7 +11,10 @@ import { TESTER_BASELINE } from "../lib/permissions";
 import { isStaffEmail, isRewardEligible } from "../lib/tester";
 import { bugBounty } from "../lib/rewards";
 
-const URL_RAW = process.env.DATABASE_URL_DEVNET || process.env.DATABASE_URL || "";
+// Prefer an explicit DATABASE_URL_DEVNET; otherwise derive it from the shared cluster URL by swapping
+// the database name (team_pyrax → devnet_tester) so a single DATABASE_URL is enough to boot.
+const URL_RAW = process.env.DATABASE_URL_DEVNET
+  || (process.env.DATABASE_URL || process.env.DATABASE_URL_TEAM_PYRAX || "").replace(/\/team_pyrax(\?|$)/, "/devnet_tester$1");
 const connectionString = URL_RAW.replace(/[?&]sslmode=[^&]*/, "");
 export const SUPERUSER_EMAIL = (process.env.SUPERUSER_EMAIL || "shawn.wilson@pyraxchain.com").toLowerCase();
 
