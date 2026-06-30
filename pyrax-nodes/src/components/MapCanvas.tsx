@@ -63,6 +63,7 @@ export default function MapCanvas() {
   const [capturing, setCapturing] = useState(false);
   const [hover, setHover] = useState<{ x: number; y: number; html: string } | null>(null);
   const [tick, setTick] = useState(0);
+  const [worldReady, setWorldReady] = useState(false);
 
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvas2dRef = useRef<HTMLCanvasElement>(null);
@@ -92,7 +93,7 @@ export default function MapCanvas() {
 
   // load world + capitals + logo
   useEffect(() => {
-    fetch("/globe/countries.json").then((r) => r.json()).then((j) => { worldRef.current = j; dirtyRef.current = true; }).catch(() => {});
+    fetch("/globe/countries.json").then((r) => r.json()).then((j) => { worldRef.current = j; dirtyRef.current = true; setWorldReady(true); }).catch((e) => console.error("[map] world load failed", e));
     fetch("/globe/capitals.json").then((r) => r.json()).then((j) => { capsRef.current = j; dirtyRef.current = true; }).catch(() => {});
     const img = new Image(); img.crossOrigin = "anonymous"; img.onload = () => (logoRef.current = img); img.onerror = () => { const f = new Image(); f.onload = () => (logoRef.current = f); f.src = "/brand/logo-vertical.png"; }; img.src = LOGO_URL;
   }, []);
@@ -136,42 +137,64 @@ export default function MapCanvas() {
   }, [tick, focus, nets]);
 
   // ===================== 3D (globe.gl) =====================
+  // Create the globe ONCE, as soon as the host is mounted + world is loaded + 3D is active.
   useEffect(() => {
-    if (mode !== "3d" || !globeHostRef.current || !worldRef.current) return;
-    if (!globeRef.current) {
-      const g = new (Globe as any)(globeHostRef.current, { rendererConfig: { preserveDrawingBuffer: true, antialias: true } })
-        .backgroundColor("rgba(0,0,0,0)").globeImageUrl("/globe/earth-dark.jpg").showGraticules(true).showAtmosphere(true).atmosphereColor(P.primary).atmosphereAltitude(0.18)
-        .polygonsData((worldRef.current.features || [])).polygonCapColor(() => BORDER_CAP).polygonSideColor(() => "rgba(0,0,0,0)").polygonStrokeColor(() => BORDER).polygonAltitude(0.006)
+    if (globeRef.current || !worldReady || mode !== "3d" || !globeHostRef.current) return;
+    try {
+      const el = globeHostRef.current;
+      const g = new (Globe as any)(el, { rendererConfig: { preserveDrawingBuffer: true, antialias: true } })
+        .backgroundColor("rgba(0,0,0,0)")
+        .globeImageUrl("/globe/earth-dark.jpg")
+        .showGraticules(true).showAtmosphere(true).atmosphereColor(P.primary).atmosphereAltitude(0.18)
+        .polygonsData(worldRef.current?.features || []).polygonCapColor(() => BORDER_CAP).polygonSideColor(() => "rgba(0,0,0,0)").polygonStrokeColor(() => BORDER).polygonAltitude(0.006)
         .pointLat((d: any) => d.lat).pointLng((d: any) => d.lng).pointColor((d: any) => d.color).pointAltitude(() => 0.01).pointRadius((d: any) => (d.kind === "rpc" ? 0.42 : 0.32)).pointsMerge(false).pointResolution(32)
         .pointLabel((d: any) => `<div style="font:600 12px Inter,sans-serif;color:#f6f8fc;background:rgba(10,12,19,.96);border:1px solid #232838;border-radius:8px;padding:6px 9px">${d.label}</div>`)
-        .arcColor((d: any) => [d.color + "00", d.color, d.color + "00"]).arcStroke(0.6).arcDashLength(0.45).arcDashGap(0.2).arcDashAnimateTime(1600).arcAltitudeAutoScale(0.4).arcCurveResolution(96).arcStartLat((d: any) => d.startLat).arcStartLng((d: any) => d.startLng).arcEndLat((d: any) => d.endLat).arcEndLng((d: any) => d.endLng)
+        .arcColor((d: any) => [d.color + "00", d.color, d.color + "00"]).arcStroke(0.6).arcDashLength(0.45).arcDashGap(0.2).arcDashAnimateTime(1600).arcAltitudeAutoScale(0.4).arcCurveResolution(96)
+        .arcStartLat((d: any) => d.startLat).arcStartLng((d: any) => d.startLng).arcEndLat((d: any) => d.endLat).arcEndLng((d: any) => d.endLng)
         .labelLat((d: any) => d.lat).labelLng((d: any) => d.lng).labelText(() => "").labelDotRadius(0.16).labelColor(() => "rgba(255,255,255,0.45)").labelResolution(2)
         .labelLabel((d: any) => `<div style="font:600 12px Inter,sans-serif;color:#f6f8fc;background:rgba(10,12,19,.96);border:1px solid #232838;border-radius:8px;padding:6px 9px">${d.n}, ${d.c}<br><span style="color:#99a2b5;font-weight:400">${d.tz} · ${tzClock(d.tz)} local</span></div>`);
       const ctrl = g.controls(); ctrl.autoRotate = !paused; ctrl.autoRotateSpeed = 0.5; ctrl.enableZoom = true; ctrl.enableRotate = true;
       g.pointOfView({ lat: 20, lng: 0, altitude: 2.4 });
       try { g.renderer().setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); } catch {}
+      g.width(el.clientWidth || 800).height(el.clientHeight || 500);
       globeRef.current = g;
-    }
-    const g = globeRef.current;
-    const resize = () => { const w = globeHostRef.current!.clientWidth, h = globeHostRef.current!.clientHeight; g.width(w).height(h); };
-    resize(); window.addEventListener("resize", resize);
-    // update layers + day/night on each tick
-    let raf = 0;
-    const update = () => {
-      const ns = gnodes(); g.pointsData(ns); g.arcsData(arcs(ns)); g.labelsData(showCapsRef.current ? capsRef.current : []);
-      // real-time sun lighting
-      const lights = g.lights?.() || [];
-      const dir = lights.find((l: any) => l.type === "DirectionalLight");
-      const amb = lights.find((l: any) => l.type === "AmbientLight");
-      if (dayNightRef.current && dir) { const [sl, so] = subsolar(new Date()); const c = g.getCoords(sl, so, 1.5); dir.position.set(c.x, c.y, c.z); dir.intensity = 1.25; if (amb) amb.intensity = 0.32; }
-      else { if (dir) dir.intensity = 0.9; if (amb) amb.intensity = 0.85; }
-      raf = requestAnimationFrame(update);
-    };
-    raf = requestAnimationFrame(update);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
-  }, [mode, tick, isLocal]);
+      setTick((t) => t + 1); // kick the first data push
+    } catch (e) { console.error("[map] globe init failed", e); }
+  }, [worldReady, mode]);
 
-  useEffect(() => { if (globeRef.current && mode === "3d") { const c = globeRef.current.controls(); c.autoRotate = !paused; } }, [paused, mode]);
+  // Push node/arc/capital data to the globe whenever it changes (not every frame).
+  useEffect(() => {
+    const g = globeRef.current; if (!g || mode !== "3d") return;
+    try { const ns = gnodes(); g.pointsData(ns); g.arcsData(arcs(ns)); g.labelsData(showCaps ? capsRef.current : []); } catch (e) { console.error("[map] data push", e); }
+  }, [mode, tick, focus, preview, showCaps, worldReady]);
+
+  // Resize on entering 3D + drive the real-time day/night sun light per frame.
+  useEffect(() => {
+    const g = globeRef.current; if (!g || mode !== "3d") return;
+    const resize = () => { const el = globeHostRef.current; if (el && el.clientWidth) g.width(el.clientWidth).height(el.clientHeight); };
+    resize(); window.addEventListener("resize", resize);
+    // Capture the globe's default light intensities ONCE so day/night never darkens below them
+    // (earth-dark.jpg is a dark texture — dropping ambient too far makes the globe vanish).
+    let raf = 0;
+    const lights0 = (typeof g.lights === "function" ? g.lights() : []) || [];
+    const dir = lights0.find((l: any) => l.type === "DirectionalLight");
+    const amb = lights0.find((l: any) => l.type === "AmbientLight");
+    const ambBase = amb ? amb.intensity : 1; const dirBase = dir ? dir.intensity : 1;
+    const loop = () => {
+      try {
+        if (dayNight && dir && typeof g.getCoords === "function") {
+          const [sl, so] = subsolar(new Date()); const c = g.getCoords(sl, so, 2);
+          dir.position.set(c.x, c.y, c.z); dir.intensity = Math.max(dirBase, 1.6); // sun lights the day side
+          if (amb) amb.intensity = Math.max(0.55, ambBase * 0.7);                  // night dimmer but visible
+        } else { if (dir) dir.intensity = dirBase; if (amb) amb.intensity = ambBase; }
+      } catch { /* keep looping */ }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
+  }, [mode, dayNight]);
+
+  useEffect(() => { const g = globeRef.current; if (g && mode === "3d") { try { g.controls().autoRotate = !paused; } catch {} } }, [paused, mode]);
 
   // ===================== 2D (d3-geo canvas) =====================
   useEffect(() => {
@@ -285,7 +308,8 @@ export default function MapCanvas() {
       <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_300px]">
         <div className="relative overflow-hidden rounded-2xl border border-line bg-[radial-gradient(circle_at_50%_35%,rgba(245,134,34,0.05),transparent_60%)]">
           <div ref={wrapRef} className="h-[62vh] min-h-[460px] w-full">
-            {mode === "3d" ? <div ref={globeHostRef} className="h-full w-full" /> : <canvas ref={canvas2dRef} className="h-full w-full cursor-grab active:cursor-grabbing" />}
+            <div ref={globeHostRef} className="h-full w-full" style={{ display: mode === "3d" ? "block" : "none" }} />
+            <canvas ref={canvas2dRef} className="h-full w-full cursor-grab active:cursor-grabbing" style={{ display: mode === "2d" ? "block" : "none" }} />
           </div>
           {hover && <div className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-lg border border-line bg-[rgba(10,12,19,0.96)] px-2.5 py-1.5 text-xs text-ink shadow-xl" style={{ left: hover.x, top: hover.y - 8 }} dangerouslySetInnerHTML={{ __html: hover.html }} />}
           {gnodes().length === 0 && <div className="pointer-events-none absolute inset-x-0 bottom-6 text-center text-sm text-faint">Waiting for located nodes to come online…{isLocal ? " (use “preview” to populate)" : ""}</div>}
