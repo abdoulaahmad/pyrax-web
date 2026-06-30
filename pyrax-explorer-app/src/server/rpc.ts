@@ -20,3 +20,13 @@ export async function rpcAll(url: string, calls: [string, unknown[]?][], timeout
 
 export const hexToNum = (h: unknown): number => (typeof h === "string" ? parseInt(h, 16) : typeof h === "number" ? h : NaN);
 export const hexToBig = (h: unknown): bigint => { try { return BigInt(h as any); } catch { return 0n; } };
+
+// Seal lane reconstructed from the stream, per pyrax-consensus `lane_algo` (production `real_lanes`):
+//   Stream A → BLAKE3 (even blue score) / SHA-256d (odd);  Stream B → kHeavyHash (GPU primary);
+//   Stream C → PoS/BLS. Neither eth_getBlockBy* nor pyrax_dagRecent surface header.seal_algo, so the
+//   lane is rebuilt from the (real) stream — always consistent with the stream, never mixed.
+export function deriveSeal(stream: string, blueScore: number): string {
+  if (stream === "C") return "pos";
+  if (stream === "B") return "kheavyhash";
+  return blueScore % 2 === 0 ? "blake3" : "sha256d";
+}

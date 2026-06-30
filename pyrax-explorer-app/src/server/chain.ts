@@ -4,7 +4,8 @@
 // pyrax_net cookie, query that network's RPC (eth_* + pyrax_*), and fall back to clearly-labeled
 // sample data when the node is unreachable — so the explorer always renders.
 import { NETWORKS, networkByChain, DEFAULT_CHAIN, type ExplorerNetwork } from "../lib/networks";
-import { rpc, rpcAll, hexToNum } from "./rpc";
+import { rpc, rpcAll, hexToNum, deriveSeal } from "./rpc";
+import * as idx from "./indexer";
 import { sampleOverview, sampleBlocks, sampleBlockDetail, sampleTxs, sampleTxDetail, sampleAddress, sampleShielded, sampleDag, sampleNetwork, sampleGas, sampleValidators, sampleContracts, sampleTokens, sampleLogs } from "./sample";
 
 export function selectedChainId(cookieHeader: string | null): number {
@@ -19,17 +20,6 @@ export async function liveStatus(net: ExplorerNetwork): Promise<{ online: boolea
   try { const n = hexToNum(await rpc(net.rpc, "eth_blockNumber", [], 3500)); if (Number.isFinite(n)) return { online: true, height: n }; } catch {}
   try { const n = Number(await rpc(net.rpc, "pyrax_blockNumber", [], 3500)); if (Number.isFinite(n)) return { online: true, height: n }; } catch {}
   return { online: false };
-}
-
-// Seal lane reconstructed from the stream, per pyrax-consensus `lane_algo` (production `real_lanes`):
-//   Stream A → BLAKE3 (even blue score) / SHA-256d (odd);  Stream B → kHeavyHash (GPU primary);
-//   Stream C → PoS/BLS. The eth block JSON and pyrax_dagRecent don't carry header.seal_algo, so we
-//   rebuild the lane from the authoritative per-stream rule rather than guessing across streams —
-//   the displayed seal is therefore ALWAYS consistent with the block's stream.
-function deriveSeal(stream: string, blueScore: number): string {
-  if (stream === "C") return "pos";
-  if (stream === "B") return "kheavyhash";
-  return blueScore % 2 === 0 ? "blake3" : "sha256d";
 }
 
 /** Fetch the real per-block stream from pyrax_dagRecent → a {blueScore → "A"|"B"|"C"} lookup. */
@@ -87,6 +77,8 @@ export async function getOverview(net: ExplorerNetwork) {
 
 // ---- list + detail getters (live attempt → PYRAX-native sample fallback) ----
 export async function getBlocks(net: ExplorerNetwork, beforeNum?: number) {
+  // Indexer first: it can paginate full history; the live RPC can only walk back from the tip.
+  const ix = await idx.blocks(net.chainId, beforeNum); if (ix) return ix;
   if (net.rpc) try {
     const head = beforeNum ?? hexToNum(await rpc(net.rpc, "eth_blockNumber", [], 4000));
     if (Number.isFinite(head)) {
@@ -110,10 +102,13 @@ export async function getBlock(net: ExplorerNetwork, idOrHash: string) {
     ]);
     if (b) { const base = ethBlock(b, streams); return { source: "live" as const, ...base, txs: (b.transactions || []).map((t: any) => ({ hash: t.hash, type: "ethereum", block: base.number, timestamp: base.timestamp, status: 1, from: t.from, to: t.to ?? null, value: (Number(hexToNum(t.value)) / 1e18).toFixed(4), valueBalance: null })), stateRoot: b.stateRoot, transactionsRoot: b.transactionsRoot, receiptsRoot: b.receiptsRoot, blueWork: b.blueWork, daaScore: hexToNum(b.daaScore), difficulty: String(hexToNum(b.difficulty)), finalized: false }; }
   } catch {}
+  // Indexer fallback for blocks the live node has pruned / for off-tip history.
+  const ix = await idx.block(net.chainId, idOrHash); if (ix) return ix;
   return sampleBlockDetail(/^0x/.test(idOrHash) ? 4_812_800 : Number(idOrHash) || 4_812_800);
 }
 export async function getTxs(net: ExplorerNetwork) {
-  // A live tx feed needs the indexer; until it's wired, sample. (Detail pages read live per-hash.)
+  // A live tx FEED needs the indexer (the RPC can't list txs); when it's wired we serve real history.
+  const ix = await idx.txs(net.chainId); if (ix) return ix;
   return { source: "sample" as const, txs: sampleTxs(25) };
 }
 export async function getTx(net: ExplorerNetwork, hash: string) {
@@ -121,13 +116,33 @@ export async function getTx(net: ExplorerNetwork, hash: string) {
     const [t, r] = await Promise.all([rpc(net.rpc, "eth_getTransactionByHash", [hash], 5000).catch(() => null), rpc(net.rpc, "eth_getTransactionReceipt", [hash], 5000).catch(() => null)]);
     if (t) return { source: "live" as const, hash, type: "ethereum", block: hexToNum(t.blockNumber), blockHash: t.blockHash, txIndex: hexToNum(t.transactionIndex), timestamp: 0, status: r ? hexToNum(r.status) : 1, from: t.from, to: t.to ?? null, value: (Number(hexToNum(t.value)) / 1e18).toFixed(4), valueBalance: null, nonce: hexToNum(t.nonce), gasLimit: hexToNum(t.gas), gasUsed: r ? hexToNum(r.gasUsed) : 0, gasPrice: (Number(hexToNum(t.gasPrice)) / 1e9).toFixed(2), fee: "0", input: t.input || "0x", contractCreated: r?.contractAddress ?? null, nullifiers: [], commitments: [], anchor: null, logs: (r?.logs || []).map((l: any) => ({ address: l.address, topics: l.topics, data: l.data })) };
   } catch {}
+  // Indexer fallback: a shielded/native tx returns null from eth_getTransactionByHash, but the
+  // indexer may still have its envelope; and it serves history the node has pruned.
+  const ix = await idx.tx(net.chainId, hash); if (ix) return ix;
   return sampleTxDetail(hash);
 }
 export async function getAddress(net: ExplorerNetwork, a: string) {
-  if (net.rpc) try {
-    const [bal, nonce, code] = await Promise.all([rpc(net.rpc, "eth_getBalance", [a, "latest"], 4000).catch(() => null), rpc(net.rpc, "eth_getTransactionCount", [a, "latest"], 4000).catch(() => null), rpc(net.rpc, "eth_getCode", [a, "latest"], 4000).catch(() => null)]);
-    if (bal !== null) { const isContract = !!code && code !== "0x"; return { source: "live" as const, address: a, isContract, vm: isContract ? "evm" : null, balance: (Number(hexToNum(bal)) / 1e18).toFixed(4), nonce: hexToNum(nonce), txCount: hexToNum(nonce), verified: false, txs: [], tokens: [] }; }
-  } catch {}
+  // Indexed history (real tx list + count + contract flag) and live state (balance/nonce/code) are
+  // complementary — the RPC has no tx history, the indexer has no balance. Fetch both and merge.
+  const [ix, live] = await Promise.all([
+    idx.address(net.chainId, a),
+    (async () => {
+      if (!net.rpc) return null;
+      try {
+        const [bal, nonce, code] = await Promise.all([rpc(net.rpc, "eth_getBalance", [a, "latest"], 4000).catch(() => null), rpc(net.rpc, "eth_getTransactionCount", [a, "latest"], 4000).catch(() => null), rpc(net.rpc, "eth_getCode", [a, "latest"], 4000).catch(() => null)]);
+        if (bal === null) return null;
+        return { balance: (Number(hexToNum(bal)) / 1e18).toFixed(4), nonce: hexToNum(nonce), isContract: !!code && code !== "0x" };
+      } catch { return null; }
+    })(),
+  ]);
+  if (ix || live) {
+    const isContract = ix?.isContract || live?.isContract || false;
+    return {
+      source: (ix ? "indexer" : "live") as const, address: a, isContract, vm: isContract ? "evm" : null,
+      balance: live?.balance ?? "—", nonce: live?.nonce ?? 0, txCount: ix?.txCount ?? live?.nonce ?? 0,
+      verified: false, txs: ix?.txs ?? [], tokens: [],
+    };
+  }
   return sampleAddress(a);
 }
 export async function getShielded(net: ExplorerNetwork) {
@@ -209,18 +224,21 @@ export async function getValidators(_net: ExplorerNetwork) {
   return sampleValidators();
 }
 
-/** Contracts registry. Needs the indexer to enumerate deployments — sample until it's wired. */
-export async function getContracts(_net: ExplorerNetwork) {
+/** Contracts registry. Enumerated by the indexer from verifications/deployments — sample until wired. */
+export async function getContracts(net: ExplorerNetwork) {
+  const ix = await idx.contracts(net.chainId); if (ix) return ix;
   return { source: "sample" as const, contracts: sampleContracts() };
 }
 
 /** Token registry. Discovered from Transfer events by the indexer — sample until it's wired. */
-export async function getTokens(_net: ExplorerNetwork) {
+export async function getTokens(net: ExplorerNetwork) {
+  const ix = await idx.tokens(net.chainId); if (ix) return ix;
   return { source: "sample" as const, tokens: sampleTokens() };
 }
 
-/** Event logs: live eth_getLogs over a recent window, else sample. */
+/** Event logs: indexer (deep history + filters) → live eth_getLogs over a recent window → sample. */
 export async function getLogs(net: ExplorerNetwork) {
+  const ix = await idx.logs(net.chainId); if (ix) return ix;
   if (net.rpc) try {
     const head = hexToNum(await rpc(net.rpc, "eth_blockNumber", [], 4000));
     if (Number.isFinite(head)) {
