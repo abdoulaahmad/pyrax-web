@@ -3,9 +3,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo, Icon, Badge, BrandMark } from "./ui";
 import { can, type Permission, PRESETS } from "../lib/permissions";
-import { Dashboard, Faucet, Downloads, Team, NodeControl, ErrorReports, Profile, Signature, SignatureStudio, DevnetUsers, DevnetStatus, DevnetIssues, DevnetChat, DevnetLegal } from "./modules";
+import { Dashboard, Faucet, Downloads, Team, NodeControl, ErrorReports, Profile, Signature, SignatureStudio, DevnetUsers, DevnetStatus, DevnetIssues, DevnetChat, DevnetLegal, NetworkManagement } from "./modules";
 
-type ModuleKey = "dashboard" | "faucet" | "downloads" | "team" | "nodes" | "errors" | "profile" | "signature" | "signature_studio" | "devnet_users" | "devnet_status" | "devnet_issues" | "devnet_chat" | "devnet_legal";
+type ModuleKey = "dashboard" | "faucet" | "downloads" | "team" | "nodes" | "errors" | "profile" | "signature" | "signature_studio" | "devnet_users" | "devnet_status" | "devnet_issues" | "devnet_chat" | "devnet_legal" | "network_mgmt";
 interface Me { id: string; email: string; displayName: string; position: string; phone: string | null; bookingUrl: string | null; socials: Record<string, string>; permissions: Permission[]; isSuperuser: boolean; status: string; }
 
 const NAV: { key: ModuleKey; label: string; perm: Permission | null; icon: keyof typeof Icon; group: string }[] = [
@@ -21,6 +21,7 @@ const NAV: { key: ModuleKey; label: string; perm: Permission | null; icon: keyof
   { key: "devnet_status", label: "Devnet Status", perm: "devnet.manage", icon: "activity", group: "Devnet" },
   { key: "devnet_chat", label: "Devnet Chat", perm: "devnet.chat", icon: "chat", group: "Devnet" },
   { key: "devnet_legal", label: "Legal Records", perm: "devnet.manage", icon: "shield", group: "Devnet" },
+  { key: "network_mgmt", label: "Network & Apps", perm: "network.manage", icon: "activity", group: "Network & App Management" },
   { key: "signature", label: "My Signature", perm: null, icon: "mail", group: "Account" },
   { key: "profile", label: "My Profile", perm: null, icon: "user", group: "Account" },
 ];
@@ -54,7 +55,11 @@ export default function Portal() {
   }
 
   const meUser = me;
-  const visible = NAV.filter((n) => n.perm === null || can(subject, n.perm));
+  const visible = NAV.filter((n) =>
+    n.key === "network_mgmt"
+      ? can(subject, "network.manage") || can(subject, "network.downloads") || can(subject, "network.broadcast")
+      : n.perm === null || can(subject, n.perm),
+  );
   const cur = visible.find((n) => n.key === active) ? active : (visible[0]?.key ?? "profile");
   const groups = Array.from(new Set(visible.map((n) => n.group)));
   const initials = (meUser.displayName || meUser.email).split(/[\s@.]/).filter(Boolean).map((s) => s[0]).join("").slice(0, 2).toUpperCase();
@@ -139,6 +144,7 @@ export default function Portal() {
               {cur === "devnet_status" && <DevnetStatus subject={subject} />}
               {cur === "devnet_chat" && <DevnetChat subject={subject} />}
               {cur === "devnet_legal" && <DevnetLegal subject={subject} />}
+              {cur === "network_mgmt" && <NetworkManagement subject={subject} />}
               {cur === "signature" && <Signature onEditProfile={() => setActive("profile")} />}
               {cur === "profile" && <Profile member={meUser as any} onSaved={(u) => setMe({ ...meUser, ...u })} />}
             </motion.div>

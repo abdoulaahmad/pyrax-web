@@ -46,6 +46,11 @@ export const PERMISSIONS = {
   "devnet.issues": { group: "Devnet Management", label: "Devnet Issue Council", desc: "View, comment on, and triage tester bug reports (award bounties).", elevated: true },
   "devnet.chat": { group: "Devnet Management", label: "Devnet Chat", desc: "Join the tester community chat as an Admin (requires a chat username)." },
 
+  // --- Network & App Management: the public nodes site (nodes.pyraxchain.com) ---
+  "network.manage": { group: "Network & App Management", label: "Manage the Nodes site", desc: "Open or close the public nodes site, and set the default network shown across all marketing sites.", elevated: true },
+  "network.downloads": { group: "Network & App Management", label: "Edit node downloads", desc: "Edit the public node app + CLI download links shown on nodes.pyraxchain.com." },
+  "network.broadcast": { group: "Network & App Management", label: "Broadcast notifications", desc: "Email + browser-push the notify list when the portal opens or an app updates.", elevated: true },
+
   // --- Operational ---
   "error_reports.view": { group: "Operations", label: "View error reports", desc: "Read inbound crash/error reports from nodes + apps." },
   "announcements.publish": { group: "Operations", label: "Publish update announcements", desc: "Announce a new app/CLI version to the network." },
@@ -115,6 +120,11 @@ export const PRESETS: Record<string, { label: string; desc: string; permissions:
     label: "Signature Manager",
     desc: "Edit the shared company email-signature design (applies to everyone).",
     permissions: ["dashboard.view", "signature.manage"],
+  },
+  network_management: {
+    label: "Network & App Management",
+    desc: "Run the public nodes site: open/close, default network, downloads, and notify broadcasts.",
+    permissions: ["dashboard.view", "network.manage", "network.downloads", "network.broadcast"],
   },
   full_admin: {
     label: "Full Admin",

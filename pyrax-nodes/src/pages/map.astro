@@ -1,0 +1,8 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Base from "../layouts/Base.astro";
+import MapGlobe from "../components/MapGlobe.tsx";
+---
+<Base title="Network Map" current="/map" description="A live interactive 3D globe of every PYRAX node online across all networks, coloured by network.">
+  <MapGlobe client:only="react" />
+</Base>

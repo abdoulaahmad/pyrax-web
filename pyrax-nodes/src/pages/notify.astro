@@ -1,0 +1,19 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Base from "../layouts/Base.astro";
+import NotifyForm from "../components/NotifyForm.tsx";
+---
+<Base title="Get Notified" current="/notify" description="Be the first to know when the PYRAX Nodes portal opens and when a new node app ships — by email and browser notification.">
+  <section class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 md:grid-cols-2">
+    <div>
+      <h1 class="text-3xl font-extrabold sm:text-5xl">Never miss a release</h1>
+      <p class="mt-4 text-lg text-muted">Tell us how you'd like to hear from us. We'll notify you when the portal opens and whenever a new node app or CLI update ships — by email, browser notification, or both.</p>
+      <ul class="mt-6 space-y-2 text-sm text-muted">
+        <li class="flex items-center gap-2"><span class="text-[color:var(--color-positive)]">✓</span> Portal launch announcement</li>
+        <li class="flex items-center gap-2"><span class="text-[color:var(--color-positive)]">✓</span> New node app + CLI releases</li>
+        <li class="flex items-center gap-2"><span class="text-[color:var(--color-positive)]">✓</span> Self-hosted, privacy-respecting notifications</li>
+      </ul>
+    </div>
+    <NotifyForm client:load />
+  </section>
+</Base>

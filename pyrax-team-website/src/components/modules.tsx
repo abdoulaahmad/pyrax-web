@@ -876,3 +876,106 @@ function Drawer({ title, children, onClose, onSave, saveLabel = "Save", busy, ex
     </div>
   );
 }
+
+/* ============================================================== Network & App Management (nodes site) */
+export function NetworkManagement({ subject }: { subject: AccessSubject }) {
+  const canManage = can(subject, "network.manage");
+  const canDl = can(subject, "network.downloads");
+  const canCast = can(subject, "network.broadcast");
+  if (!canManage && !canDl && !canCast) return <Locked what="Network & App Management" />;
+
+  const [s, setS] = useState<any>(null);
+  const [nets, setNets] = useState<any[]>([]);
+  const [dls, setDls] = useState<any[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [bKind, setBKind] = useState("updates"); const [bTitle, setBTitle] = useState(""); const [bBody, setBBody] = useState("");
+  const [bLink, setBLink] = useState("https://nodes.pyraxchain.com/downloads"); const [bButton, setBButton] = useState("Get the update");
+  const [casting, setCasting] = useState(false); const [castRes, setCastRes] = useState<any>(null);
+
+  async function load() { const d = await (await fetch("/api/network/settings")).json(); if (d.ok) { setS(d.settings); setNets(d.networks); setDls(d.settings.downloads || []); } }
+  useEffect(() => { load(); }, []);
+  async function save(patch: any, note = "Saved.") { setBusy(true); setMsg(""); const d = await (await fetch("/api/network/settings", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(patch) })).json(); if (d.ok) { setS(d.settings); setDls(d.settings.downloads || []); setMsg(note); setTimeout(() => setMsg(""), 2200); } else setMsg(d.error || "Failed."); setBusy(false); }
+  async function broadcast() { if (!bTitle.trim() || !bBody.trim()) { setMsg("Title + body required for a broadcast."); return; } setCasting(true); setCastRes(null); const d = await (await fetch("/api/network/broadcast", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind: bKind, title: bTitle, body: bBody, link: bLink, button: bButton }) })).json(); setCastRes(d); setCasting(false); }
+
+  if (!s) return <Card className="p-8 text-center text-sm text-muted">Loading…</Card>;
+  return (
+    <>
+      <PageHeader title="Network & App Management" subtitle="Control the public nodes site (nodes.pyraxchain.com) — availability, downloads, the default network shown across all marketing sites, and notify broadcasts." />
+      {msg && <div className="mb-3 rounded-lg border border-line bg-[rgba(245,134,34,0.06)] px-3 py-2 text-sm text-ink">{msg}</div>}
+
+      {canManage && (
+        <Card className="mb-4 p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div><h3 className="text-base font-bold">Public site availability</h3><p className="text-xs text-muted">When closed, nodes.pyraxchain.com shows a coming-soon page with the notify signup. The network + APIs keep running.</p></div>
+            <Badge tone={s.open ? "positive" : "danger"}>{s.open ? "Open" : "Closed"}</Badge>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Button variant={s.open ? "danger" : "primary"} onClick={() => save({ open: !s.open }, s.open ? "Site closed." : "Site opened.")} disabled={busy}>{s.open ? "Close the site" : "Open the site"}</Button>
+            <a href="https://nodes.pyraxchain.com" target="_blank" rel="noreferrer" className="text-sm text-muted hover:text-ink">nodes.pyraxchain.com ↗</a>
+          </div>
+          <div className="mt-4"><div className="label">Coming-soon message</div>
+            <textarea className="input min-h-[70px]" value={s.closedMessage} onChange={(e) => setS({ ...s, closedMessage: e.target.value })} />
+            <div className="mt-2"><Button onClick={() => save({ closedMessage: s.closedMessage })} disabled={busy}>Save message</Button></div>
+          </div>
+        </Card>
+      )}
+
+      {canManage && (
+        <Card className="mb-4 p-5">
+          <h3 className="text-base font-bold">Default network</h3>
+          <p className="text-xs text-muted">The network shown by default across all PYRAX marketing sites (until a visitor picks another).</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {nets.map((n) => (
+              <button key={n.label} onClick={() => save({ defaultNetwork: n.label }, `Default set to ${n.name}.`)} disabled={busy}
+                className={`rounded-full border px-3.5 py-1.5 text-sm transition ${s.defaultNetwork === n.label ? "border-[color:var(--color-brand)] bg-[rgba(245,134,34,0.08)] text-ink" : "border-line text-muted hover:text-ink"}`}>{n.name}</button>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {canDl && (
+        <Card className="mb-4 p-5">
+          <div className="flex items-center justify-between"><h3 className="text-base font-bold">Public downloads</h3><Button onClick={() => setDls([...dls, { product: "Inferno Node App", platform: "Windows", url: "https://", version: "latest" }])}>+ Add</Button></div>
+          <p className="text-xs text-muted">Shown on the public Downloads page with OS icons. Empty falls back to built-in defaults.</p>
+          <div className="mt-3 space-y-2">
+            {dls.length === 0 && <p className="text-sm text-faint">No custom downloads — the page shows sensible defaults.</p>}
+            {dls.map((d, i) => (
+              <div key={i} className="grid grid-cols-1 gap-2 rounded-lg border border-line p-3 sm:grid-cols-[1.4fr_1fr_2fr_0.8fr_auto]">
+                <input className="input py-1.5 text-sm" placeholder="Product" value={d.product} onChange={(e) => setDls(dls.map((x, j) => j === i ? { ...x, product: e.target.value } : x))} />
+                <select className="input py-1.5 text-sm" value={d.platform} onChange={(e) => setDls(dls.map((x, j) => j === i ? { ...x, platform: e.target.value } : x))}>{["Windows", "macOS", "Linux"].map((p) => <option key={p}>{p}</option>)}</select>
+                <input className="input py-1.5 text-sm" placeholder="https://download-url" value={d.url} onChange={(e) => setDls(dls.map((x, j) => j === i ? { ...x, url: e.target.value } : x))} />
+                <input className="input py-1.5 text-sm" placeholder="version" value={d.version || ""} onChange={(e) => setDls(dls.map((x, j) => j === i ? { ...x, version: e.target.value } : x))} />
+                <button onClick={() => setDls(dls.filter((_, j) => j !== i))} className="text-faint hover:text-[color:var(--color-negative)]">✕</button>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3"><Button variant="primary" onClick={() => save({ downloads: dls }, "Downloads saved.")} disabled={busy}>Save downloads</Button></div>
+        </Card>
+      )}
+
+      {canCast && (
+        <Card className="p-5">
+          <h3 className="text-base font-bold">Send a notification</h3>
+          <p className="text-xs text-muted">Email + browser-push everyone on the notify list who opted into this type. Uses the on-brand Brevo template.</p>
+          <div className="mt-3 flex gap-2">
+            {[["updates", "App update"], ["portal", "Portal opened"]].map(([k, l]) => (
+              <button key={k} onClick={() => setBKind(k)} className={`rounded-lg border px-3 py-1.5 text-sm ${bKind === k ? "border-[color:var(--color-brand)] bg-[rgba(245,134,34,0.08)] text-ink" : "border-line text-muted"}`}>{l}</button>
+            ))}
+          </div>
+          <div className="mt-3 grid gap-2">
+            <input className="input" placeholder="Title (e.g. Inferno v0.4.0 is here)" value={bTitle} onChange={(e) => setBTitle(e.target.value)} />
+            <textarea className="input min-h-[90px]" placeholder="Message body…" value={bBody} onChange={(e) => setBBody(e.target.value)} />
+            <div className="grid grid-cols-2 gap-2">
+              <input className="input" placeholder="Button link" value={bLink} onChange={(e) => setBLink(e.target.value)} />
+              <input className="input" placeholder="Button label" value={bButton} onChange={(e) => setBButton(e.target.value)} />
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-3"><Button variant="primary" onClick={broadcast} disabled={casting}>{casting ? "Sending…" : "Send broadcast"}</Button>
+            {castRes && (castRes.ok ? <span className="text-sm text-[color:var(--color-positive)]">Emailed {castRes.emailed} · pushed {castRes.pushed} of {castRes.subscribers} subscribers</span> : <span className="text-sm text-[color:var(--color-negative)]">{castRes.error}</span>)}
+          </div>
+        </Card>
+      )}
+    </>
+  );
+}

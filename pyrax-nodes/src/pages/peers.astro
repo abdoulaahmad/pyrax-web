@@ -1,0 +1,8 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Base from "../layouts/Base.astro";
+import PeersPanel from "../components/PeersPanel.tsx";
+---
+<Base title="Peer Directory" current="/peers" description="Live directory of every PYRAX node online on the selected network — dial address, location, and uptime, updated in real time.">
+  <PeersPanel client:load />
+</Base>
