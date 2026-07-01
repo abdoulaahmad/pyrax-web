@@ -28,6 +28,7 @@ COPY --from=build /app/scripts ./scripts
 # Drop privileges: run as the built-in unprivileged `node` user, never root.
 USER node
 EXPOSE 4322
+# Liveness: hit the in-process /healthz route (always 200 while up; DB health is a non-fatal field).
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD wget -q -O /dev/null http://127.0.0.1:4322/ || exit 1
+  CMD wget -q -O /dev/null http://127.0.0.1:4322/healthz || exit 1
 CMD ["node", "./dist/server/entry.mjs"]

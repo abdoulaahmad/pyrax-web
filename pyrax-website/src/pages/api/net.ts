@@ -6,8 +6,29 @@ import type { APIRoute } from "astro";
 import { NETWORKS, cookieChainId, TARGET_TPS } from "../../lib/networks";
 import { allNetworkStats } from "../../server/chain";
 import { teamDefaultChain } from "../../server/settings";
+import { withErrorReport, installProcessHooks } from "../../server/error-reporter";
+import { RateLimiter, clientIp } from "../../server/ratelimit";
 
-export const GET: APIRoute = async ({ request }) => {
+// Install the process-level unhandledRejection / uncaughtException → Sentinel hooks once. Placed on
+// an API module (executed by the SSR server) rather than a page so it runs on the server only, never
+// during static analysis. Idempotent + a no-op when telemetry is unconfigured.
+installProcessHooks();
+
+// Per-IP throttle. Generous for the navbar's periodic refresh, hostile to a loop that would amplify
+// each hit into a ~8-call upstream fan-out. Paired with the ~4s server-side stats cache so even allowed
+// bursts collapse to one upstream fetch.
+const limiter = new RateLimiter({ ratePerSec: 3, burst: 12 });
+
+// `withErrorReport` reports any UNEXPECTED throw to Sentinel (scrubbed + deduped) and returns a clean
+// 500 — a visitor never sees a stack. Expected results the handler returns pass through untouched.
+export const GET: APIRoute = withErrorReport("GET /api/net", async ({ request }) => {
+  const gate = limiter.take(clientIp(request.headers));
+  if (!gate.ok) {
+    return new Response(JSON.stringify({ ok: false, error: "rate limit exceeded — slow down", retryAfter: gate.retryAfter }), {
+      status: 429,
+      headers: { "content-type": "application/json", "cache-control": "no-store", "retry-after": String(gate.retryAfter) },
+    });
+  }
   // A visitor's own choice (pyrax_net cookie) wins; otherwise use the team-managed cross-site default.
   const selected = cookieChainId(request.headers.get("cookie")) ?? (await teamDefaultChain());
   const stats = await allNetworkStats();
@@ -20,4 +41,4 @@ export const GET: APIRoute = async ({ request }) => {
   return new Response(JSON.stringify({ ok: true, selected, targetTps: TARGET_TPS, networks }), {
     headers: { "content-type": "application/json", "cache-control": "no-store" },
   });
-};
+});

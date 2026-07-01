@@ -41,6 +41,12 @@ export async function requestLoginCode(email: string): Promise<{ ok: true; ttl: 
       [hmac(`${e}:${code}`), e, now, now + OTP_TTL_MS, rid],
     );
     void sendOtp(e, code, now + OTP_TTL_MS);
+    // DEV convenience: also print the code to the server console so LOCAL sign-in never depends on
+    // email delivery (Brevo). Never runs in production (codes stay email-only there).
+    if (process.env.NODE_ENV !== "production") {
+      // eslint-disable-next-line no-console
+      console.log(`\n[dev] devnet sign-in code for ${e}: ${code}\n`);
+    }
   }
   return { ok: true, ttl: OTP_TTL_S, rid };
 }
@@ -104,6 +110,11 @@ export async function currentSessionStart(sid: string | undefined): Promise<numb
   const r = await db().query("SELECT created_at FROM sessions WHERE sid_hash=$1 AND expires_at > $2", [hmac(sid), Date.now()]);
   return r.rows[0] ? Number(r.rows[0].created_at) : null;
 }
-export function cookieOptions(maxAgeMs = MAX_SESSION_DAYS * DAY) {
-  return { httpOnly: true, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production", path: "/", maxAge: Math.floor(maxAgeMs / 1000) };
+// `secure` defaults to the NODE_ENV heuristic, but the login route overrides it with the ACTUAL
+// request protocol — so a `secure` cookie is only demanded over real HTTPS. Otherwise a production
+// build served over http://localhost (`npm run preview`, NODE_ENV=production) would set a `secure`
+// cookie the browser silently drops, and the user could "log in" but never get a session (a bounce
+// back to the sign-in screen). Over plain http (localhost) `secure:false` so the cookie sticks.
+export function cookieOptions(maxAgeMs = MAX_SESSION_DAYS * DAY, secure = process.env.NODE_ENV === "production") {
+  return { httpOnly: true, sameSite: "lax" as const, secure, path: "/", maxAge: Math.floor(maxAgeMs / 1000) };
 }

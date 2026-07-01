@@ -59,9 +59,31 @@ export async function networkStats(net: PyraxNetwork): Promise<NetStats> {
   }
 }
 
-/** Stats for every network (used by /api/net for the navbar roster). */
+// Short server-side cache for the full roster fan-out. Each allNetworkStats() call issues up to ~8
+// upstream RPC calls PER online network to the shared public seed node; /api/net (and the SSR
+// overview/gas pages) are unauthenticated, so a client looping them would amplify every request into a
+// burst against that single shared dependency. A brief TTL collapses concurrent bursts + rapid polls to
+// ONE upstream fan-out. `inflight` deduplicates concurrent misses so a thundering herd shares one fetch.
+const ROSTER_TTL_MS = Number((typeof process !== "undefined" && process.env?.NET_STATS_TTL_MS) || 4000);
+let rosterCache: { stats: NetStats[]; at: number } | null = null;
+let rosterInflight: Promise<NetStats[]> | null = null;
+
+/** Stats for every network (used by /api/net for the navbar roster). Cached ~4s + single-flighted so
+ *  bursts collapse to one upstream fan-out against the shared seed node. */
 export async function allNetworkStats(): Promise<NetStats[]> {
-  return Promise.all(NETWORKS.map((n) => networkStats(n)));
+  const now = Date.now();
+  if (rosterCache && now - rosterCache.at < ROSTER_TTL_MS) return rosterCache.stats;
+  if (rosterInflight) return rosterInflight;
+  rosterInflight = (async () => {
+    try {
+      const stats = await Promise.all(NETWORKS.map((n) => networkStats(n)));
+      rosterCache = { stats, at: Date.now() };
+      return stats;
+    } finally {
+      rosterInflight = null;
+    }
+  })();
+  return rosterInflight;
 }
 
 export const statsForChain = (chainId: number): Promise<NetStats> => {

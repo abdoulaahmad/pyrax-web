@@ -22,7 +22,11 @@ function kind(ct: string, name: string): "image" | "video" | "log" | null {
 export const POST: APIRoute = async ({ request, cookies }) => {
   const me = await requireTester(cookies);
   if (!me) return json({ ok: false, error: "Not signed in." }, 401);
-  if (!can(subjectOf(me), "issues.submit")) return json({ ok: false, error: "Forbidden." }, 403);
+  // Attachments back BOTH surfaces that upload to the tester's own CDN prefix: the Issue Council
+  // (issues.submit) and Product Test proof (campaigns.view). Either baseline permission is enough; the
+  // key namespace (devnet/issues/{testerId}/…) + prefix validation are identical for both.
+  const subject = subjectOf(me);
+  if (!can(subject, "issues.submit") && !can(subject, "campaigns.view")) return json({ ok: false, error: "Forbidden." }, 403);
   if (!spacesConfigured()) return json({ ok: false, reason: "unconfigured", error: "Attachments aren't configured yet." }, 200);
 
   const b = await request.json().catch(() => ({}));

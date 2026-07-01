@@ -9,6 +9,7 @@
 
 import { db, userById, type UserRow } from "./db";
 import { hmac, randomSessionId } from "./crypto";
+import { subjectOf } from "./guard";
 import { can, type Permission } from "../lib/permissions";
 
 const DEVICE_TTL_MS = 30 * 24 * 60 * 60_000; // 30 days, sliding on activity
@@ -39,7 +40,10 @@ const EMBER_TABS: readonly { tab: string; perm: Permission }[] = [
 
 /** The admin tabs this user may open + the granted permission keys (for display). */
 export function emberAccess(user: UserRow): { tabs: string[]; roles: string[] } {
-  const granted = EMBER_TABS.filter((t) => can(user, t.perm));
+  // Use the same AccessSubject `can()` uses everywhere (guard/UI) so the superuser's implicit
+  // grant (is_superuser -> isSuperuser) is honored; passing a raw UserRow would drop that flag.
+  const subject = subjectOf(user);
+  const granted = EMBER_TABS.filter((t) => can(subject, t.perm));
   return { tabs: granted.map((t) => t.tab), roles: granted.map((t) => t.perm) };
 }
 

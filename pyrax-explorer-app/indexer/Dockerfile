@@ -16,7 +16,9 @@ COPY . .
 # Drop root: run as the built-in unprivileged `node` user.
 USER node
 EXPOSE 8788
-# Liveness: the read API answers GET /api/health with { ok: true }.
+# Liveness: GET /api/health always returns 200 while the process is up (DB status + per-network ingest
+# head-freshness/lag are non-fatal fields in the body, so neither a DB blip nor a wedged ingest fails the
+# check — a monitor watches `anyStale`/`db` instead). See index.js.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||8788)+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 CMD ["node", "index.js"]

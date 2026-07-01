@@ -39,6 +39,22 @@ function getPool(): pg.Pool | null {
 /** True when an explorer DB is configured (so chain.ts can prefer indexed reads). */
 export const ready = (): boolean => !!getPool();
 
+/** Bounded DB reachability probe for /healthz. Never throws or hangs: reports a status string, treating
+ *  a slow/unreachable DB as "down" within ~4.5s so the health check stays responsive. "unconfigured"
+ *  when no explorer DB URL is set (the app runs fine on live-RPC → sample). Dependency health is a
+ *  NON-FATAL signal — the caller must still return 200. */
+export async function pingDb(): Promise<"up" | "down" | "unconfigured"> {
+  const p = getPool();
+  if (!p) return "unconfigured";
+  return new Promise<"up" | "down">((resolve) => {
+    const t = setTimeout(() => resolve("down"), 4_500);
+    p.query("SELECT 1").then(
+      () => { clearTimeout(t); resolve("up"); },
+      () => { clearTimeout(t); resolve("down"); },
+    );
+  });
+}
+
 async function q<T = any>(text: string, params: unknown[]): Promise<T[] | null> {
   const p = getPool();
   if (!p) return null;

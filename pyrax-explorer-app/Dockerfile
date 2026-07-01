@@ -22,7 +22,8 @@ COPY --from=build /app/package.json ./package.json
 # Drop root: run as the built-in unprivileged `node` user.
 USER node
 EXPOSE 4324
-# Liveness: the SSR server answers GET / (always 200 with sample data, even with no DB/RPC).
+# Liveness: GET /healthz always returns 200 while the SSR process is up (DB health is a non-fatal
+# field in the body, so a DB outage never fails the check). See src/pages/healthz.ts.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||4324)+'/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||4324)+'/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 CMD ["node", "./dist/server/entry.mjs"]

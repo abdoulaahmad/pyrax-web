@@ -9,13 +9,55 @@
 import { EventEmitter } from "node:events";
 import { rpc, hexToInt, hexToBigStr, mapLimit, dagStreamMap, deriveSeal } from "./rpc.js";
 import * as db from "./db.js";
-import { enabledNetworks, INGEST_INTERVAL_MS, INGEST_BATCH, RECEIPT_CONCURRENCY } from "./config.js";
+import { report as sentinel } from "./sentinel.js";
+import { enabledNetworks, INGEST_INTERVAL_MS, INGEST_BATCH, RECEIPT_CONCURRENCY, MAX_LOGS_PER_BLOCK, MAX_TRANSFERS_PER_BLOCK } from "./config.js";
+import { capLogData } from "./caps.js";
 
 // Realtime feed: emits a `block` event for every freshly-indexed block. The HTTP
 // server relays these to connected browsers over WebSocket so the explorer UI updates
 // the instant a block lands — no polling, no 8-second jumps, no gaps.
 export const events = new EventEmitter();
 events.setMaxListeners(0);
+
+// ---- ingest progress (head-freshness / lag oracle) -------------------------
+// Per-network liveness so /api/health can tell a STUCK ingest from a healthy one. Each successful tick
+// records the chain head, the last block we've indexed, and the wall-clock time it last ADVANCED. A tick
+// that runs but indexes nothing new does NOT reset `lastAdvanceAt`, so a wedged ingest (RPC returns a
+// head we can never catch up to, a DB that keeps failing to write) shows a growing `staleMs` even though
+// the process is alive. Exposed via ingestProgress(); consumed by index.js → GET /api/health.
+const progress = new Map(); // chainId -> { head, indexed, lastAdvanceAt, lastTickAt, lastError }
+const now = () => Date.now();
+function markTick(chainId, head, indexed, err) {
+  const prev = progress.get(chainId) || { head: 0, indexed: -1, lastAdvanceAt: now(), lastTickAt: 0, lastError: null };
+  const advanced = Number.isFinite(indexed) && indexed > prev.indexed;
+  progress.set(chainId, {
+    head: Number.isFinite(head) ? head : prev.head,
+    indexed: Number.isFinite(indexed) ? indexed : prev.indexed,
+    lastAdvanceAt: advanced ? now() : prev.lastAdvanceAt,
+    lastTickAt: now(),
+    lastError: err ? String(err).slice(0, 200) : null,
+  });
+}
+
+/** Snapshot of per-network ingest liveness for GET /api/health. `lagBlocks` = head − indexed (how far
+ *  behind the tip we are). `staleMs` = ms since indexing last ADVANCED (grows without bound if wedged).
+ *  A consumer flags a network unhealthy when lagBlocks stays high AND staleMs exceeds a threshold. */
+export function ingestProgress() {
+  const t = now();
+  const nets = {};
+  for (const [chainId, p] of progress) {
+    const lagBlocks = Number.isFinite(p.head) && Number.isFinite(p.indexed) ? Math.max(0, p.head - p.indexed) : null;
+    nets[chainId] = {
+      head: p.head,
+      indexed: p.indexed,
+      lagBlocks,
+      staleMs: t - p.lastAdvanceAt,
+      lastTickAgoMs: p.lastTickAt ? t - p.lastTickAt : null,
+      lastError: p.lastError,
+    };
+  }
+  return nets;
+}
 
 // keccak256("Transfer(address,address,uint256)")
 const TRANSFER_SIG = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
@@ -62,14 +104,17 @@ async function ingestBlock(chainId, url, blk, streams) {
     });
     if (r && Array.isArray(r.logs)) {
       for (const log of r.logs) {
+        // Bound the per-block log/transfer row count so a spam-emitting tx can't drive an unbounded
+        // bundle (write-amplification / storage blowup). Excess logs in a pathological block are dropped.
+        if (logRows.length >= MAX_LOGS_PER_BLOCK) break;
         const li = hexToInt(log.logIndex);
         const topics = log.topics || [];
         logRows.push({
           chain_id: chainId, tx_hash: lc(t.hash), log_index: li, block_number: number, address: lc(log.address),
           topic0: lc(topics[0] ?? null), topic1: lc(topics[1] ?? null), topic2: lc(topics[2] ?? null),
-          topic3: lc(topics[3] ?? null), data: log.data,
+          topic3: lc(topics[3] ?? null), data: capLogData(log.data),
         });
-        if (topics[0] && lc(topics[0]) === TRANSFER_SIG && topics.length >= 3) {
+        if (topics[0] && lc(topics[0]) === TRANSFER_SIG && topics.length >= 3 && xferRows.length < MAX_TRANSFERS_PER_BLOCK) {
           const erc721 = topics.length === 4; // indexed tokenId ⇒ 4 topics
           xferRows.push({
             chain_id: chainId, tx_hash: lc(t.hash), log_index: li, block_number: number, block_time: blockTime,
@@ -82,7 +127,15 @@ async function ingestBlock(chainId, url, blk, streams) {
     }
   });
 
-  await db.writeBlockBundle({ block, txns: txnRows, logs: logRows, transfers: xferRows, tokens: tokenRows });
+  try {
+    await db.writeBlockBundle({ block, txns: txnRows, logs: logRows, transfers: xferRows, tokens: tokenRows });
+  } catch (e) {
+    // A DB write failure is a genuine indexer fault — persistence is the indexer's whole job. Report it
+    // (deduped/throttled/scrubbed) and re-throw so the caller's tick sees the error and doesn't advance
+    // the sync cursor past an unwritten block.
+    sentinel(`${chainId}: block write failed at #${number}`, `writeBlockBundle #${number}: ${e?.message ?? e}`, "error");
+    throw e;
+  }
   // Realtime push: tell subscribers a block landed (relayed to browsers over WS).
   events.emit("block", {
     chainId, number, hash: block.hash, parentHash: block.parent_hash, miner: block.miner,
@@ -129,7 +182,10 @@ async function ingestNetwork(net) {
   const head = hexToInt(await rpc(url, "eth_blockNumber"));
   if (!Number.isFinite(head)) return null;
   let last = await db.getSyncState(chainId);
-  if (last >= head) return null;
+  // Record liveness even when we're already caught up (last >= head): the tip is fresh and there's
+  // simply nothing new to index, which must read as HEALTHY (staleMs keeps resetting because `indexed`
+  // tracks the head), not as a stuck ingest.
+  if (last >= head) { markTick(chainId, head, head, null); return null; }
 
   // Reorg guard: if our stored tip hash no longer matches the chain, re-anchor a few blocks back.
   if (last >= 0) {
@@ -149,12 +205,18 @@ async function ingestNetwork(net) {
 
   const from = last + 1;
   const to = Math.min(head, from + INGEST_BATCH - 1);
+  let indexed = last; // highest block actually persisted this network (for the freshness oracle)
   for (let n = from; n <= to; n++) {
     const blk = await rpc(url, "eth_getBlockByNumber", ["0x" + n.toString(16), true]).catch(() => null);
     if (!blk) break;
     await ingestBlock(chainId, url, blk, streams);
     await db.setSyncState(chainId, n);
+    indexed = n;
   }
+  // Feed the freshness oracle: head is the chain tip; `indexed` is what we've actually persisted. If a
+  // batch caps below head we're behind but advancing (healthy); if `indexed` never moves across ticks
+  // while head climbs, staleMs grows and /api/health flags the network.
+  markTick(chainId, head, indexed, null);
   return { chainId, from, to, head };
 }
 
@@ -232,6 +294,10 @@ export async function startIngest() {
           if (r && r.to >= r.from) console.log(`[ingest] ${net.chainId}: ${r.from}..${r.to} / head ${r.head}`);
         } catch (e) {
           console.warn(`[ingest] ${net.chainId} error: ${e.message}`);
+          // Record the failing tick for the freshness oracle (does NOT advance lastAdvanceAt, so a
+          // persistently-failing network accrues staleMs) and report it (deduped/throttled/scrubbed).
+          markTick(net.chainId, NaN, NaN, e?.message ?? e);
+          sentinel(`${net.chainId}: ingest tick failed`, `ingestNetwork(${net.chainId}): ${e?.message ?? e}`, "error");
         }
       }
     } while (again);

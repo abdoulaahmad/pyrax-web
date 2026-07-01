@@ -24,6 +24,10 @@ export function netFor(chainId: number): ExplorerNetwork { return networkByChain
  *  non-address path param (junk, oversized, SQLi probe) never reaches the indexer SQL or the node RPC;
  *  callers fall straight through to clearly-labeled sample data instead. */
 const asAddress = (a: unknown): string | null => (typeof a === "string" && /^0x[0-9a-fA-F]{40}$/.test(a) ? a.toLowerCase() : null);
+/** A 0x-prefixed 32-byte hex tx hash, lower-cased — or null. Gates getTx the same way asAddress gates
+ *  the address getters, so a junk/oversized path param never reaches eth_getTransactionByHash or the
+ *  indexer SQL; a non-match falls straight through to clearly-labeled sample data. */
+const asTxHash = (h: unknown): string | null => (typeof h === "string" && /^0x[0-9a-fA-F]{64}$/.test(h) ? h.toLowerCase() : null);
 
 export async function liveStatus(net: ExplorerNetwork): Promise<{ online: boolean; height?: number }> {
   if (!net.rpc) return { online: false };
@@ -124,7 +128,11 @@ export async function getTxs(net: ExplorerNetwork, page: { limit?: number; offse
   const ix = await idx.txs(net.chainId, page); if (ix) return ix;
   return { source: "sample" as const, txs: sampleTxs(page.limit ?? 25) };
 }
-export async function getTx(net: ExplorerNetwork, hash: string) {
+export async function getTx(net: ExplorerNetwork, rawHash: string) {
+  // Reject a non-hash path param up front (junk/oversized/probe input) so it never reaches the node RPC
+  // or the indexer — fall straight through to (clearly-labeled) sample data, matching the address getters.
+  const hash = asTxHash(rawHash);
+  if (!hash) return sampleTxDetail(rawHash);
   if (net.rpc) try {
     const [t, r] = await Promise.all([rpc(net.rpc, "eth_getTransactionByHash", [hash], 5000).catch(() => null), rpc(net.rpc, "eth_getTransactionReceipt", [hash], 5000).catch(() => null)]);
     if (t) return { source: "live" as const, hash, type: "ethereum", block: hexToNum(t.blockNumber), blockHash: t.blockHash, txIndex: hexToNum(t.transactionIndex), timestamp: 0, status: r ? hexToNum(r.status) : 1, from: t.from, to: t.to ?? null, value: (Number(hexToNum(t.value)) / 1e18).toFixed(4), valueBalance: null, nonce: hexToNum(t.nonce), gasLimit: hexToNum(t.gas), gasUsed: r ? hexToNum(r.gasUsed) : 0, gasPrice: (Number(hexToNum(t.gasPrice)) / 1e9).toFixed(2), fee: "0", input: t.input || "0x", contractCreated: r?.contractAddress ?? null, nullifiers: [], commitments: [], anchor: null, logs: (r?.logs || []).map((l: any) => ({ address: l.address, topics: l.topics, data: l.data })) };

@@ -9,6 +9,41 @@ import http from "node:http";
 import { WebSocketServer } from "ws";
 import pg from "pg";
 
+// --- Sentinel crash telemetry (server-operated path) -------------------------------------------
+// This process runs on the droplet, so it uses the agent-secret ingest: POST ${SENTINEL_INGEST_URL}
+// /api/errors with Authorization: Bearer ${NOVA_AGENT_SECRET}. Reports are DIAGNOSTIC-ONLY (an error
+// CLASS + a fixed context string) — NEVER a chat body, token, tester id, or DB row (this DB holds
+// tester identity + messages). Fail-open: a no-op when unconfigured; every failure is swallowed;
+// bounded ~10s; deduped/throttled to one report per signature per 15 min with an occurrence count.
+const SENTINEL_BASE = (process.env.SENTINEL_INGEST_URL || "https://status.pyraxchain.com").replace(/\/+$/, "");
+const SENTINEL_SECRET = process.env.NOVA_AGENT_SECRET || "";
+const SENTINEL_SOURCE = "devnet-chat";
+const SENTINEL_THROTTLE_MS = 15 * 60 * 1000;
+const sentinelWindows = new Map();
+function sentinelReport(kind, err) {
+  if (!SENTINEL_SECRET) return; // silent no-op when unconfigured
+  try {
+    const cls = (err && err.constructor && String(err.constructor.name).slice(0, 60)) || "Error";
+    const sig = `${SENTINEL_SOURCE}|${kind}|${cls}`;
+    const now = Date.now();
+    const w = sentinelWindows.get(sig);
+    if (w && now - w.firstTs < SENTINEL_THROTTLE_MS) { w.count += 1; return; } // accrue within the window
+    const prevCount = w ? w.count : 0;
+    sentinelWindows.set(sig, { firstTs: now, count: 1 });
+    const count = prevCount + 1;
+    const title = `${cls} in ${SENTINEL_SOURCE}:${kind}${count > 1 ? ` (x${count})` : ""}`.slice(0, 200);
+    // No message/stack: a chat DB error or token-verify failure can embed identity/message data.
+    const detail = `${cls} during ${kind} (message/stack withheld — this service handles tester `
+      + `identity, chat tokens, and chat messages).`;
+    fetch(`${SENTINEL_BASE}/api/errors`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${SENTINEL_SECRET}` },
+      body: JSON.stringify({ source: SENTINEL_SOURCE, title, detail, level: "error", droplet: process.env.HOSTNAME || undefined }),
+      signal: AbortSignal.timeout(10_000),
+    }).catch(() => {}); // best-effort; never surfaced
+  } catch { /* telemetry must never break the chat server */ }
+}
+
 // Fail-closed: in production the chat secret MUST be set to a real, non-default value. An unset secret
 // (or the public dev placeholder) would let anyone forge a chat token, so we refuse to start.
 const DEV_DEFAULT = "dev-chat-secret-change-me";
@@ -39,7 +74,13 @@ function verify(token) {
     // Clamp identity claims defensively (mirrors src/lib/chat-token.ts).
     c.name = clampClaim(c.name); c.user = clampClaim(c.user); c.uid = clampClaim(c.uid);
     return c;
-  } catch { return null; }
+  } catch (e) {
+    // A VALID HMAC over an UN-parseable body is anomalous (a mismatched signer / corrupt token),
+    // not a routine bad token — report the class only (never the token bytes). A bad signature
+    // returned above is expected/benign and is intentionally NOT reported.
+    sentinelReport("token.verify", e);
+    return null;
+  }
 }
 
 // Plain HTTP server so the droplet monitor can name-check the chat service at GET /health; the
@@ -88,7 +129,7 @@ wss.on("connection", (ws, req) => {
   if (!claims) { send(ws, { type: "error", error: "auth" }); ws.close(); return; }
   ws.claims = claims; ws.channel = "general"; ws.times = [];
   send(ws, { type: "ready", me: { user: claims.user, name: claims.name, admin: claims.admin }, channels: CHANNELS });
-  history("general").then((m) => send(ws, { type: "history", channel: "general", messages: m }));
+  history("general").then((m) => send(ws, { type: "history", channel: "general", messages: m }), (e) => sentinelReport("db.history", e));
   pushPresence("general");
   broadcastOnline();
 
@@ -117,10 +158,14 @@ wss.on("connection", (ws, req) => {
       await pool.query("UPDATE chat_messages SET deleted=TRUE WHERE id=$1", [m.id]);
       broadcast(ws.channel, { type: "deleted", id: m.id });
     }
-    } catch (e) { console.error("[chat] message error:", e?.message || e); try { send(ws, { type: "error", error: "Something went wrong." }); } catch {} }
+    } catch (e) { console.error("[chat] message error:", e?.message || e); sentinelReport("db.message", e); try { send(ws, { type: "error", error: "Something went wrong." }); } catch {} }
   });
   ws.on("close", () => { pushPresence(ws.channel); broadcastOnline(); });
 });
 
-process.on("unhandledRejection", (e) => console.error("[chat] unhandledRejection:", e?.message || e));
+// A pg Pool emits 'error' when an IDLE client's connection drops (a real DB failure the query-path
+// try/catch can't see). Log it (default) + report the class to Sentinel. Without a listener pg would
+// crash the process, so this also keeps the chat server up through transient DB blips.
+pool.on("error", (e) => { console.error("[chat] pool error:", e?.message || e); sentinelReport("db.pool", e); });
+process.on("unhandledRejection", (e) => { console.error("[chat] unhandledRejection:", e?.message || e); sentinelReport("unhandledRejection", e); });
 httpServer.listen(PORT, () => console.log(`[chat] WebSocket chat server listening on :${PORT} (channels: ${CHANNELS.join(", ")}; health: GET /health)`));

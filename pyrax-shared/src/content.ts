@@ -96,7 +96,7 @@ export const MEGA: Record<string, Mega> = {
       { title: "WASM contracts", desc: "Rust, AssemblyScript & TinyGo via the pyrax-contract-sdk.", href: "/docs.html#/wasm-overview", icon: "chip" },
       { title: "Cairo contracts", desc: "STARK-provable execution feeding the L3 rollup.", href: "/docs.html#/cairo", icon: "cube" },
       { title: "JSON-RPC reference", desc: "The full eth_* surface + filters + WS subscriptions + pyrax_* native.", href: "/docs.html#/json-rpc", icon: "terminal" },
-      { title: "Build with NEURAX", desc: "OpenAI-compatible gateway + the route CLI + the SDKs.", href: "/docs.html#/neurax-overview", icon: "spark" },
+      { title: "Build with NEURAX", desc: "Industry-standard API gateway + the route CLI + the SDKs.", href: "/docs.html#/neurax-overview", icon: "spark" },
     ],
     actions: [
       { name: "Quickstart & examples", href: "/build.html", icon: "code" },

@@ -160,6 +160,17 @@ export async function listUsers(): Promise<UserRow[]> {
   const r = await db().query("SELECT * FROM users ORDER BY is_superuser DESC, created_at ASC");
   return r.rows.map(rowToUser);
 }
+/** Active team members who can be assigned work gated by `permission` (superusers implicitly hold every
+ *  permission). Used e.g. by the Test Reviews assign dropdown to list `devnet.tests` holders. */
+export async function listPermissionHolders(permission: Permission): Promise<Array<{ id: string; name: string; email: string }>> {
+  await init();
+  const r = await db().query(
+    "SELECT id, display_name, email, is_superuser, permissions FROM users WHERE status = 'active' ORDER BY is_superuser DESC, display_name ASC",
+  );
+  return r.rows
+    .filter((u) => u.is_superuser || (Array.isArray(u.permissions) && u.permissions.includes(permission)))
+    .map((u) => ({ id: u.id, name: u.display_name || u.email, email: u.email }));
+}
 export async function touchLogin(id: string): Promise<void> {
   await db().query("UPDATE users SET last_login = $1, status = 'active' WHERE id = $2", [Date.now(), id]);
 }

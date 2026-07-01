@@ -23,13 +23,24 @@ export type OtpState = "pending" | "used" | "expired";
 const REQ_MAX = 5, REQ_WINDOW_MS = 15 * 60_000;
 const VER_MAX = 8, VER_WINDOW_MS = 10 * 60_000;
 
+// Second limiter DIMENSION keyed on the caller's IP. The per-email cap alone lets an attacker who
+// knows a teammate's address burn that email's request bucket to deny them a fresh code (a targeted
+// sign-in DoS). The per-IP cap bounds how many DISTINCT emails one source can grieve: it is looser
+// than the per-email cap (a real shared office/VPN may sign several people in) but still stops a
+// single host from exhausting many emails' buckets. Only applied when we actually have a trusted IP
+// (see ip.ts / TRUST_PROXY) — an empty IP never blocks, so this is fail-open by design.
+const REQ_IP_MAX = 30, REQ_IP_WINDOW_MS = 15 * 60_000;
+const VER_IP_MAX = 40, VER_IP_WINDOW_MS = 10 * 60_000;
+
 /** Issue a sign-in code to a whitelisted email. Anti-enumeration: always reports success — and
  *  always returns a watch-token (rid) + ttl — so a caller can't probe which addresses are on the
  *  team. Only actually stores a code + emails for whitelisted users; for everyone else the rid is
  *  a throwaway that the status endpoint treats as "pending" until the page's own timer expires. */
-export async function requestLoginCode(email: string): Promise<{ ok: true; ttl: number; rid: string } | { ok: false; reason: "rate" }> {
+export async function requestLoginCode(email: string, ip = ""): Promise<{ ok: true; ttl: number; rid: string } | { ok: false; reason: "rate" }> {
   const e = email.trim().toLowerCase();
   await init();
+  // Per-IP dimension first (only when a trusted IP is known): one host can't starve many emails.
+  if (ip && !(await rateAllow("otp_request_ip", ip, REQ_IP_MAX, REQ_IP_WINDOW_MS))) return { ok: false, reason: "rate" };
   if (!(await rateAllow("otp_request", e, REQ_MAX, REQ_WINDOW_MS))) return { ok: false, reason: "rate" };
   const rid = randomSessionId();
   const user = await userByEmail(e);
@@ -62,10 +73,12 @@ export async function otpStatus(rid: string): Promise<OtpState> {
 }
 
 /** Verify a code. On success consumes it, marks the user active, and returns them. */
-export async function verifyLoginCode(email: string, code: string): Promise<{ ok: true; user: UserRow } | { ok: false; reason: "rate" | "invalid" }> {
+export async function verifyLoginCode(email: string, code: string, ip = ""): Promise<{ ok: true; user: UserRow } | { ok: false; reason: "rate" | "invalid" }> {
   const e = email.trim().toLowerCase();
   const c = normalizeOtpCode(code);
   await init();
+  // Per-IP dimension first (only when a trusted IP is known): bounds cross-email guessing volume.
+  if (ip && !(await rateAllow("otp_verify_ip", ip, VER_IP_MAX, VER_IP_WINDOW_MS))) return { ok: false, reason: "rate" };
   if (!(await rateAllow("otp_verify", e, VER_MAX, VER_WINDOW_MS))) return { ok: false, reason: "rate" };
   if (!isWellFormedOtp(c)) return { ok: false, reason: "invalid" };
   const hash = hmac(`${e}:${c}`);

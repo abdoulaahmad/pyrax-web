@@ -56,9 +56,31 @@ export class RateLimiter {
   reset() { this.buckets.clear(); }
 }
 
-/** Best-effort client IP from common proxy headers, falling back to a constant bucket. */
+/**
+ * Trusted client IP for rate-limit keying.
+ *
+ * SECURITY: never key on the LEFTMOST `X-Forwarded-For` hop — that value is fully client-controlled, so
+ * rotating it per request mints a fresh bucket every time and defeats the limiter. This edge sits behind
+ * Cloudflare (orange-proxied) fronting Caddy, and BOTH append to inbound XFF, so the leftmost hop is
+ * whatever the attacker sent.
+ *
+ * Order of trust:
+ *   1. `CF-Connecting-IP` — Cloudflare OVERWRITES (not appends) this with the real client IP on every
+ *      request; a client cannot forge it through the CF proxy. This is the authoritative source in prod.
+ *   2. The RIGHTMOST `X-Forwarded-For` hop — the address the nearest trusted proxy (Caddy) attested,
+ *      i.e. the hop the client cannot control. (Direct, non-proxied requests carry a single value, which
+ *      is simultaneously left- and right-most, so this stays correct off Cloudflare too.)
+ *   3. `X-Real-IP` — a single proxy-set value.
+ *   4. A constant fallback bucket so an IP-less request is still throttled (shared, but bounded).
+ */
 export function clientIp(headers: Headers): string {
+  const cf = headers.get("cf-connecting-ip")?.trim();
+  if (cf) return cf;
   const xff = headers.get("x-forwarded-for");
-  if (xff) return xff.split(",")[0].trim();
-  return headers.get("x-real-ip")?.trim() || headers.get("cf-connecting-ip")?.trim() || "unknown";
+  if (xff) {
+    const hops = xff.split(",").map((h) => h.trim()).filter(Boolean);
+    // Rightmost hop = the address our own proxy saw the connection come FROM (not client-forgeable).
+    if (hops.length) return hops[hops.length - 1];
+  }
+  return headers.get("x-real-ip")?.trim() || "unknown";
 }

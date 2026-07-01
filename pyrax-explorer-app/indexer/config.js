@@ -27,8 +27,34 @@ export const INGEST_INTERVAL_MS = Number(process.env.INGEST_INTERVAL_MS ?? 4000)
 export const INGEST_BATCH = Number(process.env.INGEST_BATCH ?? 40); // max blocks ingested per network per tick
 export const RECEIPT_CONCURRENCY = Number(process.env.RECEIPT_CONCURRENCY ?? 8);
 
+// Persistence caps so a hostile contract on the indexed chain can't drive unbounded DB growth by
+// emitting enormous log `data` blobs across many logs per block.
+//   MAX_LOG_DATA_BYTES: a single log's `data` beyond this is truncated (with a marker) before storage.
+//   MAX_LOGS_PER_BLOCK / MAX_TRANSFERS_PER_BLOCK: hard row caps written per block bundle.
+export const MAX_LOG_DATA_BYTES = Number(process.env.MAX_LOG_DATA_BYTES ?? 32 * 1024);
+export const MAX_LOGS_PER_BLOCK = Number(process.env.MAX_LOGS_PER_BLOCK ?? 5000);
+export const MAX_TRANSFERS_PER_BLOCK = Number(process.env.MAX_TRANSFERS_PER_BLOCK ?? 5000);
+
 // CORS: which origins may call the read API in the browser. "*" is fine for a public read-only API.
 export const ALLOW_ORIGIN = process.env.ALLOW_ORIGIN ?? "*";
+
+// ---- request hardening (public read/verify API) ----------------------------------------------
+// The indexer is publicly reachable and co-hosts the ingest worker in-process, so an unbounded body
+// read, a pathological OFFSET, or an unthrottled flood can starve its memory / pg pool / event loop.
+//
+// VERIFY_MAX_BODY_BYTES: hard cap on the POST /verify request body BEFORE it is buffered/parsed (the
+//   500 KB source cap in verify.js only runs after the whole body is parsed). Room for a 500 KB source
+//   plus JSON envelope/whitespace.
+// READ_MAX_OFFSET: cap on ?offset= so a caller can't drive a huge OFFSET scan on the heaviest queries.
+// RL_*: per-IP token-bucket rates for the read routes vs. the (far more expensive) verify route.
+export const VERIFY_MAX_BODY_BYTES = Number(process.env.VERIFY_MAX_BODY_BYTES ?? 600 * 1024);
+export const READ_MAX_OFFSET = Number(process.env.READ_MAX_OFFSET ?? 100_000);
+export const RL_READ_RPS = Number(process.env.RL_READ_RPS ?? 20);
+export const RL_READ_BURST = Number(process.env.RL_READ_BURST ?? 60);
+export const RL_VERIFY_RPS = Number(process.env.RL_VERIFY_RPS ?? 0.2); // ~1 verify / 5s sustained
+export const RL_VERIFY_BURST = Number(process.env.RL_VERIFY_BURST ?? 5);
+// statement_timeout applied to every pooled connection so one pathological query can't pin a client.
+export const DB_STATEMENT_TIMEOUT_MS = Number(process.env.DB_STATEMENT_TIMEOUT_MS ?? 15_000);
 
 /** Networks that have an RPC wired (the only ones we ingest). */
 export const enabledNetworks = () =>

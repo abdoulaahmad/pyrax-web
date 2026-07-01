@@ -9,6 +9,11 @@ import { defineMiddleware } from "astro:middleware";
 import { buildCsp } from "./lib/csp";
 import { checkRequestCsrf } from "./server/csrf";
 import { json } from "./server/http";
+import { reportPortalError, installUnhandledReporter } from "./server/sentinel";
+
+// Best-effort crash telemetry (Sentinel). Catches process-level dangling-promise rejections; API 5xx
+// and thrown handlers are reported inline below. Fail-open + PII-scrubbed inside the reporter.
+installUnhandledReporter();
 
 // CSP is derived once at module load from the runtime env: the chat WS origin (CHAT_WS_URL) is added
 // to connect-src, and — when DigitalOcean Spaces is configured — the bucket upload host (connect-src)
@@ -22,9 +27,13 @@ const CSP = buildCsp();
 //                       called from the app's MAIN process with no browser Origin.
 //   /api/node/pair    — the app/CLI redeeming a short pairing code to link a node (public, code-auth).
 //   /api/node/heartbeat — the app/CLI's periodic heartbeat (Authorization: Bearer <nodeToken>).
+//   /api/internal/*   — the nova/Sentinel observer API (Authorization: Bearer NOVA_AGENT_SECRET),
+//                       called server-to-server with no browser Origin; each route fails closed on a
+//                       missing/mismatched secret (src/server/internal-auth.ts).
 // Every other /api route (cookie/session-authenticated browser calls) keeps the same-origin check.
 function csrfExempt(pathname: string): boolean {
-  return pathname.startsWith("/api/app/") || pathname === "/api/node/pair" || pathname === "/api/node/heartbeat";
+  return pathname.startsWith("/api/app/") || pathname.startsWith("/api/internal/")
+    || pathname === "/api/node/pair" || pathname === "/api/node/heartbeat";
 }
 
 export const onRequest = defineMiddleware(async ({ request, url }, next) => {
@@ -35,7 +44,21 @@ export const onRequest = defineMiddleware(async ({ request, url }, next) => {
     if (!csrf.ok) return json({ ok: false, error: "Cross-origin request blocked." }, 403);
   }
 
-  const res = await next();
+  // Wrap the handler so a THROWN error (which Astro turns into a 500) is reported to Sentinel before
+  // it propagates. The reporter is fail-open + PII-scrubbed (class + route only) and we always rethrow
+  // so error behavior is unchanged. Only /api/* is instrumented — a rendered-page error still bubbles.
+  let res: Response;
+  try {
+    res = await next();
+  } catch (err) {
+    if (url.pathname.startsWith("/api/")) reportPortalError({ err, route: url.pathname, level: "error" });
+    throw err;
+  }
+  // Report API 5xx responses (handlers that return a 500 rather than throwing). 4xx are EXPECTED
+  // (bad input / auth) and are deliberately skipped per the canonical "skip benign errors" rule.
+  if (url.pathname.startsWith("/api/") && res.status >= 500) {
+    reportPortalError({ err: new Error("api_5xx"), route: url.pathname, level: "error", status: res.status });
+  }
   const h = res.headers;
   h.set("X-Frame-Options", "DENY");
   h.set("X-Content-Type-Options", "nosniff");

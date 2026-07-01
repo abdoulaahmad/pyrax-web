@@ -4,15 +4,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Logo, Icon, Badge, BrandMark } from "./ui";
 import { can, type Permission } from "../lib/permissions";
 import { Dashboard, Downloads, IssueCouncil, Leaderboard, Chat, Releases, Settings, Triage, Testers, NdaPage, TosPage } from "./modules";
+import { Tests } from "./Tests";
 import { LegalGate, type LegalStatus } from "./Legal";
 
-type ModuleKey = "dashboard" | "downloads" | "releases" | "issues" | "leaderboard" | "chat" | "settings" | "triage" | "testers" | "nda" | "tos";
+type ModuleKey = "dashboard" | "downloads" | "releases" | "tests" | "issues" | "leaderboard" | "chat" | "settings" | "triage" | "testers" | "nda" | "tos";
 export interface Me { id: string; email: string; displayName: string; handle: string; payoutWallet: string | null; rewardEligible: boolean; isStaff: boolean; permissions: Permission[]; isSuperuser: boolean; status: string; sessionMaxDays: number; foundingRank: number | null; }
 
 const NAV: { key: ModuleKey; label: string; perm: Permission | null; icon: keyof typeof Icon; group: string }[] = [
   { key: "dashboard", label: "Dashboard", perm: "dashboard.view", icon: "grid", group: "Workspace" },
   { key: "downloads", label: "Downloads", perm: null, icon: "download", group: "Workspace" },
   { key: "releases", label: "Releases", perm: null, icon: "activity", group: "Workspace" },
+  { key: "tests", label: "Tests", perm: "campaigns.view", icon: "check", group: "Testing" },
   { key: "issues", label: "Issue Council", perm: "issues.view", icon: "alert", group: "Testing" },
   { key: "leaderboard", label: "Leaderboard", perm: null, icon: "trophy", group: "Community" },
   { key: "chat", label: "Chat", perm: null, icon: "chat", group: "Community" },
@@ -119,6 +121,7 @@ export default function Portal() {
       case "dashboard": return <Dashboard onNavigate={(k) => setActive(k as ModuleKey)} />;
       case "downloads": return <Downloads />;
       case "releases": return <Releases subject={subject} />;
+      case "tests": return <Tests me={meUser} />;
       case "issues": return <IssueCouncil me={meUser} subject={subject} />;
       case "leaderboard": return <Leaderboard me={meUser} />;
       case "chat": return <Chat me={meUser} />;

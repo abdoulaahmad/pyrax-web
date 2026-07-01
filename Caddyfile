@@ -68,9 +68,18 @@ relay.pyraxchain.com {
 }
 
 # --- public test-token faucet: a small web UI + rate-limited /drip endpoint.
-# Dispenses test PYRX on the Pyrax Seed Network through the internal write node. ---
+# Dispenses test PYRX on the Pyrax Seed Network through the internal write node.
+# SECURITY (finding M16): OVERWRITE X-Forwarded-For with the immediate client's IP
+# ({remote_host}) rather than appending to a client-supplied value. Combined with the
+# faucet's TRUST_PROXY=1 + rightmost-hop parsing, this makes the per-IP anti-automation
+# caps (welcome + drip) see exactly one proxy-set, attacker-uncontrollable identity —
+# closing the "rotate a spoofed leftmost XFF for a fresh bucket each request" bypass.
+# This single-proxy topology (client -> Caddy -> faucet) is REQUIRED for the header to be
+# trustworthy; do not chain another appending proxy in front without re-establishing it. ---
 faucet.pyraxchain.com {
-	reverse_proxy faucet:8800
+	reverse_proxy faucet:8800 {
+		header_up X-Forwarded-For {remote_host}
+	}
 }
 
 # --- update-notification feed: the static manifests (+ installers) the desktop apps

@@ -23,13 +23,13 @@ export const GET: APIRoute = async ({ cookies }) => {
       open: false,
       message: settings.downloadsClosedMessage || "Downloads are temporarily closed.",
       inferno: { available: false, version: null, assets: [] },
-      cli: { available: false, version: null, assets: [] },
     });
   }
 
   try {
-    const { configured, inferno, cli } = await downloadsPayload();
-    return json({ ok: true, open: true, configured, inferno, cli });
+    // The CLI is not published this round — the devnet portal offers Inferno only.
+    const { configured, inferno } = await downloadsPayload();
+    return json({ ok: true, open: true, configured, inferno });
   } catch (e) {
     console.error("[downloads] feed resolve failed:", (e as Error)?.message || e);
     // Honest failure: report unavailable rather than a broken link.
@@ -39,7 +39,6 @@ export const GET: APIRoute = async ({ cookies }) => {
       configured: true,
       error: "Could not reach the release storage. Please try again shortly.",
       inferno: { available: false, version: null, assets: [] },
-      cli: { available: false, version: null, assets: [] },
     });
   }
 };

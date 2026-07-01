@@ -388,9 +388,20 @@ export function IssueCouncil({ me, subject, initialStatus = "", title = "Issue C
   );
 }
 
-function BugForm({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
-  const [f, setF] = useState<any>({ title: "", severity: "medium", component: "", description: "", reproSteps: "", expected: "", actual: "" });
-  const [atts, setAtts] = useState<any[]>([]); const [busy, setBusy] = useState(false); const [up, setUp] = useState(false);
+// Optional pre-fill so other surfaces (e.g. a failed Product Test step) can open a partly-filled bug
+// report — title/component/severity + repro text, plus proof attachments already uploaded to the
+// tester's own CDN prefix. Every field falls back to the empty default.
+export interface BugPrefill {
+  title?: string; severity?: string; component?: string; description?: string;
+  reproSteps?: string; expected?: string; actual?: string;
+  attachments?: Array<{ url: string; type: string; name?: string; size?: number; stepIndex?: number; contentHash?: string }>;
+}
+export function BugForm({ onClose, onCreated, prefill }: { onClose: () => void; onCreated: () => void; prefill?: BugPrefill }) {
+  const [f, setF] = useState<any>({
+    title: prefill?.title || "", severity: prefill?.severity || "medium", component: prefill?.component || "",
+    description: prefill?.description || "", reproSteps: prefill?.reproSteps || "", expected: prefill?.expected || "", actual: prefill?.actual || "",
+  });
+  const [atts, setAtts] = useState<any[]>(prefill?.attachments ? [...prefill.attachments] : []); const [busy, setBusy] = useState(false); const [up, setUp] = useState(false);
   const [errs, setErrs] = useState<Record<string, string>>({}); const [note, setNote] = useState("");
   const set = (k: string, v: string) => setF({ ...f, [k]: v });
   async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {

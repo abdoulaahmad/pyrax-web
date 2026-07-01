@@ -15,6 +15,7 @@
 import type { MiddlewareHandler } from "astro";
 import { cookieChainId } from "./server/chain";
 import { teamDefaultChain } from "./server/settings";
+import { reportServerError, redact } from "./server/sentinel";
 
 const CSP = [
   "default-src 'self'",
@@ -41,7 +42,21 @@ export const onRequest: MiddlewareHandler = async (ctx, next) => {
       ctx.cookies.set("pyrax_net", String(await teamDefaultChain()), { path: "/", maxAge: 31536000, sameSite: "lax" });
     } catch { /* ignore — the page still renders on the local default */ }
   }
-  const res = await next();
+  // Single choke-point for SSR/API fault telemetry (Sentinel, source "explorer-web"). A thrown handler
+  // or a handler that returns a 5xx is a genuine server fault worth reporting; 2xx/3xx/4xx are normal
+  // (4xx = bad user input / not-found, never reported). Fail-open: reporting is fire-and-forget,
+  // deduped/throttled + privacy-scrubbed inside the reporter, and can never alter the response.
+  let res: Response;
+  try {
+    res = await next();
+  } catch (e: any) {
+    // Never swallow — re-throw so Astro renders its own 500. We only observe it in passing.
+    reportServerError(`ssr ${ctx.request.method} ${ctx.url.pathname}: ${e?.name || "Error"}`, redact(String(e?.stack || e?.message || e)));
+    throw e;
+  }
+  if (res.status >= 500) {
+    reportServerError(`ssr ${ctx.request.method} ${ctx.url.pathname}: HTTP ${res.status}`, `${ctx.url.pathname} returned HTTP ${res.status}`);
+  }
   const h = res.headers;
   h.set("Content-Security-Policy", CSP);
   h.set("X-Content-Type-Options", "nosniff");

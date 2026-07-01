@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 //
-// Authenticated download resolver for the team portal. Returns the CURRENT signed builds — Inferno +
-// CLI for anyone with `downloads.view`, and ADDITIONALLY the internal Ember app ONLY for users who
-// also hold `downloads.ember` — each with real versions and short-lived PRESIGNED URLs from the
-// private DigitalOcean Spaces bucket.
+// Authenticated download resolver for the team portal. The team portal serves the internal Ember app
+// ONLY — and ONLY to users who hold `downloads.ember`. Inferno is distributed exclusively on the devnet
+// + nodes sites, and the CLI is not published this round, so neither is offered here. Ember is returned
+// with a real version and a short-lived PRESIGNED URL from the private DigitalOcean Spaces bucket.
 //
 // RBAC is enforced SERVER-SIDE: the Ember feed is listed + presigned only when can(subject,
 // "downloads.ember") is true, so a user without that permission never receives an Ember presigned URL
@@ -13,7 +13,7 @@ import { requireUser, subjectOf } from "../../server/guard";
 import { can } from "../../lib/permissions";
 import { json } from "../../server/http";
 import { spacesConfigured } from "../../server/spaces";
-import { resolveDesktopFeed, resolveCliFeed, type Product } from "../../server/feeds";
+import { resolveDesktopFeed, type Product } from "../../server/feeds";
 
 export const prerender = false;
 
@@ -38,8 +38,8 @@ export const GET: APIRoute = async ({ cookies }) => {
   if (canEmber) {
     tasks.push(resolveDesktopFeed("ember", { id: "ember", name: "Ember (Internal Seed)", note: "Internal seed node app — restricted. Do not distribute outside the team.", restricted: true }));
   }
-  tasks.push(resolveDesktopFeed("node", { id: "inferno", name: "Inferno Node App", note: "Public desktop node — run, mine, and manage from a UI." }));
-  tasks.push(resolveCliFeed());
+  // Inferno + the CLI are intentionally NOT offered on the team portal — Inferno is distributed via the
+  // devnet + nodes sites, and the CLI is not published this round. The team portal serves Ember only.
 
   let products: Product[];
   try {

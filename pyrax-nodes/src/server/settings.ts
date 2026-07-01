@@ -24,7 +24,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   closedMessage: "The PYRAX Nodes portal is opening soon. Leave your email below and we'll notify you the moment it's live.",
   defaultNetwork: "forge",
   downloads: [],
-  downloadsOpen: true,
+  downloadsOpen: false,           // GO-LIVE: nodes public downloads start DISABLED; the team opens them via the portal toggle
+
   downloadsMessage: "Public node downloads open when the PYRAX testnet goes live. Join the list and we'll email you the moment official downloads are available.",
   updatedAt: 0,
   updatedBy: null,

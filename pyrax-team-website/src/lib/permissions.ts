@@ -44,6 +44,8 @@ export const PERMISSIONS = {
   // --- Devnet Management: the closed-alpha tester program (devnet.pyraxchain.com) ---
   "devnet.manage": { group: "Devnet Management", label: "Manage Devnet Users", desc: "Whitelist testers (email + Telegram handle → invite), set devnet status + the downloads gate.", elevated: true },
   "devnet.issues": { group: "Devnet Management", label: "Devnet Issue Council", desc: "View, comment on, and triage tester bug reports (award bounties).", elevated: true },
+  "devnet.tests": { group: "Devnet Management", label: "Devnet Test Reviews", desc: "Review tester product-test submissions: assign, view the proof + Sentinel assessment, accept/reject/request-more, and award PYRX.", elevated: true },
+  "devnet.rewards": { group: "Devnet Management", label: "Airdrop Accounting", desc: "View every tester's accrued PYRX rewards + payout wallets (the mainnet-airdrop liability) and export the accounting as CSV.", elevated: true },
   "devnet.chat": { group: "Devnet Management", label: "Devnet Chat", desc: "Join the tester community chat as an Admin (requires a chat username)." },
 
   // --- Network & App Management: the public nodes site (nodes.pyraxchain.com) ---
@@ -54,6 +56,14 @@ export const PERMISSIONS = {
   // --- Operational ---
   "error_reports.view": { group: "Operations", label: "View error reports", desc: "Read inbound crash/error reports from nodes + apps." },
   "announcements.publish": { group: "Operations", label: "Publish update announcements", desc: "Announce a new app/CLI version to the network." },
+
+  // --- NEURAX Sentinel (SRE): the guardian-AI operations console. ALL Sentinel activity lives
+  //     here in the team portal — status.pyraxchain.com is the PUBLIC status page only. ---
+  "sentinel.view": { group: "NEURAX Sentinel", label: "Sentinel console", desc: "Open the NEURAX Sentinel console: brain + fleet health, the live Mind activity stream, and advisories." },
+  "sentinel.ask": { group: "NEURAX Sentinel", label: "Ask Sentinel", desc: "Query the Sentinel brain (the on-GPU runtime) from the console." },
+  "sentinel.approve": { group: "NEURAX Sentinel", label: "Approve Sentinel actions", desc: "Approve or reject Sentinel's proposed actions — including the red-line consensus/comms/p2p fixes — and resolve advisories.", elevated: true },
+  "sentinel.control": { group: "NEURAX Sentinel", label: "Sentinel kill-switch & autonomy", desc: "Arm or disarm autonomy and trip the Sentinel kill-switch (halt all autonomous action at once).", elevated: true },
+  "sentinel.incidents": { group: "NEURAX Sentinel", label: "Sentinel incidents", desc: "Manage incidents Sentinel opens: staged status-page notes, the restoration watch, and resolution.", elevated: true },
 } as const;
 
 export type Permission = keyof typeof PERMISSIONS;
@@ -113,8 +123,8 @@ export const PRESETS: Record<string, { label: string; desc: string; permissions:
   },
   devnet_management: {
     label: "Devnet Management",
-    desc: "Run the closed-alpha tester program: whitelist testers, status, issues + chat.",
-    permissions: ["dashboard.view", "devnet.manage", "devnet.issues", "devnet.chat"],
+    desc: "Run the closed-alpha tester program: whitelist testers, status, issues, test reviews, airdrop accounting + chat.",
+    permissions: ["dashboard.view", "devnet.manage", "devnet.issues", "devnet.tests", "devnet.rewards", "devnet.chat"],
   },
   signature_manager: {
     label: "Signature Manager",

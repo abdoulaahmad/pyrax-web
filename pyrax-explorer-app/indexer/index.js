@@ -21,10 +21,27 @@
 
 import { createServer } from "node:http";
 import { WebSocketServer } from "ws";
+import { createRequire } from "node:module";
 import * as db from "./db.js";
-import { startIngest, events } from "./ingest.js";
+import { startIngest, events, ingestProgress } from "./ingest.js";
 import { verifyContract } from "./verify.js";
-import { PORT, HOST, ALLOW_ORIGIN, NETWORKS, enabledNetworks } from "./config.js";
+import { report as sentinel } from "./sentinel.js";
+import { RateLimiter, clientIp } from "./ratelimit.js";
+import { num, clampLimit, clampOffset, readBody } from "./http-helpers.js";
+import {
+  PORT, HOST, ALLOW_ORIGIN, NETWORKS, enabledNetworks,
+  VERIFY_MAX_BODY_BYTES, RL_READ_RPS, RL_READ_BURST, RL_VERIFY_RPS, RL_VERIFY_BURST,
+} from "./config.js";
+
+const VERSION = process.env.EXPLORER_INDEXER_VERSION || (() => {
+  try { return createRequire(import.meta.url)("./package.json").version; } catch { return "0.0.0"; }
+})();
+
+// Head-freshness thresholds for /api/health. A network is flagged unhealthy only when it is BOTH far
+// behind the tip AND hasn't advanced for a while — so a momentarily-behind-but-catching-up indexer stays
+// healthy, while a genuinely wedged one (RPC gone, DB write loop failing) is detectable.
+const STALE_MS = Number(process.env.HEALTH_STALE_MS) || 90_000;   // no forward progress for this long …
+const LAG_BLOCKS = Number(process.env.HEALTH_LAG_BLOCKS) || 25;   // … while still this far behind head
 
 const CORS = {
   "access-control-allow-origin": ALLOW_ORIGIN,
@@ -36,17 +53,11 @@ const json = (res, code, body) => {
   res.end(JSON.stringify(body));
 };
 const bad = (res, code, msg, extra) => json(res, code, { error: msg, ...(extra || {}) });
-const num = (v, d) => {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : d;
-};
-const clampLimit = (v) => Math.min(100, Math.max(1, num(v, 25)));
 
-async function readBody(req) {
-  const chunks = [];
-  for await (const c of req) chunks.push(c);
-  return Buffer.concat(chunks).toString("utf8");
-}
+// Per-IP token buckets. Read routes are generous (interactive UI + external consumers); the verify
+// route is far more expensive (remote solc download + CPU compile) and gets a much tighter bucket.
+const readLimiter = new RateLimiter({ ratePerSec: RL_READ_RPS, burst: RL_READ_BURST });
+const verifyLimiter = new RateLimiter({ ratePerSec: RL_VERIFY_RPS, burst: RL_VERIFY_BURST });
 
 const server = createServer(async (req, res) => {
   try {
@@ -58,9 +69,46 @@ const server = createServer(async (req, res) => {
     const p = url.pathname.replace(/\/+$/, "");
     const sp = url.searchParams;
     const limit = clampLimit(sp.get("limit"));
-    const offset = Math.max(0, num(sp.get("offset"), 0));
+    const offset = clampOffset(sp.get("offset"));
 
-    if (p === "/api/health" || p === "/health") return json(res, 200, { ok: true, networks: enabledNetworks().map((n) => n.chainId) });
+    // Per-IP read-rate gate on EVERY route (health included, so a flood can't pin the DB probe either).
+    // The verify route additionally passes a tighter gate below before any body is read/compiled.
+    const ip = clientIp(req);
+    const gate = readLimiter.take(ip);
+    if (!gate.ok) {
+      res.writeHead(429, { "content-type": "application/json; charset=utf-8", "retry-after": String(gate.retryAfter), ...CORS });
+      return res.end(JSON.stringify({ error: "rate limit exceeded — slow down", retryAfter: gate.retryAfter }));
+    }
+
+    if (p === "/api/health" || p === "/health" || p === "/healthz") {
+      // Liveness + a NON-FATAL ingest-freshness/lag oracle. Contract: ALWAYS 200 while the process is up
+      // (dependency health is a field, never a non-200). A bounded DB probe reports up/down without
+      // hanging the check. `networks[].stale` flips true when a network is BOTH far behind head AND has
+      // made no forward progress for STALE_MS — that's the signal a monitor watches for a wedged ingest.
+      const dbStatus = await db.ping().catch(() => "down");
+      const prog = ingestProgress();
+      const networks = enabledNetworks().map((n) => {
+        const pr = prog[n.chainId] || null;
+        const stale = !!(pr && pr.lagBlocks != null && pr.lagBlocks > LAG_BLOCKS && pr.staleMs > STALE_MS);
+        return {
+          chainId: n.chainId,
+          head: pr ? pr.head : null,
+          indexed: pr ? pr.indexed : null,
+          lagBlocks: pr ? pr.lagBlocks : null,
+          staleMs: pr ? pr.staleMs : null,
+          lastTickAgoMs: pr ? pr.lastTickAgoMs : null,
+          stale,
+        };
+      });
+      return json(res, 200, {
+        ok: true,
+        version: VERSION,
+        db: dbStatus,
+        anyStale: networks.some((x) => x.stale),
+        networks,
+        ts: Date.now(),
+      });
+    }
     if (p === "/api/networks")
       return json(res, 200, Object.entries(NETWORKS).map(([id, n]) => ({ chainId: Number(id), name: n.name, indexed: !!n.rpc })));
 
@@ -111,13 +159,26 @@ const server = createServer(async (req, res) => {
     if ((mm = rest.match(/^contract\/(0x[0-9a-fA-F]{40})$/))) return json(res, 200, (await db.contractGet(chainId, mm[1])) ?? null);
 
     if (rest === "verify" && req.method === "POST") {
-      const body = JSON.parse((await readBody(req)) || "{}");
+      // A second, MUCH tighter per-IP gate before the (remote solc download + CPU compile) verify path.
+      const vgate = verifyLimiter.take(ip);
+      if (!vgate.ok) {
+        res.writeHead(429, { "content-type": "application/json; charset=utf-8", "retry-after": String(vgate.retryAfter), ...CORS });
+        return res.end(JSON.stringify({ error: "verify rate limit exceeded — slow down", retryAfter: vgate.retryAfter }));
+      }
+      // Hard body cap enforced BEFORE buffering/JSON.parse so an oversized/never-ending body can't
+      // allocate arbitrary memory per connection.
+      const body = JSON.parse((await readBody(req, VERIFY_MAX_BODY_BYTES)) || "{}");
       const result = await verifyContract(chainId, body);
       return json(res, result.ok ? 200 : 400, result);
     }
 
     return bad(res, 404, "not found");
   } catch (e) {
+    // An oversized body is a client error (413), not a server fault — respond cleanly without paging.
+    if (e && e.code === 413) return bad(res, 413, "request body too large");
+    // A 500 from a read-API request is a genuine server fault — report it (deduped/throttled/scrubbed),
+    // fail-open. The response to the client is unchanged.
+    sentinel(`read-api 500 ${req.method} ${req.url?.split("?")[0] || ""}`, `read API: ${e?.message ?? e}`, "error");
     return bad(res, 500, e?.message || "server error");
   }
 });
@@ -160,5 +221,8 @@ db.init()
   )
   .catch((e) => {
     console.error("[api] failed to initialize the database:", e?.message ?? e);
-    process.exit(1);
+    // Fatal boot failure — report it best-effort BEFORE exiting so an operator sees the crash-loop in
+    // Sentinel. Give the fire-and-forget POST a brief moment to flush, then exit regardless (fail-open).
+    sentinel("indexer boot failed: db.init", `db.init() at startup: ${e?.message ?? e}`, "error");
+    setTimeout(() => process.exit(1), 1_000).unref?.();
   });

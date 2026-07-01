@@ -1,16 +1,16 @@
 #!/bin/sh
 # SPDX-License-Identifier: LicenseRef-PYRAX-Proprietary
 #
-# Ensure the faucet's dispensing key exists, then start the HTTP faucet. Idles if
-# PYRAX_KEY_PASSPHRASE is unset (so the service can deploy before it's configured).
+# Ensure the faucet's per-network dispensing keys exist, then start the HTTP faucet. Idles
+# if PYRAX_KEY_PASSPHRASE is unset (so the service can deploy before it's configured).
 #
-# The dispensing key is the FAUCET operator account, which the uniform dev/test
-# genesis pre-funds (1 B PYRX) — so the faucet can dispense immediately with NO
-# post-genesis funding transaction. We import the well-known, PUBLIC Hardhat/Anvil
-# account #2 private key (0x3C44…293BC) under the name `faucet-op`. A fresh name
-# (not `faucet`) guarantees we never collide with an older auto-generated key left
-# in the data volume. This is a documented throwaway dev key used ONLY on dev/test
-# networks (the faucet is never wired to mainnet) — it MUST NEVER be reused on mainnet.
+# The dispensing keys are the CONTROLLED, genesis-funded welcome-faucet wallets for each
+# network — so the faucet can dispense immediately with NO post-genesis funding tx. The
+# deploy passes each network's secret from the root .env vault (NEVER logged; only the
+# derived address is printed), imported under the keystore NAME the faucet signs with:
+#   FAUCET_SK        -> Seed  (881109) under $FAUCET_KEY        (default seed-faucet;  SEED_FAUCET_KEY)
+#   FAUCET_SK_710823 -> Forge (710823) under $FAUCET_KEY_710823 (default forge-faucet; FORGE_FAUCET_KEY)
+# The faucet is NEVER wired to mainnet.
 set -eu
 
 if [ -z "${PYRAX_KEY_PASSPHRASE:-}" ]; then
@@ -19,15 +19,35 @@ if [ -z "${PYRAX_KEY_PASSPHRASE:-}" ]; then
 fi
 
 export PYRAX_HOME=/data
-FAUCET_KEY="${FAUCET_KEY:-faucet-op}"
-# Anvil/Hardhat account #2 (mnemonic "test test … junk"). PUBLIC dev key — dev/test only.
-FAUCET_SK="0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
-# Import the genesis-funded dispensing key once (idempotent: skipped if it exists).
-if ! pyrax keys show "$FAUCET_KEY" >/dev/null 2>&1; then
-  echo "[faucet] importing genesis-funded dispensing key '$FAUCET_KEY' (Anvil #2)…"
-  pyrax keys import "$FAUCET_KEY" "$FAUCET_SK" || true
-fi
-echo "[faucet] dispensing address: $(pyrax keys show "$FAUCET_KEY" 2>/dev/null || echo '?')"
+
+# SECURITY (finding M16): the faucet is ALWAYS deployed behind the shared Caddy edge, which
+# OVERWRITES X-Forwarded-For with the real client IP as the rightmost hop (see the faucet
+# route in pyrax-web/Caddyfile). Turn on proxy trust by default so the per-IP anti-automation
+# caps read that trusted, attacker-uncontrollable IP instead of collapsing every caller into
+# one shared bucket. Overridable: set TRUST_PROXY explicitly (e.g. 0) if the faucet is ever
+# run WITHOUT the single-proxy topology, so a client-spoofed XFF is never trusted as identity.
+export TRUST_PROXY="${TRUST_PROXY:-1}"
+
+# Import one network's genesis-funded welcome-faucet key under its keystore name (idempotent:
+# skipped if it already exists). The secret is read from the environment and never echoed.
+import_key() {
+  name="$1"; secret="$2"
+  [ -n "$secret" ] || return 0
+  if ! pyrax keys show "$name" >/dev/null 2>&1; then
+    echo "[faucet] importing genesis-funded dispensing key '$name'…"
+    pyrax keys import "$name" "$secret" || true
+  fi
+  echo "[faucet] '$name' dispensing address: $(pyrax keys show "$name" 2>/dev/null || echo '?')"
+}
+
+# Seed (881109) welcome-faucet key (SEED_FAUCET_KEY in the vault → FAUCET_SK in the deploy).
+FAUCET_KEY="${FAUCET_KEY:-seed-faucet}"
+import_key "$FAUCET_KEY" "${FAUCET_SK:-}"
+
+# Forge (710823) welcome-faucet key (FORGE_FAUCET_KEY in the vault → FAUCET_SK_710823 in the
+# deploy). Only imported when the Forge secret is configured, so a Seed-only deploy is unchanged.
+FAUCET_KEY_710823="${FAUCET_KEY_710823:-forge-faucet}"
+import_key "$FAUCET_KEY_710823" "${FAUCET_SK_710823:-}"
 
 # Pre-shield a chunk of the operator's transparent balance into the shielded pool so
 # that `wallet shielded-send` has notes to spend. Best-effort and never fatal: the node

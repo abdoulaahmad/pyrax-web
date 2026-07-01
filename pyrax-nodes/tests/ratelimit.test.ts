@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 // Token-bucket rate limiter: burst capacity, per-key isolation, refill over time, and bounded size.
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { createRateLimiter } from "../src/server/ratelimit";
+import { createRateLimiter, announceLimiter, deregisterLimiter, notifySubscribeLimiter } from "../src/server/ratelimit";
 
 describe("createRateLimiter", () => {
   beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(0); });
@@ -55,5 +55,30 @@ describe("createRateLimiter", () => {
     expect(rl.size()).toBe(2);
     rl.reset();
     expect(rl.size()).toBe(0);
+  });
+});
+
+describe("shared endpoint limiters", () => {
+  beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(0); announceLimiter.reset(); deregisterLimiter.reset(); notifySubscribeLimiter.reset(); });
+  afterEach(() => { announceLimiter.reset(); deregisterLimiter.reset(); notifySubscribeLimiter.reset(); vi.useRealTimers(); });
+
+  it("deregister has a bounded burst then throttles (directory-churn DoS defense)", () => {
+    // A malicious holder of the shared secret loops deregister from one IP; after the small burst the
+    // limiter must reject so it can't blank the directory faster than nodes re-announce (~10s).
+    let allowed = 0;
+    for (let i = 0; i < 50; i++) if (deregisterLimiter.take("198.51.100.9")) allowed++;
+    expect(allowed).toBeGreaterThan(0);
+    expect(allowed).toBeLessThan(50);      // it DID throttle
+    expect(deregisterLimiter.take("198.51.100.9")).toBe(false); // exhausted
+    expect(deregisterLimiter.take("203.0.113.7")).toBe(true);   // a different IP has its own bucket
+  });
+
+  it("deregister refills slowly (well under the ~10s re-announce cadence per token)", () => {
+    for (let i = 0; i < 50; i++) deregisterLimiter.take("ip");
+    expect(deregisterLimiter.take("ip")).toBe(false);
+    vi.advanceTimersByTime(1000); // refillPerSec 0.2 → <1 token in 1s
+    expect(deregisterLimiter.take("ip")).toBe(false);
+    vi.advanceTimersByTime(5000); // now ≥1 token has accrued
+    expect(deregisterLimiter.take("ip")).toBe(true);
   });
 });

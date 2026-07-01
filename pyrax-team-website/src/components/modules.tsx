@@ -754,6 +754,23 @@ const DSEV: Record<string, { tone: any; label: string }> = { critical: { tone: "
 const DSTATUS: Record<string, string> = { new: "New", confirmed: "Confirmed", in_progress: "In Progress", fixed: "Fixed", verified: "Verified", closed: "Closed", duplicate: "Duplicate", wont_fix: "Won't Fix" };
 const dago = (ms: number) => { const s = Math.floor((Date.now() - ms) / 1000); if (s < 60) return s + "s ago"; if (s < 3600) return Math.floor(s / 60) + "m ago"; if (s < 86400) return Math.floor(s / 3600) + "h ago"; return Math.floor(s / 86400) + "d ago"; };
 
+// ---- Product-Test review vocabulary (mirrors the cross-surface contract review_status machine) ----
+const TSTATUS: Record<string, { tone: any; label: string }> = {
+  submitted: { tone: "water", label: "Submitted" },
+  ai_screening: { tone: "brand", label: "AI Screening" },
+  in_review: { tone: "warning", label: "In Review" },
+  needs_more: { tone: "warning", label: "Needs More" },
+  accepted: { tone: "positive", label: "Accepted" },
+  rejected: { tone: "danger", label: "Rejected" },
+};
+const TVERDICT: Record<string, { tone: any; label: string }> = {
+  accept: { tone: "positive", label: "Accept" },
+  reject: { tone: "danger", label: "Reject" },
+  escalate: { tone: "warning", label: "Escalate" },
+};
+const TRACK_LABEL: Record<string, string> = { inferno: "Inferno", cli: "CLI" };
+const nfmt = (n: number) => Number(n || 0).toLocaleString("en-US");
+
 const DOC_LABEL: Record<string, string> = { nda: "NDA", tos: "Alpha T&C" };
 export function DevnetLegal({ subject }: { subject: AccessSubject }) {
   if (!can(subject, "devnet.manage")) return <Locked what="the Devnet legal records" />;
@@ -873,6 +890,341 @@ function DevnetBugDetail({ id, onClose, onChanged }: { id: string; onClose: () =
           </div>
         </>; })()}
       </div>
+    </div>
+  );
+}
+
+/* ============================================================== Devnet Test Reviews (product tests) */
+/** Staff review of tester product-test submissions — the review QUEUE (filter by status/track/assignee,
+ *  Sentinel verdict badge, assignee chip), a DETAIL drawer that plays the proof back (photos/video, each
+ *  step's pass/fail, the tester's logs, auto-captured environment, and the full Sentinel assessment),
+ *  ASSIGN + review actions (accept→award / reject / request-more) with an award-override, the comment
+ *  thread, and a Release-Readiness panel (per-version coverage + a test×track pass/fail heatmap).
+ *  Mirrors the Issue-Council flow against the team review API (contract §6). */
+export function DevnetRewards({ subject }: { subject: AccessSubject }) {
+  if (!can(subject, "devnet.rewards")) return <Locked what="Airdrop Accounting" />;
+  const [data, setData] = useState<{ accounts: any[]; totals: any; priceUsd: number } | null>(null);
+  const [q, setQ] = useState("");
+  const [only, setOnly] = useState<"all" | "eligible" | "wallet">("all");
+  const [err, setErr] = useState("");
+  useEffect(() => {
+    (async () => {
+      try {
+        const d = await (await fetch("/api/devnet/rewards")).json();
+        if (d.ok) setData({ accounts: d.accounts, totals: d.totals, priceUsd: d.priceUsd }); else setErr(d.error || "Failed to load.");
+      } catch { setErr("Failed to load."); }
+    })();
+  }, []);
+  const usd = (n: number) => "$" + Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const rows = useMemo(() => {
+    if (!data) return [];
+    const term = q.trim().toLowerCase();
+    return data.accounts.filter((a) => {
+      if (only === "eligible" && !a.rewardEligible) return false;
+      if (only === "wallet" && !a.payoutWallet) return false;
+      if (!term) return true;
+      return (a.handle || "").toLowerCase().includes(term) || (a.displayName || "").toLowerCase().includes(term) || (a.email || "").toLowerCase().includes(term) || (a.payoutWallet || "").toLowerCase().includes(term);
+    });
+  }, [data, q, only]);
+
+  return (
+    <>
+      <PageHeader title="Airdrop Accounting" subtitle="Every tester's accrued PYRX rewards — paid at the mainnet airdrop. Broken down by reason, with payout wallets and CSV export." />
+      {err && <Card className="mb-3 p-4 text-sm text-red-400">{err}</Card>}
+      {!data ? <Card className="p-8 text-center text-sm text-muted">Loading…</Card> : (
+        <>
+          <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Card className="p-4"><div className="text-xs text-faint">Total accrued</div><div className="mt-1 text-xl font-semibold">{nfmt(data.totals.totalPyrx)}<span className="ml-1 text-xs text-muted">PYRX</span></div><div className="text-xs text-faint">≈ {usd(data.totals.usd)} @ ${data.priceUsd}/PYRX</div></Card>
+            <Card className="p-4"><div className="text-xs text-faint">Airdrop liability (eligible)</div><div className="mt-1 text-xl font-semibold">{nfmt(data.totals.eligiblePyrx)}<span className="ml-1 text-xs text-muted">PYRX</span></div><div className="text-xs text-faint">reward-eligible testers only</div></Card>
+            <Card className="p-4"><div className="text-xs text-faint">Testers</div><div className="mt-1 text-xl font-semibold">{nfmt(data.totals.testers)}</div><div className="text-xs text-faint">{nfmt(data.totals.withWallet)} with a payout wallet</div></Card>
+            <Card className="p-4"><div className="text-xs text-faint">By reason</div><div className="mt-1 space-y-0.5 text-xs">
+              <div className="flex justify-between"><span className="text-muted">Tests</span><span>{nfmt(data.totals.byReason.test)}</span></div>
+              <div className="flex justify-between"><span className="text-muted">Bugs</span><span>{nfmt(data.totals.byReason.bug)}</span></div>
+              <div className="flex justify-between"><span className="text-muted">Consistency</span><span>{nfmt(data.totals.byReason.consistency)}</span></div>
+              <div className="flex justify-between"><span className="text-muted">Uptime</span><span>{nfmt(data.totals.byReason.uptime)}</span></div>
+              <div className="flex justify-between"><span className="text-muted">Founding / other</span><span>{nfmt(data.totals.byReason.founding + data.totals.byReason.other)}</span></div>
+            </div></Card>
+          </div>
+
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <input className="input w-auto flex-1 py-1.5 text-sm" placeholder="Search handle, name, email, or wallet…" value={q} onChange={(e) => setQ(e.target.value)} />
+            <div className="flex rounded-lg border border-line p-0.5 text-sm">
+              {(["all", "eligible", "wallet"] as const).map((k) => (
+                <button key={k} onClick={() => setOnly(k)} className={`rounded-md px-3 py-1 ${only === k ? "bg-[rgba(245,134,34,0.1)] text-ink" : "text-muted hover:text-ink"}`}>{k === "all" ? "All" : k === "eligible" ? "Eligible" : "Has wallet"}</button>
+              ))}
+            </div>
+            <a href="/api/devnet/rewards?format=csv" className="btn btn-ghost px-3 py-1.5 text-sm" download>Export CSV</a>
+          </div>
+
+          {rows.length === 0 ? <Card className="p-8 text-center text-sm text-muted">No testers match.</Card> : (
+            <Card className="overflow-x-auto p-0">
+              <table className="w-full text-sm">
+                <thead><tr className="border-b border-line text-left text-xs text-faint">
+                  <th className="p-3 font-medium">Tester</th>
+                  <th className="p-3 font-medium">Payout wallet</th>
+                  <th className="p-3 text-right font-medium">Total PYRX</th>
+                  <th className="p-3 text-right font-medium">≈ USD</th>
+                  <th className="p-3 text-right font-medium">Tests</th>
+                  <th className="p-3 text-right font-medium">Bugs</th>
+                  <th className="p-3 text-right font-medium">Consistency</th>
+                  <th className="p-3 text-right font-medium">Last earned</th>
+                </tr></thead>
+                <tbody>{rows.map((a) => (
+                  <tr key={a.testerId} className="border-b border-line/50 last:border-0">
+                    <td className="p-3">
+                      <div className="flex items-center gap-2 font-medium">{a.handle ? "@" + a.handle : a.displayName || a.email}{a.foundingRank ? <Badge tone="brand">Founding #{a.foundingRank}</Badge> : null}{!a.rewardEligible ? <Badge tone="muted">ineligible</Badge> : null}</div>
+                      <div className="text-xs text-faint">{a.displayName || a.email}</div>
+                    </td>
+                    <td className="p-3 font-mono text-xs text-muted">{a.payoutWallet ? a.payoutWallet.slice(0, 10) + "…" + a.payoutWallet.slice(-6) : <span className="text-faint">— none —</span>}</td>
+                    <td className="p-3 text-right font-semibold">{nfmt(a.totalPyrx)}</td>
+                    <td className="p-3 text-right text-muted">{usd(a.usd)}</td>
+                    <td className="p-3 text-right text-muted">{nfmt(a.byReason.test)}<span className="text-faint"> ({a.testCount})</span></td>
+                    <td className="p-3 text-right text-muted">{nfmt(a.byReason.bug)}<span className="text-faint"> ({a.bugCount})</span></td>
+                    <td className="p-3 text-right text-muted">{nfmt(a.byReason.consistency)}</td>
+                    <td className="p-3 text-right text-xs text-faint">{a.lastEarnedAt ? dago(a.lastEarnedAt) : "—"}</td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </Card>
+          )}
+          <p className="mt-3 text-xs text-faint">Rewards accrue now and are paid at the mainnet airdrop. Testers without a payout wallet must set one before the snapshot. Amounts reflect the earnings ledger; a wrongful award is corrected with an <code>adjustment</code> entry, never a silent edit.</p>
+        </>
+      )}
+    </>
+  );
+}
+
+export function DevnetTestReviews({ subject }: { subject: AccessSubject }) {
+  if (!can(subject, "devnet.tests")) return <Locked what="the Devnet Test Reviews" />;
+  const [subs, setSubs] = useState<any[] | null>(null);
+  const [reviewers, setReviewers] = useState<any[]>([]);
+  const [status, setStatus] = useState(""); const [track, setTrack] = useState(""); const [assignee, setAssignee] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [tab, setTab] = useState<"queue" | "readiness">("queue");
+  async function load() {
+    const q = new URLSearchParams();
+    if (status) q.set("status", status); if (track) q.set("track", track); if (assignee) q.set("assignee", assignee);
+    const d = await (await fetch("/api/devnet/tests?" + q)).json();
+    if (d.ok) { setSubs(d.submissions); setReviewers(d.reviewers || []); } else { setSubs([]); }
+  }
+  useEffect(() => { if (tab === "queue") load(); }, [status, track, assignee, tab]);
+  return (
+    <>
+      <PageHeader title="Devnet Test Reviews" subtitle="Tester product-test submissions — assign, verify the proof + Sentinel assessment, and accept (award), reject, or request more info." />
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <div className="flex rounded-lg border border-line p-0.5 text-sm">
+          <button onClick={() => setTab("queue")} className={`rounded-md px-3 py-1 ${tab === "queue" ? "bg-[rgba(245,134,34,0.1)] text-ink" : "text-muted hover:text-ink"}`}>Review Queue</button>
+          <button onClick={() => setTab("readiness")} className={`rounded-md px-3 py-1 ${tab === "readiness" ? "bg-[rgba(245,134,34,0.1)] text-ink" : "text-muted hover:text-ink"}`}>Release Readiness</button>
+        </div>
+      </div>
+      {tab === "readiness" ? <ReleaseReadiness /> : <>
+        <div className="mb-3 flex flex-wrap gap-2">
+          <select className="input w-auto py-1.5 text-sm" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">All statuses</option>{Object.entries(TSTATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select>
+          <select className="input w-auto py-1.5 text-sm" value={track} onChange={(e) => setTrack(e.target.value)}><option value="">All tracks</option><option value="inferno">Inferno</option><option value="cli">CLI</option></select>
+          <select className="input w-auto py-1.5 text-sm" value={assignee} onChange={(e) => setAssignee(e.target.value)}><option value="">Any assignee</option>{reviewers.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</select>
+        </div>
+        {!subs ? <Card className="p-8 text-center text-sm text-muted">Loading…</Card> : subs.length === 0 ? <Card className="p-8 text-center text-sm text-muted">No submissions match.</Card> : (
+          <div className="space-y-2">{subs.map((s) => { const st = TSTATUS[s.reviewStatus]; const sa = s.sentinelAssessment; return (
+            <Card key={s.id} hover className="cursor-pointer p-4" onClick={() => setOpenId(s.id)}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge tone="muted">{TRACK_LABEL[s.track] || s.track}</Badge>
+                    <Badge tone={st?.tone}>{st?.label || s.reviewStatus}</Badge>
+                    {sa?.verdict && <Badge tone={TVERDICT[sa.verdict]?.tone}>Sentinel: {TVERDICT[sa.verdict]?.label || sa.verdict}{typeof sa.confidence === "number" ? ` ${Math.round(sa.confidence * 100)}%` : ""}</Badge>}
+                    {s.awardedPyrx > 0 && <Badge tone="brand">{nfmt(s.awardedPyrx)} PYRX</Badge>}
+                  </div>
+                  <div className="mt-1.5 truncate font-semibold">{s.testTitle}</div>
+                  <div className="text-xs text-faint">by {s.testerHandle ? "@" + s.testerHandle : s.testerName} · {dago(Number(s.createdAt))}{s.assignedToName ? " · assigned to " + s.assignedToName : ""}</div>
+                </div>
+                <div className="shrink-0 text-right text-xs text-faint">
+                  <div>{(s.results || []).filter((r: any) => r.pass).length}/{(s.results || []).length} steps</div>
+                  <div>{(s.attachments || []).length} proof</div>
+                </div>
+              </div>
+            </Card>
+          ); })}</div>
+        )}
+        {openId && <TestReviewDetail id={openId} reviewers={reviewers} onClose={() => setOpenId(null)} onChanged={load} />}
+      </>}
+    </>
+  );
+}
+
+function TestReviewDetail({ id, reviewers, onClose, onChanged }: { id: string; reviewers: any[]; onClose: () => void; onChanged: () => void }) {
+  const [s, setS] = useState<any>(null); const [comments, setComments] = useState<any[]>([]);
+  const [comment, setComment] = useState(""); const [notes, setNotes] = useState(""); const [award, setAward] = useState(""); const [busy, setBusy] = useState(false);
+  async function load() { const d = await (await fetch("/api/devnet/tests/" + id)).json(); if (d.ok) { setS(d.submission); setComments(d.comments || []); } }
+  useEffect(() => { load(); }, [id]);
+  async function assign(assigneeId: string) { setBusy(true); const d = await (await fetch(`/api/devnet/tests/${id}/assign`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ assigneeId }) })).json(); if (d.ok) { setS(d.submission); onChanged(); } setBusy(false); }
+  async function review(verdict: "accept" | "reject" | "needs_more") {
+    setBusy(true);
+    const body: any = { verdict, notes };
+    const a = Number(award); if (verdict === "accept" && award.trim() !== "" && Number.isFinite(a) && a >= 0) body.awardPyrx = Math.round(a);
+    const d = await (await fetch(`/api/devnet/tests/${id}/review`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })).json();
+    if (d.ok) { setS(d.submission); onChanged(); } setBusy(false);
+  }
+  async function addComment() { if (!comment.trim()) return; const d = await (await fetch(`/api/devnet/tests/${id}/comment`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ body: comment }) })).json(); if (d.ok) { setComments(d.comments); setComment(""); } }
+
+  const stepFlag = (i: number) => s?.sentinelAssessment?.perStep?.find((p: any) => p.stepIndex === i);
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div className="h-full w-full max-w-2xl overflow-y-auto border-l border-line bg-[rgba(8,10,17,0.97)] p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-4 flex items-center justify-between"><h2 className="text-lg font-bold">{s?.testTitle || "Submission"}</h2><button onClick={onClose} className="text-faint hover:text-ink">✕</button></div>
+        {!s ? <p className="text-sm text-muted">Loading…</p> : (() => { const st = TSTATUS[s.reviewStatus]; const sa = s.sentinelAssessment; const terminal = s.reviewStatus === "accepted" || s.reviewStatus === "rejected"; return <>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge tone="muted">{TRACK_LABEL[s.track] || s.track}</Badge>
+            <Badge tone={st?.tone}>{st?.label || s.reviewStatus}</Badge>
+            {s.awardedPyrx > 0 && <Badge tone="brand">{nfmt(s.awardedPyrx)} PYRX</Badge>}
+            <span className="text-xs text-faint">by {s.testerHandle ? "@" + s.testerHandle : s.testerName} · {dago(Number(s.createdAt))}</span>
+          </div>
+          <p className="mt-2 text-xs text-faint">Test: <span className="text-muted">{s.testSlug || s.testId}</span> · weight <span className="text-muted">{nfmt(s.weightPyrx)} PYRX</span>{s.appVersion ? <> · built for <span className="text-muted">{s.appVersion}</span></> : null}{s.testerWallet ? <> · payout <span className="text-muted">{s.testerWallet}</span></> : <> · <span className="text-[color:var(--color-ember)]">no payout wallet</span></>}</p>
+
+          {/* per-step results with the tester's pass/fail + note, annotated by Sentinel's perStep flags */}
+          <div className="mt-4"><div className="label">Steps</div>
+            <div className="mt-1 space-y-1.5">{(s.results || []).length === 0 ? <p className="text-xs text-faint">No step results.</p> : (s.results || []).map((r: any, i: number) => { const f = stepFlag(r.stepIndex ?? i); return (
+              <div key={i} className="rounded-lg border border-line bg-[rgba(5,6,9,0.4)] p-2.5 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium">Step {(r.stepIndex ?? i) + 1}</span>
+                  <span className="flex items-center gap-1.5">
+                    {f && <Badge tone={f.ok ? "positive" : "danger"}>AI {f.ok ? "ok" : "flag"}</Badge>}
+                    <Badge tone={r.pass ? "positive" : "danger"}>{r.pass ? "Pass" : "Fail"}</Badge>
+                  </span>
+                </div>
+                {r.note && <div className="mt-1 whitespace-pre-wrap text-muted">{r.note}</div>}
+                {f?.flag && <div className="mt-1 text-xs text-[color:var(--color-ember)]">⚑ {f.flag}</div>}
+              </div>
+            ); })}</div>
+          </div>
+
+          {s.notes && <div className="mt-3"><div className="label">Tester notes</div><div className="mt-1 whitespace-pre-wrap rounded-lg border border-line bg-[rgba(5,6,9,0.4)] p-3 text-sm text-muted">{s.notes}</div></div>}
+          {s.logs && <div className="mt-3"><div className="label">Logs</div><pre className="mt-1 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-line bg-[rgba(5,6,9,0.6)] p-3 text-xs text-muted">{s.logs}</pre></div>}
+
+          {/* proof played back inline: photos as thumbnails, video from the CDN url, other files as chips */}
+          {(s.attachments?.length || 0) > 0 && <div className="mt-3"><div className="label">Proof</div><div className="mt-1 grid grid-cols-2 gap-2">{s.attachments.map((a: any, i: number) => {
+            const kind = a.type === "video" ? "video" : a.type === "image" ? "image" : "file";
+            return kind === "image"
+              ? <a key={i} href={a.url} target="_blank" rel="noreferrer" className="block"><img src={a.url} className="h-28 w-full rounded-lg border border-line object-cover" alt={a.name || "proof"} /><div className="mt-0.5 truncate text-[0.65rem] text-faint">{a.name || `image · step ${(a.stepIndex ?? 0) + 1}`}</div></a>
+              : kind === "video"
+                ? <div key={i}><video src={a.url} controls preload="metadata" className="h-28 w-full rounded-lg border border-line bg-black object-contain" /><div className="mt-0.5 truncate text-[0.65rem] text-faint">{a.name || `video · step ${(a.stepIndex ?? 0) + 1}`}</div></div>
+                : <a key={i} href={a.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-line bg-[rgba(5,6,9,0.4)] p-2 text-xs text-muted hover:text-ink">📎 {a.name || a.type || "attachment"}</a>;
+          })}</div></div>}
+
+          {/* the full Sentinel assessment: verdict/confidence, rationale, chain cross-checks, model */}
+          <Card className="mt-4 p-4">
+            <div className="flex items-center justify-between"><div className="text-sm font-semibold">Sentinel assessment</div>{sa?.verdict && <Badge tone={TVERDICT[sa.verdict]?.tone}>{TVERDICT[sa.verdict]?.label || sa.verdict}{typeof sa.confidence === "number" ? ` · ${Math.round(sa.confidence * 100)}%` : ""}</Badge>}</div>
+            {!sa ? <p className="mt-1 text-xs text-faint">Not yet screened by Sentinel.</p> : <>
+              {sa.reason && <p className="mt-2 whitespace-pre-wrap text-sm text-muted">{sa.reason}</p>}
+              {(sa.chainChecks?.length || 0) > 0 && <div className="mt-2"><div className="label">Chain checks</div><div className="mt-1 space-y-1">{sa.chainChecks.map((c: any, i: number) => (
+                <div key={i} className="flex items-center gap-2 text-xs"><span className={c.ok ? "text-positive" : "text-[color:var(--color-negative)]"}>{c.ok ? "✓" : "✕"}</span><span className="font-medium text-ink">{c.name}</span>{c.detail && <span className="text-faint">— {c.detail}</span>}</div>
+              ))}</div></div>}
+              <p className="mt-2 text-[0.65rem] text-faint">{sa.model ? `model ${sa.model}` : ""}{sa.at ? ` · ${dago(Number(sa.at))}` : ""}</p>
+            </>}
+          </Card>
+
+          {/* assignment */}
+          <Card className="mt-4 p-4">
+            <div className="text-sm font-semibold">Assignment</div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <select className="input w-auto py-1.5 text-sm" value={s.assignedTo || ""} onChange={(e) => e.target.value && assign(e.target.value)} disabled={busy}>
+                <option value="">Unassigned</option>
+                {reviewers.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+              </select>
+              <span className="text-xs text-faint">{s.assignedToName ? `Assigned to ${s.assignedToName}` : "Not assigned"}{s.assignedByName ? ` · by ${s.assignedByName}` : ""}</span>
+            </div>
+          </Card>
+
+          {/* review actions */}
+          <Card className="mt-4 p-4">
+            <div className="text-sm font-semibold">Review</div>
+            {terminal && <p className="mt-1 text-xs text-faint">This submission is {st?.label?.toLowerCase()}. Re-accepting will not pay twice (ledger is idempotent per submission).</p>}
+            <textarea className="input mt-2 min-h-[64px] text-sm" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Reviewer notes / rationale (shared with the tester on the decision)…" />
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <label className="text-xs text-faint">Award override</label>
+              <input className="input w-40 py-1.5 text-sm" inputMode="numeric" value={award} onChange={(e) => setAward(e.target.value.replace(/[^0-9]/g, ""))} placeholder={`${nfmt(s.weightPyrx)} default`} />
+              <span className="text-xs text-faint">PYRX (blank = weight + on-time bonus)</span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button variant="primary" onClick={() => review("accept")} disabled={busy}>Accept → award</Button>
+              <Button variant="danger" onClick={() => review("reject")} disabled={busy}>Reject</Button>
+              <Button onClick={() => review("needs_more")} disabled={busy}>Request more info</Button>
+            </div>
+          </Card>
+
+          {/* comment thread */}
+          <div className="mt-5"><div className="label">Comments</div>
+            <div className="mt-2 space-y-2">{comments.map((c: any) => <div key={c.id} className="rounded-lg border border-line p-2.5 text-sm"><div className="text-xs text-faint">{c.handle ? "@" + c.handle : c.display_name}{c.is_staff && <span className="ml-1 text-[color:var(--color-brand)]">· Admin</span>} · {dago(Number(c.created_at))}</div><div className="mt-0.5 whitespace-pre-wrap">{c.body}</div></div>)}{comments.length === 0 && <p className="text-xs text-faint">No comments yet.</p>}</div>
+            <div className="mt-2 flex gap-2"><input className="input" value={comment} onChange={(e) => setComment(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addComment()} placeholder="Reply as PYRAX team…" /><Button onClick={addComment}>Send</Button></div>
+          </div>
+        </>; })()}
+      </div>
+    </div>
+  );
+}
+
+/** Release-Readiness panel: per-app-version test COVERAGE % + a test×track pass/fail heatmap, computed
+ *  from the raw tests + submissions. Coverage = share of a version's tests with ≥1 accepted submission. */
+function ReleaseReadiness() {
+  const [data, setData] = useState<{ tests: any[]; submissions: any[] } | null>(null);
+  useEffect(() => { fetch("/api/devnet/tests/readiness").then((r) => r.json()).then((d) => { if (d.ok) setData({ tests: d.tests, submissions: d.submissions }); else setData({ tests: [], submissions: [] }); }).catch(() => setData({ tests: [], submissions: [] })); }, []);
+  const view = useMemo(() => {
+    if (!data) return null;
+    const tests = data.tests;
+    const subs = data.submissions;
+    // Per test: accepted / rejected / pending submission counts (accepted ⇒ the test "passes").
+    const perTest = new Map<string, { accepted: number; rejected: number; pending: number }>();
+    for (const t of tests) perTest.set(t.id, { accepted: 0, rejected: 0, pending: 0 });
+    for (const s of subs) {
+      const b = perTest.get(s.testId); if (!b) continue;
+      if (s.reviewStatus === "accepted") b.accepted++;
+      else if (s.reviewStatus === "rejected") b.rejected++;
+      else b.pending++;
+    }
+    // Coverage per app_version: fraction of that version's tests with ≥1 accepted submission.
+    const byVersion = new Map<string, { total: number; covered: number }>();
+    for (const t of tests) {
+      const v = t.appVersion || "unversioned";
+      const b = byVersion.get(v) || { total: 0, covered: 0 };
+      b.total++; if ((perTest.get(t.id)?.accepted ?? 0) > 0) b.covered++;
+      byVersion.set(v, b);
+    }
+    const versions = Array.from(byVersion.entries()).map(([version, v]) => ({ version, ...v, pct: v.total ? Math.round((v.covered / v.total) * 100) : 0 })).sort((a, b) => a.version.localeCompare(b.version));
+    const tracks = Array.from(new Set(tests.map((t) => t.track)));
+    return { tests, perTest, versions, tracks };
+  }, [data]);
+
+  if (!view) return <Card className="p-8 text-center text-sm text-muted">Loading…</Card>;
+  if (view.tests.length === 0) return <Card className="p-8 text-center text-sm text-muted">No tests published yet.</Card>;
+  const cellTone = (b: { accepted: number; rejected: number; pending: number }) =>
+    b.accepted > 0 ? "border-[color:rgba(52,199,89,0.4)] bg-[rgba(52,199,89,0.12)] text-positive"
+      : b.rejected > 0 ? "border-[color:rgba(255,69,58,0.4)] bg-[rgba(255,69,58,0.1)] text-[color:var(--color-negative)]"
+        : b.pending > 0 ? "border-[color:rgba(245,134,34,0.4)] bg-[rgba(245,134,34,0.08)] text-gold"
+          : "border-line bg-[rgba(5,6,9,0.4)] text-faint";
+  return (
+    <div className="space-y-4">
+      <Card className="p-5">
+        <h3 className="text-base font-bold">Coverage by app version</h3>
+        <p className="text-xs text-muted">Share of each version's authored tests that have at least one accepted submission.</p>
+        <div className="mt-3 space-y-2.5">{view.versions.map((v) => (
+          <div key={v.version}>
+            <div className="mb-1 flex items-center justify-between text-sm"><span className="font-medium">{v.version}</span><span className="text-faint">{v.covered}/{v.total} tests · {v.pct}%</span></div>
+            <div className="h-2 overflow-hidden rounded-full bg-[rgba(5,6,9,0.6)] border border-line"><div className="h-full flame-bar" style={{ width: `${v.pct}%` }} /></div>
+          </div>
+        ))}</div>
+      </Card>
+      {view.tracks.map((track) => (
+        <Card key={track} className="p-5">
+          <h3 className="text-base font-bold">{TRACK_LABEL[track] || track} — pass/fail heatmap</h3>
+          <p className="text-xs text-muted">Green = an accepted submission exists · red = only rejections · amber = pending review · grey = no submissions.</p>
+          <div className="mt-3 grid gap-1.5 sm:grid-cols-2">{view.tests.filter((t) => t.track === track).map((t) => { const b = view.perTest.get(t.id)!; return (
+            <div key={t.id} className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-xs ${cellTone(b)}`}>
+              <span className="truncate font-medium">{t.title}</span>
+              <span className="shrink-0 tabular-nums">✓{b.accepted} ✕{b.rejected} •{b.pending}</span>
+            </div>
+          ); })}</div>
+        </Card>
+      ))}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { listBugs, createBug } from "../../../server/db";
 import { json } from "../../../server/http";
 import { rateLimited } from "../../../server/ratelimit";
 import { can } from "../../../lib/permissions";
+import { sanitizeAttachments } from "../../../server/attachments";
 
 export const prerender = false;
 
@@ -27,7 +28,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   if (title.length < 5) return json({ ok: false, errors: { title: "Give the bug a clear title (5+ chars)." } }, 422);
   const reproSteps = String(b?.reproSteps ?? "").trim();
   if (reproSteps.length < 5) return json({ ok: false, errors: { reproSteps: "Add the steps to reproduce." } }, 422);
-  const attachments = Array.isArray(b?.attachments) ? b.attachments.filter((a: any) => a && typeof a.url === "string").slice(0, 8) : [];
+  // Attachments are rendered to every viewer (incl. staff) as <a href>/<img src>/<video src>, so the
+  // client-supplied url/type cannot be trusted. Accept only attachments whose url is under THIS tester's
+  // own presigned CDN prefix and whose type is a known kind — blocks stored off-CDN link injection.
+  const attachments = sanitizeAttachments(b?.attachments, me.id);
   const bug = await createBug(me.id, {
     title, description: String(b?.description ?? ""), reproSteps,
     expected: String(b?.expected ?? ""), actual: String(b?.actual ?? ""),

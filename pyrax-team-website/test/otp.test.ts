@@ -14,6 +14,8 @@ interface OtpRow { code_hash: string; email: string; created_at: number; expires
 const otps: OtpRow[] = [];
 const reqHits = new Map<string, number[]>();
 const verHits = new Map<string, number[]>();
+const reqIpHits = new Map<string, number[]>();
+const verIpHits = new Map<string, number[]>();
 
 const user = { id: "u_ada", email: "ada@pyraxchain.com", display_name: "Ada", is_superuser: false, permissions: [] as string[] };
 
@@ -59,8 +61,13 @@ vi.mock("../src/server/db", () => {
   return {
     db: () => ({ query: (sql: string, params?: any[]) => Promise.resolve(fakeQuery(sql, params)) }),
     init: () => Promise.resolve(),
-    rateAllow: (bucket: string, key: string, max: number, windowMs: number) =>
-      Promise.resolve(limiter(bucket === "otp_request" ? reqHits : verHits, key, max, windowMs)),
+    rateAllow: (bucket: string, key: string, max: number, windowMs: number) => {
+      const map = bucket === "otp_request" ? reqHits
+        : bucket === "otp_verify" ? verHits
+        : bucket === "otp_request_ip" ? reqIpHits
+        : verIpHits; // otp_verify_ip
+      return Promise.resolve(limiter(map, key, max, windowMs));
+    },
     userByEmail: (email: string) => Promise.resolve(email.toLowerCase() === user.email ? { ...user } : null),
     userById: (id: string) => Promise.resolve(id === user.id ? { ...user } : null),
     touchLogin: () => Promise.resolve(),
@@ -89,6 +96,8 @@ beforeEach(() => {
   otps.length = 0;
   reqHits.clear();
   verHits.clear();
+  reqIpHits.clear();
+  verIpHits.clear();
   lastCode = "";
 });
 
@@ -155,5 +164,57 @@ describe("anti-enumeration", () => {
     expect(r.ok).toBe(true);
     if (r.ok) expect(typeof r.rid).toBe("string");
     expect(otps.length).toBe(0); // nothing was stored for an unknown user
+  });
+});
+
+describe("per-IP rate limiting (targeted sign-in DoS defense)", () => {
+  it("caps request volume from ONE ip across MANY distinct emails", async () => {
+    const ip = "203.0.113.9";
+    // REQ_IP_MAX = 30: 30 fresh emails from the same ip all succeed...
+    for (let i = 0; i < 30; i++) {
+      const r = await auth.requestLoginCode(`user${i}@example.com`, ip);
+      expect(r.ok).toBe(true);
+    }
+    // ...the 31st from that ip is blocked even though it's a brand-new email whose own bucket is empty.
+    const blocked = await auth.requestLoginCode("user30@example.com", ip);
+    expect(blocked.ok).toBe(false);
+    if (!blocked.ok) expect(blocked.reason).toBe("rate");
+  });
+
+  it("does NOT cross-block a different ip once one ip is exhausted", async () => {
+    const bad = "203.0.113.9";
+    for (let i = 0; i < 30; i++) await auth.requestLoginCode(`u${i}@example.com`, bad);
+    expect((await auth.requestLoginCode("fresh@example.com", bad)).ok).toBe(false);
+    // A legitimate user on a different ip is unaffected.
+    expect((await auth.requestLoginCode("fresh@example.com", "198.51.100.7")).ok).toBe(true);
+  });
+
+  it("an empty ip never engages the per-ip cap (fail-open when no trusted IP is known)", async () => {
+    // 50 requests with no ip: the per-EMAIL cap still applies per email, but there is no global
+    // per-ip block collapsing distinct emails into one bucket.
+    for (let i = 0; i < 50; i++) {
+      const r = await auth.requestLoginCode(`noip${i}@example.com`, "");
+      expect(r.ok).toBe(true);
+    }
+  });
+
+  it("verify is also per-ip capped across emails", async () => {
+    const ip = "203.0.113.9";
+    // VER_IP_MAX = 40 attempts from one ip, then blocked regardless of email.
+    for (let i = 0; i < 40; i++) await auth.verifyLoginCode(`v${i}@example.com`, "111111111", ip);
+    const r = await auth.verifyLoginCode("v40@example.com", "111111111", ip);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe("rate");
+  });
+
+  it("the per-email cap still fires independently of the per-ip cap", async () => {
+    // Same email, distinct ips: the per-email bucket (5) blocks the 6th even though each ip is fresh.
+    for (let i = 0; i < 5; i++) {
+      const r = await auth.requestLoginCode("ada@pyraxchain.com", `10.0.0.${i}`);
+      expect(r.ok).toBe(true);
+    }
+    const sixth = await auth.requestLoginCode("ada@pyraxchain.com", "10.0.0.99");
+    expect(sixth.ok).toBe(false);
+    if (!sixth.ok) expect(sixth.reason).toBe("rate");
   });
 });

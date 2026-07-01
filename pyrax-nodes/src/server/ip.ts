@@ -31,30 +31,47 @@ export function multiaddrFor(ip: string, port: number, peerId: string): string {
   return `/ip${fam}/${norm}/tcp/${port}/p2p/${peerId}`;
 }
 
-/** True when the request is behind a trusted reverse proxy (so XFF / body ip may be honored). */
+/** True when the request is behind a trusted reverse proxy (so XFF may be honored). */
 export const trustProxy = () => process.env.TRUSTED_PROXY === "1" || process.env.TRUSTED_PROXY === "true";
+
+/**
+ * Number of proxy hops we trust to have APPENDED to X-Forwarded-For, counted from the right. Our known
+ * topology is a single trusted reverse proxy (Caddy) directly in front, so the rightmost XFF entry is
+ * the address Caddy attested for the hop it received; everything to its left is client-supplied and
+ * therefore spoofable. Overridable via TRUSTED_PROXY_HOPS for a multi-proxy chain (e.g. Cloudflare +
+ * Caddy = 2). Clamped to >=1.
+ */
+const trustedProxyHops = () => Math.max(1, Number(process.env.TRUSTED_PROXY_HOPS || 1) || 1);
 
 /**
  * Resolve the client IP to use for an announce.
  *  - Default (no trusted proxy): ALWAYS the socket peer (clientAddress). Body `ip` and XFF are ignored,
  *    so a node can't spoof its location on the public map.
- *  - With TRUSTED_PROXY set: prefer body `ip`, then the first XFF hop, then clientAddress — because the
- *    real client address is the proxy and the upstream proxy is trusted to set those headers honestly.
+ *  - With TRUSTED_PROXY set: take the proxy-ATTESTED hop from X-Forwarded-For — the Nth entry counted
+ *    from the RIGHT, where N = TRUSTED_PROXY_HOPS (default 1). An appending proxy puts the address it
+ *    saw at the right end; the leftmost hop is whatever the original client sent (spoofable), so we
+ *    never read from the left. The request-body `ip` is NOT trusted over the proxy attestation. Falls
+ *    back to clientAddress (the proxy's own socket address) if XFF yields nothing valid.
  * Returns a normalized, shape-validated IP, or "" if nothing valid is available.
  */
 export function resolveClientIp(opts: {
   clientAddress?: string | null;
+  /** @deprecated Accepted for backward-compat but IGNORED — the client-supplied body ip is spoofable
+   *  and must never determine a node's public multiaddr/geo. Kept so existing callers/tests compile. */
   bodyIp?: unknown;
   xForwardedFor?: string | null;
 }): string {
   const fromSocket = normalizeIp(String(opts.clientAddress || ""));
   if (!trustProxy()) return isValidIp(fromSocket) ? fromSocket : "";
 
-  const bodyIp = typeof opts.bodyIp === "string" ? normalizeIp(opts.bodyIp) : "";
-  if (isValidIp(bodyIp)) return bodyIp;
-
-  const xff = normalizeIp(String(opts.xForwardedFor || "").split(",")[0]);
-  if (isValidIp(xff)) return xff;
+  // Parse XFF right-to-left: the trusted proxy appends the address it saw, so the attested client hop is
+  // `hops` entries in from the right. Everything further left is attacker-controlled and must be ignored.
+  const chain = String(opts.xForwardedFor || "").split(",").map((s) => normalizeIp(s)).filter(Boolean);
+  if (chain.length) {
+    const idx = chain.length - trustedProxyHops();
+    const attested = idx >= 0 ? chain[idx] : chain[0];
+    if (isValidIp(attested)) return attested;
+  }
 
   return isValidIp(fromSocket) ? fromSocket : "";
 }

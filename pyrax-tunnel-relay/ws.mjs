@@ -9,6 +9,19 @@ import { createHash } from "node:crypto";
 
 const GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
+// Hard caps against an unauthenticated OOM. A tunnel-mux text frame is a small JSON
+// envelope (an HTTP request/response chunk is base64 inside it), so a couple of MiB is
+// already far above any legitimate frame — anything larger is hostile. Two independent
+// bounds are enforced:
+//   • MAX_FRAME_BYTES — reject a single frame that DECLARES a payload larger than this
+//     (a client that announces a multi-GB length then dribbles bytes can never wedge us
+//     into buffering that much), and
+//   • MAX_BUFFER_BYTES — cap the total un-parsed accumulation, so a stream of never-
+//     completing partial frames can't grow the per-connection buffer without bound.
+// On either overflow the frame decoder signals `fatal` and the socket is destroyed.
+export const MAX_FRAME_BYTES = 2 * 1024 * 1024; // 2 MiB per declared frame payload
+export const MAX_BUFFER_BYTES = 4 * 1024 * 1024; // 4 MiB of un-parsed accumulation
+
 export function wsAccept(key) {
   return createHash("sha1")
     .update(key + GUID)
@@ -36,11 +49,15 @@ export function encodeFrame(data, opcode = 0x1) {
   return Buffer.concat([header, payload]);
 }
 
-/** Decode whole masked client→server frames; returns leftover partial bytes. */
+/** Decode whole masked client→server frames; returns leftover partial bytes. Sets
+ *  `fatal:true` when a frame declares a payload larger than MAX_FRAME_BYTES — the caller
+ *  MUST destroy the socket in that case (an attacker who announces a huge length then
+ *  dribbles bytes would otherwise force us to buffer the whole payload). */
 export function decodeFrames(buf) {
   const texts = [];
   const pings = [];
   let closed = false;
+  let fatal = false;
   let off = 0;
   while (off + 2 <= buf.length) {
     const b1 = buf[off + 1];
@@ -56,6 +73,12 @@ export function decodeFrames(buf) {
       if (p + 8 > buf.length) break;
       len = Number(buf.readBigUInt64BE(p));
       p += 8;
+    }
+    // A frame that DECLARES more than the cap is rejected before we wait for (or allocate)
+    // its bytes — this is the OOM guard against "announce a multi-GB length, trickle bytes".
+    if (!Number.isSafeInteger(len) || len < 0 || len > MAX_FRAME_BYTES) {
+      fatal = true;
+      break;
     }
     let mask = null;
     if (masked) {
@@ -76,7 +99,7 @@ export function decodeFrames(buf) {
     else if (opcode === 0x8) closed = true;
     else if (opcode === 0x9) pings.push(Buffer.from(payload));
   }
-  return { texts, pings, closed, rest: buf.subarray(off) };
+  return { texts, pings, closed, fatal, rest: buf.subarray(off) };
 }
 
 /** Complete the WS handshake on a raw upgrade socket and return a text-message `Sock`
@@ -110,10 +133,31 @@ export function acceptUpgrade(req, socket) {
       }
     },
   };
+  const destroy = () => {
+    fireClose();
+    try {
+      socket.destroy();
+    } catch {
+      /* already gone */
+    }
+  };
   socket.on("data", (chunk) => {
+    if (!alive) return;
     buffer = Buffer.concat([buffer, chunk]);
-    const { texts, pings, closed, rest } = decodeFrames(buffer);
+    // Total un-parsed accumulation cap: a stream of never-completing partial frames (or a
+    // single oversized frame whose bytes are still arriving) cannot grow this buffer past
+    // the bound. Kill the connection rather than keep buffering.
+    if (buffer.length > MAX_BUFFER_BYTES) {
+      destroy();
+      return;
+    }
+    const { texts, pings, closed, fatal, rest } = decodeFrames(buffer);
     buffer = rest;
+    // A frame that declared an over-cap length is fatal — drop the socket immediately.
+    if (fatal) {
+      destroy();
+      return;
+    }
     for (const p of pings) socket.write(encodeFrame(p, 0xa));
     for (const t of texts) for (const cb of textCbs) cb(t);
     if (closed) {

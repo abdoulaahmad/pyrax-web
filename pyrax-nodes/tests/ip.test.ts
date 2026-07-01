@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 // IP shape validation + trusted client-IP resolution (announce anti-spoofing).
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { isValidIp, normalizeIp, resolveClientIp, trustProxy, multiaddrFor } from "../src/server/ip";
 
 beforeEach(() => { delete process.env.TRUSTED_PROXY; });
@@ -73,22 +73,44 @@ describe("resolveClientIp (default — no trusted proxy)", () => {
 });
 
 describe("resolveClientIp (TRUSTED_PROXY=1)", () => {
-  it("honors a valid body ip first", () => {
+  afterEach(() => { delete process.env.TRUSTED_PROXY_HOPS; });
+
+  it("takes the proxy-ATTESTED (rightmost) XFF hop, NOT the spoofable leftmost, and IGNORES body ip", () => {
     process.env.TRUSTED_PROXY = "1";
     expect(trustProxy()).toBe(true);
-    const ip = resolveClientIp({ clientAddress: "10.0.0.1", bodyIp: "203.0.113.20", xForwardedFor: "1.1.1.1" });
+    // Attacker sends `X-Forwarded-For: 8.8.8.8` + body ip; the single trusted proxy (Caddy) appends the
+    // real hop it saw (203.0.113.20) at the RIGHT. We must return the appended value, never the client's.
+    const ip = resolveClientIp({ clientAddress: "10.0.0.1", bodyIp: "1.2.3.4", xForwardedFor: "8.8.8.8, 203.0.113.20" });
     expect(ip).toBe("203.0.113.20");
   });
 
-  it("falls back to the first XFF hop when body ip is absent/invalid", () => {
+  it("ignores an attacker-forged leftmost XFF even when it is the only entry a naive parser would read", () => {
     process.env.TRUSTED_PROXY = "1";
-    const ip = resolveClientIp({ clientAddress: "10.0.0.1", bodyIp: "not-an-ip", xForwardedFor: "203.0.113.30, 9.9.9.9" });
-    expect(ip).toBe("203.0.113.30");
+    // Single-entry XFF from a direct client behind one proxy: that lone entry IS the proxy-attested hop.
+    // A forged multi-entry list must resolve to the rightmost (proxy-appended) value.
+    expect(resolveClientIp({ clientAddress: "10.0.0.1", xForwardedFor: "203.0.113.30" })).toBe("203.0.113.30");
+    expect(resolveClientIp({ clientAddress: "10.0.0.1", xForwardedFor: "1.1.1.1, 2.2.2.2, 203.0.113.31" })).toBe("203.0.113.31");
   });
 
-  it("falls back to the socket address when neither body ip nor XFF is valid", () => {
+  it("honors TRUSTED_PROXY_HOPS for a multi-proxy chain (e.g. Cloudflare + Caddy = 2 appended hops)", () => {
     process.env.TRUSTED_PROXY = "1";
-    const ip = resolveClientIp({ clientAddress: "203.0.113.40", bodyIp: undefined, xForwardedFor: "junk" });
-    expect(ip).toBe("203.0.113.40");
+    process.env.TRUSTED_PROXY_HOPS = "2";
+    // chain: <client-spoofed>, <real client attested by CF>, <CF attested by Caddy>. With 2 trusted
+    // appended hops the attested client is the 2nd from the right.
+    const ip = resolveClientIp({ clientAddress: "10.0.0.1", xForwardedFor: "8.8.8.8, 203.0.113.50, 172.16.0.9" });
+    expect(ip).toBe("203.0.113.50");
+  });
+
+  it("never prefers the request-body ip over the proxy attestation", () => {
+    process.env.TRUSTED_PROXY = "1";
+    const ip = resolveClientIp({ clientAddress: "10.0.0.1", bodyIp: "203.0.113.20", xForwardedFor: "" });
+    // No XFF → fall through to the socket address; the body ip is never trusted.
+    expect(ip).toBe("10.0.0.1");
+  });
+
+  it("falls back to the socket address when XFF is absent/invalid", () => {
+    process.env.TRUSTED_PROXY = "1";
+    expect(resolveClientIp({ clientAddress: "203.0.113.40", bodyIp: undefined, xForwardedFor: "junk" })).toBe("203.0.113.40");
+    expect(resolveClientIp({ clientAddress: "203.0.113.41", xForwardedFor: null })).toBe("203.0.113.41");
   });
 });

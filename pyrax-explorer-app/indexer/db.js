@@ -8,7 +8,8 @@
 // `stream` (A/B/C) and the `seal_algo` lane; txns carry the PYRAX envelope `tx_type`.
 
 import pg from "pg";
-import { DATABASE_URL, DATABASE_SSL, DATABASE_CA } from "./config.js";
+import { DATABASE_URL, DATABASE_SSL, DATABASE_CA, DB_STATEMENT_TIMEOUT_MS } from "./config.js";
+import { report as sentinel } from "./sentinel.js";
 
 // int8 (BIGINT) -> JS number. Everything we store as an integer (block numbers, blue score, gas,
 // unix-second timestamps, counts) fits comfortably under 2^53, so this is safe and keeps the
@@ -25,10 +26,52 @@ const pool = new pg.Pool({
   max: Number(process.env.PG_POOL_MAX ?? 10),
   idleTimeoutMillis: 30_000,
   connectionTimeoutMillis: 10_000,
+  // Bound EVERY query server-side so one pathological read (a giant OFFSET scan, a wide log filter)
+  // can't pin a pooled client indefinitely and starve ingest of the pool. 0 disables (opt-out).
+  statement_timeout: DB_STATEMENT_TIMEOUT_MS > 0 ? DB_STATEMENT_TIMEOUT_MS : undefined,
 });
-pool.on("error", (e) => console.error("[explorer] pg pool error:", e?.message ?? e));
+pool.on("error", (e) => {
+  console.error("[explorer] pg pool error:", e?.message ?? e);
+  // A pool-level error (idle client dropped, DB restarted) is a genuine infra fault worth surfacing to
+  // Sentinel — deduped/throttled/scrubbed so a flapping connection is one report, not a flood. Fail-open.
+  sentinel("pg pool error", `idle pg client error: ${e?.message ?? e}`, "warn");
+});
+
+/** Bounded DB reachability probe for /api/health. Never throws or hangs (treats a slow/unreachable DB
+ *  as "down" within ~4.5s). "up" | "down". */
+export async function ping() {
+  return new Promise((resolve) => {
+    const t = setTimeout(() => resolve("down"), 4_500);
+    q("SELECT 1").then(
+      () => { clearTimeout(t); resolve("up"); },
+      () => { clearTimeout(t); resolve("down"); },
+    );
+  });
+}
 
 const q = (text, params) => pool.query(text, params);
+
+/**
+ * Least-privilege posture check. The indexer is internet-exposed and needs only read + INSERT/UPDATE/
+ * DELETE on its OWN explorer tables — never cluster-superuser rights. Connecting as a superuser (e.g. DO
+ * Managed Postgres `doadmin`) means any SQL-execution flaw, dependency compromise, or credential leak in
+ * this process grants control of the WHOLE shared cluster (all site DBs). We can't grant privileges from
+ * here, but we CAN detect the misconfiguration and warn loudly at startup so an operator provisions the
+ * dedicated role in scripts/explorer-role.sql. Best-effort: never throws / blocks boot.
+ */
+async function warnIfSuperuser() {
+  try {
+    const { rows } = await q("SELECT current_user, rolsuper FROM pg_roles WHERE rolname = current_user");
+    const r = rows[0];
+    if (r && r.rolsuper) {
+      const msg = `explorer indexer is connected to Postgres as SUPERUSER "${r.current_user}" — use a dedicated least-privilege role (see indexer/scripts/explorer-role.sql) in EXPLORER_DATABASE_URL, not doadmin`;
+      console.error(`[explorer] SECURITY: ${msg}`);
+      sentinel("indexer DB uses a superuser role", msg, "warn");
+    }
+  } catch {
+    /* pg_roles not visible for this role (expected for a properly-scoped least-privilege user) — good. */
+  }
+}
 
 export async function init() {
   await q(`
@@ -99,6 +142,9 @@ export async function init() {
     "ALTER TABLE blocks ADD COLUMN IF NOT EXISTS seal_algo TEXT",
     "ALTER TABLE txns ADD COLUMN IF NOT EXISTS tx_type TEXT",
   ]) await q(stmt);
+
+  // Surface a superuser-role misconfiguration loudly (does not block boot).
+  await warnIfSuperuser();
 }
 
 // ---- upsert helpers --------------------------------------------------------

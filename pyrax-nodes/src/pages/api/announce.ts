@@ -7,8 +7,10 @@
 // Security model for the embedded IP (it becomes the public multiaddr + is geo-located, so a spoofed
 // value would poison the map): we DO NOT trust the request body `b.ip` or `X-Forwarded-For` unless an
 // explicit TRUSTED_PROXY flag is set (i.e. a real reverse proxy we trust is in front). By default we
-// use the socket peer address (Astro's clientAddress). The IP shape is validated before any use, and
-// private/loopback ranges are dropped from geo by isPublicIp() in the geo module.
+// use the socket peer address (Astro's clientAddress). With TRUSTED_PROXY set we read the proxy-attested
+// hop from the RIGHT of X-Forwarded-For (never the client-controlled leftmost entry), never the body ip.
+// The IP shape is validated before any use, and private/loopback ranges are dropped from geo by
+// isPublicIp() in the geo module.
 import type { APIRoute } from "astro";
 import { verifyHmac, ingestSecretReady } from "../../server/hmac";
 import { upsertPeer, patchGeo, TTL_MS } from "../../server/directory";
@@ -44,12 +46,11 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   if (!v.ok) return json({ ok: false, error: v.error }, v.status);
   const { network, port, peerId, kind, relayPubkey, peers } = v.value;
 
-  // Resolve the IP from the trusted source (socket by default; body/XFF only with TRUSTED_PROXY=1),
-  // shape-validated. An invalid/unresolvable IP yields an empty host — geo is skipped, the node is
-  // still recorded so the directory counts it.
+  // Resolve the IP from the trusted source (socket by default; the proxy-attested XFF hop only with
+  // TRUSTED_PROXY=1 — never the body ip), shape-validated. An invalid/unresolvable IP yields an empty
+  // host — geo is skipped, the node is still recorded so the directory counts it.
   const ip = resolveClientIp({
     clientAddress,
-    bodyIp: b?.ip,
     xForwardedFor: request.headers.get("x-forwarded-for"),
   });
   const multiaddr = multiaddrFor(ip, port, peerId);

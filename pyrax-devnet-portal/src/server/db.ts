@@ -9,7 +9,8 @@ import crypto from "node:crypto";
 import type { Permission } from "../lib/permissions";
 import { TESTER_BASELINE } from "../lib/permissions";
 import { isStaffEmail, isRewardEligible } from "../lib/tester";
-import { bugBounty } from "../lib/rewards";
+import { bugBounty, perTestReward, boundedAward, consistencyBonus, CONSISTENCY, type TesterTestStats } from "../lib/rewards";
+import { SEED_TESTS } from "./tests-seed";
 
 // Prefer an explicit DATABASE_URL_DEVNET; otherwise derive it from the shared cluster URL by swapping
 // the database name (team_pyrax → devnet_tester) so a single DATABASE_URL is enough to boot.
@@ -33,7 +34,13 @@ export interface TesterRow {
 function getPool(): pg.Pool {
   if (!pool) {
     if (!connectionString) throw new Error("DATABASE_URL_DEVNET is not configured.");
-    pool = new pg.Pool({ connectionString, ssl: { rejectUnauthorized: false }, max: 6, idleTimeoutMillis: 30_000 });
+    pool = new pg.Pool({
+      connectionString, ssl: { rejectUnauthorized: false }, max: 6, idleTimeoutMillis: 30_000,
+      // Bound EVERY DB operation so a stalled connect or query can never hang a request forever.
+      // The login path awaits init(), so an UNBOUNDED connect meant one stuck connection wedged the
+      // whole portal ("send code just hangs"). connect ≤10s; a query ≤20s → fail fast, never hang.
+      connectionTimeoutMillis: 10_000, statement_timeout: 20_000, query_timeout: 20_000,
+    });
   }
   return pool;
 }
@@ -89,6 +96,13 @@ export function init(): Promise<void> {
         reason TEXT NOT NULL, pyrx BIGINT NOT NULL, note TEXT, ref TEXT, created_at BIGINT NOT NULL
       );
       CREATE INDEX IF NOT EXISTS idx_ledger_tester ON earnings_ledger(tester_id);
+      -- Idempotency is a DB INVARIANT, not an app-level check. Every payable event has a stable ref
+      -- (test:{id}, bug:{id}, consistency:{isoWeek}, uptime:{ym}); without a UNIQUE index the award path
+      -- was a check-then-insert TOCTOU race two concurrent accepts could double-pay. Collapse any
+      -- pre-existing duplicate refs (keep the earliest row) BEFORE the index so it builds cleanly, then
+      -- enforce exactly-once at the database (paired with INSERT ... ON CONFLICT (ref) DO NOTHING).
+      DELETE FROM earnings_ledger a USING earnings_ledger b WHERE a.ref IS NOT NULL AND a.ref = b.ref AND a.ctid > b.ctid;
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_ledger_ref ON earnings_ledger(ref) WHERE ref IS NOT NULL;
       CREATE TABLE IF NOT EXISTS bugs (
         id TEXT PRIMARY KEY, tester_id TEXT NOT NULL, title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '',
         repro_steps TEXT NOT NULL DEFAULT '', expected TEXT NOT NULL DEFAULT '', actual TEXT NOT NULL DEFAULT '',
@@ -113,15 +127,51 @@ export function init(): Promise<void> {
       ALTER TABLE bug_comments ADD COLUMN IF NOT EXISTS author_admin BOOLEAN NOT NULL DEFAULT FALSE;
       ALTER TABLE bug_comments DROP COLUMN IF EXISTS tester_id;
       CREATE INDEX IF NOT EXISTS idx_bugcomments_bug ON bug_comments(bug_id);
+      -- Product Tests. The campaigns table is repurposed as TESTS (a self-contained module a tester
+      -- completes and submits proof for) and reports as SUBMISSIONS. The new columns below are added
+      -- with guarded, additive ALTERs so re-running init() on an existing DB is always safe.
       CREATE TABLE IF NOT EXISTS campaigns (
         id TEXT PRIMARY KEY, title TEXT NOT NULL, body TEXT NOT NULL DEFAULT '', steps JSONB NOT NULL DEFAULT '[]'::jsonb,
         opens_at BIGINT, closes_at BIGINT, status TEXT NOT NULL DEFAULT 'open', created_by TEXT, created_at BIGINT NOT NULL
       );
+      ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS track TEXT NOT NULL DEFAULT 'inferno';
+      ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS app_version TEXT NOT NULL DEFAULT '';
+      ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS weight_pyrx BIGINT NOT NULL DEFAULT 0;
+      ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS prereq_slugs JSONB NOT NULL DEFAULT '[]'::jsonb;
+      ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS order_idx INT NOT NULL DEFAULT 0;
+      ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS est_minutes INT NOT NULL DEFAULT 0;
+      ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS slug TEXT;
+      -- slug is the stable id used by prereqs + the boot seed. UNIQUE so upsert-by-slug is atomic;
+      -- the partial predicate keeps any legacy rows that predate slugs (NULL) from colliding.
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_campaigns_slug ON campaigns(slug) WHERE slug IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS idx_campaigns_track_order ON campaigns(track, order_idx);
       CREATE TABLE IF NOT EXISTS reports (
         id TEXT PRIMARY KEY, campaign_id TEXT NOT NULL, tester_id TEXT NOT NULL, results JSONB NOT NULL DEFAULT '[]'::jsonb,
         notes TEXT NOT NULL DEFAULT '', attachments JSONB NOT NULL DEFAULT '[]'::jsonb,
         accepted BOOLEAN, created_at BIGINT NOT NULL
       );
+      ALTER TABLE reports ADD COLUMN IF NOT EXISTS assigned_to TEXT;
+      ALTER TABLE reports ADD COLUMN IF NOT EXISTS assigned_by TEXT;
+      ALTER TABLE reports ADD COLUMN IF NOT EXISTS assigned_at BIGINT;
+      ALTER TABLE reports ADD COLUMN IF NOT EXISTS review_status TEXT NOT NULL DEFAULT 'submitted';
+      ALTER TABLE reports ADD COLUMN IF NOT EXISTS reviewer_verdict TEXT;
+      ALTER TABLE reports ADD COLUMN IF NOT EXISTS reviewer_notes TEXT;
+      ALTER TABLE reports ADD COLUMN IF NOT EXISTS logs TEXT;
+      ALTER TABLE reports ADD COLUMN IF NOT EXISTS sentinel_assessment JSONB;
+      ALTER TABLE reports ADD COLUMN IF NOT EXISTS awarded_pyrx BIGINT NOT NULL DEFAULT 0;
+      ALTER TABLE reports ADD COLUMN IF NOT EXISTS accepted_at BIGINT;
+      ALTER TABLE reports ADD COLUMN IF NOT EXISTS updated_at BIGINT NOT NULL DEFAULT 0;
+      CREATE INDEX IF NOT EXISTS idx_reports_status_created ON reports(review_status, created_at);
+      CREATE INDEX IF NOT EXISTS idx_reports_assignee ON reports(assigned_to);
+      CREATE INDEX IF NOT EXISTS idx_reports_tester_created ON reports(tester_id, created_at);
+      CREATE INDEX IF NOT EXISTS idx_reports_campaign ON reports(campaign_id);
+      -- Submission review thread (mirrors bug_comments): staff ↔ tester back-and-forth on a submission.
+      CREATE TABLE IF NOT EXISTS report_comments (
+        id TEXT PRIMARY KEY, report_id TEXT NOT NULL, author_id TEXT NOT NULL,
+        author_name TEXT NOT NULL DEFAULT '', author_user TEXT NOT NULL DEFAULT '', author_admin BOOLEAN NOT NULL DEFAULT FALSE,
+        body TEXT NOT NULL, created_at BIGINT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_reportcomments_report ON report_comments(report_id, created_at);
       CREATE TABLE IF NOT EXISTS chat_messages (
         id TEXT PRIMARY KEY, channel TEXT NOT NULL DEFAULT 'general', author_id TEXT NOT NULL,
         author_name TEXT NOT NULL DEFAULT '', author_user TEXT NOT NULL DEFAULT '', author_admin BOOLEAN NOT NULL DEFAULT FALSE,
@@ -177,12 +227,25 @@ export function init(): Promise<void> {
        ON CONFLICT (email) DO UPDATE SET is_superuser = TRUE, is_staff = TRUE, reward_eligible = FALSE, status = 'active'`,
       [SUPERUSER_EMAIL, Date.now()],
     );
+    // Seed the pre-authored Product Test suite, idempotently by slug (upsert overwrites seeded content
+    // so instruction edits ship on the next boot; testers' submissions reference the campaign id which
+    // is stable across re-seeds). Failures here must never block boot — the portal runs without tests.
+    // Seed the Product-Test catalog in the BACKGROUND — the login/session path must NEVER wait on
+    // (or be blocked by) the content seed. Best-effort; on failure the catalog is just empty until the
+    // next boot. This keeps init() (and therefore sign-in) fast + resilient no matter the seed's state.
+    void seedTests().catch((e) => console.error("[db] test seed failed:", (e as { message?: string })?.message || e));
     // Boot-time + periodic retention sweep for raw heartbeats (in addition to the write-path prune),
     // so an idle portal still trims the table. Unref'd so it never holds the process open.
     void pruneHeartbeats().catch(() => {});
     const sweep = setInterval(() => void pruneHeartbeats().catch(() => {}), HEARTBEAT_PRUNE_EVERY_MS);
     if (typeof (sweep as any).unref === "function") (sweep as any).unref();
-  })();
+  })().catch((e) => {
+    // A failed init (a transient DB blip / connect timeout) must NOT wedge the portal forever: clear
+    // the cached promise so the NEXT request retries a fresh init, instead of every request awaiting
+    // a permanently-rejected one (which looked like "login always hangs").
+    ready = null;
+    throw e;
+  });
   return ready;
 }
 
@@ -334,9 +397,37 @@ export async function uptimePct(testerId: string, sinceMs: number): Promise<numb
 }
 
 // ---- earnings ledger ----
-export async function addLedger(testerId: string, reason: string, pyrx: number, note: string, ref?: string): Promise<void> {
-  await init(); await db().query("INSERT INTO earnings_ledger (id,tester_id,reason,pyrx,note,ref,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)", [id("l"), testerId, reason, Math.round(pyrx), note, ref ?? null, Date.now()]);
+export async function addLedger(testerId: string, reason: string, pyrx: number, note: string, ref?: string): Promise<boolean> {
+  await init();
+  // Exactly-once by ref: the partial UNIQUE index on (ref) WHERE ref IS NOT NULL turns a concurrent or
+  // replayed award into a no-op instead of a double-pay. Returns TRUE only when a NEW row was written —
+  // so callers know whether to notify / echo the award; FALSE means this ref was already paid.
+  const r = await db().query(
+    "INSERT INTO earnings_ledger (id,tester_id,reason,pyrx,note,ref,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (ref) WHERE ref IS NOT NULL DO NOTHING",
+    [id("l"), testerId, reason, Math.round(pyrx), note, ref ?? null, Date.now()],
+  );
+  return (r.rowCount ?? 0) > 0;
 }
+
+/** Serialize the auto-award critical section (weekly-cap read → §8 decision → award) per tester across
+ *  concurrent observer assessments. The weekly cap isn't keyed by a ledger ref, so the unique-ref
+ *  idempotency can't bound it — N concurrent assessments of DIFFERENT submissions by one tester could
+ *  each read `autoAwardsThisWeek < cap` and collectively blow past it. A cooperative per-tester advisory
+ *  lock (held on a dedicated pooled connection) forces those sections to run one at a time. The lock is
+ *  advisory: it only works because EVERY auto-award path runs inside it. */
+export async function withTesterAwardLock<T>(testerId: string, fn: () => Promise<T>): Promise<T> {
+  await init();
+  const client = await db().connect();
+  const key = `tests-award:${testerId}`;
+  try {
+    await client.query("SELECT pg_advisory_lock(hashtext($1))", [key]);
+    return await fn();
+  } finally {
+    try { await client.query("SELECT pg_advisory_unlock(hashtext($1))", [key]); } catch { /* connection may have dropped; the lock auto-frees on close */ }
+    client.release();
+  }
+}
+
 export async function ledgerTotal(testerId: string): Promise<number> {
   await init(); const r = await db().query("SELECT COALESCE(SUM(pyrx),0) AS total FROM earnings_ledger WHERE tester_id=$1", [testerId]); return Number(r.rows[0].total);
 }
@@ -505,9 +596,13 @@ export async function triageBug(bugId: string, f: { status?: string; assignedSev
     const reporter = cur.rows[0].tester_id;
     const t = await testerById(reporter);
     if (t?.reward_eligible) {
-      await addLedger(reporter, "bug", award, cur.rows[0].title, `bug:${bugId}`);
-      await addNotification(reporter, "bug", "Your bug was accepted 🎉", `"${cur.rows[0].title}" earned ${award.toLocaleString("en-US")} PYRX.`, "/app");
-      _awarded = { reporterId: reporter, amount: award, title: cur.rows[0].title };
+      // Notify + echo only when THIS call actually wrote the ledger row (atomic ON CONFLICT), so a
+      // concurrent/replayed triage can't double-notify or double-count the same bounty.
+      const paid = await addLedger(reporter, "bug", award, cur.rows[0].title, `bug:${bugId}`);
+      if (paid) {
+        await addNotification(reporter, "bug", "Your bug was accepted 🎉", `"${cur.rows[0].title}" earned ${award.toLocaleString("en-US")} PYRX.`, "/app");
+        _awarded = { reporterId: reporter, amount: award, title: cur.rows[0].title };
+      }
     }
   }
   return { ...r.rows[0], _awarded };
@@ -632,10 +727,9 @@ export async function awardUptimeForMonth(testerId: string, ym: string, pyrx: nu
   await init();
   if (pyrx <= 0) return false;
   const ref = `uptime:${ym}`;
-  const exists = await db().query("SELECT 1 FROM earnings_ledger WHERE tester_id=$1 AND ref=$2", [testerId, ref]);
-  if ((exists.rowCount ?? 0) > 0) return false;
-  await addLedger(testerId, "uptime", pyrx, `Uptime — ${ym}`, ref);
-  return true;
+  // Atomic once-per-month: the unique-ref index guarantees a single payment even under a concurrent
+  // sweep. `paid` is TRUE only when this call wrote the row.
+  return addLedger(testerId, "uptime", pyrx, `Uptime — ${ym}`, ref);
 }
 
 // ---- legal agreements (NDA + Alpha T&C) ---------------------------------------------------------
@@ -705,6 +799,7 @@ export async function deleteTesterFully(testerId: string): Promise<boolean> {
     await c.query("DELETE FROM bug_reactions WHERE tester_id=$1", [testerId]);
     await c.query("DELETE FROM bug_comments WHERE author_id=$1", [testerId]);
     await c.query("DELETE FROM bugs WHERE tester_id=$1", [testerId]);
+    await c.query("DELETE FROM report_comments WHERE author_id=$1", [testerId]);
     await c.query("DELETE FROM reports WHERE tester_id=$1", [testerId]);
     await c.query("DELETE FROM notifications WHERE tester_id=$1", [testerId]);
     await c.query("DELETE FROM conversation_members WHERE member_id=$1", [testerId]);
@@ -718,4 +813,599 @@ export async function deleteTesterFully(testerId: string): Promise<boolean> {
   } finally {
     c.release();
   }
+}
+
+// ===================================================================================================
+// Product Tests — the "tests" (campaigns) + "submissions" (reports) data layer.
+//
+// A test is a self-contained module a tester completes and submits proof for; submissions flow through
+// a review state machine and, on acceptance, pay the test's weight (+ on-time bonus) once via the
+// earnings ledger under the idempotent ref `test:{report_id}`. Prereq slugs gate progression:
+// a test unlocks for a tester only once every prereq test has an ACCEPTED submission by that tester.
+// ===================================================================================================
+
+export const REVIEW_STATUSES = ["submitted", "ai_screening", "in_review", "needs_more", "accepted", "rejected"] as const;
+export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
+export const REVIEW_VERDICTS = ["accept", "reject", "needs_more"] as const;
+export type ReviewVerdict = (typeof REVIEW_VERDICTS)[number];
+
+// One ISO-week has 7 days; used for the "this week" windows in testerTestStats + consistency.
+const WEEK_MS = 7 * 86_400_000;
+/** Start (ms) of the current UTC ISO week (Monday 00:00 UTC). Consistency + weekly caps key off this. */
+export function isoWeekStart(nowMs = Date.now()): number {
+  const d = new Date(nowMs);
+  const dow = (d.getUTCDay() + 6) % 7; // 0 = Monday
+  const monday = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - dow * 86_400_000;
+  return monday;
+}
+/** Compact ISO-week label (e.g. "2026-W27") for idempotent consistency-award refs. */
+export function isoWeekLabel(nowMs = Date.now()): string {
+  const start = isoWeekStart(nowMs);
+  const d = new Date(start);
+  // ISO week number: Thursday of this week decides the year.
+  const thursday = new Date(start + 3 * 86_400_000);
+  const year = thursday.getUTCFullYear();
+  const jan1 = Date.UTC(year, 0, 1);
+  const week = Math.floor((thursday.getTime() - jan1) / WEEK_MS) + 1;
+  void d;
+  return `${year}-W${String(week).padStart(2, "0")}`;
+}
+
+/** Normalize a DB campaign row into the "test" shape the app consumes (numbers coerced from bigint). */
+function testRow(r: any) {
+  return {
+    id: r.id as string,
+    slug: (r.slug ?? null) as string | null,
+    track: r.track as string,
+    title: r.title as string,
+    body: r.body as string,
+    steps: (r.steps ?? []) as any[],
+    prereqSlugs: (r.prereq_slugs ?? []) as string[],
+    orderIdx: Number(r.order_idx ?? 0),
+    estMinutes: Number(r.est_minutes ?? 0),
+    weightPyrx: Number(r.weight_pyrx ?? 0),
+    appVersion: (r.app_version ?? "") as string,
+    status: r.status as string,
+    opensAt: r.opens_at == null ? null : Number(r.opens_at),
+    closesAt: r.closes_at == null ? null : Number(r.closes_at),
+    createdAt: Number(r.created_at ?? 0),
+  };
+}
+export type ProductTest = ReturnType<typeof testRow>;
+
+/** Idempotently create/update a test by slug (used by the boot seed AND staff authoring). Returns the
+ *  test id. `steps`/`prereqSlugs` are stored as JSONB. Existing rows keep their id (submissions stay
+ *  linked); content columns are overwritten with the supplied values. */
+export async function upsertTest(t: {
+  slug: string; track: string; title: string; body?: string; steps?: any[];
+  prereqSlugs?: string[]; orderIdx?: number; estMinutes?: number; weightPyrx?: number;
+  appVersion?: string; status?: string; opensAt?: number | null; closesAt?: number | null; createdBy?: string | null;
+}): Promise<string> {
+  await init();
+  const now = Date.now();
+  const slug = t.slug.trim().toLowerCase().slice(0, 80);
+  const track = t.track === "cli" ? "cli" : "inferno";
+  const r = await db().query(
+    `INSERT INTO campaigns (id, slug, track, title, body, steps, prereq_slugs, order_idx, est_minutes, weight_pyrx, app_version, status, opens_at, closes_at, created_by, created_at)
+     VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+     ON CONFLICT (slug) WHERE slug IS NOT NULL DO UPDATE SET
+       track=EXCLUDED.track, title=EXCLUDED.title, body=EXCLUDED.body, steps=EXCLUDED.steps,
+       prereq_slugs=EXCLUDED.prereq_slugs, order_idx=EXCLUDED.order_idx, est_minutes=EXCLUDED.est_minutes,
+       weight_pyrx=EXCLUDED.weight_pyrx, app_version=EXCLUDED.app_version, status=EXCLUDED.status,
+       opens_at=EXCLUDED.opens_at, closes_at=EXCLUDED.closes_at
+     RETURNING id`,
+    [
+      id("test"), slug, track, t.title.slice(0, 200), (t.body || "").slice(0, 4000),
+      JSON.stringify(t.steps || []), JSON.stringify(t.prereqSlugs || []),
+      Math.round(t.orderIdx ?? 0), Math.round(t.estMinutes ?? 0), Math.round(t.weightPyrx ?? 0),
+      (t.appVersion || "").slice(0, 40), t.status || "open",
+      t.opensAt ?? null, t.closesAt ?? null, t.createdBy ?? null, now,
+    ],
+  );
+  return r.rows[0].id as string;
+}
+
+/** Upsert the entire pre-authored suite (called on boot). Idempotent by slug. */
+async function seedTests(): Promise<void> {
+  for (const t of SEED_TESTS) {
+    await upsertTest({
+      slug: t.slug, track: t.track, title: t.title, body: t.body, steps: t.steps,
+      prereqSlugs: t.prereq_slugs, orderIdx: t.order_idx, estMinutes: t.est_minutes,
+      weightPyrx: t.weight_pyrx, appVersion: t.app_version, status: "open", createdBy: "seed",
+    });
+  }
+}
+
+/** All published tests (staff view), ordered by track then order_idx. */
+export async function listTests(): Promise<ProductTest[]> {
+  await init();
+  const r = await db().query("SELECT * FROM campaigns ORDER BY track ASC, order_idx ASC, created_at ASC");
+  return r.rows.map(testRow);
+}
+/** One test by id. */
+export async function getTest(testId: string): Promise<ProductTest | null> {
+  await init();
+  const r = await db().query("SELECT * FROM campaigns WHERE id=$1", [testId]);
+  return r.rows[0] ? testRow(r.rows[0]) : null;
+}
+/** One test by slug (prereq resolution + seeding). */
+export async function getTestBySlug(slug: string): Promise<ProductTest | null> {
+  await init();
+  const r = await db().query("SELECT * FROM campaigns WHERE slug=$1", [slug]);
+  return r.rows[0] ? testRow(r.rows[0]) : null;
+}
+
+/** Whether the test's on-time window is still open (closes_at unset ⇒ always on time). */
+export function testIsOnTime(test: Pick<ProductTest, "closesAt">, nowMs = Date.now()): boolean {
+  return test.closesAt == null || nowMs <= test.closesAt;
+}
+
+// ---- submissions ----------------------------------------------------------------------------------
+
+/** Sanitized submission input the tester POSTs. `results` mirrors the test's steps by index. */
+export interface SubmissionInput {
+  results: Array<{ stepIndex: number; pass: boolean; note?: string }>;
+  attachments: Array<{ url: string; type: string; stepIndex?: number; name?: string; size?: number }>;
+  logs?: string;
+  notes?: string;
+}
+
+const MAX_LOGS = 16_000;
+
+/** Create a tester's submission for a test. `onTime` is captured at submit against the test's window.
+ *  Returns the new submission id. The caller validates prereqs + attachments before calling. */
+export async function createSubmission(testerId: string, testId: string, input: SubmissionInput): Promise<{ id: string }> {
+  await init();
+  const now = Date.now();
+  const rid = id("sub");
+  await db().query(
+    `INSERT INTO reports (id, campaign_id, tester_id, results, notes, attachments, logs, review_status, created_at, updated_at)
+     VALUES ($1,$2,$3,$4::jsonb,$5,$6::jsonb,$7,'submitted',$8,$8)`,
+    [
+      rid, testId, testerId,
+      JSON.stringify((input.results || []).slice(0, 200)),
+      (input.notes || "").slice(0, 4000),
+      JSON.stringify((input.attachments || []).slice(0, 24)),
+      input.logs ? String(input.logs).slice(0, MAX_LOGS) : null,
+      now,
+    ],
+  );
+  return { id: rid };
+}
+
+/** Normalize a submission row joined with its test + tester into the app shape. */
+function submissionRow(r: any) {
+  return {
+    id: r.id as string,
+    testId: r.campaign_id as string,
+    testSlug: (r.test_slug ?? null) as string | null,
+    testTitle: (r.test_title ?? "") as string,
+    track: (r.test_track ?? "") as string,
+    weightPyrx: Number(r.test_weight ?? 0),
+    testerId: r.tester_id as string,
+    testerName: (r.tester_name ?? "") as string,
+    testerHandle: (r.tester_handle ?? "") as string,
+    results: (r.results ?? []) as any[],
+    attachments: (r.attachments ?? []) as any[],
+    notes: (r.notes ?? "") as string,
+    logs: (r.logs ?? null) as string | null,
+    reviewStatus: (r.review_status ?? "submitted") as ReviewStatus,
+    reviewerVerdict: (r.reviewer_verdict ?? null) as string | null,
+    reviewerNotes: (r.reviewer_notes ?? null) as string | null,
+    sentinelAssessment: (r.sentinel_assessment ?? null) as any,
+    assignedTo: (r.assigned_to ?? null) as string | null,
+    assignedBy: (r.assigned_by ?? null) as string | null,
+    assignedAt: r.assigned_at == null ? null : Number(r.assigned_at),
+    awardedPyrx: Number(r.awarded_pyrx ?? 0),
+    acceptedAt: r.accepted_at == null ? null : Number(r.accepted_at),
+    createdAt: Number(r.created_at ?? 0),
+    updatedAt: Number(r.updated_at ?? 0),
+  };
+}
+export type Submission = ReturnType<typeof submissionRow>;
+
+const SUBMISSION_SELECT = `
+  SELECT rp.*, c.slug AS test_slug, c.title AS test_title, c.track AS test_track, c.weight_pyrx AS test_weight,
+         t.display_name AS tester_name, t.handle AS tester_handle
+  FROM reports rp
+  JOIN campaigns c ON c.id = rp.campaign_id
+  JOIN testers t ON t.id = rp.tester_id`;
+
+/** One submission by id (with its test + tester). */
+export async function getSubmission(submissionId: string): Promise<Submission | null> {
+  await init();
+  const r = await db().query(`${SUBMISSION_SELECT} WHERE rp.id=$1`, [submissionId]);
+  return r.rows[0] ? submissionRow(r.rows[0]) : null;
+}
+
+/** List submissions with optional filters (staff review queue + tester history share this). */
+export async function listSubmissions(filter: { status?: string; assignee?: string; track?: string; tester?: string; limit?: number } = {}): Promise<Submission[]> {
+  await init();
+  const where: string[] = [];
+  const vals: any[] = [];
+  if (filter.status && (REVIEW_STATUSES as readonly string[]).includes(filter.status)) { vals.push(filter.status); where.push(`rp.review_status = $${vals.length}`); }
+  if (filter.assignee) { vals.push(filter.assignee); where.push(`rp.assigned_to = $${vals.length}`); }
+  if (filter.track === "cli" || filter.track === "inferno") { vals.push(filter.track); where.push(`c.track = $${vals.length}`); }
+  if (filter.tester) { vals.push(filter.tester); where.push(`rp.tester_id = $${vals.length}`); }
+  vals.push(Math.min(500, Math.max(1, filter.limit ?? 200)));
+  const clause = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const r = await db().query(`${SUBMISSION_SELECT} ${clause} ORDER BY rp.created_at DESC LIMIT $${vals.length}`, vals);
+  return r.rows.map(submissionRow);
+}
+
+/** Assign a submission to a reviewer (staff). Idempotent-ish: overwrites the assignee. */
+export async function assignSubmission(submissionId: string, assigneeId: string, assignedBy: string): Promise<Submission | null> {
+  await init();
+  const now = Date.now();
+  await db().query(
+    `UPDATE reports SET assigned_to=$2, assigned_by=$3, assigned_at=$4,
+       review_status = CASE WHEN review_status IN ('submitted','ai_screening') THEN 'in_review' ELSE review_status END,
+       updated_at=$4 WHERE id=$1`,
+    [submissionId, assigneeId, assignedBy, now],
+  );
+  return getSubmission(submissionId);
+}
+
+/** Attach Sentinel's machine assessment to a submission (server-to-server observer path). Setting an
+ *  assessment moves a fresh submission into 'ai_screening' unless a human already picked it up. */
+export async function setSentinelAssessment(submissionId: string, assessment: unknown): Promise<Submission | null> {
+  await init();
+  const now = Date.now();
+  await db().query(
+    `UPDATE reports SET sentinel_assessment=$2::jsonb,
+       review_status = CASE WHEN review_status = 'submitted' THEN 'ai_screening' ELSE review_status END,
+       updated_at=$3 WHERE id=$1`,
+    [submissionId, JSON.stringify(assessment ?? null), now],
+  );
+  return getSubmission(submissionId);
+}
+
+/** Human (or guardrailed-auto) review of a submission. Sets the terminal status + verdict + notes and,
+ *  on ACCEPT, pays the test's weight (+ on-time bonus if `onTime`) ONCE via the ledger ref
+ *  `test:{submissionId}`. Reward-ineligible testers (staff) never get a ledger entry. An explicit
+ *  `awardPyrx` overrides the computed amount (staff discretion). Returns the updated submission +
+ *  whether an award was written. Reversible: a later 'rejected' review does NOT claw back, but the
+ *  ledger ref guarantees a re-accept can't double-pay. */
+export async function reviewSubmission(
+  submissionId: string,
+  f: { verdict: ReviewVerdict; notes?: string; awardPyrx?: number; reviewer?: string; auto?: boolean },
+): Promise<{ submission: Submission; awarded: number } | null> {
+  await init();
+  const sub = await getSubmission(submissionId);
+  if (!sub) return null;
+  const now = Date.now();
+  const status: ReviewStatus = f.verdict === "accept" ? "accepted" : f.verdict === "reject" ? "rejected" : "needs_more";
+
+  // Atomically CLAIM the transition: only a non-terminal submission may be decided, and only ONE caller
+  // wins the claim. This closes two holes at once — a rejected/accepted row can't be flipped to a fresh
+  // terminal state (no resurrecting a reject into a pay), and two concurrent accepts can't both proceed
+  // (the loser matches 0 rows). A null return therefore means "not found OR already decided" (409-ish).
+  const claim = await db().query(
+    `UPDATE reports SET review_status=$2, reviewer_verdict=$3, reviewer_notes=$4, accepted=$5,
+       accepted_at = CASE WHEN $2='accepted' THEN $6 ELSE accepted_at END,
+       assigned_to = COALESCE(assigned_to, $7), updated_at=$6
+     WHERE id=$1 AND review_status IN ('submitted','ai_screening','in_review','needs_more')`,
+    [submissionId, status, f.verdict, (f.notes || "").slice(0, 8000), f.verdict === "accept", now, f.reviewer ?? null],
+  );
+  if ((claim.rowCount ?? 0) === 0) return null;
+
+  let awarded = 0;
+  if (f.verdict === "accept") {
+    const ref = `test:${submissionId}`;
+    const test = await getTest(sub.testId);
+    const tester = await testerById(sub.testerId);
+    if (test && tester?.reward_eligible) {
+      const onTime = testIsOnTime(test, sub.createdAt);
+      const computed = perTestReward({ weight_pyrx: test.weightPyrx }, onTime);
+      // Cap any manual override to a defensible ceiling (a single reviewer can't mint unbounded PYRX).
+      const amount = boundedAward(f.awardPyrx, computed, test.weightPyrx);
+      if (amount > 0) {
+        // Idempotent write: addLedger returns TRUE only if this call actually created the ledger row, so
+        // a replayed accept (or the observer racing a human) never double-pays or double-notifies.
+        const paid = await addLedger(sub.testerId, "test", amount, `${test.title}`, ref);
+        if (paid) {
+          await addNotification(sub.testerId, "test", "Your test was accepted 🎉", `"${test.title}" earned ${amount.toLocaleString("en-US")} PYRX.`, "/app");
+          awarded = amount;
+          await db().query("UPDATE reports SET awarded_pyrx=$2, updated_at=$3 WHERE id=$1", [submissionId, awarded, now]);
+        }
+      }
+    }
+  }
+  const updated = await getSubmission(submissionId);
+  return { submission: updated!, awarded };
+}
+
+// ---- submission comments (review thread) ----------------------------------------------------------
+export async function addReportComment(reportId: string, author: { id: string; name: string; user: string; admin: boolean }, body: string): Promise<any> {
+  await init();
+  const r = await db().query(
+    "INSERT INTO report_comments (id,report_id,author_id,author_name,author_user,author_admin,body,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id,body,created_at,author_name,author_user,author_admin",
+    [id("rc"), reportId, author.id, author.name, author.user, author.admin, body.slice(0, 4000), Date.now()],
+  );
+  return r.rows[0];
+}
+export async function listReportComments(reportId: string): Promise<any[]> {
+  await init();
+  const r = await db().query(
+    "SELECT id, body, created_at, author_name AS display_name, author_user AS handle, author_admin AS is_staff FROM report_comments WHERE report_id=$1 ORDER BY created_at ASC",
+    [reportId],
+  );
+  return r.rows;
+}
+
+// ---- tester-facing stats + unlock computation -----------------------------------------------------
+
+/** Per-tester test stats for the dashboard + consistency engine.
+ *  - acceptedThisWeek: accepted test submissions in the current ISO week.
+ *  - acceptedIssueReportsThisWeek: accepted (bounty-paid) bugs in the current ISO week.
+ *  - rollingAcceptRate: accepted / decided over the tester's most recent submissions (0..1; 1 if none
+ *    decided yet, so a brand-new tester isn't penalized before their first review).
+ *  - weeklyStreak: consecutive ISO weeks (ending this week) meeting the consistency cadence+accuracy bar. */
+export async function testerTestStats(testerId: string, nowMs = Date.now()): Promise<TesterTestStats> {
+  await init();
+  const weekStart = isoWeekStart(nowMs);
+
+  const acceptedThisWeek = Number((await db().query(
+    "SELECT COUNT(*)::int AS n FROM reports WHERE tester_id=$1 AND review_status='accepted' AND accepted_at >= $2",
+    [testerId, weekStart],
+  )).rows[0].n);
+
+  const acceptedIssueReportsThisWeek = Number((await db().query(
+    "SELECT COUNT(*)::int AS n FROM bugs WHERE tester_id=$1 AND bounty_pyrx > 0 AND updated_at >= $2",
+    [testerId, weekStart],
+  )).rows[0].n);
+
+  // Rolling accept-rate over the last 20 DECIDED submissions.
+  const decided = await db().query(
+    "SELECT review_status FROM reports WHERE tester_id=$1 AND review_status IN ('accepted','rejected') ORDER BY updated_at DESC LIMIT 20",
+    [testerId],
+  );
+  const total = decided.rowCount ?? 0;
+  const acc = decided.rows.filter((x) => x.review_status === "accepted").length;
+  const rollingAcceptRate = total === 0 ? 1 : acc / total;
+
+  // Weekly streak: walk back week-by-week while each week met the cadence bar. We approximate accuracy
+  // with the CURRENT rolling rate (cheap + stable); the cadence check is per-week from the ledger-free
+  // acceptance timestamps. Bounded to sustainedWeeks+1 look-back so this stays O(1) queries-ish.
+  let weeklyStreak = 0;
+  for (let w = 0; w <= CONSISTENCY.sustainedWeeks; w++) {
+    const from = weekStart - w * WEEK_MS;
+    const to = from + WEEK_MS;
+    const tCount = Number((await db().query(
+      "SELECT COUNT(*)::int AS n FROM reports WHERE tester_id=$1 AND review_status='accepted' AND accepted_at >= $2 AND accepted_at < $3",
+      [testerId, from, to],
+    )).rows[0].n);
+    const bCount = Number((await db().query(
+      "SELECT COUNT(*)::int AS n FROM bugs WHERE tester_id=$1 AND bounty_pyrx > 0 AND updated_at >= $2 AND updated_at < $3",
+      [testerId, from, to],
+    )).rows[0].n);
+    const cadence = tCount >= CONSISTENCY.minAcceptedTestsPerWeek || bCount >= CONSISTENCY.minAcceptedIssueReportsPerWeek;
+    if (cadence && rollingAcceptRate >= CONSISTENCY.accuracyFloor) weeklyStreak++;
+    else break;
+  }
+
+  return { acceptedThisWeek, acceptedIssueReportsThisWeek, rollingAcceptRate, weeklyStreak };
+}
+
+/** The catalog for a tester: every test with that tester's per-test status + a computed unlock flag.
+ *  A test is `locked` until every prereq slug has an ACCEPTED submission by this tester. `status` is the
+ *  tester's latest submission status for the test (or 'not_started'). */
+export async function listTestsForTester(testerId: string): Promise<Array<ProductTest & {
+  myStatus: "not_started" | ReviewStatus; mySubmissionId: string | null; locked: boolean; missingPrereqs: string[];
+}>> {
+  await init();
+  const tests = await listTests();
+  // Latest submission per test for this tester.
+  const subs = await db().query(
+    `SELECT DISTINCT ON (campaign_id) campaign_id, id, review_status
+       FROM reports WHERE tester_id=$1 ORDER BY campaign_id, created_at DESC`,
+    [testerId],
+  );
+  const latest = new Map<string, { id: string; status: ReviewStatus }>();
+  for (const s of subs.rows) latest.set(s.campaign_id, { id: s.id, status: s.review_status });
+  // Slugs this tester has an ACCEPTED submission for (prereq satisfaction).
+  const acceptedSlugs = new Set<string>();
+  const accepted = await db().query(
+    `SELECT DISTINCT c.slug AS slug FROM reports rp JOIN campaigns c ON c.id = rp.campaign_id
+       WHERE rp.tester_id=$1 AND rp.review_status='accepted' AND c.slug IS NOT NULL`,
+    [testerId],
+  );
+  for (const a of accepted.rows) acceptedSlugs.add(a.slug);
+
+  return tests.map((t) => {
+    const mine = latest.get(t.id);
+    const missingPrereqs = (t.prereqSlugs || []).filter((s) => !acceptedSlugs.has(s));
+    return {
+      ...t,
+      myStatus: mine ? mine.status : ("not_started" as const),
+      mySubmissionId: mine ? mine.id : null,
+      locked: missingPrereqs.length > 0,
+      missingPrereqs,
+    };
+  });
+}
+
+/** Whether a tester may submit for a test right now: the test exists + is open, and every prereq slug
+ *  has an ACCEPTED submission by this tester. Returns the test + the unmet prereqs (empty ⇒ allowed). */
+export async function canTesterSubmit(testerId: string, testId: string): Promise<{ ok: boolean; test: ProductTest | null; missingPrereqs: string[]; reason?: string }> {
+  await init();
+  const test = await getTest(testId);
+  if (!test) return { ok: false, test: null, missingPrereqs: [], reason: "not_found" };
+  if (test.status !== "open") return { ok: false, test, missingPrereqs: [], reason: "closed" };
+  if (!test.prereqSlugs.length) return { ok: true, test, missingPrereqs: [] };
+  const accepted = await db().query(
+    `SELECT DISTINCT c.slug AS slug FROM reports rp JOIN campaigns c ON c.id = rp.campaign_id
+       WHERE rp.tester_id=$1 AND rp.review_status='accepted' AND c.slug = ANY($2::text[])`,
+    [testerId, test.prereqSlugs],
+  );
+  const have = new Set(accepted.rows.map((x) => x.slug));
+  const missingPrereqs = test.prereqSlugs.filter((s) => !have.has(s));
+  return { ok: missingPrereqs.length === 0, test, missingPrereqs, reason: missingPrereqs.length ? "prereq" : undefined };
+}
+
+/** How many auto-awards this tester has already received THIS ISO week (for the weekly auto-award cap
+ *  guardrail — counts test-reason ledger entries written by the auto path in the current week). */
+export async function testerAutoAwardsThisWeek(testerId: string, nowMs = Date.now()): Promise<number> {
+  await init();
+  const weekStart = isoWeekStart(nowMs);
+  const r = await db().query(
+    "SELECT COUNT(*)::int AS n FROM earnings_ledger WHERE tester_id=$1 AND reason='test' AND ref LIKE 'test:%' AND created_at >= $2",
+    [testerId, weekStart],
+  );
+  return Number(r.rows[0].n);
+}
+
+/** Total accepted submissions ever by this tester (used by the "new tester → always human" guardrail:
+ *  the first N submissions must be reviewed by a person, never auto-awarded). */
+export async function testerDecidedSubmissionCount(testerId: string): Promise<number> {
+  await init();
+  const r = await db().query(
+    "SELECT COUNT(*)::int AS n FROM reports WHERE tester_id=$1 AND review_status IN ('accepted','rejected')",
+    [testerId],
+  );
+  return Number(r.rows[0].n);
+}
+
+/** Award the sustained-participation consistency bonus ONCE per ISO week (idempotent by ledger ref
+ *  `consistency:{isoWeek}`). No-op for reward-ineligible testers or when the streak/accuracy bar isn't
+ *  met. Returns the PYRX paid (0 if none). Callers gate this behind the observer/consistency path. */
+export async function awardConsistencyForWeek(testerId: string, nowMs = Date.now()): Promise<number> {
+  await init();
+  const tester = await testerById(testerId);
+  if (!tester?.reward_eligible) return 0;
+  const stats = await testerTestStats(testerId, nowMs);
+  const amount = consistencyBonus(stats);
+  if (amount <= 0) return 0;
+  const ref = `consistency:${isoWeekLabel(nowMs)}`;
+  // Atomic once-per-week: the unique-ref index makes a concurrent sweep + observer call collapse to one
+  // payment. Notify only when THIS call wrote the row (paid), never on the idempotent no-op.
+  const paid = await addLedger(testerId, "consistency", amount, `Consistency bonus — ${isoWeekLabel(nowMs)}`, ref);
+  if (!paid) return 0;
+  await addNotification(testerId, "consistency", "Consistency bonus 🔥", `You earned a ${amount.toLocaleString("en-US")} PYRX consistency bonus.`, "/app");
+  return amount;
+}
+
+/** Every reward-eligible, active tester (the default sweep set for the weekly consistency runner). */
+export async function eligibleActiveTesterIds(): Promise<string[]> {
+  await init();
+  const r = await db().query("SELECT id FROM testers WHERE reward_eligible = TRUE AND status = 'active'");
+  return r.rows.map((x) => x.id as string);
+}
+
+// ---- anti-fraud: proof content-hash de-duplication ------------------------------------------------
+// Each submission attachment carries a client-computed SHA-256 of the file bytes. Reusing the same
+// photo/video across submissions is a farming signal even when the CDN url differs (every upload gets a
+// unique key). We index the hashes stored in reports.attachments and flag any hash that appears on more
+// than one submission (optionally excluding the submission being examined). Advisory only — surfaced to
+// Sentinel + reviewers in the /pending context; never auto-rejects on its own.
+
+/** Content hashes on `submissionId` that ALSO appear on at least one OTHER submission, each with the
+ *  count of distinct other submissions using it + a small sample of those submission ids. Empty ⇒ all
+ *  of this submission's proof is unique. Reads the JSONB attachment arrays via a lateral unnest. */
+export async function duplicateProofHashes(submissionId: string): Promise<Array<{ hash: string; otherCount: number; otherSubmissions: string[] }>> {
+  await init();
+  const r = await db().query(
+    `WITH mine AS (
+       SELECT DISTINCT lower(a->>'contentHash') AS h
+       FROM reports rp, jsonb_array_elements(rp.attachments) a
+       WHERE rp.id = $1 AND a ? 'contentHash' AND a->>'contentHash' ~ '^[0-9a-f]{64}$'
+     ),
+     others AS (
+       SELECT lower(a->>'contentHash') AS h, rp.id AS sid
+       FROM reports rp, jsonb_array_elements(rp.attachments) a
+       WHERE rp.id <> $1 AND a ? 'contentHash' AND a->>'contentHash' ~ '^[0-9a-f]{64}$'
+     )
+     SELECT m.h AS hash, COUNT(DISTINCT o.sid)::int AS other_count,
+            (array_agg(DISTINCT o.sid))[1:5] AS other_submissions
+     FROM mine m JOIN others o ON o.h = m.h
+     GROUP BY m.h`,
+    [submissionId],
+  );
+  return r.rows.map((x) => ({ hash: x.hash as string, otherCount: Number(x.other_count), otherSubmissions: (x.other_submissions || []) as string[] }));
+}
+
+// ---- observer (Sentinel) context ------------------------------------------------------------------
+// The observer POLLS for work: submissions in 'submitted' that have no assessment yet. Each is enriched
+// with everything Sentinel needs for its chain cross-checks — the test's steps, the tester's results +
+// logs + attachments (with dup-proof flags), the tester's payout identity, and their nodes' current
+// height + last heartbeat — so the observer never has to call back for context.
+
+export interface PendingNode { nodePk: string; height: number | null; lastHeartbeat: number; app: string | null; appVersion: string | null; online: boolean }
+export interface PendingSubmissionContext {
+  submissionId: string;
+  testSlug: string | null;
+  testTitle: string;
+  track: string;
+  steps: any[];
+  results: any[];
+  logs: string | null;
+  attachments: any[];
+  tester: { id: string; handle: string; displayName: string; payoutWallet: string | null; rewardEligible: boolean; decidedCount: number; autoAwardsThisWeek: number };
+  nodes: PendingNode[];
+  dupProof: Array<{ hash: string; otherCount: number; otherSubmissions: string[] }>;
+  createdAt: number;
+}
+
+/** The observer work queue: submissions in 'submitted' WITHOUT an assessment yet, each enriched with
+ *  the full context Sentinel needs (steps, results, logs, attachments + dup-proof flags, tester payout
+ *  identity + guardrail counters, and the tester's nodes with height/heartbeat). Newest-first. */
+export async function pendingSubmissionContexts(limit = 25): Promise<PendingSubmissionContext[]> {
+  await init();
+  const lim = Math.min(100, Math.max(1, Math.floor(limit)));
+  const rows = await db().query(
+    `SELECT rp.id, rp.campaign_id, rp.tester_id, rp.results, rp.attachments, rp.logs, rp.created_at,
+            c.slug AS test_slug, c.title AS test_title, c.track AS test_track, c.steps AS test_steps,
+            t.handle AS tester_handle, t.display_name AS tester_name, t.payout_wallet, t.reward_eligible
+       FROM reports rp
+       JOIN campaigns c ON c.id = rp.campaign_id
+       JOIN testers t ON t.id = rp.tester_id
+      WHERE rp.review_status = 'submitted' AND rp.sentinel_assessment IS NULL
+      ORDER BY rp.created_at ASC
+      LIMIT $1`,
+    [lim],
+  );
+  const now = Date.now();
+  const out: PendingSubmissionContext[] = [];
+  for (const r of rows.rows) {
+    const nodesR = await db().query(
+      "SELECT node_pk, height, peers, app, app_version, last_heartbeat FROM nodes WHERE tester_id=$1 ORDER BY last_heartbeat DESC LIMIT 20",
+      [r.tester_id],
+    );
+    const nodes: PendingNode[] = nodesR.rows.map((n) => ({
+      nodePk: n.node_pk as string,
+      height: n.height == null ? null : Number(n.height),
+      lastHeartbeat: Number(n.last_heartbeat),
+      app: (n.app ?? null) as string | null,
+      appVersion: (n.app_version ?? null) as string | null,
+      online: now - Number(n.last_heartbeat) < ONLINE_MS,
+    }));
+    const [dupProof, decidedCount, autoAwardsThisWeek] = await Promise.all([
+      duplicateProofHashes(r.id),
+      testerDecidedSubmissionCount(r.tester_id),
+      testerAutoAwardsThisWeek(r.tester_id, now),
+    ]);
+    out.push({
+      submissionId: r.id,
+      testSlug: (r.test_slug ?? null) as string | null,
+      testTitle: (r.test_title ?? "") as string,
+      track: (r.test_track ?? "") as string,
+      steps: (r.test_steps ?? []) as any[],
+      results: (r.results ?? []) as any[],
+      logs: (r.logs ?? null) as string | null,
+      attachments: (r.attachments ?? []) as any[],
+      tester: {
+        id: r.tester_id as string,
+        handle: (r.tester_handle ?? "") as string,
+        displayName: (r.tester_name ?? "") as string,
+        payoutWallet: (r.payout_wallet ?? null) as string | null,
+        rewardEligible: !!r.reward_eligible,
+        decidedCount,
+        autoAwardsThisWeek,
+      },
+      nodes,
+      dupProof,
+      createdAt: Number(r.created_at ?? 0),
+    });
+  }
+  return out;
 }

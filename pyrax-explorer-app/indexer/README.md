@@ -24,12 +24,35 @@ npm run ingest     # ingest worker only (no HTTP)
 
 | Var | Purpose | Default |
 | --- | --- | --- |
-| `EXPLORER_DATABASE_URL` / `DATABASE_URL` | Postgres (DO Managed; `…?sslmode=require`) | local dev DB |
+| `EXPLORER_DATABASE_URL` / `DATABASE_URL` | Postgres (DO Managed; `…?sslmode=require`). **Use a least-privilege role — see below.** | local dev DB |
 | `RPC_881109` / `RPC_710823` / `RPC_104928` / `RPC_563821` | per-network RPC override | SSOT defaults |
 | `PORT` / `HOST` | read-API bind | `8788` / `0.0.0.0` |
 | `INGEST_INTERVAL_MS` / `INGEST_BATCH` / `RECEIPT_CONCURRENCY` | ingest cadence + bounds | `4000` / `40` / `8` |
 | `DATABASE_SSL` / `DATABASE_CA` | force TLS / verify DB cert | derived from URL |
+| `DB_STATEMENT_TIMEOUT_MS` | per-connection `statement_timeout` (0 disables) | `15000` |
 | `ALLOW_ORIGIN` | CORS origin for the read API | `*` |
+| `VERIFY_MAX_BODY_BYTES` | hard cap on the POST `/verify` body (413 beyond) | `614400` |
+| `READ_MAX_OFFSET` | cap on `?offset=` for the read routes | `100000` |
+| `RL_READ_RPS` / `RL_READ_BURST` | per-IP token bucket for read routes | `20` / `60` |
+| `RL_VERIFY_RPS` / `RL_VERIFY_BURST` | tighter per-IP bucket for `/verify` | `0.2` / `5` |
+| `MAX_LOG_DATA_BYTES` | truncate a single stored log `data` blob beyond this | `32768` |
+| `MAX_LOGS_PER_BLOCK` / `MAX_TRANSFERS_PER_BLOCK` | per-block row caps | `5000` / `5000` |
+
+## Security posture
+
+- **Least-privilege DB role (REQUIRED in production).** The indexer is internet-exposed and needs only
+  read + INSERT/UPDATE/DELETE on its own explorer tables. Do NOT point `EXPLORER_DATABASE_URL` at the DO
+  cluster superuser (`doadmin`) — a single SQL-execution / dependency / credential flaw would then own
+  the whole shared cluster. Provision the dedicated role once with
+  [`scripts/explorer-role.sql`](./scripts/explorer-role.sql) and use it. The indexer logs a loud
+  `SECURITY` warning (+ a Sentinel `warn`) at startup if it detects it is connected as a superuser.
+- **Request hardening.** Every read route is per-IP rate-limited; `/verify` has a second, much tighter
+  bucket and a hard request-body cap enforced BEFORE the body is buffered/parsed. `?offset=` is clamped,
+  and a `statement_timeout` bounds every query so one pathological read can't pin a pooled client.
+- **Ingestion caps.** A single log's `data` blob is truncated past `MAX_LOG_DATA_BYTES`, and per-block
+  log/transfer rows are bounded, so a hostile contract on the indexed chain can't drive unbounded storage.
+- **Trusted client IP.** Rate-limit keys use `CF-Connecting-IP` (behind Cloudflare) or the rightmost
+  (proxy-attested) `X-Forwarded-For` hop, never the client-controlled leftmost hop.
 
 ## Schema (per `chain_id`)
 

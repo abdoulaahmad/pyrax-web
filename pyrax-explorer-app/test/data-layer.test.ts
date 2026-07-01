@@ -70,6 +70,22 @@ describe("data-layer fail-safe (no DB, no RPC ⇒ sample, never throws)", () => 
     expect((await getAddress(net, ok)).source).toBe("sample");
   });
 
+  it("getTx rejects a non-hash path param → sample, never touching the node RPC or the indexer (L8)", async () => {
+    const { netFor, getTx } = await import("../src/server/chain");
+    const net = netFor(RISE);
+    for (const bad of ["not-a-hash", "0xZZZ", "' OR 1=1", "0x123", "<script>", "0x" + "a".repeat(200), "0x" + "a".repeat(40)]) {
+      const r = await getTx(net, bad);
+      expect(r.source, `tx ${bad}`).toBe("sample");
+      // The echoed hash is the raw input, unaltered (sample detail is honest about what was requested).
+      expect((r as any).hash).toBe(bad);
+    }
+    // A well-formed 32-byte hash is accepted (and, with no DB/RPC, still resolves to sample, lower-cased).
+    const okHash = "0x" + "A".repeat(64);
+    const good = await getTx(net, okHash);
+    expect(good.source).toBe("sample");
+    expect((good as any).hash).toBe(okHash.toLowerCase());
+  });
+
   it("getLogs accepts a filter without throwing and still returns sample", async () => {
     const { netFor, getLogs } = await import("../src/server/chain");
     const net = netFor(RISE);

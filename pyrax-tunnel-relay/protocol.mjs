@@ -78,6 +78,10 @@ export class TunnelHub {
     } catch {
       return;
     }
+    // `JSON.parse` accepts bare `null`/numbers/strings/arrays as valid documents; ignore any
+    // non-object envelope so a hostile/buggy agent frame (e.g. the literal `null`) can't crash
+    // the message loop by dereferencing a field on a non-object.
+    if (m === null || typeof m !== "object") return;
     if (m.t === "res") {
       const resolve = this.#pendingHttp.get(m.id);
       if (resolve) {

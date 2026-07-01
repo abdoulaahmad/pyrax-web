@@ -76,8 +76,13 @@ export function createRateLimiter(opts: RateLimitOptions): RateLimiter {
   };
 }
 
-// Shared limiters for the two abuse-amplification endpoints.
+// Shared limiters for the abuse-amplification endpoints.
 //   announce: a node legitimately posts every ~10s; allow a small burst, refill ~1/3s.
+//   deregister: a node legitimately calls this only when it is destroyed (rare, once per node). We
+//     still allow a small burst (a fleet operator may tear several nodes down at once) but throttle it
+//     so one holder of the shared HMAC secret can't loop deregister over every live peerId faster than
+//     the ~10s re-announce cycle and keep the public directory perpetually blanked (directory churn DoS).
 //   notifySubscribe: each call may hit Brevo (email) — keep this tight to deny email-bomb amplification.
 export const announceLimiter = createRateLimiter({ capacity: 20, refillPerSec: 0.5 });
+export const deregisterLimiter = createRateLimiter({ capacity: 10, refillPerSec: 0.2 });
 export const notifySubscribeLimiter = createRateLimiter({ capacity: 5, refillPerSec: 0.05 });

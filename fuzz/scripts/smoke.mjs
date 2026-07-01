@@ -21,6 +21,10 @@ const TARGETS = [
   ["announce-body", "announce-body.target.mjs", "corpus/announce-body"],
   ["otp-code", "otp-code.target.mjs", "corpus/otp-code"],
   ["release-feed", "release-feed.target.mjs", "corpus/release-feed"],
+  ["relay-host-id", "relay-host-id.target.mjs", "corpus/relay-host-id"],
+  ["relay-ws-frames", "relay-ws-frames.target.mjs", "corpus/relay-ws-frames"],
+  ["assessment-validate", "assessment-validate.target.mjs", "corpus/assessment-validate"],
+  ["nova-assessment", "nova-assessment.target.mjs", "corpus/nova-assessment"],
 ];
 
 const results = [];

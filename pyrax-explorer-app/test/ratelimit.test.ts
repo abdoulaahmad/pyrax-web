@@ -31,10 +31,30 @@ describe("RateLimiter token bucket", () => {
   });
 });
 
-describe("clientIp", () => {
-  it("prefers the first x-forwarded-for hop", () => {
-    expect(clientIp(new Headers({ "x-forwarded-for": "1.2.3.4, 5.6.7.8" }))).toBe("1.2.3.4");
+describe("clientIp (spoof-resistant behind Cloudflare + Caddy)", () => {
+  it("prefers CF-Connecting-IP (Cloudflare overwrites it; client cannot forge it)", () => {
+    // Even with a spoofed leftmost XFF, the CF-set header wins.
+    const ip = clientIp(new Headers({ "cf-connecting-ip": "3.3.3.3", "x-forwarded-for": "6.6.6.6, 7.7.7.7" }));
+    expect(ip).toBe("3.3.3.3");
   });
+
+  it("uses the RIGHTMOST X-Forwarded-For hop (proxy-attested), never the client-controlled leftmost", () => {
+    // The attacker sets 1.2.3.4 as the leftmost hop; the trusted proxy appends the real peer 5.6.7.8.
+    // Keying on the rightmost hop means rotating the leftmost value can't mint fresh buckets.
+    expect(clientIp(new Headers({ "x-forwarded-for": "1.2.3.4, 5.6.7.8" }))).toBe("5.6.7.8");
+  });
+
+  it("a spoofed leftmost XFF cannot rotate the bucket key", () => {
+    const a = clientIp(new Headers({ "x-forwarded-for": "1.1.1.1, 9.9.9.9" }));
+    const b = clientIp(new Headers({ "x-forwarded-for": "2.2.2.2, 9.9.9.9" }));
+    expect(a).toBe(b); // same real (rightmost) peer ⇒ same bucket regardless of the forged leftmost
+    expect(a).toBe("9.9.9.9");
+  });
+
+  it("a single-hop XFF (direct/off-Cloudflare) is used verbatim", () => {
+    expect(clientIp(new Headers({ "x-forwarded-for": "8.8.8.8" }))).toBe("8.8.8.8");
+  });
+
   it("falls back to x-real-ip then a constant", () => {
     expect(clientIp(new Headers({ "x-real-ip": "9.9.9.9" }))).toBe("9.9.9.9");
     expect(clientIp(new Headers({}))).toBe("unknown");

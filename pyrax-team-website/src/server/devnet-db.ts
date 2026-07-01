@@ -115,12 +115,365 @@ export async function triageDevnetBug(bugId: string, f: { status?: string; assig
     const reporter = cur.rows[0].tester_id;
     const t = await db().query("SELECT email, reward_eligible FROM testers WHERE id=$1", [reporter]);
     if (t.rows[0]?.reward_eligible) {
-      await db().query("INSERT INTO earnings_ledger (id,tester_id,reason,pyrx,note,ref,created_at) VALUES ($1,$2,'bug',$3,$4,$5,$6)", [id("l"), reporter, award, cur.rows[0].title, `bug:${bugId}`, Date.now()]);
-      await addDevnetNotification(reporter, "bug", "Your bug was accepted 🎉", `"${cur.rows[0].title}" earned ${award.toLocaleString("en-US")} PYRX.`, "/app");
-      awarded = { email: t.rows[0].email, amount: award, title: cur.rows[0].title };
+      // Idempotent bounty: the shared earnings_ledger has a UNIQUE(ref) index, so a concurrent/replayed
+      // triage collapses to ONE payment. Notify + echo only when this insert actually wrote the row.
+      const ins = await db().query("INSERT INTO earnings_ledger (id,tester_id,reason,pyrx,note,ref,created_at) VALUES ($1,$2,'bug',$3,$4,$5,$6) ON CONFLICT (ref) WHERE ref IS NOT NULL DO NOTHING", [id("l"), reporter, award, cur.rows[0].title, `bug:${bugId}`, Date.now()]);
+      if ((ins.rowCount ?? 0) > 0) {
+        await addDevnetNotification(reporter, "bug", "Your bug was accepted 🎉", `"${cur.rows[0].title}" earned ${award.toLocaleString("en-US")} PYRX.`, "/app");
+        awarded = { email: t.rows[0].email, amount: award, title: cur.rows[0].title };
+      }
     }
   }
   return { ok: true, awarded };
+}
+
+// ---- Product-Test Reviews (staff review the tester-submitted test proofs from the team site) ----
+//
+// The devnet-portal owns the `campaigns` (= TESTS) / `reports` (= SUBMISSIONS) / `report_comments`
+// tables and the review_status state machine (see pyrax-devnet-portal/docs/PRODUCT-TESTS-CONTRACT.md).
+// This mirrors the Issue-Council flow: assign → review (accept/reject/needs_more) → comment, with an
+// idempotent PYRX award on accept (ledger ref `test:{submissionId}`) and a tester notification — the
+// exact same auto-award + notify shape as triageDevnetBug, just for the tests economy.
+const REVIEW_STATUSES = ["submitted", "ai_screening", "in_review", "needs_more", "accepted", "rejected"] as const;
+const REVIEW_VERDICTS = ["accept", "reject", "needs_more"] as const;
+type TestVerdict = (typeof REVIEW_VERDICTS)[number];
+// Fixed on-time bonus + guardrail mirror of the devnet-portal economics (rewards.ts). Kept in sync via
+// the shared contract; the per-test weight itself lives on the campaign row (`weight_pyrx`).
+const ON_TIME_TEST_BONUS_PYRX = 800;
+
+/** PYRX for accepting ONE submission: the test's weight + the on-time bonus (submitted at/before the
+ *  test's closes_at; unset ⇒ always on time). Mirrors devnet-portal rewards.perTestReward. */
+function perTestReward(weightPyrx: number, onTime: boolean): number {
+  const weight = Math.max(0, Math.round(Number(weightPyrx) || 0));
+  return weight + (onTime ? ON_TIME_TEST_BONUS_PYRX : 0);
+}
+
+// Mirror of devnet-portal rewards.boundedAward — kept in sync via the contract. Bounds a manual staff
+// `awardPyrx` override so a single rogue/compromised reviewer can't mint unbounded PYRX: an override may
+// exceed the computed reward but never beyond MAX_OVERRIDE_FACTOR × weight, and never above the absolute
+// MAX_MANUAL_AWARD_PYRX. Anything larger is a tokenomics decision, not a single review click.
+const MAX_OVERRIDE_FACTOR = 4;
+const MAX_MANUAL_AWARD_PYRX = 50_000;
+function boundedAward(override: number | undefined, computed: number, weightPyrx: number): number {
+  if (typeof override !== "number" || !Number.isFinite(override) || override < 0) return Math.max(0, Math.round(computed));
+  const weight = Math.max(0, Math.round(Number(weightPyrx) || 0));
+  const ceiling = Math.min(MAX_MANUAL_AWARD_PYRX, Math.max(Math.round(computed), weight * MAX_OVERRIDE_FACTOR));
+  return Math.max(0, Math.min(Math.round(override), ceiling));
+}
+
+// Join reports → their test (campaign) + the submitting tester. Column aliases match the contract's
+// Submission shape so the API/UI read the same field names the portal exposes.
+const SUB_SELECT = `
+  SELECT rp.id, rp.campaign_id, rp.tester_id, rp.results, rp.attachments, rp.notes, rp.logs,
+         rp.review_status, rp.reviewer_verdict, rp.reviewer_notes, rp.sentinel_assessment,
+         rp.assigned_to, rp.assigned_by, rp.assigned_at, rp.awarded_pyrx, rp.accepted_at,
+         rp.created_at, rp.updated_at,
+         c.slug AS test_slug, c.title AS test_title, c.track AS test_track,
+         c.weight_pyrx AS test_weight, c.app_version AS test_app_version, c.closes_at AS test_closes_at,
+         t.display_name AS tester_name, t.handle AS tester_handle, t.email AS tester_email,
+         t.payout_wallet AS tester_wallet, t.reward_eligible AS tester_reward_eligible
+    FROM reports rp
+    JOIN campaigns c ON c.id = rp.campaign_id
+    JOIN testers t ON t.id = rp.tester_id`;
+
+function subRow(r: any) {
+  return {
+    id: r.id as string,
+    testId: r.campaign_id as string,
+    testSlug: (r.test_slug ?? null) as string | null,
+    testTitle: (r.test_title ?? "") as string,
+    track: (r.test_track ?? "") as string,
+    weightPyrx: Number(r.test_weight ?? 0),
+    appVersion: (r.test_app_version ?? "") as string,
+    testerId: r.tester_id as string,
+    testerName: (r.tester_name ?? "") as string,
+    testerHandle: (r.tester_handle ?? "") as string,
+    testerWallet: (r.tester_wallet ?? null) as string | null,
+    testerRewardEligible: !!r.tester_reward_eligible,
+    results: (r.results ?? []) as any[],
+    attachments: (r.attachments ?? []) as any[],
+    notes: (r.notes ?? "") as string,
+    logs: (r.logs ?? null) as string | null,
+    reviewStatus: (r.review_status ?? "submitted") as string,
+    reviewerVerdict: (r.reviewer_verdict ?? null) as string | null,
+    reviewerNotes: (r.reviewer_notes ?? null) as string | null,
+    sentinelAssessment: (r.sentinel_assessment ?? null) as any,
+    assignedTo: (r.assigned_to ?? null) as string | null,
+    assignedBy: (r.assigned_by ?? null) as string | null,
+    assignedAt: r.assigned_at == null ? null : Number(r.assigned_at),
+    awardedPyrx: Number(r.awarded_pyrx ?? 0),
+    acceptedAt: r.accepted_at == null ? null : Number(r.accepted_at),
+    createdAt: Number(r.created_at ?? 0),
+    updatedAt: Number(r.updated_at ?? 0),
+  };
+}
+export type TestSubmission = ReturnType<typeof subRow>;
+
+/** Resolve reviewer team-user ids → display names (assignee/assigner are TEAM users, not testers, so
+ *  they live in the team DB — passed in from the API layer to avoid a cross-pool import cycle). */
+function attachReviewerNames<T extends { assignedTo: string | null; assignedBy: string | null }>(
+  rows: T[],
+  names: Map<string, string>,
+): (T & { assignedToName: string | null; assignedByName: string | null })[] {
+  return rows.map((s) => ({
+    ...s,
+    assignedToName: s.assignedTo ? names.get(s.assignedTo) ?? null : null,
+    assignedByName: s.assignedBy ? names.get(s.assignedBy) ?? null : null,
+  }));
+}
+
+/** The review queue. Filters mirror the contract (status/assignee/track/tester/limit). */
+export async function listTestSubmissions(filter: { status?: string; assignee?: string; track?: string; tester?: string; limit?: number } = {}): Promise<TestSubmission[]> {
+  const where: string[] = [];
+  const vals: any[] = [];
+  if (filter.status && (REVIEW_STATUSES as readonly string[]).includes(filter.status)) { vals.push(filter.status); where.push(`rp.review_status = $${vals.length}`); }
+  if (filter.assignee) { vals.push(filter.assignee); where.push(`rp.assigned_to = $${vals.length}`); }
+  if (filter.track === "cli" || filter.track === "inferno") { vals.push(filter.track); where.push(`c.track = $${vals.length}`); }
+  if (filter.tester) { vals.push(filter.tester); where.push(`rp.tester_id = $${vals.length}`); }
+  vals.push(Math.min(500, Math.max(1, Math.floor(Number.isFinite(filter.limit as number) ? (filter.limit as number) : 200))));
+  const clause = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const r = await db().query(`${SUB_SELECT} ${clause} ORDER BY rp.created_at DESC LIMIT $${vals.length}`, vals);
+  return r.rows.map(subRow);
+}
+
+/** One submission by id (with its test + tester), or null. */
+export async function getTestSubmission(submissionId: string): Promise<TestSubmission | null> {
+  const r = await db().query(`${SUB_SELECT} WHERE rp.id=$1`, [submissionId]);
+  return r.rows[0] ? subRow(r.rows[0]) : null;
+}
+
+/** The review thread for a submission (report_comments), oldest first. */
+export async function listTestComments(reportId: string): Promise<any[]> {
+  const r = await db().query(
+    "SELECT id, body, created_at, author_name AS display_name, author_user AS handle, author_admin AS is_staff FROM report_comments WHERE report_id=$1 ORDER BY created_at ASC",
+    [reportId],
+  );
+  return r.rows;
+}
+
+/** Assign a submission to a reviewer (a TEAM user id). Moves submitted/ai_screening → in_review. */
+export async function assignTestSubmission(submissionId: string, assigneeId: string, assignedBy: string): Promise<TestSubmission | null> {
+  const now = Date.now();
+  const upd = await db().query(
+    `UPDATE reports SET assigned_to=$2, assigned_by=$3, assigned_at=$4,
+       review_status = CASE WHEN review_status IN ('submitted','ai_screening') THEN 'in_review' ELSE review_status END,
+       updated_at=$4 WHERE id=$1 AND review_status NOT IN ('accepted','rejected')`,
+    [submissionId, assigneeId, assignedBy, now],
+  );
+  if ((upd.rowCount ?? 0) === 0) return null; // not found OR already terminal (can't reassign a decided submission)
+  return getTestSubmission(submissionId);
+}
+
+/** Post a staff comment on the review thread (author_admin=TRUE) + notify the tester (in-app). */
+export async function addTestComment(reportId: string, author: { id: string; name: string; user: string }, body: string): Promise<any[]> {
+  const cid = id("rc");
+  await db().query(
+    "INSERT INTO report_comments (id,report_id,author_id,author_name,author_user,author_admin,body,created_at) VALUES ($1,$2,$3,$4,$5,TRUE,$6,$7)",
+    [cid, reportId, author.id, author.name, author.user, body.slice(0, 4000), Date.now()],
+  );
+  const rep = await db().query(
+    "SELECT rp.tester_id, c.title FROM reports rp JOIN campaigns c ON c.id=rp.campaign_id WHERE rp.id=$1",
+    [reportId],
+  );
+  if (rep.rows[0]) await addDevnetNotification(rep.rows[0].tester_id, "reply", "PYRAX team replied to your test submission", `On "${rep.rows[0].title}".`, "/app");
+  return listTestComments(reportId);
+}
+
+/** Human review of a submission from the team site. Sets the terminal status + verdict + notes, and on
+ *  ACCEPT pays the test's weight (or the staff `awardPyrx` override) ONCE via the idempotent ledger ref
+ *  `test:{submissionId}` + notifies the tester — mirroring triageDevnetBug's bounty auto-award. Verdict
+ *  maps: accept→accepted, reject→rejected, needs_more→needs_more. Reward-ineligible testers (staff)
+ *  never get a ledger row; a re-accept can never double-pay (the ref guards it). */
+export async function reviewTestSubmission(
+  submissionId: string,
+  f: { verdict: string; notes?: string; awardPyrx?: number },
+  reviewer: { id: string; email: string },
+): Promise<{ ok: true; submission?: TestSubmission; awarded?: { email: string; amount: number; title: string } } | { ok: false; reason: "verdict" | "not_found" | "self_review" | "already_decided" }> {
+  const verdict = (REVIEW_VERDICTS as readonly string[]).includes(f.verdict) ? (f.verdict as TestVerdict) : null;
+  if (!verdict) return { ok: false, reason: "verdict" };
+  const cur = await getTestSubmission(submissionId);
+  if (!cur) return { ok: false, reason: "not_found" };
+
+  // Self-dealing guard: a reviewer must never ACCEPT a submission from their own reward-eligible tester
+  // account. Team users and testers live in different id-spaces, so we compare the verified emails.
+  const testerEmail = (await db().query("SELECT email FROM testers WHERE id=$1", [cur.testerId])).rows[0]?.email as string | undefined;
+  if (verdict === "accept" && testerEmail && reviewer.email && testerEmail.toLowerCase() === reviewer.email.trim().toLowerCase()) {
+    return { ok: false, reason: "self_review" };
+  }
+
+  const now = Date.now();
+  const status = verdict === "accept" ? "accepted" : verdict === "reject" ? "rejected" : "needs_more";
+
+  // Atomically CLAIM the transition from a NON-terminal state. This blocks resurrecting a rejected row
+  // into a fresh 'accepted' (which would pay), overwriting a terminal decision, and two concurrent
+  // reviews both proceeding (the loser matches 0 rows → 'already_decided').
+  const claim = await db().query(
+    `UPDATE reports SET review_status=$2, reviewer_verdict=$3, reviewer_notes=$4, accepted=$5,
+       accepted_at = CASE WHEN $2='accepted' THEN $6 ELSE accepted_at END,
+       assigned_to = COALESCE(assigned_to, $7), updated_at=$6
+     WHERE id=$1 AND review_status IN ('submitted','ai_screening','in_review','needs_more')`,
+    [submissionId, status, verdict, (f.notes || "").slice(0, 8000), verdict === "accept", now, reviewer.id],
+  );
+  if ((claim.rowCount ?? 0) === 0) return { ok: false, reason: "already_decided" };
+
+  let awardedInfo: { email: string; amount: number; title: string } | undefined;
+  if (verdict === "accept" && cur.testerRewardEligible) {
+    const ref = `test:${submissionId}`;
+    const onTime = isOnTime(cur.createdAt, await testCloseAt(cur.testId));
+    const computed = perTestReward(cur.weightPyrx, onTime);
+    const amount = boundedAward(f.awardPyrx, computed, cur.weightPyrx); // cap the manual override
+    if (amount > 0) {
+      // Idempotent award: the shared earnings_ledger has a UNIQUE(ref) index (owned by the devnet-portal
+      // schema), so a concurrent team-accept + observer-accept collapse to ONE payment. Notify + echo only
+      // when THIS insert actually wrote the row.
+      const ins = await db().query(
+        "INSERT INTO earnings_ledger (id,tester_id,reason,pyrx,note,ref,created_at) VALUES ($1,$2,'test',$3,$4,$5,$6) ON CONFLICT (ref) WHERE ref IS NOT NULL DO NOTHING",
+        [id("l"), cur.testerId, amount, cur.testTitle, ref, now],
+      );
+      if ((ins.rowCount ?? 0) > 0) {
+        await addDevnetNotification(cur.testerId, "test", "Your test was accepted 🎉", `"${cur.testTitle}" earned ${amount.toLocaleString("en-US")} PYRX.`, "/app");
+        awardedInfo = { email: testerEmail ?? "", amount, title: cur.testTitle };
+        await db().query("UPDATE reports SET awarded_pyrx=$2, updated_at=$3 WHERE id=$1", [submissionId, amount, now]);
+      }
+    }
+  } else if (verdict === "needs_more") {
+    await addDevnetNotification(cur.testerId, "test", "More info requested on your test", `Reviewer asked for more on "${cur.testTitle}". Address it and resubmit.`, "/app");
+  } else if (verdict === "reject") {
+    await addDevnetNotification(cur.testerId, "test", "Your test submission was reviewed", `"${cur.testTitle}" was not accepted this time.`, "/app");
+  }
+
+  const updated = await getTestSubmission(submissionId);
+  return { ok: true, submission: updated ?? undefined, awarded: awardedInfo };
+}
+
+/** The test's on-time window boundary (ms) — unset ⇒ always on time. */
+async function testCloseAt(testId: string): Promise<number | null> {
+  const r = await db().query("SELECT closes_at FROM campaigns WHERE id=$1", [testId]);
+  return r.rows[0]?.closes_at == null ? null : Number(r.rows[0].closes_at);
+}
+const isOnTime = (submittedAt: number, closesAt: number | null): boolean => closesAt == null || submittedAt <= closesAt;
+
+/** Release-readiness data: every submission + every test, so the module can compute per-app-version
+ *  coverage % and the test×track pass/fail heatmap without extra round-trips. */
+export async function testReleaseReadiness(): Promise<{ tests: any[]; submissions: any[] }> {
+  const tests = await db().query(
+    "SELECT id, slug, title, track, app_version, order_idx, weight_pyrx FROM campaigns ORDER BY track ASC, order_idx ASC, created_at ASC",
+  );
+  const subs = await db().query(
+    `SELECT rp.campaign_id, rp.tester_id, rp.review_status, rp.created_at,
+            c.track AS test_track, c.app_version AS test_app_version
+       FROM reports rp JOIN campaigns c ON c.id=rp.campaign_id`,
+  );
+  return {
+    tests: tests.rows.map((t) => ({ id: t.id, slug: t.slug, title: t.title, track: t.track, appVersion: t.app_version || "", orderIdx: Number(t.order_idx ?? 0), weightPyrx: Number(t.weight_pyrx ?? 0) })),
+    submissions: subs.rows.map((s) => ({ testId: s.campaign_id, testerId: s.tester_id, reviewStatus: s.review_status, track: s.test_track, appVersion: s.test_app_version || "", createdAt: Number(s.created_at ?? 0) })),
+  };
+}
+
+/** Attach reviewer (team-user) display names to a set of submissions. The API layer supplies the
+ *  id→name map (from the team `users` table) so this module stays on the devnet pool only. */
+export function withReviewerNames<T extends { assignedTo: string | null; assignedBy: string | null }>(rows: T[], names: Map<string, string>) {
+  return attachReviewerNames(rows, names);
+}
+
+// ---- Airdrop accounting (per-tester accrued PYRX; paid at the mainnet airdrop) ----
+//
+// Rewards accrue in earnings_ledger NOW and are paid as a mainnet airdrop LATER. This is the team's
+// single source of truth for what each tester is owed: their lifetime accrued PYRX, a breakdown by
+// reason, and their payout wallet. USD is the fixed $0.0025/PYRX genesis reference. Only reward-eligible
+// (non-staff) testers accrue; the grand total is the airdrop liability. Read-only — this view never
+// mutates the ledger.
+export const PYX_USD = 0.0025;
+
+export interface TesterRewardAccount {
+  testerId: string; email: string; handle: string; displayName: string;
+  payoutWallet: string | null; rewardEligible: boolean; foundingRank: number | null; status: string;
+  totalPyrx: number; usd: number;
+  byReason: { test: number; bug: number; consistency: number; uptime: number; founding: number; other: number };
+  testCount: number; bugCount: number; ledgerCount: number; lastEarnedAt: number | null;
+}
+
+/** Every non-staff tester with their lifetime accrued PYRX, split by ledger reason + their payout
+ *  wallet, plus grand totals (the airdrop liability). Ordered by total accrued, descending. */
+export async function testerRewardAccounting(): Promise<{
+  accounts: TesterRewardAccount[];
+  totals: { testers: number; withWallet: number; totalPyrx: number; eligiblePyrx: number; usd: number;
+    byReason: { test: number; bug: number; consistency: number; uptime: number; founding: number; other: number } };
+  priceUsd: number;
+}> {
+  const r = await db().query(
+    `SELECT t.id, t.email, t.handle, t.display_name, t.payout_wallet, t.reward_eligible, t.founding_rank, t.status,
+            COALESCE(SUM(l.pyrx), 0)                                                        AS total_pyrx,
+            COALESCE(SUM(l.pyrx) FILTER (WHERE l.reason = 'test'), 0)                        AS test_pyrx,
+            COALESCE(SUM(l.pyrx) FILTER (WHERE l.reason = 'bug'), 0)                         AS bug_pyrx,
+            COALESCE(SUM(l.pyrx) FILTER (WHERE l.reason = 'consistency'), 0)                 AS consistency_pyrx,
+            COALESCE(SUM(l.pyrx) FILTER (WHERE l.reason = 'uptime'), 0)                      AS uptime_pyrx,
+            COALESCE(SUM(l.pyrx) FILTER (WHERE l.reason = 'founding'), 0)                    AS founding_pyrx,
+            COALESCE(SUM(l.pyrx) FILTER (WHERE l.reason NOT IN ('test','bug','consistency','uptime','founding')), 0) AS other_pyrx,
+            COUNT(l.id) FILTER (WHERE l.reason = 'test')                                     AS test_count,
+            COUNT(l.id) FILTER (WHERE l.reason = 'bug')                                      AS bug_count,
+            COUNT(l.id)                                                                      AS ledger_count,
+            MAX(l.created_at)                                                                AS last_earned_at
+       FROM testers t
+       LEFT JOIN earnings_ledger l ON l.tester_id = t.id
+      WHERE t.is_staff = FALSE
+      GROUP BY t.id
+      ORDER BY total_pyrx DESC, t.created_at ASC
+      LIMIT 2000`,
+  );
+  const accounts: TesterRewardAccount[] = r.rows.map((x) => {
+    const totalPyrx = Number(x.total_pyrx) || 0;
+    return {
+      testerId: x.id, email: x.email, handle: x.handle || "", displayName: x.display_name || "",
+      payoutWallet: x.payout_wallet ?? null, rewardEligible: !!x.reward_eligible,
+      foundingRank: x.founding_rank == null ? null : Number(x.founding_rank), status: x.status || "",
+      totalPyrx, usd: Math.round(totalPyrx * PYX_USD * 100) / 100,
+      byReason: {
+        test: Number(x.test_pyrx) || 0, bug: Number(x.bug_pyrx) || 0, consistency: Number(x.consistency_pyrx) || 0,
+        uptime: Number(x.uptime_pyrx) || 0, founding: Number(x.founding_pyrx) || 0, other: Number(x.other_pyrx) || 0,
+      },
+      testCount: Number(x.test_count) || 0, bugCount: Number(x.bug_count) || 0, ledgerCount: Number(x.ledger_count) || 0,
+      lastEarnedAt: x.last_earned_at == null ? null : Number(x.last_earned_at),
+    };
+  });
+  const totals = accounts.reduce(
+    (a, t) => {
+      a.testers += 1;
+      if (t.payoutWallet) a.withWallet += 1;
+      a.totalPyrx += t.totalPyrx;
+      if (t.rewardEligible) a.eligiblePyrx += t.totalPyrx;
+      a.byReason.test += t.byReason.test; a.byReason.bug += t.byReason.bug; a.byReason.consistency += t.byReason.consistency;
+      a.byReason.uptime += t.byReason.uptime; a.byReason.founding += t.byReason.founding; a.byReason.other += t.byReason.other;
+      return a;
+    },
+    { testers: 0, withWallet: 0, totalPyrx: 0, eligiblePyrx: 0, usd: 0, byReason: { test: 0, bug: 0, consistency: 0, uptime: 0, founding: 0, other: 0 } },
+  );
+  totals.usd = Math.round(totals.totalPyrx * PYX_USD * 100) / 100;
+  return { accounts, totals, priceUsd: PYX_USD };
+}
+
+/** CSV export of the airdrop accounting (one row per tester). Values are quoted/escaped so a handle or
+ *  wallet can't break the CSV. UTF-8, CRLF line endings (spreadsheet-friendly). */
+export function rewardAccountingCsv(accounts: TesterRewardAccount[]): string {
+  const cols = [
+    "email", "handle", "display_name", "status", "reward_eligible", "founding_rank", "payout_wallet",
+    "total_pyrx", "usd_at_0.0025", "test_pyrx", "bug_pyrx", "consistency_pyrx", "uptime_pyrx", "founding_pyrx", "other_pyrx",
+    "test_count", "bug_count", "ledger_entries", "last_earned_iso",
+  ];
+  const esc = (v: unknown) => {
+    const s = v == null ? "" : String(v);
+    return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const iso = (ms: number | null) => (ms == null ? "" : new Date(ms).toISOString());
+  const lines = [cols.join(",")];
+  for (const a of accounts) {
+    lines.push([
+      a.email, a.handle, a.displayName, a.status, a.rewardEligible ? "yes" : "no", a.foundingRank ?? "", a.payoutWallet ?? "",
+      a.totalPyrx, a.usd, a.byReason.test, a.byReason.bug, a.byReason.consistency, a.byReason.uptime, a.byReason.founding, a.byReason.other,
+      a.testCount, a.bugCount, a.ledgerCount, iso(a.lastEarnedAt),
+    ].map(esc).join(","));
+  }
+  return lines.join("\r\n") + "\r\n";
 }
 
 // ---- chat (conversations + roster) for the team Devnet Chat page ----
