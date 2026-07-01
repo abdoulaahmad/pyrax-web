@@ -1,14 +1,14 @@
 ---
 // SPDX-License-Identifier: LicenseRef-Proprietary
-import Site from "../../../layouts/Site.astro";
-import { isLocale, DEFAULT_LOCALE, localizePath } from "../../../i18n/config";
-import { useT } from "../../../i18n";
-import { categoryBySlug } from "../../../lib/industries";
+import Site from "../../layouts/Site.astro";
+import { DEFAULT_LOCALE, localizePath } from "../../i18n/config";
+import { useT } from "../../i18n";
+import { categoryBySlug } from "../../lib/industries";
 
-const { lang = DEFAULT_LOCALE, category = "" } = Astro.params;
-if (!isLocale(lang)) return Astro.redirect(`/${DEFAULT_LOCALE}/industries`, 302);
+const lang = DEFAULT_LOCALE;
+const { category = "" } = Astro.params;
 const cat = categoryBySlug(category);
-if (!cat) return Astro.redirect(`/${lang}/industries`, 302);
+if (!cat) return Astro.redirect("/industries", 302);
 const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 ---

@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 //
-// Dynamic sitemap. Emits the canonical English URL for every route (marketing pages + the 10 industry
-// categories + all 100 business types), each with hreflang alternates for the 26 locales so search
-// engines index the right language per region.
+// Dynamic sitemap. Emits the canonical (locale-free) URL for every route (marketing pages + the 10
+// industry categories + all 100 business types). While the site is served single-language at plain
+// URLs, there are no per-locale hreflang alternates; they return when multi-locale routing is re-enabled.
 import type { APIRoute } from "astro";
-import { LOCALES, DEFAULT_LOCALE } from "../i18n/config";
 import { CATEGORIES } from "../lib/industries";
 
 const ORIGIN = "https://pyraxchain.com";
@@ -33,19 +32,15 @@ const xmlEscape = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
 export const GET: APIRoute = () => {
   const urls = routes().map(({ path, priority }) => {
-    const alternates = LOCALES.map((l) => `    <xhtml:link rel="alternate" hreflang="${l.code}" href="${xmlEscape(`${ORIGIN}/${l.code}${path}`)}"/>`).join("\n");
-    const xdefault = `    <xhtml:link rel="alternate" hreflang="x-default" href="${xmlEscape(`${ORIGIN}/${DEFAULT_LOCALE}${path}`)}"/>`;
     return `  <url>
-    <loc>${xmlEscape(`${ORIGIN}/${DEFAULT_LOCALE}${path}`)}</loc>
+    <loc>${xmlEscape(`${ORIGIN}${path || "/"}`)}</loc>
     <changefreq>weekly</changefreq>
     <priority>${priority.toFixed(1)}</priority>
-${alternates}
-${xdefault}
   </url>`;
   }).join("\n");
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls}
 </urlset>`;
 

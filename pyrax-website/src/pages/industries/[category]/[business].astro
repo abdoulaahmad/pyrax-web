@@ -1,17 +1,17 @@
 ---
 // SPDX-License-Identifier: LicenseRef-Proprietary
-import Site from "../../../../layouts/Site.astro";
-import { isLocale, DEFAULT_LOCALE, localizePath } from "../../../../i18n/config";
-import { useT } from "../../../../i18n";
-import { categoryBySlug, businessBySlug } from "../../../../lib/industries";
-import { contentFor } from "../../../../lib/industry-content";
-import { DOMAINS } from "../../../../lib/endpoints";
+import Site from "../../../layouts/Site.astro";
+import { DEFAULT_LOCALE, localizePath } from "../../../i18n/config";
+import { useT } from "../../../i18n";
+import { categoryBySlug, businessBySlug } from "../../../lib/industries";
+import { contentFor } from "../../../lib/industry-content";
+import { DOMAINS } from "../../../lib/endpoints";
 
-const { lang = DEFAULT_LOCALE, category = "", business = "" } = Astro.params;
-if (!isLocale(lang)) return Astro.redirect(`/${DEFAULT_LOCALE}/industries`, 302);
+const lang = DEFAULT_LOCALE;
+const { category = "", business = "" } = Astro.params;
 const cat = categoryBySlug(category);
 const biz = businessBySlug(category, business);
-if (!cat || !biz) return Astro.redirect(`/${lang}/industries`, 302);
+if (!cat || !biz) return Astro.redirect("/industries", 302);
 const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 const c = contentFor(category, business);

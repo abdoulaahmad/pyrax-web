@@ -1,9 +1,9 @@
 ---
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Site from "../layouts/Site.astro";
-import { negotiateLocale, localizePath } from "../i18n/config";
+import { DEFAULT_LOCALE, localizePath } from "../i18n/config";
 import { useT } from "../i18n";
-const lang = negotiateLocale(Astro.request.headers.get("accept-language"));
+const lang = DEFAULT_LOCALE;
 const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 const links = [

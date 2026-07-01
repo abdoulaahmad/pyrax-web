@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 //
-// English strings for the remaining hardcoded copy on the home page (`/[lang]/index.astro`) and the
+// English strings for the remaining hardcoded copy on the home page (`index.astro`) and the
 // live-stats widget (`LiveStats.tsx`). Flat lowerCamelCase keys; each maps 1:1 to a
 // t("homeExtra.<key>", "<English>") call. English is the source of truth — other locales fall back
 // to these values key-by-key.

@@ -55,10 +55,14 @@ export function parsePath(pathname: string): { lang: string; rest: string } {
   return { lang: DEFAULT_LOCALE, rest: pathname || "/" };
 }
 
-/** Build a localized href: localizePath("en","/industries") => "/en/industries". */
-export function localizePath(lang: string, path: string): string {
+/**
+ * Build an internal href. Internationalization is temporarily served at plain, locale-free URLs
+ * (no `/en/…` prefix) until the multi-locale routing is re-enabled. The `lang` argument is retained
+ * for call-site compatibility and future re-activation, but ignored — the path is returned as-is.
+ */
+export function localizePath(_lang: string, path: string): string {
   const p = path.startsWith("/") ? path : "/" + path;
-  return `/${lang}${p === "/" ? "" : p}` || `/${lang}`;
+  return p;
 }
 
 /** Pick the best supported locale from an Accept-Language header. */

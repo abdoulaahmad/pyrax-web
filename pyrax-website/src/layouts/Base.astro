@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
-import { isRtl, parsePath, localizePath, LOCALES, DEFAULT_LOCALE } from "../i18n/config";
+import { isRtl } from "../i18n/config";
 
 interface Props { title: string; description?: string; lang?: string; ogImage?: string }
 const { title, description, lang = "en", ogImage = "/brand/pyrax-icon.png" } = Astro.props;
@@ -10,9 +10,8 @@ const dir = isRtl(lang) ? "rtl" : "ltr";
 const fullTitle = title.includes("PYRAX") ? title : `${title} | PYRAX™ Network`;
 const desc = description ?? "PYRAX — a private-by-default, fully decentralized, ISP-resistant Layer-1 with a GhostDAG blockDAG and a verifiable AI compute marketplace.";
 const canonical = new URL(Astro.url.pathname, "https://pyraxchain.com");
-// hreflang alternates for the current route across all locales (SEO)
-const { rest } = parsePath(Astro.url.pathname);
-const alternates = LOCALES.map((l) => ({ code: l.code, href: new URL(localizePath(l.code, rest), "https://pyraxchain.com").href }));
+// Single-language (English) for now — served at plain, locale-free URLs; hreflang alternates return
+// when the multi-locale routing is re-enabled.
 ---
 <!doctype html>
 <html lang={lang} dir={dir} class="scroll-smooth">
@@ -22,8 +21,6 @@ const alternates = LOCALES.map((l) => ({ code: l.code, href: new URL(localizePat
     <title>{fullTitle}</title>
     <meta name="description" content={desc} />
     <link rel="canonical" href={canonical.href} />
-    {alternates.map((a) => <link rel="alternate" hreflang={a.code} href={a.href} />)}
-    <link rel="alternate" hreflang="x-default" href={new URL(localizePath(DEFAULT_LOCALE, rest), "https://pyraxchain.com").href} />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
