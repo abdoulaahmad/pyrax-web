@@ -9,6 +9,9 @@ export const DOMAINS = {
   devnet: "https://devnet.pyraxchain.com",
   peers: "https://peers.pyraxchain.com",
   updates: "https://updates.pyraxchain.com",
+  // Team portal — the source of truth for the cross-site default network (Network Management page).
+  // Read server-side only; override with the TEAM_URL env for local dev against a local team portal.
+  team: "https://team.pyraxchain.com",
   email: "info@pyraxchain.com",
 } as const;
 

@@ -13,6 +13,8 @@
 //     bootstrap scripts; without a nonce pipeline they need 'unsafe-inline'. No third-party script
 //     origins are allowed, and there is no user-generated HTML, so the XSS surface stays small.
 import type { MiddlewareHandler } from "astro";
+import { cookieChainId } from "./server/chain";
+import { teamDefaultChain } from "./server/settings";
 
 const CSP = [
   "default-src 'self'",
@@ -30,7 +32,15 @@ const CSP = [
   "upgrade-insecure-requests",
 ].join("; ");
 
-export const onRequest: MiddlewareHandler = async (_ctx, next) => {
+export const onRequest: MiddlewareHandler = async (ctx, next) => {
+  // Default a first-time visitor (no explicit pyrax_net choice) to the team-managed cross-site default
+  // network, persisted as a cookie so every SSR page + the topbar selector agree from then on. Only for
+  // top-level document GETs; API/asset requests are skipped. Best-effort — never blocks the response.
+  if (ctx.request.method === "GET" && !ctx.url.pathname.startsWith("/api/") && cookieChainId(ctx.request.headers.get("cookie")) === null) {
+    try {
+      ctx.cookies.set("pyrax_net", String(await teamDefaultChain()), { path: "/", maxAge: 31536000, sameSite: "lax" });
+    } catch { /* ignore — the page still renders on the local default */ }
+  }
   const res = await next();
   const h = res.headers;
   h.set("Content-Security-Policy", CSP);

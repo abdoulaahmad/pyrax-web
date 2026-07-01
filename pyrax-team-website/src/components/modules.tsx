@@ -924,7 +924,7 @@ export function NetworkManagement({ subject }: { subject: AccessSubject }) {
       {canManage && (
         <Card className="mb-4 p-5">
           <h3 className="text-base font-bold">Default network</h3>
-          <p className="text-xs text-muted">The network shown by default across all PYRAX marketing sites (until a visitor picks another).</p>
+          <p className="text-xs text-muted">The network shown by default across the main website, the block explorer, and the nodes site (until a visitor picks another).</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {nets.map((n) => (
               <button key={n.label} onClick={() => save({ defaultNetwork: n.label }, `Default set to ${n.name}.`)} disabled={busy}

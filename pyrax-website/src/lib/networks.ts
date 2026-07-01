@@ -48,9 +48,15 @@ export const networkByKey = (k: string): PyraxNetwork | undefined => NETWORKS.fi
 
 /** Selected chain from the pyrax_net cookie, defaulting to Seed. */
 export function selectedChainId(cookieHeader: string | null): number {
+  return cookieChainId(cookieHeader) ?? DEFAULT_CHAIN;
+}
+
+/** The chain explicitly chosen in the pyrax_net cookie, or null when the visitor hasn't chosen one yet
+ *  (the caller then applies the team-managed default). */
+export function cookieChainId(cookieHeader: string | null): number | null {
   const m = (cookieHeader || "").match(/(?:^|;\s*)pyrax_net=(\d+)/);
   const id = m ? Number(m[1]) : NaN;
-  return networkByChain(id) ? id : DEFAULT_CHAIN;
+  return networkByChain(id) ? id : null;
 }
 
 /** The published network-wide throughput target (used to color live TPS). */

@@ -9,9 +9,14 @@ import * as idx from "./indexer";
 import { sampleOverview, sampleBlocks, sampleBlockDetail, sampleTxs, sampleTxDetail, sampleAddress, sampleShielded, sampleDag, sampleNetwork, sampleGas, sampleValidators, sampleContracts, sampleTokens, sampleLogs, sampleContractDetail, sampleTokenDetail } from "./sample";
 
 export function selectedChainId(cookieHeader: string | null): number {
+  return cookieChainId(cookieHeader) ?? DEFAULT_CHAIN;
+}
+/** The chain explicitly chosen in the pyrax_net cookie, or null when unset/invalid (the caller then
+ *  applies the team-managed cross-site default). */
+export function cookieChainId(cookieHeader: string | null): number | null {
   const m = (cookieHeader || "").match(/(?:^|;\s*)pyrax_net=(\d+)/);
   const id = m ? Number(m[1]) : NaN;
-  return networkByChain(id) ? id : DEFAULT_CHAIN;
+  return networkByChain(id) ? id : null;
 }
 export function netFor(chainId: number): ExplorerNetwork { return networkByChain(chainId) || NETWORKS[0]; }
 
