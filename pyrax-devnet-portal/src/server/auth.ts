@@ -8,8 +8,8 @@ import { db, init, testerByEmail, testerById, touchLogin, type TesterRow } from 
 import { hmac, randomOtp, randomSessionId, timingSafeEqual } from "./crypto";
 import { sendOtp } from "./email";
 import { clampSessionDays, MAX_SESSION_DAYS } from "../lib/tester";
+import { OTP_LEN, normalizeOtpCode, isWellFormedOtp } from "./otp-code";
 
-const OTP_LEN = 9;
 const OTP_TTL_MS = 10 * 60_000;
 export const OTP_TTL_S = OTP_TTL_MS / 1000;
 export const SESSION_COOKIE = "dv_session";
@@ -59,9 +59,9 @@ export async function otpStatus(rid: string): Promise<OtpState> {
 
 export async function verifyLoginCode(email: string, code: string): Promise<{ ok: true; tester: TesterRow } | { ok: false; reason: "rate" | "invalid" }> {
   const e = email.trim().toLowerCase();
-  const c = (code || "").replace(/\D/g, "");
+  const c = normalizeOtpCode(code);
   if (!allow(verBucket, e, 8, 10 * 60_000)) return { ok: false, reason: "rate" };
-  if (c.length !== OTP_LEN) return { ok: false, reason: "invalid" };
+  if (!isWellFormedOtp(c)) return { ok: false, reason: "invalid" };
   await init();
   const hash = hmac(`${e}:${c}`);
   const now = Date.now();

@@ -82,6 +82,23 @@ export function presignGet(key: string, expiresSec = 900): string {
   return `https://${HOST}${canonicalUri}?${canonicalQuery}&X-Amz-Signature=${signature}`;
 }
 
+/** Result of parsing one ListObjectsV2 XML page: keys on the page + the next continuation token. */
+export interface ListKeysPage { keys: string[]; nextToken?: string }
+
+/**
+ * Pure parser for one ListObjectsV2 XML response body. Extracted from listKeys() so the untrusted-XML
+ * handling can be unit-tested and fuzzed in isolation (a bucket response is bytes we don't control).
+ * Total: any string — including malformed/truncated/hostile XML — yields a `ListKeysPage` (never
+ * throws), with `<Key>` values entity-decoded. The caller stops paginating when there's no token.
+ */
+export function parseListKeysPage(xml: string): ListKeysPage {
+  const keys: string[] = [];
+  for (const m of xml.matchAll(/<Key>([^<]+)<\/Key>/g)) keys.push(decodeXml(m[1]));
+  const truncated = /<IsTruncated>true<\/IsTruncated>/.test(xml);
+  const next = xml.match(/<NextContinuationToken>([^<]+)<\/NextContinuationToken>/);
+  return { keys, nextToken: truncated && next ? decodeXml(next[1]) : undefined };
+}
+
 /**
  * List object keys under `prefix` via SigV4-signed ListObjectsV2. Returns the flat list of keys
  * (handles pagination). Throws on a non-2xx response so the caller can degrade to "unavailable".
@@ -113,11 +130,10 @@ export async function listKeys(prefix: string): Promise<string[]> {
     });
     if (!res.ok) throw new Error(`Spaces list ${prefix} failed: ${res.status}`);
     const xml = await res.text();
-    for (const m of xml.matchAll(/<Key>([^<]+)<\/Key>/g)) keys.push(decodeXml(m[1]));
-    const truncated = /<IsTruncated>true<\/IsTruncated>/.test(xml);
-    const next = xml.match(/<NextContinuationToken>([^<]+)<\/NextContinuationToken>/);
-    if (!truncated || !next) break;
-    token = decodeXml(next[1]);
+    const page = parseListKeysPage(xml);
+    keys.push(...page.keys);
+    if (!page.nextToken) break;
+    token = page.nextToken;
   }
   return keys;
 }

@@ -15,8 +15,9 @@ export interface FeedResult { available: boolean; version: string | null; assets
 
 const PRESIGN_TTL_S = 3600; // 1h — long enough to click through, short enough to expire
 
-/** Classify an installer/archive filename to a platform, or null if it isn't a user download. */
-function infernoPlatform(name: string): Platform | null {
+/** Classify an installer/archive filename to a platform, or null if it isn't a user download.
+ *  Exported for fuzzing: the input is an attacker-influenceable object key from a bucket listing. */
+export function infernoPlatform(name: string): Platform | null {
   const n = name.toLowerCase();
   if (n.endsWith(".yml") || n.endsWith(".yaml") || n.endsWith(".blockmap")) return null; // updater metadata
   if (n.endsWith(".exe")) return "win";
@@ -24,7 +25,9 @@ function infernoPlatform(name: string): Platform | null {
   if (n.endsWith(".appimage") || n.endsWith(".deb") || n.endsWith(".rpm")) return "linux";
   return null;
 }
-function cliPlatform(name: string): Platform | null {
+/** Classify a CLI archive filename to a platform, or null if it isn't a user download.
+ *  Exported for fuzzing: the input is an attacker-influenceable object key from a bucket listing. */
+export function cliPlatform(name: string): Platform | null {
   const n = name.toLowerCase();
   if (n.endsWith(".json")) return null; // manifest
   if (n.includes("windows") || n.endsWith("-win.zip") || (n.endsWith(".zip") && n.includes("win"))) return "win";
@@ -37,10 +40,27 @@ const baseName = (key: string) => key.split("/").pop() || key;
 /** Newest object first (by LastModified, then key for determinism). */
 const newest = (a: SpacesObject, b: SpacesObject) => b.lastModified - a.lastModified || (a.key < b.key ? 1 : -1);
 
-/** Best-effort semver-ish version pulled from a filename, e.g. "Inferno-0.3.1.exe" → "0.3.1". */
-function versionFromName(name: string): string | null {
+/** Best-effort semver-ish version pulled from a filename, e.g. "Inferno-0.3.1.exe" → "0.3.1".
+ *  Exported for fuzzing: the input is an attacker-influenceable object key from a bucket listing. */
+export function versionFromName(name: string): string | null {
   const m = name.match(/(\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?)/);
   return m ? m[1] : null;
+}
+
+/**
+ * Best-effort version extracted from an UNTRUSTED cli/manifest.json body. Total: any string — including
+ * non-JSON, a JSON array/number/null, or an object with a hostile `version`/`latest`/`tag` — yields a
+ * clean version string or null (never throws). Extracted from cliFeed() so this untrusted-JSON parsing
+ * can be fuzzed in isolation; the manifest lives in a private bucket, but treat its body as untrusted.
+ */
+export function versionFromManifest(text: string): string | null {
+  let m: unknown;
+  try { m = JSON.parse(text); } catch { return null; }
+  if (!m || typeof m !== "object") return null;
+  const rec = m as Record<string, unknown>;
+  const v = rec.version ?? rec.latest ?? rec.tag ?? null;
+  if (typeof v === "string" && v.trim()) return v.trim().replace(/^v/, "");
+  return null;
 }
 
 /** Pick the newest asset per platform from a feed's object list. */
@@ -77,13 +97,7 @@ export async function cliFeed(): Promise<FeedResult> {
   const manifestKey = objects.map((o) => o.key).find((k) => baseName(k).toLowerCase() === "manifest.json");
   if (manifestKey) {
     const text = await getObjectText(manifestKey);
-    if (text) {
-      try {
-        const m = JSON.parse(text);
-        const v = m?.version ?? m?.latest ?? m?.tag ?? null;
-        if (typeof v === "string" && v.trim()) version = v.trim().replace(/^v/, "");
-      } catch { /* fall through to filename-derived version */ }
-    }
+    if (text) version = versionFromManifest(text); // null → fall through to filename-derived version
   }
   if (!version) version = assets.map((a) => versionFromName(a.filename)).find(Boolean) ?? null;
   return { available: assets.length > 0, version, assets };

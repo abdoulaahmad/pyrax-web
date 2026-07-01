@@ -6,8 +6,8 @@
 import { db, init, rateAllow, userByEmail, userById, touchLogin, type UserRow } from "./db";
 import { hmac, randomOtp, randomSessionId, timingSafeEqual, newUserId } from "./crypto";
 import { sendOtp } from "./email";
+import { OTP_LEN, normalizeOtpCode, isWellFormedOtp } from "./otp-code";
 
-const OTP_LEN = 9;
 const OTP_TTL_MS = 10 * 60_000;          // 10 minutes
 export const OTP_TTL_S = OTP_TTL_MS / 1000;
 const SESSION_TTL_MS = 7 * 24 * 60 * 60_000; // 7 days
@@ -64,10 +64,10 @@ export async function otpStatus(rid: string): Promise<OtpState> {
 /** Verify a code. On success consumes it, marks the user active, and returns them. */
 export async function verifyLoginCode(email: string, code: string): Promise<{ ok: true; user: UserRow } | { ok: false; reason: "rate" | "invalid" }> {
   const e = email.trim().toLowerCase();
-  const c = (code || "").replace(/\D/g, "");
+  const c = normalizeOtpCode(code);
   await init();
   if (!(await rateAllow("otp_verify", e, VER_MAX, VER_WINDOW_MS))) return { ok: false, reason: "rate" };
-  if (c.length !== OTP_LEN) return { ok: false, reason: "invalid" };
+  if (!isWellFormedOtp(c)) return { ok: false, reason: "invalid" };
   const hash = hmac(`${e}:${c}`);
   const now = Date.now();
   // Atomically consume: only if it exists, matches the email, is unused and unexpired.

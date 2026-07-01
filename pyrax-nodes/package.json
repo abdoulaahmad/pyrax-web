@@ -12,7 +12,9 @@
     "build": "astro build",
     "preview": "astro preview --host --port 4323",
     "check": "astro check",
-    "test": "vitest run"
+    "test": "vitest run",
+    "redteam": "vitest run --config redteam/vitest.redteam.config.ts",
+    "redteam:watch": "vitest --config redteam/vitest.redteam.config.ts"
   },
   "dependencies": {
     "@astrojs/node": "^9.1.3",

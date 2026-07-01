@@ -13,41 +13,16 @@ import type { APIRoute } from "astro";
 import { verifyHmac, ingestSecretReady } from "../../server/hmac";
 import { upsertPeer, patchGeo, TTL_MS } from "../../server/directory";
 import { geoLookup } from "../../server/geo";
-import { isNetLabel } from "../../lib/networks";
 import { resolveClientIp, multiaddrFor } from "../../server/ip";
 import { announceLimiter } from "../../server/ratelimit";
+import { validateAnnounce, type AnnounceBody } from "../../server/announce-validate";
+
+// Re-exported so existing importers of the route keep working; the implementation lives in the pure,
+// side-effect-free announce-validate module (importable + fuzzable without the route's timers).
+export { validateAnnounce, type AnnounceBody };
 
 export const prerender = false;
-const ENABLED = (process.env.PYRAX_ENABLED_NETWORKS || "seed,forge,rise,one").split(",").map((s) => s.trim()).filter(Boolean);
 const json = (d: unknown, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { "content-type": "application/json", "cache-control": "no-store" } });
-
-export interface AnnounceBody {
-  network: string;
-  port: number;
-  peerId: string;
-  kind: "operator" | "seed" | "rpc";
-  relayPubkey?: string;
-  peers?: string[];
-}
-
-/**
- * Pure validation of a parsed announce body. Returns the normalized fields or an `{ error, status }`.
- * Exported for tests — keeps the route handler thin.
- */
-export function validateAnnounce(b: any): { ok: true; value: AnnounceBody } | { ok: false; error: string; status: number } {
-  const network = String(b?.network || "");
-  if (!isNetLabel(network) || !ENABLED.includes(network)) return { ok: false, error: "network not enabled", status: 403 };
-  const port = Number(b?.port);
-  if (!Number.isInteger(port) || port < 1 || port > 65535) return { ok: false, error: "bad port", status: 400 };
-  const peerId = String(b?.peerId || "");
-  if (!/^[0-9A-Za-z]{6,128}$/.test(peerId)) return { ok: false, error: "bad peerId", status: 400 };
-  const kind = ["operator", "seed", "rpc"].includes(b?.kind) ? b.kind : "operator";
-  const relayPubkey = b?.relayPubkey ? String(b.relayPubkey).slice(0, 128) : undefined;
-  const peers = Array.isArray(b?.peers)
-    ? b.peers.map((x: any) => String(x)).filter((s: string) => /^[0-9A-Za-z]{6,128}$/.test(s)).slice(0, 64)
-    : undefined;
-  return { ok: true, value: { network, port, peerId, kind: kind as AnnounceBody["kind"], relayPubkey, peers } };
-}
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {
   // Fail closed: in production, refuse ingest if no real directory secret is configured (the published

@@ -1,0 +1,23 @@
+{
+  "name": "pyrax-web-fuzz",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "LicenseRef-Proprietary",
+  "description": "Coverage-guided (Jazzer.js) fuzzing of the untrusted-input parsers/verifiers in the PYRAX web portals: SigV4/ListObjectsV2 XML parsing, HMAC announce-ingest verification, announce-body validation, OTP code parsing, and release-feed/manifest parsing. Harnesses import the REAL production parsers (never reimplementations).",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "fuzz:spaces-xml": "node scripts/run.mjs spaces-xml.target.mjs corpus/spaces-xml",
+    "fuzz:announce-hmac": "node scripts/run.mjs announce-hmac.target.mjs corpus/announce-hmac",
+    "fuzz:announce-body": "node scripts/run.mjs announce-body.target.mjs corpus/announce-body",
+    "fuzz:otp-code": "node scripts/run.mjs otp-code.target.mjs corpus/otp-code",
+    "fuzz:release-feed": "node scripts/run.mjs release-feed.target.mjs corpus/release-feed",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "devDependencies": {
+    "@jazzer.js/core": "^4.0.0",
+    "tsx": "^4.19.2"
+  }
+}

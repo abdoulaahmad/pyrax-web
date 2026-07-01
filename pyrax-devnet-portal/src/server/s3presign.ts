@@ -103,6 +103,31 @@ export function presignGet(key: string, expiresSec = 3600): string {
 /** One object key returned by a bucket listing. */
 export interface SpacesObject { key: string; size: number; lastModified: number }
 
+/** Result of parsing one ListObjectsV2 XML page: the objects on the page + the next continuation token. */
+export interface ListPage { objects: SpacesObject[]; nextToken?: string }
+
+/**
+ * Pure parser for one ListObjectsV2 XML response body. Extracted from listPrefix() so the untrusted-
+ * XML handling can be unit-tested and fuzzed in isolation (the input is a bucket response, i.e. bytes
+ * we don't control). It is total: any string — including malformed, truncated, or hostile XML — yields
+ * a `ListPage` (never throws), with folder placeholders skipped and entities decoded. `objects` may be
+ * empty and `nextToken` undefined; the caller stops paginating when there's no token.
+ */
+export function parseListObjectsV2(xml: string): ListPage {
+  const objects: SpacesObject[] = [];
+  for (const m of xml.matchAll(/<Contents>([\s\S]*?)<\/Contents>/g)) {
+    const block = m[1];
+    const key = (block.match(/<Key>([\s\S]*?)<\/Key>/)?.[1] || "").trim();
+    if (!key || key.endsWith("/")) continue; // skip folder placeholders
+    const size = Number(block.match(/<Size>(\d+)<\/Size>/)?.[1] || 0);
+    const lm = block.match(/<LastModified>([\s\S]*?)<\/LastModified>/)?.[1] || "";
+    objects.push({ key: decodeXml(key), size, lastModified: lm ? Date.parse(lm) : 0 });
+  }
+  const truncated = /<IsTruncated>true<\/IsTruncated>/.test(xml);
+  const nextToken = truncated ? (xml.match(/<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/)?.[1] || "").trim() : undefined;
+  return { objects, nextToken: nextToken || undefined };
+}
+
 /**
  * List objects under `prefix` via SigV4-signed ListObjectsV2 (GET ?list-type=2&prefix=…). Returns the
  * keys in the bucket root's feed (e.g. "node/", "cli/"). Signed with AUTHORIZATION header (not query)
@@ -137,16 +162,9 @@ export async function listPrefix(prefix: string, maxPages = 5): Promise<SpacesOb
     });
     if (!res.ok) throw new Error(`Spaces list ${prefix} failed: ${res.status}`);
     const xml = await res.text();
-    for (const m of xml.matchAll(/<Contents>([\s\S]*?)<\/Contents>/g)) {
-      const block = m[1];
-      const key = (block.match(/<Key>([\s\S]*?)<\/Key>/)?.[1] || "").trim();
-      if (!key || key.endsWith("/")) continue; // skip folder placeholders
-      const size = Number(block.match(/<Size>(\d+)<\/Size>/)?.[1] || 0);
-      const lm = block.match(/<LastModified>([\s\S]*?)<\/LastModified>/)?.[1] || "";
-      out.push({ key: decodeXml(key), size, lastModified: lm ? Date.parse(lm) : 0 });
-    }
-    const truncated = /<IsTruncated>true<\/IsTruncated>/.test(xml);
-    token = truncated ? (xml.match(/<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/)?.[1] || "").trim() : undefined;
+    const page = parseListObjectsV2(xml);
+    out.push(...page.objects);
+    token = page.nextToken;
     if (!token) break;
   }
   return out;

@@ -1,0 +1,1 @@
+<ListBucketResult><Contents><Key>cli/manifest.json</Key><Size>77</Size></Contents><IsTruncated>true</IsTruncated><NextContinuationToken>abc123</NextContinuationToken></ListBucketResult>
