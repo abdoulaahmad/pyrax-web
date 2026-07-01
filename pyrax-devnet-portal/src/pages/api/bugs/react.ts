@@ -4,6 +4,7 @@ import type { APIRoute } from "astro";
 import { requireTester, subjectOf } from "../../../server/guard";
 import { reactBug } from "../../../server/db";
 import { json } from "../../../server/http";
+import { rateLimited } from "../../../server/ratelimit";
 import { can } from "../../../lib/permissions";
 
 export const prerender = false;
@@ -12,6 +13,8 @@ export const POST: APIRoute = async ({ url, request, cookies }) => {
   const me = await requireTester(cookies);
   if (!me) return json({ ok: false, error: "Not signed in." }, 401);
   if (!can(subjectOf(me), "issues.submit")) return json({ ok: false, error: "Forbidden." }, 403);
+  const limited = rateLimited(`bug:react:${me.id}`, 60, 60_000); // ≤60 toggles/min/tester
+  if (limited) return limited;
   const bugId = url.searchParams.get("id") || "";
   const b = await request.json().catch(() => ({}));
   const kind = b?.kind === "confirm" ? "confirm" : "vote";

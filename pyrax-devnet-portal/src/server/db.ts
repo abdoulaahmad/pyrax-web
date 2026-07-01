@@ -177,6 +177,11 @@ export function init(): Promise<void> {
        ON CONFLICT (email) DO UPDATE SET is_superuser = TRUE, is_staff = TRUE, reward_eligible = FALSE, status = 'active'`,
       [SUPERUSER_EMAIL, Date.now()],
     );
+    // Boot-time + periodic retention sweep for raw heartbeats (in addition to the write-path prune),
+    // so an idle portal still trims the table. Unref'd so it never holds the process open.
+    void pruneHeartbeats().catch(() => {});
+    const sweep = setInterval(() => void pruneHeartbeats().catch(() => {}), HEARTBEAT_PRUNE_EVERY_MS);
+    if (typeof (sweep as any).unref === "function") (sweep as any).unref();
   })();
   return ready;
 }
@@ -273,6 +278,29 @@ export async function setDevnetSettings(data: Record<string, any>, by: string): 
 
 // ---- nodes + heartbeats ----
 const ONLINE_MS = 90_000;
+// Raw heartbeat rows are only needed for the uptime window (the dashboard reads 30 days). We keep a
+// little headroom and prune anything older than 35 days so the table can't grow without bound — one
+// online node emits a heartbeat every ~30s (~100k rows/month). uptimePct stays correct because its
+// query never looks past `sinceMs` (≤30d).
+export const HEARTBEAT_RETENTION_MS = 35 * 86_400_000;
+const HEARTBEAT_PRUNE_EVERY_MS = 6 * 3_600_000; // at most once every 6h per process
+let lastHeartbeatPrune = 0;
+
+/** Delete heartbeat rows older than the retention window. Returns rows removed. */
+export async function pruneHeartbeats(retentionMs = HEARTBEAT_RETENTION_MS): Promise<number> {
+  await init();
+  const cutoff = Date.now() - retentionMs;
+  const r = await db().query("DELETE FROM node_heartbeats WHERE ts < $1", [cutoff]);
+  return r.rowCount ?? 0;
+}
+/** Best-effort, throttled prune triggered on the heartbeat write path (no separate cron needed). */
+function maybePruneHeartbeats(): void {
+  const now = Date.now();
+  if (now - lastHeartbeatPrune < HEARTBEAT_PRUNE_EVERY_MS) return;
+  lastHeartbeatPrune = now;
+  void pruneHeartbeats().catch((e) => console.error("[db] heartbeat prune failed:", e?.message || e));
+}
+
 export async function recordHeartbeat(testerId: string, nodePk: string, info: { label?: string; app?: string; appVersion?: string; nodeVersion?: string; height?: number; peers?: number }): Promise<void> {
   await init();
   const now = Date.now();
@@ -284,6 +312,7 @@ export async function recordHeartbeat(testerId: string, nodePk: string, info: { 
     [nodePk, testerId, info.label ?? null, info.app ?? null, info.appVersion ?? null, info.nodeVersion ?? null, info.height ?? null, info.peers ?? null, now],
   );
   await db().query("INSERT INTO node_heartbeats (node_pk,tester_id,ts) VALUES ($1,$2,$3)", [nodePk, testerId, now]);
+  maybePruneHeartbeats();
 }
 export async function listNodesFor(testerId: string): Promise<any[]> {
   await init();
@@ -323,6 +352,13 @@ export async function leaderboard(limit = 50): Promise<any[]> {
      WHERE t.reward_eligible = TRUE AND t.status = 'active'
      GROUP BY t.id ORDER BY total DESC, t.joined_at ASC LIMIT $1`, [limit]);
   return r.rows.map((x) => ({ ...x, total: Number(x.total), bugs: Number(x.bugs) }));
+}
+
+/** How many Founding Tester slots have been claimed (testers with a non-null founding_rank). */
+export async function foundingClaimedCount(): Promise<number> {
+  await init();
+  const r = await db().query("SELECT COUNT(*)::int AS n FROM testers WHERE founding_rank IS NOT NULL");
+  return r.rows[0].n as number;
 }
 
 /** Claim a Founding Tester slot (first N to connect a node). Returns the rank or null if full/taken. */
@@ -371,6 +407,25 @@ export async function nodeByToken(token: string): Promise<{ node_pk: string; tes
   await init();
   const r = await db().query("SELECT node_pk, tester_id FROM nodes WHERE token_hash=$1", [sha256(token || "")]);
   return r.rows[0] || null;
+}
+/** Remove a node the tester owns (revokes the node + its heartbeat token; prunes its heartbeats).
+ *  Scoped to the owner so a tester can only unlink their own nodes. Returns true if one was removed. */
+export async function unlinkNode(testerId: string, nodePk: string): Promise<boolean> {
+  await init();
+  const r = await db().query("DELETE FROM nodes WHERE node_pk=$1 AND tester_id=$2", [nodePk, testerId]);
+  if ((r.rowCount ?? 0) === 0) return false;
+  // Heartbeat rows aren't FK-bound to nodes; clean them up so uptime no longer counts the removed node.
+  await db().query("DELETE FROM node_heartbeats WHERE node_pk=$1 AND tester_id=$2", [nodePk, testerId]);
+  return true;
+}
+/** Rotate a node's heartbeat token (invalidates the old one). Scoped to the owner. Returns the new
+ *  raw token (shown once) + nodePk, or null if the tester doesn't own that node. */
+export async function rotateNodeToken(testerId: string, nodePk: string): Promise<{ nodePk: string; nodeToken: string } | null> {
+  await init();
+  const nodeToken = crypto.randomBytes(32).toString("base64url");
+  const r = await db().query("UPDATE nodes SET token_hash=$3 WHERE node_pk=$1 AND tester_id=$2 RETURNING node_pk", [nodePk, testerId, sha256(nodeToken)]);
+  if ((r.rowCount ?? 0) === 0) return null;
+  return { nodePk, nodeToken };
 }
 
 // ---- Issue Council (bugs) ----

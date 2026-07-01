@@ -4,6 +4,7 @@ import type { APIRoute } from "astro";
 import { requireTester } from "../../../server/guard";
 import { listConversations, createConversation, testerByHandle } from "../../../server/db";
 import { json } from "../../../server/http";
+import { rateLimited } from "../../../server/ratelimit";
 
 export const prerender = false;
 
@@ -17,6 +18,8 @@ export const GET: APIRoute = async ({ cookies }) => {
 export const POST: APIRoute = async ({ request, cookies }) => {
   const me = await requireTester(cookies);
   if (!me) return json({ ok: false }, 401);
+  const limited = rateLimited(`conv:create:${me.id}`, 15, 60_000); // ≤15 new conversations/min/tester
+  if (limited) return limited;
   const b = await request.json().catch(() => ({}));
   const type = b?.type === "dm" ? "dm" : "group";
   const handles: string[] = Array.isArray(b?.memberHandles) ? b.memberHandles.map((h: any) => String(h).replace(/^@/, "")).slice(0, 20) : [];

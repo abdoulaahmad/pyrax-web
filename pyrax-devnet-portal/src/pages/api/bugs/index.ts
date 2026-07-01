@@ -3,6 +3,7 @@ import type { APIRoute } from "astro";
 import { requireTester, subjectOf } from "../../../server/guard";
 import { listBugs, createBug } from "../../../server/db";
 import { json } from "../../../server/http";
+import { rateLimited } from "../../../server/ratelimit";
 import { can } from "../../../lib/permissions";
 
 export const prerender = false;
@@ -19,6 +20,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const me = await requireTester(cookies);
   if (!me) return json({ ok: false, error: "Not signed in." }, 401);
   if (!can(subjectOf(me), "issues.submit")) return json({ ok: false, error: "Forbidden." }, 403);
+  const limited = rateLimited(`bug:create:${me.id}`, 10, 60_000); // ≤10 new reports/min/tester
+  if (limited) return limited;
   const b = await request.json().catch(() => ({}));
   const title = String(b?.title ?? "").trim();
   if (title.length < 5) return json({ ok: false, errors: { title: "Give the bug a clear title (5+ chars)." } }, 422);

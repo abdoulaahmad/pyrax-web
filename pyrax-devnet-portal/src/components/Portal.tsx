@@ -60,7 +60,19 @@ export default function Portal() {
 
   useEffect(() => {
     fetch("/api/me", { headers: { accept: "application/json" } }).then((r) => r.json())
-      .then((d) => { if (!d.ok || !d.tester) { window.location.href = "/"; return; } setMe(d.tester); setLegal(d.legal || { ndaAccepted: true, tosAccepted: true, exempt: true }); setLoading(false); })
+      .then((d) => {
+        if (!d.ok || !d.tester) { window.location.href = "/"; return; }
+        setMe(d.tester);
+        // Fail-closed: if the server's legal status is missing or malformed, default to NOT accepted
+        // (and NOT exempt) so the signing gate SHOWS. Exemption is only ever granted by a well-formed
+        // server response (the superuser) — never synthesized on the client.
+        const L = d.legal;
+        const safe: LegalStatus = L && typeof L === "object"
+          ? { ndaAccepted: !!L.ndaAccepted, tosAccepted: !!L.tosAccepted, exempt: !!L.exempt, ndaVersion: L.ndaVersion, tosVersion: L.tosVersion }
+          : { ndaAccepted: false, tosAccepted: false, exempt: false };
+        setLegal(safe);
+        setLoading(false);
+      })
       .catch(() => { window.location.href = "/"; });
   }, []);
 
@@ -111,7 +123,7 @@ export default function Portal() {
       case "leaderboard": return <Leaderboard me={meUser} />;
       case "chat": return <Chat me={meUser} />;
       case "settings": return <Settings me={meUser} onSaved={(t) => setMe({ ...meUser, ...t })} />;
-      case "triage": return <Triage subject={subject} />;
+      case "triage": return <Triage me={meUser} subject={subject} />;
       case "testers": return <Testers subject={subject} />;
       case "nda": return <NdaPage />;
       case "tos": return <TosPage />;

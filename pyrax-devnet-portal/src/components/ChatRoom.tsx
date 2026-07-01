@@ -32,6 +32,7 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
   const [gifs, setGifs] = useState<any[]>([]);
   const [gifQ, setGifQ] = useState("");
   const [newChat, setNewChat] = useState<null | "dm" | "group">(null);
+  const [mobileNav, setMobileNav] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
   const curRef = useRef("general");
@@ -67,7 +68,7 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
-  function switchTo(id: string) { setCurrent(id); curRef.current = id; setMessages([]); wsRef.current?.send(JSON.stringify({ type: "join", channel: id })); }
+  function switchTo(id: string) { setCurrent(id); curRef.current = id; setMessages([]); setMobileNav(false); wsRef.current?.send(JSON.stringify({ type: "join", channel: id })); }
   function send() { const body = input.trim(); if (!body) return; wsRef.current?.send(JSON.stringify({ type: "msg", body })); setInput(""); setEmojiOpen(false); }
   function sendGif(url: string) { wsRef.current?.send(JSON.stringify({ type: "msg", gif: url })); setGifOpen(false); }
   function del(id: string) { wsRef.current?.send(JSON.stringify({ type: "delete", id })); }
@@ -100,7 +101,12 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
       {/* center: messages */}
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center justify-between border-b border-line px-4 py-2.5 text-sm">
-          <div className="font-semibold">{headerLabel}</div>
+          <div className="flex min-w-0 items-center gap-2">
+            <button onClick={() => setMobileNav(true)} aria-label="Channels & messages" className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-line text-muted hover:text-ink lg:hidden">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+            </button>
+            <div className="truncate font-semibold">{headerLabel}</div>
+          </div>
           <div className="flex items-center gap-2 text-xs text-faint"><span className={`h-1.5 w-1.5 rounded-full ${connected ? "bg-[color:var(--color-positive)]" : "bg-faint"}`} />{connected ? "connected" : "reconnecting…"}</div>
         </div>
         <div className="flex-1 space-y-3 overflow-y-auto p-4">
@@ -157,6 +163,39 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
           })}
         </div>
       </div>
+
+      {/* mobile: channels + conversations + members in a slide-over sheet (the lg/xl panels are hidden on small screens) */}
+      {mobileNav && (
+        <div className="fixed inset-0 z-[55] lg:hidden">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileNav(false)} />
+          <div className="absolute inset-y-0 left-0 flex w-72 max-w-[86vw] flex-col overflow-y-auto border-r border-line bg-[rgba(8,10,17,0.98)] p-3">
+            <div className="flame-bar -mx-3 -mt-3 mb-3 h-1" />
+            <div className="flex items-center justify-between px-1"><span className="text-sm font-bold">Chat</span><button onClick={() => setMobileNav(false)} aria-label="Close" className="grid h-7 w-7 place-items-center rounded-lg border border-line text-muted">✕</button></div>
+
+            <div className="mt-4 px-1 text-[0.66rem] font-semibold uppercase tracking-wider text-faint">Channels</div>
+            <div className="mt-1 space-y-0.5">{channels.map((c) => <button key={c} onClick={() => switchTo(c)} className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm ${current === c ? "bg-[rgba(245,134,34,0.1)] text-ink" : "text-muted hover:text-ink"}`}># {c}</button>)}</div>
+
+            <div className="mt-4 flex items-center justify-between px-1"><span className="text-[0.66rem] font-semibold uppercase tracking-wider text-faint">Direct & Groups</span><button onClick={() => { setMobileNav(false); setNewChat("dm"); }} className="text-faint hover:text-ink" title="New message">＋</button></div>
+            <div className="mt-1 space-y-0.5">
+              {convos.length === 0 && <p className="px-2.5 py-1 text-xs text-faint">No conversations yet.</p>}
+              {convos.map((c) => <button key={c.id} onClick={() => switchTo(c.id)} className={`block w-full truncate rounded-lg px-2.5 py-1.5 text-left text-sm ${current === c.id ? "bg-[rgba(245,134,34,0.1)] text-ink" : "text-muted hover:text-ink"}`}>{c.type === "dm" ? convLabel(c) : "👥 " + (c.name || "Group")}</button>)}
+            </div>
+
+            <div className="mt-4 px-1 text-[0.66rem] font-semibold uppercase tracking-wider text-faint">Members · {onlineSet.size} online</div>
+            <div className="mt-1 space-y-0.5">
+              {roster.map((u) => {
+                const on = onlineSet.has(u.user);
+                return (
+                  <button key={u.id} onClick={() => { if (u.id !== me?.id) { setMobileNav(false); startDm(u.user); } }} title={u.id !== me?.id ? "Message @" + u.user : "You"} className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm text-muted hover:bg-[rgba(255,255,255,0.03)] hover:text-ink">
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${on ? "bg-[color:var(--color-positive)] animate-pulse shadow-[0_0_6px_var(--color-positive)]" : "bg-[#5a2230]"}`} />
+                    <span className="truncate" style={{ color: roleColor(u.role) }}>@{u.user}</span>{u.admin ? <span className="ml-auto text-[0.6rem]" style={{ color: "#5aa6e0" }}>admin</span> : u.role === "support" && <span className="ml-auto text-[0.6rem]" style={{ color: "#3fcf8e" }}>support</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {newChat && <NewChat apiBase={apiBase} initial={newChat} onClose={() => setNewChat(null)} onCreated={async (id) => { setNewChat(null); await loadConvos(); switchTo(id); }} />}
     </div>

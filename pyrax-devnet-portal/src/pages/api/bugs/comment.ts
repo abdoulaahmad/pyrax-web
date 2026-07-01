@@ -5,6 +5,7 @@ import type { APIRoute } from "astro";
 import { requireTester, subjectOf } from "../../../server/guard";
 import { addBugComment, getBug, bugReporter, testerByHandle, testerById, addNotification } from "../../../server/db";
 import { json } from "../../../server/http";
+import { rateLimited } from "../../../server/ratelimit";
 import { can } from "../../../lib/permissions";
 import { sendIssueNotify } from "../../../server/email";
 
@@ -14,6 +15,8 @@ export const POST: APIRoute = async ({ url, request, cookies }) => {
   const me = await requireTester(cookies);
   if (!me) return json({ ok: false, error: "Not signed in." }, 401);
   if (!can(subjectOf(me), "issues.submit")) return json({ ok: false, error: "Forbidden." }, 403);
+  const limited = rateLimited(`bug:comment:${me.id}`, 30, 60_000); // ≤30 comments/min/tester (also fans out email)
+  if (limited) return limited;
   const bugId = url.searchParams.get("id") || "";
   const b = await request.json().catch(() => ({}));
   const body = String(b?.body ?? "").trim();

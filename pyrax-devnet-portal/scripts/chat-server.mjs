@@ -5,10 +5,21 @@
 // Channels, presence, @mentions (client highlights), GIFs, admin delete, rate limiting.
 //   env: DATABASE_URL_DEVNET, DEVNET_CHAT_SECRET, CHAT_WS_PORT (default 8788)
 import crypto from "node:crypto";
+import http from "node:http";
 import { WebSocketServer } from "ws";
 import pg from "pg";
 
-const SECRET = process.env.DEVNET_CHAT_SECRET || "dev-chat-secret-change-me";
+// Fail-closed: in production the chat secret MUST be set to a real, non-default value. An unset secret
+// (or the public dev placeholder) would let anyone forge a chat token, so we refuse to start.
+const DEV_DEFAULT = "dev-chat-secret-change-me";
+const RAW_SECRET = process.env.DEVNET_CHAT_SECRET || "";
+if ((!RAW_SECRET || RAW_SECRET === DEV_DEFAULT) && process.env.NODE_ENV === "production") {
+  console.error("[chat] FATAL: DEVNET_CHAT_SECRET must be set to a non-default value in production.");
+  process.exit(1);
+}
+const SECRET = RAW_SECRET || DEV_DEFAULT;
+const MAX_CLAIM = 64;
+const clampClaim = (v) => (typeof v === "string" ? v.slice(0, MAX_CLAIM) : "");
 const PORT = Number(process.env.CHAT_WS_PORT || 8788);
 const CHANNELS = ["announcements", "general", "getting-started", "node-support", "bug-chat", "feedback", "known-issues", "off-topic"];
 const cs = (process.env.DATABASE_URL_DEVNET || "").replace(/[?&]sslmode=[^&]*/, "");
@@ -20,10 +31,29 @@ function verify(token) {
   if (!body || !sig) return null;
   const expect = crypto.createHmac("sha256", SECRET).update(body).digest("base64url");
   if (sig.length !== expect.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expect))) return null;
-  try { const c = JSON.parse(Buffer.from(body, "base64url").toString()); if (!c || c.exp < Math.floor(Date.now() / 1000)) return null; return c; } catch { return null; }
+  try {
+    const c = JSON.parse(Buffer.from(body, "base64url").toString());
+    // Reject a missing/non-numeric exp (a bare `c.exp < now` would treat undefined/NaN as valid),
+    // mirroring src/lib/chat-token.ts so the two verifiers agree.
+    if (!c || typeof c.exp !== "number" || c.exp < Math.floor(Date.now() / 1000)) return null;
+    // Clamp identity claims defensively (mirrors src/lib/chat-token.ts).
+    c.name = clampClaim(c.name); c.user = clampClaim(c.user); c.uid = clampClaim(c.uid);
+    return c;
+  } catch { return null; }
 }
 
-const wss = new WebSocketServer({ port: PORT });
+// Plain HTTP server so the droplet monitor can name-check the chat service at GET /health; the
+// WebSocket server shares this same port via the upgrade handshake.
+const httpServer = http.createServer((req, res) => {
+  if (req.method === "GET" && (req.url === "/health" || req.url === "/healthz")) {
+    res.writeHead(200, { "content-type": "application/json", "cache-control": "no-store" });
+    res.end(JSON.stringify({ ok: true, service: "pyrax-devnet-chat", clients: wss.clients.size, channels: CHANNELS.length }));
+    return;
+  }
+  res.writeHead(404, { "content-type": "text/plain" });
+  res.end("not found");
+});
+const wss = new WebSocketServer({ server: httpServer });
 const send = (ws, obj) => { try { ws.send(JSON.stringify(obj)); } catch {} };
 const broadcast = (channel, obj) => { for (const c of wss.clients) if (c.readyState === 1 && c.channel === channel) send(c, obj); };
 function presence(channel) {
@@ -93,4 +123,4 @@ wss.on("connection", (ws, req) => {
 });
 
 process.on("unhandledRejection", (e) => console.error("[chat] unhandledRejection:", e?.message || e));
-console.log(`[chat] WebSocket chat server listening on :${PORT} (channels: ${CHANNELS.join(", ")})`);
+httpServer.listen(PORT, () => console.log(`[chat] WebSocket chat server listening on :${PORT} (channels: ${CHANNELS.join(", ")}; health: GET /health)`));

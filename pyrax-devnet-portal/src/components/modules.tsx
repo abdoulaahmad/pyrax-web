@@ -37,8 +37,23 @@ export function Dashboard({ onNavigate }: { onNavigate: (k: string) => void }) {
   const [pair, setPair] = useState<{ code: string; expiresInSec: number } | null>(null);
   const [pairBusy, setPairBusy] = useState(false);
   const [showRewards, setShowRewards] = useState(false);
+  const [nodeBusy, setNodeBusy] = useState<string | null>(null);
+  const [rotated, setRotated] = useState<{ nodePk: string; token: string } | null>(null);
+  async function reload() { try { const x = await (await fetch("/api/dashboard")).json(); if (x?.ok) setD(x); } catch {} }
   useEffect(() => { fetch("/api/dashboard").then((r) => r.json()).then((x) => { if (x?.ok) setD(x); else setErr("Couldn't load your dashboard."); }).catch(() => setErr("Network error.")); }, []);
   async function linkNode() { setPairBusy(true); try { const r = await (await fetch("/api/node/pair-code", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })).json(); if (r.ok) setPair({ code: r.code, expiresInSec: r.expiresInSec }); } catch {} setPairBusy(false); }
+  async function removeNode(nodePk: string, label: string) {
+    if (!window.confirm(`Remove "${label}"? Its heartbeat token is revoked and it stops counting toward uptime. You can re-link it any time.`)) return;
+    setNodeBusy(nodePk);
+    try { const r = await (await fetch("/api/node/unlink", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ nodePk, action: "remove" }) })).json(); if (r.ok) await reload(); } catch {}
+    setNodeBusy(null);
+  }
+  async function rotateNode(nodePk: string) {
+    if (!window.confirm("Rotate this node's token? The current token stops working immediately — you'll need to re-pair the app/CLI with the new one.")) return;
+    setNodeBusy(nodePk);
+    try { const r = await (await fetch("/api/node/unlink", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ nodePk, action: "rotate" }) })).json(); if (r.ok && r.nodeToken) setRotated({ nodePk, token: r.nodeToken }); } catch {}
+    setNodeBusy(null);
+  }
   if (err) return <Card className="p-8 text-center text-sm text-[color:var(--color-negative)]">{err}</Card>;
   if (!d) return <Card className="p-10 text-center text-sm text-muted"><span className="mr-2 inline-block h-4 w-4 animate-spin-slow rounded-full border-2 border-line border-t-[color:var(--color-brand)] align-middle" />Loading…</Card>;
 
@@ -83,12 +98,27 @@ export function Dashboard({ onNavigate }: { onNavigate: (k: string) => void }) {
             <div className="mt-4 rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted">No nodes linked yet. Connect Inferno or the CLI to your account to start tracking uptime.<div className="mt-3"><Button variant="primary" onClick={() => onNavigate("downloads")}>Download the app</Button></div></div>
           ) : (
             <div className="mt-3 space-y-2">
-              {d.nodes.map((n: any) => (
-                <div key={n.node_pk} className="flex items-center justify-between rounded-lg border border-line p-3">
-                  <div className="flex items-center gap-3"><span className={`h-2.5 w-2.5 rounded-full ${n.online ? "bg-[color:var(--color-positive)]" : "bg-faint"}`} /><div><div className="text-sm font-semibold">{n.label || n.node_pk.slice(0, 10)} <span className="text-xs font-normal text-faint">· {n.app || "node"}</span></div><div className="text-xs text-faint">v{n.app_version || "?"} · height {n.height ?? "—"} · {n.peers ?? 0} peers</div></div></div>
-                  <div className="text-right text-xs text-faint">{n.online ? <Badge tone="positive">Online</Badge> : <span>seen {ago(Number(n.last_heartbeat))}</span>}</div>
+              {rotated && (
+                <div className="rounded-xl border border-[color:rgba(245,134,34,0.4)] bg-[rgba(245,134,34,0.06)] p-3 text-sm">
+                  <div className="font-semibold text-gold">New node token (shown once)</div>
+                  <p className="mt-1 text-xs text-muted">Paste this into the Inferno app / CLI for the node. The old token no longer works.</p>
+                  <div className="mt-2 break-all rounded-lg border border-line bg-[rgba(5,6,9,0.5)] p-2 font-mono text-xs text-ink">{rotated.token}</div>
+                  <div className="mt-2 flex gap-2"><Button onClick={() => navigator.clipboard?.writeText(rotated.token).catch(() => {})}>Copy</Button><Button onClick={() => setRotated(null)}>Done</Button></div>
                 </div>
-              ))}
+              )}
+              {d.nodes.map((n: any) => {
+                const label = n.label || n.node_pk.slice(0, 10);
+                return (
+                  <div key={n.node_pk} className="flex items-center justify-between gap-2 rounded-lg border border-line p-3">
+                    <div className="flex min-w-0 items-center gap-3"><span className={`h-2.5 w-2.5 shrink-0 rounded-full ${n.online ? "bg-[color:var(--color-positive)]" : "bg-faint"}`} /><div className="min-w-0"><div className="truncate text-sm font-semibold">{label} <span className="text-xs font-normal text-faint">· {n.app || "node"}</span></div><div className="text-xs text-faint">v{n.app_version || "?"} · height {n.height ?? "—"} · {n.peers ?? 0} peers</div></div></div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <div className="text-right text-xs text-faint">{n.online ? <Badge tone="positive">Online</Badge> : <span>seen {ago(Number(n.last_heartbeat))}</span>}</div>
+                      <button onClick={() => rotateNode(n.node_pk)} disabled={nodeBusy === n.node_pk} title="Rotate token" className="rounded-lg border border-line px-2 py-1 text-xs text-faint hover:text-ink disabled:opacity-50">Rotate</button>
+                      <button onClick={() => removeNode(n.node_pk, label)} disabled={nodeBusy === n.node_pk} title="Remove node" className="rounded-lg border border-line px-2 py-1 text-xs text-faint hover:text-[color:var(--color-negative)] disabled:opacity-50">Remove</button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </Card>
@@ -285,15 +315,15 @@ function Drawer({ title, children, onClose, wide }: { title: string; children: R
   );
 }
 
-export function IssueCouncil({ me, subject }: { me: any; subject: AccessSubject }) {
+export function IssueCouncil({ me, subject, initialStatus = "", title = "Issue Council", subtitle = "Report bugs with repro steps + attachments, confirm others, and track them to Verified." }: { me: any; subject: AccessSubject; initialStatus?: string; title?: string; subtitle?: string }) {
   const [bugs, setBugs] = useState<any[] | null>(null);
-  const [status, setStatus] = useState(""); const [sort, setSort] = useState("recent");
+  const [status, setStatus] = useState(initialStatus); const [sort, setSort] = useState("recent");
   const [creating, setCreating] = useState(false); const [openId, setOpenId] = useState<string | null>(null);
   async function load() { const q = new URLSearchParams(); if (status) q.set("status", status); if (sort) q.set("sort", sort); const d = await (await fetch("/api/bugs?" + q)).json(); setBugs(d.ok ? d.bugs : []); }
   useEffect(() => { load(); }, [status, sort]);
   return (
     <>
-      <PageHeader title="Issue Council" subtitle="Report bugs with repro steps + attachments, confirm others, and track them to Verified."
+      <PageHeader title={title} subtitle={subtitle}
         action={can2(subject, "issues.submit") && <Button variant="primary" onClick={() => setCreating(true)}><Icon.plus className="h-4 w-4" /> Report a bug</Button>} />
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <select className="input w-auto py-1.5 text-sm" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">All statuses</option>{Object.entries(STATUS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
@@ -494,8 +524,11 @@ export function Releases({ subject }: { subject: AccessSubject }) {
     </>
   );
 }
-export function Triage(_: { subject: AccessSubject }) {
-  return <><PageHeader title="Triage" subtitle="Staff: triage bug reports + award bounties." /><ComingSoon title="Triage tools are being wired up" detail="Set severity/status, link duplicates, and award bug bounties to testers." /></>;
+// Triage is the Issue Council scoped to incoming reports (status = New) — the real triage controls
+// (set status/severity, award bounties) live in each bug's drawer, gated by `issues.triage`. This is
+// an honest filtered view, not a placeholder: it surfaces exactly the queue a triager works.
+export function Triage({ me, subject }: { me: any; subject: AccessSubject }) {
+  return <IssueCouncil me={me} subject={subject} initialStatus="new" title="Triage" subtitle="Incoming reports awaiting triage. Open one to set its status/severity, link duplicates, and award a bug bounty." />;
 }
 export function Testers(_: { subject: AccessSubject }) {
   return <><PageHeader title="Testers" subtitle="Staff: tester roster, uptime + earnings." /><ComingSoon title="Tester admin is being wired up" detail="The roster, uptime + earnings overview, and eligibility controls live here." /></>;

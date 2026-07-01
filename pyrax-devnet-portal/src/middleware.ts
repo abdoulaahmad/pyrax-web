@@ -4,6 +4,13 @@
 // is applied in production only (the dev server's HMR needs eval/inline + websockets, which a
 // strict CSP would block). HSTS is production-only too (meaningful only over HTTPS).
 import { defineMiddleware } from "astro:middleware";
+import { buildCsp } from "./lib/csp";
+
+// CSP is derived once at module load from the runtime env: the chat WS origin (CHAT_WS_URL) is added
+// to connect-src, and — when DigitalOcean Spaces is configured — the bucket upload host (connect-src)
+// and CDN host (img-src/media-src) for Issue Council attachments, plus *.giphy.com for chat GIFs.
+// See src/lib/csp.ts (unit-tested there). Falls back safely to 'self'-only directives when unset.
+const CSP = buildCsp();
 
 export const onRequest = defineMiddleware(async (_ctx, next) => {
   const res = await next();
@@ -18,22 +25,7 @@ export const onRequest = defineMiddleware(async (_ctx, next) => {
 
   if (import.meta.env.PROD) {
     h.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
-    h.set(
-      "Content-Security-Policy",
-      [
-        "default-src 'self'",
-        "script-src 'self' 'unsafe-inline'",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-        "font-src 'self' https://fonts.gstatic.com",
-        "img-src 'self' data:",
-        "connect-src 'self'",
-        "frame-ancestors 'none'",
-        "base-uri 'self'",
-        "form-action 'self'",
-        "object-src 'none'",
-        "upgrade-insecure-requests",
-      ].join("; "),
-    );
+    h.set("Content-Security-Policy", CSP);
   }
   return res;
 });

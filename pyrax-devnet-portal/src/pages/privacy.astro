@@ -1,0 +1,97 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+// Privacy & Cookie Policy for the PYRAX Devnet Tester Portal. Linked from the cookie-consent banner.
+// Concise + honest: it describes only the data the portal actually processes (auth, nodes, Issue
+// Council, chat) and the cookies it actually sets (the session cookie + the local consent record).
+import Base from "../layouts/Base.astro";
+
+const updated = "June 2025";
+const sections: { h: string; body: string[] }[] = [
+  {
+    h: "Who we are",
+    body: [
+      "This portal (devnet.pyraxchain.com) is the closed-alpha tester hub operated by PYRAX LLC (“PYRAX”, “we”). It is available to invited testers only. This policy explains what we collect, why, and your choices. It supplements the NDA and Alpha Test Program Terms you accept inside the portal.",
+    ],
+  },
+  {
+    h: "What we collect",
+    body: [
+      "Account: your email address, display name, the Telegram @handle set when you were invited, and (optionally) the PYRAX payout address you provide for the rewards airdrop.",
+      "Node telemetry: for each node you link, a node identifier, app/node version, block height, peer count, and periodic heartbeat timestamps used to compute your uptime.",
+      "Issue Council: the bug reports, comments, reactions, and any files you choose to attach.",
+      "Community chat: the messages you send and your presence (online/offline) while connected.",
+      "Legal acceptance audit trail: when you accept the NDA or Terms, we record the document version, a timestamp, your typed signature/name, and the IP address and browser user-agent at the moment of signing.",
+      "Security/operational logs: standard request metadata (including IP address) needed to operate the service, rate-limit abuse, and keep accounts secure.",
+    ],
+  },
+  {
+    h: "How we use it",
+    body: [
+      "To authenticate you (one-time email sign-in codes), run the testing program, track node uptime, accrue and account for tester rewards, operate the Issue Council and chat, send you transactional and notification email, and protect the service against abuse. We do not sell your personal information, and we do not use it for third-party advertising.",
+    ],
+  },
+  {
+    h: "Cookies & local storage",
+    body: [
+      "Strictly necessary — a single first-party session cookie (“dv_session”) keeps you signed in. It is HttpOnly, SameSite=Lax, and Secure in production. It is essential and cannot be turned off while you use the portal.",
+      "Preferences — your cookie-consent choice is stored locally in your browser (localStorage), not on our servers, so we don’t have to ask again.",
+      "Analytics/Preferences (optional) — if we enable optional analytics in future, they run only with your consent, which you give via the cookie banner and can change at any time.",
+    ],
+  },
+  {
+    h: "Service providers",
+    body: [
+      "We use a small set of processors strictly to run the portal: a managed PostgreSQL database (for the data above), DigitalOcean Spaces (object storage for files you attach to bug reports), and Brevo (to deliver sign-in codes and notification email). These providers process data on our behalf under their own agreements; we share only what each needs to perform its function.",
+    ],
+  },
+  {
+    h: "Retention",
+    body: [
+      "We keep account and program data for as long as you participate in the alpha. Raw node heartbeat records are pruned on a rolling basis (older detailed heartbeats are removed) while your computed uptime is preserved. If you decline the legal terms, your tester account and the records tied to it are deleted. You may also ask us to delete your account; legal-acceptance audit records may be retained where we are required to keep them.",
+    ],
+  },
+  {
+    h: "Your choices & rights",
+    body: [
+      "You can update your display name and payout address in Settings, manage optional cookies from the banner, unlink a node at any time (which revokes its heartbeat token), and request access to or deletion of your data by contacting us. Because this is a private, invite-only alpha, the portal is not indexed and is intended for authorized testers only.",
+    ],
+  },
+  {
+    h: "Contact",
+    body: [
+      "Questions about this policy or your data: devnet@pyraxchain.com.",
+    ],
+  },
+];
+---
+
+<Base title="Privacy & Cookie Policy">
+  <main class="mx-auto w-full max-w-3xl px-5 py-12 sm:py-16">
+    <a href="/app" class="text-sm text-faint hover:text-muted">&larr; Back to the portal</a>
+    <div class="card mt-4 overflow-hidden">
+      <div class="flame-bar h-1 w-full"></div>
+      <div class="p-7 sm:p-9">
+        <h1 class="text-2xl font-extrabold flame-text sm:text-3xl">Privacy &amp; Cookie Policy</h1>
+        <p class="mt-2 text-sm text-faint">PYRAX Devnet Tester Portal &middot; Last updated {updated}</p>
+        <p class="mt-4 text-sm leading-relaxed text-muted">
+          We collect only what the closed alpha needs to run and to keep your account secure, and we
+          are transparent about it. This summary is written in plain language; it does not override
+          the NDA or Alpha Test Program Terms you accept in the portal.
+        </p>
+
+        {sections.map((s) => (
+          <section class="mt-7">
+            <h2 class="text-base font-bold text-ink">{s.h}</h2>
+            {s.body.map((p) => (
+              <p class="mt-2 text-sm leading-relaxed text-muted">{p}</p>
+            ))}
+          </section>
+        ))}
+
+        <p class="mt-8 border-t border-line pt-5 text-xs text-faint">
+          &copy; {new Date().getFullYear()} PYRAX LLC. Authorized testers only.
+        </p>
+      </div>
+    </div>
+  </main>
+</Base>
