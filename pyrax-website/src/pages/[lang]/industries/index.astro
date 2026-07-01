@@ -1,0 +1,49 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Site from "../../../layouts/Site.astro";
+import { isLocale, DEFAULT_LOCALE, localizePath } from "../../../i18n/config";
+import { useT } from "../../../i18n";
+import { CATEGORIES, TOTAL_INDUSTRIES } from "../../../lib/industries";
+
+const { lang = DEFAULT_LOCALE } = Astro.params;
+if (!isLocale(lang)) return Astro.redirect(`/${DEFAULT_LOCALE}`, 302);
+const t = useT(lang);
+const L = (p: string) => localizePath(lang, p);
+---
+<Site title="Industries — PYRAX Blockchain Solutions | PYRAX™ Network" description={`PYRAX for ${TOTAL_INDUSTRIES} business types across ${CATEGORIES.length} industries — market projections, concrete network integrations, and buildathon dApp ideas.`} lang={lang}>
+  <section class="relative overflow-hidden border-b border-line">
+    <div class="pointer-events-none absolute -left-40 -top-40 h-96 w-96 rounded-full bg-[radial-gradient(circle,rgba(245,134,34,0.16),transparent_62%)] blur-3xl"></div>
+    <div class="mx-auto max-w-7xl px-6 py-20 text-center">
+      <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">Industries</div>
+      <h1 class="mx-auto mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">PYRAX blockchain solutions for <span class="flame-text">every industry</span></h1>
+      <p class="mx-auto mt-5 max-w-2xl text-lg text-muted">{CATEGORIES.length} categories · {TOTAL_INDUSTRIES} business types. Each with current market projections, concrete PYRAX integrations, and buildathon-ready dApp ideas.</p>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-7xl px-6 py-14">
+    <div class="space-y-6">
+      {CATEGORIES.map((c) => (
+        <div class="overflow-hidden rounded-3xl border border-line bg-[color:var(--color-surface)]">
+          <div class="flex flex-col gap-3 border-b border-line-soft p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-4">
+              <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl" style={`background:linear-gradient(135deg,${c.color},${c.color}44)`}></span>
+              <div>
+                <a href={L(`/industries/${c.slug}`)} class="font-display text-xl font-extrabold hover:text-[color:var(--color-brand)]">{c.name}</a>
+                <p class="text-sm text-muted">{c.blurb}</p>
+              </div>
+            </div>
+            <a href={L(`/industries/${c.slug}`)} class="shrink-0 rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">All 10 →</a>
+          </div>
+          <div class="grid gap-1 p-3 sm:grid-cols-2 lg:grid-cols-5">
+            {c.businesses.map((b) => (
+              <a href={L(`/industries/${c.slug}/${b.slug}`)} class="group rounded-xl px-3 py-2.5 transition hover:bg-[rgba(255,255,255,0.03)]">
+                <div class="text-sm font-semibold text-ink group-hover:text-[color:var(--color-brand)]">{b.name}</div>
+                <div class="mt-0.5 line-clamp-2 text-[0.72rem] text-faint">{b.hook}</div>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+</Site>

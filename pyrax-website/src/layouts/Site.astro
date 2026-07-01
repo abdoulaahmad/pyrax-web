@@ -1,0 +1,15 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Base from "./Base.astro";
+import MegaNav from "../components/MegaNav.tsx";
+import Footer from "../components/Footer.astro";
+interface Props { title: string; description?: string; lang?: string; ogImage?: string }
+const { title, description, lang = "en", ogImage } = Astro.props;
+---
+<Base title={title} description={description} lang={lang} ogImage={ogImage}>
+  <MegaNav client:load lang={lang} transition:persist="pyrax-nav" />
+  <main>
+    <slot />
+  </main>
+  <Footer lang={lang} />
+</Base>

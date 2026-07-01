@@ -1,0 +1,115 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Site from "../../layouts/Site.astro";
+import { isLocale, DEFAULT_LOCALE, localizePath } from "../../i18n/config";
+import { DOMAINS, SOCIAL } from "../../lib/endpoints";
+import { NETWORKS } from "../../lib/networks";
+
+const { lang = DEFAULT_LOCALE } = Astro.params;
+if (!isLocale(lang)) return Astro.redirect(`/${DEFAULT_LOCALE}/developers`, 302);
+const L = (p: string) => localizePath(lang, p);
+const seed = NETWORKS[0];
+
+const paths = [
+  { t: "Deploy a Solidity contract", d: "Point your existing Ethereum toolchain (Hardhat, Foundry, ethers) at the PYRAX RPC — the full eth_* surface is there.", c: "#f58722", vm: "EVM" },
+  { t: "Write a Rust contract", d: "Compile to WebAssembly and deploy to the WASM VM, metered by the same gas market as everything else.", c: "#34d399", vm: "WASM" },
+  { t: "Prove with Cairo", d: "Move heavy computation off-chain and verify a STARK proof on-chain via the Cairo VM.", c: "#7c5cff", vm: "Cairo" },
+  { t: "Build a shielded dApp", d: "Use shielded transfers and viewing keys so your users are private by default and your auditors still have read-only proof.", c: "#60b8cc", vm: "ZK" },
+  { t: "Buy verifiable compute", d: "Escrow a NEURAX job, get a ComputeReceipt, and pay per compute unit — AI inference and training with proof, not trust.", c: "#fcd03d", vm: "NEURAX" },
+  { t: "Run a node", d: "Join the mesh with an Inferno node, mine a stream, or stake to validate — no bootstrap server required.", c: "#f5a623", vm: "P2P" },
+];
+
+const resources = [
+  { t: "Documentation", d: "Guides, architecture, and the JSON-RPC reference.", href: DOMAINS.docs || DOMAINS.site, ext: true, icon: "book" },
+  { t: "Whitepaper v4", d: "The full technical paper and a plain-English companion.", href: L("/whitepaper"), ext: false, icon: "book" },
+  { t: "GitHub", d: "Apache-2.0 protocol, node, and SDK — read the source.", href: SOCIAL.github, ext: true, icon: "code" },
+  { t: "Block explorer", d: "Inspect GhostDAG blocks, the shielded pool, and contracts.", href: DOMAINS.explorer, ext: true, icon: "search" },
+  { t: "Node & wallet apps", d: "Desktop node, CLI, and wallet — mesh, mine, shield, stream.", href: DOMAINS.nodes, ext: true, icon: "node" },
+  { t: "Devnet tester portal", d: "Join the closed alpha and put PYRAX Forge through its paces.", href: DOMAINS.devnet, ext: true, icon: "flask" },
+];
+
+const ICON: Record<string, string> = {
+  book: "M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM8 3v16",
+  code: "m8 8-4 4 4 4M16 8l4 4-4 4",
+  search: "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14M20 20l-3.5-3.5",
+  node: "M12 5a2 2 0 1 0 0-.01M5 18a2 2 0 1 0 0-.01M19 18a2 2 0 1 0 0-.01M12 7v3M8 15l3-4M13 11l3 4",
+  flask: "M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3",
+};
+---
+<Site title="Developers — PYRAX™ Network" description="Build on PYRAX: three virtual machines (EVM, WASM, Cairo), shielded-by-default privacy, verifiable NEURAX compute, and the full eth_* JSON-RPC. Docs, SDK, RPC endpoints, and a live sandbox network." lang={lang}>
+  <section class="relative overflow-hidden border-b border-line">
+    <div class="grid-backdrop absolute inset-0 opacity-40"></div>
+    <div class="pointer-events-none absolute right-0 -top-40 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(52,211,153,0.14),transparent_60%)] blur-3xl"></div>
+    <div class="relative mx-auto max-w-7xl px-6 py-20">
+      <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">Developers</div>
+      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">Build with the tools you <span class="flame-text">already know</span></h1>
+      <p class="mt-5 max-w-2xl text-lg text-muted">Ship Solidity today against the full Ethereum RPC, or reach for Rust, Cairo, shielded transfers, and verifiable compute when you need them. Start free on the always-on Seed sandbox.</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href={DOMAINS.docs || DOMAINS.site} class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">Read the docs →</a>
+        <a href={SOCIAL.github} class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUICKSTART: connect -->
+  <section class="mx-auto max-w-7xl px-6 py-16">
+    <div class="grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+      <div data-reveal>
+        <h2 class="font-display text-2xl font-extrabold">Connect in one step</h2>
+        <p class="mt-2 text-muted">The Seed network speaks the standard Ethereum JSON-RPC. Add it to any EVM wallet or framework and you are building — play-money, no signup, always on.</p>
+        <dl class="mt-5 space-y-2 text-sm">
+          <div class="flex justify-between gap-3 border-b border-line-soft pb-2"><dt class="text-faint">Network</dt><dd class="font-mono text-ink">{seed.name}</dd></div>
+          <div class="flex justify-between gap-3 border-b border-line-soft pb-2"><dt class="text-faint">Chain ID</dt><dd class="font-mono text-ink">{seed.chainId}</dd></div>
+          <div class="flex justify-between gap-3 border-b border-line-soft pb-2"><dt class="text-faint">Currency</dt><dd class="font-mono text-ink">PYRX</dd></div>
+          <div class="flex justify-between gap-3"><dt class="text-faint">Block time</dt><dd class="font-mono text-ink">{seed.blockTime}s</dd></div>
+        </dl>
+      </div>
+      <div data-reveal data-reveal-delay="1" class="overflow-hidden rounded-3xl border border-line bg-[#07080d]">
+        <div class="flex items-center gap-2 border-b border-line-soft px-4 py-2.5"><span class="h-2.5 w-2.5 rounded-full bg-[#fb6f73]"></span><span class="h-2.5 w-2.5 rounded-full bg-[#f5a623]"></span><span class="h-2.5 w-2.5 rounded-full bg-[#34d399]"></span><span class="ml-2 font-mono text-xs text-faint">connect.ts</span></div>
+        <pre class="overflow-x-auto p-5 font-mono text-[0.78rem] leading-relaxed text-muted"><code>{`import { ethers } from "ethers";
+
+// The always-on PYRAX Seed sandbox.
+const rpc = "${seed.rpc}";
+const provider = new ethers.JsonRpcProvider(rpc);
+
+const net = await provider.getNetwork();      // chainId ${seed.chainId}
+const head = await provider.getBlockNumber(); // GhostDAG height
+
+// Deploy exactly as you would on Ethereum —
+// revm gives full eth_* equivalence.
+const factory = new ethers.ContractFactory(abi, bytecode, signer);
+const contract = await factory.deploy();
+await contract.waitForDeployment();`}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUILD PATHS -->
+  <section class="border-y border-line bg-[color:var(--color-bg-2)]">
+    <div class="mx-auto max-w-7xl px-6 py-16">
+      <div data-reveal><h2 class="font-display text-2xl font-extrabold">Pick your path</h2><p class="mt-2 max-w-2xl text-muted">Six ways to build on PYRAX — from a familiar Solidity deploy to shielded dApps and verifiable AI.</p></div>
+      <div class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {paths.map((p, i) => (
+          <div data-reveal data-reveal-delay={String((i % 3) + 1)} class="group rounded-3xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:-translate-y-1 hover:border-[color:#34405a]">
+            <div class="flex items-center justify-between"><div class="h-1 w-10 rounded-full" style={`background:${p.c}`}></div><span class="rounded-full border border-line px-2 py-0.5 font-mono text-[0.62rem]" style={`color:${p.c}`}>{p.vm}</span></div>
+            <h3 class="mt-4 font-bold text-ink">{p.t}</h3>
+            <p class="mt-2 text-sm text-muted">{p.d}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- RESOURCES -->
+  <section class="mx-auto max-w-7xl px-6 py-16">
+    <div data-reveal><h2 class="font-display text-2xl font-extrabold">Resources</h2></div>
+    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {resources.map((r, i) => (
+        <a data-reveal data-reveal-delay={String((i % 3) + 1)} href={r.href} class="group flex items-start gap-4 rounded-3xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:-translate-y-1 hover:border-[color:#34405a]">
+          <span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-line text-[color:var(--color-brand)]"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d={ICON[r.icon]}/></svg></span>
+          <span><span class="flex items-center gap-1 font-bold text-ink group-hover:text-[color:var(--color-brand)]">{r.t}{r.ext && <svg viewBox="0 0 24 24" class="h-3 w-3 text-faint" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg>}</span><span class="mt-1 block text-sm text-muted">{r.d}</span></span>
+        </a>
+      ))}
+    </div>
+  </section>
+</Site>

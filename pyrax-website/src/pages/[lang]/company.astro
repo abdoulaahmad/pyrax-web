@@ -1,0 +1,95 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Site from "../../layouts/Site.astro";
+import { isLocale, DEFAULT_LOCALE, localizePath } from "../../i18n/config";
+import { DOMAINS, SOCIAL } from "../../lib/endpoints";
+
+const { lang = DEFAULT_LOCALE } = Astro.params;
+if (!isLocale(lang)) return Astro.redirect(`/${DEFAULT_LOCALE}/company`, 302);
+const L = (p: string) => localizePath(lang, p);
+
+const principles = [
+  { t: "Private by default", d: "Financial privacy is a right, not a premium feature. Every transfer is shielded unless a user chooses otherwise — and auditors can still verify with viewing keys.", c: "#7c5cff" },
+  { t: "Decentralized for real", d: "No company-run bootstrap server, no privileged keys on mainnet. If PYRAX matters, it has to survive without us.", c: "#60b8cc" },
+  { t: "Prove, don't promise", d: "Claims on this site map to code you can read. The supply cap is enforced in consensus; results come with cryptographic proof.", c: "#34d399" },
+  { t: "Open-core", d: "The protocol, node, and SDK are Apache-2.0. We compete on execution and ecosystem, not on secrecy.", c: "#f58722" },
+];
+
+const facts = [
+  { n: "50B", l: "PYRX hard cap, enforced in consensus" },
+  { n: "4", l: "networks from one binary" },
+  { n: "3 VMs", l: "EVM · WASM · Cairo" },
+  { n: "100%", l: "open-core protocol" },
+];
+---
+<Site title="Company — PYRAX™ Network" description="PYRAX is building a private-by-default, fully decentralized, audit-gated Layer-1 with a verifiable AI compute market. Our mission, principles, and how to reach us." lang={lang}>
+  <section class="relative overflow-hidden border-b border-line">
+    <div class="grid-backdrop absolute inset-0 opacity-40"></div>
+    <div class="pointer-events-none absolute left-0 -top-40 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.14),transparent_60%)] blur-3xl"></div>
+    <div class="relative mx-auto max-w-7xl px-6 py-20">
+      <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">Company</div>
+      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">Money that is <span class="flame-text">private</span>, infrastructure that is <span class="water-text">unstoppable</span></h1>
+      <p class="mt-5 max-w-2xl text-lg text-muted">PYRAX exists to make private, high-throughput, verifiable value transfer the default — and to put a verifiable compute economy on the same rails. We build in the open and gate ourselves to mainnet with an external audit.</p>
+    </div>
+  </section>
+
+  <!-- MISSION -->
+  <section class="mx-auto max-w-7xl px-6 py-16">
+    <div class="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+      <div data-reveal>
+        <h2 class="font-display text-3xl font-extrabold">Our mission</h2>
+        <p class="mt-4 text-muted">Public blockchains forced a false choice: transparency that leaks your whole financial life, or privacy tools bolted on as an afterthought. PYRAX rejects the trade-off. A GhostDAG blockDAG gives the throughput of parallel work; shielded-by-default transfers give privacy without asking; a multi-VM execution layer meets developers where they are; and NEURAX turns idle GPUs into a market for compute you can actually verify.</p>
+        <p class="mt-4 text-muted">We are deliberately unglamorous about the path: a faithful simulation running today, a closed alpha, a public testnet, and a single external audit before anything carries real value.</p>
+      </div>
+      <div data-reveal data-reveal-delay="1" class="grid grid-cols-2 gap-3">
+        {facts.map((f) => (
+          <div class="rounded-2xl border border-line bg-[color:var(--color-surface)] p-5">
+            <div class="font-mono text-2xl font-extrabold flame-text">{f.n}</div>
+            <div class="mt-1 text-xs text-muted">{f.l}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- PRINCIPLES -->
+  <section class="border-y border-line bg-[color:var(--color-bg-2)]">
+    <div class="mx-auto max-w-7xl px-6 py-16">
+      <div data-reveal><h2 class="font-display text-2xl font-extrabold">What we believe</h2></div>
+      <div class="mt-8 grid gap-4 sm:grid-cols-2">
+        {principles.map((p, i) => (
+          <div data-reveal data-reveal-delay={String((i % 4) + 1)} class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
+            <div class="h-1 w-10 rounded-full" style={`background:${p.c}`}></div>
+            <h3 class="mt-4 text-lg font-bold text-ink">{p.t}</h3>
+            <p class="mt-2 text-sm text-muted">{p.d}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="mx-auto max-w-7xl px-6 py-16">
+    <div class="grid gap-4 lg:grid-cols-3">
+      <a href={DOMAINS.site ? "https://team.pyraxchain.com" : "#"} class="group rounded-3xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:-translate-y-1 hover:border-[color:#34405a]">
+        <h3 class="font-display text-xl font-extrabold">Team &amp; careers</h3>
+        <p class="mt-2 text-sm text-muted">The gated team portal — for contributors and collaborators building PYRAX.</p>
+        <span class="mt-4 inline-flex text-sm font-semibold text-[color:var(--color-brand)]">Team portal →</span>
+      </a>
+      <a href="mailto:hello@pyrax.org" class="group rounded-3xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:-translate-y-1 hover:border-[color:#34405a]">
+        <h3 class="font-display text-xl font-extrabold">Get in touch</h3>
+        <p class="mt-2 text-sm text-muted">Partnerships, press, and ecosystem enquiries.</p>
+        <span class="mt-4 inline-flex text-sm font-semibold text-[color:var(--color-brand)]">hello@pyrax.org →</span>
+      </a>
+      <a href={SOCIAL.github} class="group rounded-3xl border border-line bg-[radial-gradient(120%_120%_at_100%_0%,rgba(245,134,34,0.12),transparent_60%)] p-6 transition hover:-translate-y-1 hover:border-[color:#34405a]">
+        <h3 class="font-display text-xl font-extrabold">Read the source</h3>
+        <p class="mt-2 text-sm text-muted">Everything on this site maps to open-core code. Verify it.</p>
+        <span class="mt-4 inline-flex text-sm font-semibold text-[color:var(--color-brand)]">GitHub →</span>
+      </a>
+    </div>
+    <div class="mt-10 flex flex-wrap items-center gap-3">
+      <a href={L("/pitch")} class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">See the investor pitch →</a>
+      <a href={L("/whitepaper")} class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">Read the whitepaper</a>
+    </div>
+  </section>
+</Site>

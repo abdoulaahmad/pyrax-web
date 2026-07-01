@@ -1,6 +1,23 @@
-// SPDX-License-Identifier: LicenseRef-PYRAX-Proprietary
+// SPDX-License-Identifier: LicenseRef-Proprietary
 //
-// Domains / social / per-network RPC endpoints are the single source in @pyrax/shared (endpoints.ts) —
-// re-exported here so existing `./lib/endpoints.js` imports keep working. To wire a network's live RPC
-// or change a domain, edit @pyrax/shared/src/endpoints.ts ONCE and every PYRAX property inherits it.
-export * from "@pyrax/shared";
+// Single source of truth for every PYRAX domain / social / service endpoint the marketing site links
+// to. Mirrors @pyrax/shared endpoints.ts — update here (or upstream) when a service address lands.
+export const DOMAINS = {
+  site: "https://pyraxchain.com",
+  explorer: "https://explorer.pyraxchain.com",
+  nodes: "https://nodes.pyraxchain.com",
+  devnet: "https://devnet.pyraxchain.com",
+  peers: "https://peers.pyraxchain.com",
+  updates: "https://updates.pyraxchain.com",
+  email: "info@pyraxchain.com",
+} as const;
+
+export const SOCIAL = {
+  github: "https://github.com/PYRAX-NETWORK",
+  x: "https://x.com/PYRAX_Official",
+  discord: "https://discord.gg/cEX6uQn24",
+  telegram: "https://t.me/+3DreJAHGxqhjYWQx",
+  youtube: "https://www.youtube.com/@PYRAXNETWORK",
+  linkedin: "https://www.linkedin.com/company/pyrax-llc/",
+  facebook: "https://www.facebook.com/groups/pyraxchain",
+} as const;

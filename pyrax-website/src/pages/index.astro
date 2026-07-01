@@ -1,0 +1,7 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+// Root: negotiate the visitor's language from Accept-Language and redirect to /<lang>.
+import { negotiateLocale } from "../i18n/config";
+const lang = negotiateLocale(Astro.request.headers.get("accept-language"));
+return Astro.redirect(`/${lang}`, 302);
+---

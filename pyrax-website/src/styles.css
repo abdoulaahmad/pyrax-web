@@ -1,8 +1,0 @@
-/* SPDX-License-Identifier: LicenseRef-PYRAX-Proprietary */
-/* The PYRAX brand design system (@theme + component layer + all chrome/page styles) is the single
- * source in @pyrax/shared — imported here so this site can never drift from the other properties.
- * The @source registers the shared chrome's TS so Tailwind v4 generates the utility classes it
- * renders with (else the nav would be unstyled). This site adds no styles of its own. */
-@import "tailwindcss";
-@import "../../pyrax-shared/src/styles.css";
-@source "../../pyrax-shared/src";

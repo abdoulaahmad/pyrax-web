@@ -1,0 +1,69 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import { isRtl, parsePath, localizePath, LOCALES, DEFAULT_LOCALE } from "../i18n/config";
+
+interface Props { title: string; description?: string; lang?: string; ogImage?: string }
+const { title, description, lang = "en", ogImage = "/brand/pyrax-icon.png" } = Astro.props;
+const dir = isRtl(lang) ? "rtl" : "ltr";
+const fullTitle = title.includes("PYRAX") ? title : `${title} | PYRAX™ Network`;
+const desc = description ?? "PYRAX — a private-by-default, fully decentralized, ISP-resistant Layer-1 with a GhostDAG blockDAG and a verifiable AI compute marketplace.";
+const canonical = new URL(Astro.url.pathname, "https://pyraxchain.com");
+// hreflang alternates for the current route across all locales (SEO)
+const { rest } = parsePath(Astro.url.pathname);
+const alternates = LOCALES.map((l) => ({ code: l.code, href: new URL(localizePath(l.code, rest), "https://pyraxchain.com").href }));
+---
+<!doctype html>
+<html lang={lang} dir={dir} class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={canonical.href} />
+    {alternates.map((a) => <link rel="alternate" hreflang={a.code} href={a.href} />)}
+    <link rel="alternate" hreflang="x-default" href={new URL(localizePath(DEFAULT_LOCALE, rest), "https://pyraxchain.com").href} />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#050609" />
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="PYRAX™ Network" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/sora-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <noscript><style>[data-reveal]{opacity:1!important;transform:none!important}</style></noscript>
+    <ClientRouter />
+  </head>
+  <body class="min-h-screen bg-[color:var(--color-bg)] text-ink antialiased selection:bg-[rgba(245,134,34,0.25)]">
+    <slot />
+    <script is:inline>
+      // Progressive scroll-reveal — re-armed on every view-transition navigation.
+      (() => {
+        const arm = () => {
+          const els = document.querySelectorAll("[data-reveal]:not(.revealed)");
+          if (!("IntersectionObserver" in window)) { els.forEach((e) => e.classList.add("revealed")); return; }
+          const io = new IntersectionObserver((entries) => {
+            for (const en of entries) {
+              if (en.isIntersecting) { en.target.classList.add("revealed"); io.unobserve(en.target); }
+            }
+          }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+          els.forEach((e) => {
+            const r = e.getBoundingClientRect();
+            if (r.top < window.innerHeight * 0.92) e.classList.add("revealed"); // already in view on load
+            else io.observe(e);
+          });
+        };
+        document.addEventListener("astro:page-load", arm);
+        if (document.readyState !== "loading") arm(); else document.addEventListener("DOMContentLoaded", arm);
+      })();
+    </script>
+  </body>
+</html>

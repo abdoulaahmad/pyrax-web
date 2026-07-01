@@ -1,0 +1,27 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Site from "../layouts/Site.astro";
+import { negotiateLocale, localizePath } from "../i18n/config";
+const lang = negotiateLocale(Astro.request.headers.get("accept-language"));
+const L = (p: string) => localizePath(lang, p);
+const links = [
+  { t: "Home", href: L("/") },
+  { t: "Technology", href: L("/technology") },
+  { t: "Industries", href: L("/industries") },
+  { t: "Token", href: L("/token") },
+  { t: "Whitepaper", href: L("/whitepaper") },
+];
+---
+<Site title="Page not found — PYRAX™ Network" description="The page you're looking for doesn't exist." lang={lang}>
+  <section class="relative flex min-h-[70vh] items-center justify-center overflow-hidden px-6">
+    <div class="pointer-events-none absolute left-1/2 top-1/2 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(245,134,34,0.14),transparent_62%)] blur-3xl"></div>
+    <div class="relative text-center">
+      <div class="font-display text-8xl font-extrabold flame-text sm:text-9xl">404</div>
+      <h1 class="mt-4 font-display text-2xl font-extrabold sm:text-3xl">This block was orphaned</h1>
+      <p class="mx-auto mt-3 max-w-md text-muted">The page you're looking for isn't in the DAG. Let's get you back to a confirmed path.</p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-2">
+        {links.map((l) => (<a href={l.href} class="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{l.t}</a>))}
+      </div>
+    </div>
+  </section>
+</Site>
