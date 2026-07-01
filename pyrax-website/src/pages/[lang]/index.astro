@@ -20,27 +20,27 @@ const pillars = [
   { t: t("pillars.ispT"), d: t("pillars.ispD"), c: "#60b8cc", n: "Sphinx", nl: "onion mixnet" },
 ];
 const techStats = [
-  { n: "50B", l: "Max supply (hard cap)" },
-  { n: "3 VMs", l: "EVM · WASM · Cairo" },
-  { n: "5 lanes", l: "TriStream seal lanes" },
-  { n: "4 networks", l: "Seed · Forge · Rise · One" },
-  { n: "18s", l: "L3 recursive proof" },
-  { n: "100%", l: "open-core protocol" },
+  { n: "50B", l: t("homeExtra.techStatMaxSupply", "Max supply (hard cap)") },
+  { n: "3 VMs", l: t("homeExtra.techStatVms", "EVM · WASM · Cairo") },
+  { n: "5 lanes", l: t("homeExtra.techStatSealLanes", "TriStream seal lanes") },
+  { n: "4 networks", l: t("homeExtra.techStatNetworks", "Seed · Forge · Rise · One") },
+  { n: "18s", l: t("homeExtra.techStatRecursiveProof", "L3 recursive proof") },
+  { n: "100%", l: t("homeExtra.techStatOpenCore", "open-core protocol") },
 ];
 const techCards = [
-  { t: "GhostDAG blockDAG", d: "A multi-parent web of blocks ordered by GhostDAG (k-cluster blue set), so honest parallel work is included, not orphaned.", href: L("/technology#consensus"), c: "#f58722" },
-  { t: "TriStream mining", d: "Three streams over five seal lanes — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU), and BLS proof-of-stake finality.", href: L("/technology#consensus"), c: "#60b8cc" },
-  { t: "Shielded by default", d: "Every transfer hides sender, receiver, and amount with plonky2 proofs — no trusted setup, and the circuit is default-on today.", href: L("/technology#privacy"), c: "#7c5cff" },
-  { t: "Multi-VM L2 + ZK-rollup L3", d: "EVM (revm), WASM (wasmtime), and Cairo with cross-VM calls; a recursive ZK-rollup folds thousands of proofs into one.", href: L("/technology#vms"), c: "#34d399" },
-  { t: "Bootstrapless & ISP-resistant", d: "No company-run starter server; traffic rides an onion Sphinx mixnet so an on-path observer sees only uniform encrypted flows.", href: L("/technology#network"), c: "#4c99cc" },
-  { t: "Audit-gated to mainnet", d: "Formal invariants, a documented threat model, and a single external audit of consensus + ZK + bridge before PYRAX One.", href: L("/technology#security"), c: "#fcd03d" },
+  { t: t("homeExtra.techCard1T", "GhostDAG blockDAG"), d: t("homeExtra.techCard1D", "A multi-parent web of blocks ordered by GhostDAG (k-cluster blue set), so honest parallel work is included, not orphaned."), href: L("/technology#consensus"), c: "#f58722" },
+  { t: t("homeExtra.techCard2T", "TriStream mining"), d: t("homeExtra.techCard2D", "Three streams over five seal lanes — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU), and BLS proof-of-stake finality."), href: L("/technology#consensus"), c: "#60b8cc" },
+  { t: t("homeExtra.techCard3T", "Shielded by default"), d: t("homeExtra.techCard3D", "Every transfer hides sender, receiver, and amount with plonky2 proofs — no trusted setup, and the circuit is default-on today."), href: L("/technology#privacy"), c: "#7c5cff" },
+  { t: t("homeExtra.techCard4T", "Multi-VM L2 + ZK-rollup L3"), d: t("homeExtra.techCard4D", "EVM (revm), WASM (wasmtime), and Cairo with cross-VM calls; a recursive ZK-rollup folds thousands of proofs into one."), href: L("/technology#vms"), c: "#34d399" },
+  { t: t("homeExtra.techCard5T", "Bootstrapless & ISP-resistant"), d: t("homeExtra.techCard5D", "No company-run starter server; traffic rides an onion Sphinx mixnet so an on-path observer sees only uniform encrypted flows."), href: L("/technology#network"), c: "#4c99cc" },
+  { t: t("homeExtra.techCard6T", "Audit-gated to mainnet"), d: t("homeExtra.techCard6D", "Formal invariants, a documented threat model, and a single external audit of consensus + ZK + bridge before PYRAX One."), href: L("/technology#security"), c: "#fcd03d" },
 ];
 ---
 <Site title="PYRAX™ Network — the private, parallel Layer-1" description={t("meta.description")} lang={lang}>
   <!-- HERO + LIVE STATS -->
   <Hero client:load lang={lang} />
   <section class="relative z-10 mx-auto -mt-4 max-w-5xl px-6 pb-16">
-    <LiveStats client:load />
+    <LiveStats client:load lang={lang} />
     <p class="mt-3 text-center text-xs text-faint">{t("hero.liveOn")} <span class="text-muted">PYRAX Seed</span> · switch networks in the navbar. Numbers are real — an offline network shows em-dashes, never fabricated figures.</p>
   </section>
 
@@ -68,11 +68,11 @@ const techCards = [
     <div class="mx-auto max-w-7xl px-6 py-16">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">Built, not planned</div>
-          <h2 class="mt-2 font-display text-3xl font-extrabold sm:text-4xl">A real, tested Layer-1 — today</h2>
-          <p class="mt-2 max-w-2xl text-muted">One binary, four chainspecs: a faithful simulation on real primitives, with the production consensus path wired end-to-end and gated to mainnet by external audit.</p>
+          <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">{t("homeExtra.techEyebrow", "Built, not planned")}</div>
+          <h2 class="mt-2 font-display text-3xl font-extrabold sm:text-4xl">{t("homeExtra.techHeading", "A real, tested Layer-1 — today")}</h2>
+          <p class="mt-2 max-w-2xl text-muted">{t("homeExtra.techParagraph", "One binary, four chainspecs: a faithful simulation on real primitives, with the production consensus path wired end-to-end and gated to mainnet by external audit.")}</p>
         </div>
-        <a href={L("/whitepaper")} class="shrink-0 rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">Read the whitepaper →</a>
+        <a href={L("/whitepaper")} class="shrink-0 rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("homeExtra.readWhitepaper", "Read the whitepaper →")}</a>
       </div>
       <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {techStats.map((s) => (
@@ -88,7 +88,7 @@ const techCards = [
             <div class="h-1 w-10 rounded-full" style={`background:${c.c}`}></div>
             <h3 class="mt-4 text-lg font-bold group-hover:text-[color:var(--color-brand)]">{c.t}</h3>
             <p class="mt-2 text-sm text-muted">{c.d}</p>
-            <span class="mt-4 inline-flex text-sm font-semibold text-[color:var(--color-brand)] opacity-0 transition group-hover:opacity-100">Learn more →</span>
+            <span class="mt-4 inline-flex text-sm font-semibold text-[color:var(--color-brand)] opacity-0 transition group-hover:opacity-100">{t("homeExtra.learnMore", "Learn more →")}</span>
           </a>
         ))}
       </div>
@@ -101,19 +101,19 @@ const techCards = [
       <div class="grid gap-8 lg:grid-cols-2 lg:items-center">
         <div>
           <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">NEURAX</div>
-          <h2 class="mt-2 font-display text-3xl font-extrabold sm:text-4xl">Idle GPUs become a verifiable compute market</h2>
-          <p class="mt-3 max-w-xl text-muted">The same hardware that mines Stream B runs paid AI and compute jobs, settled on-chain and priced at a fixed 8 PYRX per compute unit. A four-rung verification ladder — redundancy, fraud proofs, interactive dispute, and TEE attestation — replaces blind trust with cryptographic proof.</p>
+          <h2 class="mt-2 font-display text-3xl font-extrabold sm:text-4xl">{t("homeExtra.neuraxHeading", "Idle GPUs become a verifiable compute market")}</h2>
+          <p class="mt-3 max-w-xl text-muted">{t("homeExtra.neuraxParagraph", "The same hardware that mines Stream B runs paid AI and compute jobs, settled on-chain and priced at a fixed 8 PYRX per compute unit. A four-rung verification ladder — redundancy, fraud proofs, interactive dispute, and TEE attestation — replaces blind trust with cryptographic proof.")}</p>
           <div class="mt-6 flex flex-wrap gap-3">
-            <a href={L("/technology#neurax")} class="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">How NEURAX works</a>
-            <a href={L("/industries/ai-data-compute")} class="rounded-full px-4 py-2 text-sm font-semibold text-[color:var(--color-brand)]">AI & compute industries →</a>
+            <a href={L("/technology#neurax")} class="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("homeExtra.neuraxHowItWorks", "How NEURAX works")}</a>
+            <a href={L("/industries/ai-data-compute")} class="rounded-full px-4 py-2 text-sm font-semibold text-[color:var(--color-brand)]">{t("homeExtra.neuraxIndustries", "AI & compute industries →")}</a>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           {[
-            { n: "8 PYRX", l: "per compute unit (1 RTX-4090-hour)" },
-            { n: "4B", l: "PYRX AI-compute pool" },
-            { n: "4-rung", l: "verification ladder" },
-            { n: "RTX 3060", l: "local-first baseline GPU" },
+            { n: "8 PYRX", l: t("homeExtra.neuraxTile1L", "per compute unit (1 RTX-4090-hour)") },
+            { n: "4B", l: t("homeExtra.neuraxTile2L", "PYRX AI-compute pool") },
+            { n: "4-rung", l: t("homeExtra.neuraxTile3L", "verification ladder") },
+            { n: "RTX 3060", l: t("homeExtra.neuraxTile4L", "local-first baseline GPU") },
           ].map((x) => (
             <div class="rounded-2xl border border-line bg-[rgba(9,11,18,0.6)] p-5">
               <div class="font-mono text-xl font-extrabold text-[color:#7c5cff]">{x.n}</div>
@@ -138,7 +138,7 @@ const techCards = [
           <a href={L(`/industries/${c.slug}`)} class="group rounded-2xl border border-line bg-[color:var(--color-surface)] p-5 transition hover:-translate-y-1 hover:border-[color:#34405a]">
             <div class="h-8 w-8 rounded-xl" style={`background:linear-gradient(135deg,${c.color},${c.color}55)`}></div>
             <div class="mt-3 text-sm font-bold group-hover:text-[color:var(--color-brand)]">{c.name}</div>
-            <div class="mt-1 text-[0.7rem] text-faint">{c.businesses.length} business types</div>
+            <div class="mt-1 text-[0.7rem] text-faint">{c.businesses.length} {t("homeExtra.businessTypes", "business types")}</div>
           </a>
         ))}
       </div>
@@ -157,9 +157,9 @@ const techCards = [
         <span class="mt-6 inline-flex text-sm font-bold text-[color:var(--color-brand)]">{t("cta.build")} →</span>
       </a>
       <a href={L("/pitch")} class="group relative overflow-hidden rounded-[2rem] border border-line bg-[radial-gradient(120%_120%_at_100%_0%,rgba(245,134,34,0.12),transparent_60%)] p-8 transition hover:border-[color:#34405a] sm:p-10">
-        <h3 class="font-display text-2xl font-extrabold">For investors</h3>
-        <p class="mt-2 max-w-md text-muted">An interactive, animated deck — the vision, the technology, the tokenomics, and the ask.</p>
-        <span class="mt-6 inline-flex text-sm font-bold text-[color:var(--color-brand)]">Open the pitch deck →</span>
+        <h3 class="font-display text-2xl font-extrabold">{t("homeExtra.investorsTitle", "For investors")}</h3>
+        <p class="mt-2 max-w-md text-muted">{t("homeExtra.investorsBody", "An interactive, animated deck — the vision, the technology, the tokenomics, and the ask.")}</p>
+        <span class="mt-6 inline-flex text-sm font-bold text-[color:var(--color-brand)]">{t("homeExtra.openPitchDeck", "Open the pitch deck →")}</span>
       </a>
     </div>
   </section>

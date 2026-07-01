@@ -2,46 +2,48 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Site from "../../layouts/Site.astro";
 import { isLocale, DEFAULT_LOCALE, localizePath } from "../../i18n/config";
+import { useT } from "../../i18n";
 import { DOMAINS } from "../../lib/endpoints";
 
 const { lang = DEFAULT_LOCALE } = Astro.params;
 if (!isLocale(lang)) return Astro.redirect(`/${DEFAULT_LOCALE}/technology`, 302);
+const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 
 const sub = [
-  { id: "consensus", label: "Consensus" },
-  { id: "privacy", label: "Privacy" },
-  { id: "vms", label: "Virtual machines" },
-  { id: "neurax", label: "NEURAX" },
-  { id: "network", label: "Network" },
-  { id: "security", label: "Security" },
+  { id: "consensus", label: t("techPage.subConsensus", "Consensus") },
+  { id: "privacy", label: t("techPage.subPrivacy", "Privacy") },
+  { id: "vms", label: t("techPage.subVms", "Virtual machines") },
+  { id: "neurax", label: t("techPage.subNeurax", "NEURAX") },
+  { id: "network", label: t("techPage.subNetwork", "Network") },
+  { id: "security", label: t("techPage.subSecurity", "Security") },
 ];
 
 const lanes = [
-  { s: "A", lane: "BLAKE3 PoW", hw: "ASIC / specialized", c: "#f58722" },
-  { s: "A", lane: "double-SHA-256", hw: "ASIC", c: "#f58722" },
-  { s: "B", lane: "kHeavyHash", hw: "Commodity GPU", c: "#60b8cc" },
-  { s: "B", lane: "Argon2id (memory-hard)", hw: "Commodity CPU", c: "#60b8cc" },
-  { s: "C", lane: "BLS proof-of-stake", hw: "Staked validators", c: "#7c5cff" },
+  { s: "A", lane: "BLAKE3 PoW", hw: t("techPage.lane1Hw", "ASIC / specialized"), c: "#f58722" },
+  { s: "A", lane: "double-SHA-256", hw: t("techPage.lane2Hw", "ASIC"), c: "#f58722" },
+  { s: "B", lane: "kHeavyHash", hw: t("techPage.lane3Hw", "Commodity GPU"), c: "#60b8cc" },
+  { s: "B", lane: t("techPage.lane4Lane", "Argon2id (memory-hard)"), hw: t("techPage.lane4Hw", "Commodity CPU"), c: "#60b8cc" },
+  { s: "C", lane: t("techPage.lane5Lane", "BLS proof-of-stake"), hw: t("techPage.lane5Hw", "Staked validators"), c: "#7c5cff" },
 ];
 
 const vms = [
-  { n: "EVM", e: "revm", d: "Full Ethereum equivalence — Solidity/Vyper, the complete eth_* JSON-RPC, filters, subscriptions, precompiles, CREATE2, and EIP-1559.", c: "#f58722" },
-  { n: "WASM", e: "wasmtime", d: "Rust-first smart contracts compiled to WebAssembly — sandboxed, fast, and metered by the same gas market.", c: "#34d399" },
-  { n: "Cairo", e: "STARK-provable", d: "The Cairo VM for provable computation, so heavy logic can be proven off-chain and verified on-chain.", c: "#7c5cff" },
+  { n: "EVM", e: "revm", d: t("techPage.vm1Desc", "Full Ethereum equivalence — Solidity/Vyper, the complete eth_* JSON-RPC, filters, subscriptions, precompiles, CREATE2, and EIP-1559."), c: "#f58722" },
+  { n: "WASM", e: "wasmtime", d: t("techPage.vm2Desc", "Rust-first smart contracts compiled to WebAssembly — sandboxed, fast, and metered by the same gas market."), c: "#34d399" },
+  { n: "Cairo", e: t("techPage.vm3Engine", "STARK-provable"), d: t("techPage.vm3Desc", "The Cairo VM for provable computation, so heavy logic can be proven off-chain and verified on-chain."), c: "#7c5cff" },
 ];
 
-const txTypes = ["Shielded", "Transparent", "Ethereum", "Escrow", "Stake", "Governance"];
+const txTypes = [t("techPage.tx1", "Shielded"), t("techPage.tx2", "Transparent"), t("techPage.tx3", "Ethereum"), t("techPage.tx4", "Escrow"), t("techPage.tx5", "Stake"), t("techPage.tx6", "Governance")];
 ---
-<Site title="Technology — PYRAX™ Network" description="How PYRAX works: a GhostDAG blockDAG sealed by three streams over five lanes, BLS proof-of-stake finality, shielded-by-default privacy, a multi-VM execution layer, the NEURAX compute market, a bootstrapless ISP-resistant network, and an audit-gated path to mainnet." lang={lang}>
+<Site title={t("techPage.metaTitle", "Technology — PYRAX™ Network")} description={t("techPage.metaDescription", "How PYRAX works: a GhostDAG blockDAG sealed by three streams over five lanes, BLS proof-of-stake finality, shielded-by-default privacy, a multi-VM execution layer, the NEURAX compute market, a bootstrapless ISP-resistant network, and an audit-gated path to mainnet.")} lang={lang}>
   <!-- HERO -->
   <section class="relative overflow-hidden border-b border-line">
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
     <div class="pointer-events-none absolute right-0 -top-40 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(96,184,204,0.16),transparent_60%)] blur-3xl"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20">
-      <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">Technology</div>
-      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">A Layer-1 that is <span class="flame-text">parallel</span>, <span class="water-text">private</span>, and provable</h1>
-      <p class="mt-5 max-w-2xl text-lg text-muted">One binary, four chainspecs. A blockDAG that includes honest parallel work instead of orphaning it, transfers that are shielded by default, three virtual machines, and a verifiable compute market — with a single external audit standing between the code and mainnet.</p>
+      <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">{t("techPage.heroEyebrow", "Technology")}</div>
+      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">{t("techPage.heroTitlePre", "A Layer-1 that is ")}<span class="flame-text">{t("techPage.heroTitleParallel", "parallel")}</span>{t("techPage.heroTitleMid", ", ")}<span class="water-text">{t("techPage.heroTitlePrivate", "private")}</span>{t("techPage.heroTitlePost", ", and provable")}</h1>
+      <p class="mt-5 max-w-2xl text-lg text-muted">{t("techPage.heroLede", "One binary, four chainspecs. A blockDAG that includes honest parallel work instead of orphaning it, transfers that are shielded by default, three virtual machines, and a verifiable compute market — with a single external audit standing between the code and mainnet.")}</p>
     </div>
   </section>
 
@@ -56,16 +58,16 @@ const txTypes = ["Shielded", "Transparent", "Ethereum", "Escrow", "Stake", "Gove
   <section id="consensus" class="scroll-mt-32 border-b border-line">
     <div class="mx-auto max-w-7xl px-6 py-16">
       <div data-reveal class="max-w-3xl">
-        <div class="text-xs font-semibold uppercase tracking-wider text-[color:var(--color-brand)]">01 · Consensus</div>
-        <h2 class="mt-2 font-display text-3xl font-extrabold">GhostDAG + TriStream</h2>
-        <p class="mt-3 text-muted">PYRAX orders a <span class="text-ink">blockDAG</span>, not a single chain. GhostDAG's k-cluster rule selects a "blue set" of well-connected blocks and orders everything relative to a selected-parent chain — so honest blocks mined in parallel are <span class="text-ink">included and rewarded</span>, not orphaned. That is what lets throughput scale without sacrificing the security of proof-of-work.</p>
+        <div class="text-xs font-semibold uppercase tracking-wider text-[color:var(--color-brand)]">{t("techPage.consensusEyebrow", "01 · Consensus")}</div>
+        <h2 class="mt-2 font-display text-3xl font-extrabold">{t("techPage.consensusTitle", "GhostDAG + TriStream")}</h2>
+        <p class="mt-3 text-muted">{t("techPage.consensusLede1", "PYRAX orders a ")}<span class="text-ink">{t("techPage.consensusLedeBlockdag", "blockDAG")}</span>{t("techPage.consensusLede2", ", not a single chain. GhostDAG's k-cluster rule selects a \"blue set\" of well-connected blocks and orders everything relative to a selected-parent chain — so honest blocks mined in parallel are ")}<span class="text-ink">{t("techPage.consensusLedeIncluded", "included and rewarded")}</span>{t("techPage.consensusLede3", ", not orphaned. That is what lets throughput scale without sacrificing the security of proof-of-work.")}</p>
       </div>
 
       <div class="mt-8 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
         <div data-reveal class="overflow-hidden rounded-3xl border border-line bg-[color:var(--color-surface)]">
-          <div class="border-b border-line-soft px-5 py-3 text-sm font-semibold text-ink">Three streams · five seal lanes</div>
+          <div class="border-b border-line-soft px-5 py-3 text-sm font-semibold text-ink">{t("techPage.lanesCardTitle", "Three streams · five seal lanes")}</div>
           <table class="w-full text-sm">
-            <thead><tr class="text-left text-[0.7rem] uppercase tracking-wider text-faint"><th class="px-5 py-2 font-medium">Stream</th><th class="px-5 py-2 font-medium">Seal lane</th><th class="px-5 py-2 font-medium">Hardware</th></tr></thead>
+            <thead><tr class="text-left text-[0.7rem] uppercase tracking-wider text-faint"><th class="px-5 py-2 font-medium">{t("techPage.lanesColStream", "Stream")}</th><th class="px-5 py-2 font-medium">{t("techPage.lanesColSealLane", "Seal lane")}</th><th class="px-5 py-2 font-medium">{t("techPage.lanesColHardware", "Hardware")}</th></tr></thead>
             <tbody>
               {lanes.map((l) => (
                 <tr class="border-t border-line-soft">
@@ -79,12 +81,12 @@ const txTypes = ["Shielded", "Transparent", "Ethereum", "Escrow", "Stake", "Gove
         </div>
         <div class="grid gap-4">
           <div data-reveal data-reveal-delay="1" class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
-            <h3 class="font-bold text-ink">BLS-aggregated PoS finality</h3>
-            <p class="mt-2 text-sm text-muted">Proof-of-work gives probabilistic ordering; <span class="text-ink">Stream C</span> adds deterministic finality. Validators bond a minimum <span class="font-mono text-ink">32 PYRX</span> and vote with BLS12-381 signatures that aggregate — hundreds compress to one. A block is <span class="text-ink">final once attestations cover &gt; 2/3 of staked weight</span>, and finality overrides work.</p>
+            <h3 class="font-bold text-ink">{t("techPage.finalityTitle", "BLS-aggregated PoS finality")}</h3>
+            <p class="mt-2 text-sm text-muted">{t("techPage.finalityBody1", "Proof-of-work gives probabilistic ordering; ")}<span class="text-ink">{t("techPage.finalityStreamC", "Stream C")}</span>{t("techPage.finalityBody2", " adds deterministic finality. Validators bond a minimum ")}<span class="font-mono text-ink">32 PYRX</span>{t("techPage.finalityBody3", " and vote with BLS12-381 signatures that aggregate — hundreds compress to one. A block is ")}<span class="text-ink">{t("techPage.finalityFinal", "final once attestations cover > 2/3 of staked weight")}</span>{t("techPage.finalityBody4", ", and finality overrides work.")}</p>
           </div>
           <div data-reveal data-reveal-delay="2" class="rounded-3xl border border-line bg-[radial-gradient(120%_120%_at_100%_0%,rgba(245,134,34,0.1),transparent_60%)] p-6">
-            <h3 class="font-bold text-ink">51%-resistance across three resources</h3>
-            <p class="mt-2 text-sm text-muted">Rewriting history would require a majority of <span class="text-ink">ASIC</span> and <span class="text-ink">GPU+CPU</span> hashpower and a <span class="text-ink">staked supermajority</span> — three uncorrelated supply chains at once — while GhostDAG colors withheld branches red and reverting a finalized block is a slashable offense (5% burn + 10% reporter bounty).</p>
+            <h3 class="font-bold text-ink">{t("techPage.resistTitle", "51%-resistance across three resources")}</h3>
+            <p class="mt-2 text-sm text-muted">{t("techPage.resistBody1", "Rewriting history would require a majority of ")}<span class="text-ink">ASIC</span>{t("techPage.resistBody2", " and ")}<span class="text-ink">GPU+CPU</span>{t("techPage.resistBody3", " hashpower and a ")}<span class="text-ink">{t("techPage.resistSupermajority", "staked supermajority")}</span>{t("techPage.resistBody4", " — three uncorrelated supply chains at once — while GhostDAG colors withheld branches red and reverting a finalized block is a slashable offense (5% burn + 10% reporter bounty).")}</p>
           </div>
         </div>
       </div>
@@ -95,15 +97,15 @@ const txTypes = ["Shielded", "Transparent", "Ethereum", "Escrow", "Stake", "Gove
   <section id="privacy" class="scroll-mt-32 border-b border-line bg-[color:var(--color-bg-2)]">
     <div class="mx-auto max-w-7xl px-6 py-16">
       <div data-reveal class="max-w-3xl">
-        <div class="text-xs font-semibold uppercase tracking-wider text-[color:#7c5cff]">02 · Privacy</div>
-        <h2 class="mt-2 font-display text-3xl font-extrabold">Shielded by default</h2>
-        <p class="mt-3 text-muted">On every production network the default transfer is <span class="text-ink">Shielded</span> — transparent is the explicit special case, enforced at the type level. A shielded transaction reveals no sender, no receiver, and no per-note amount.</p>
+        <div class="text-xs font-semibold uppercase tracking-wider text-[color:#7c5cff]">{t("techPage.privacyEyebrow", "02 · Privacy")}</div>
+        <h2 class="mt-2 font-display text-3xl font-extrabold">{t("techPage.privacyTitle", "Shielded by default")}</h2>
+        <p class="mt-3 text-muted">{t("techPage.privacyLede1", "On every production network the default transfer is ")}<span class="text-ink">{t("techPage.privacyLedeShielded", "Shielded")}</span>{t("techPage.privacyLede2", " — transparent is the explicit special case, enforced at the type level. A shielded transaction reveals no sender, no receiver, and no per-note amount.")}</p>
       </div>
       <div class="mt-8 grid gap-4 md:grid-cols-3">
         {[
-          { t: "Notes, not balances", d: "State is a set of notes in a depth-32 note-commitment Merkle tree plus a nullifier set. Spending reveals a nullifier — never which commitment it came from.", c: "#7c5cff" },
-          { t: "No trusted setup", d: "Poseidon-over-Goldilocks proofs with a plonky2-style backend. There is no toxic-waste ceremony to trust, and the circuit is default-on today.", c: "#60b8cc" },
-          { t: "Auditable by choice", d: "Viewing keys grant read-only visibility to an auditor or regulator without ever exposing the ability to spend — private for users, provable for oversight.", c: "#34d399" },
+          { t: t("techPage.privacyCard1Title", "Notes, not balances"), d: t("techPage.privacyCard1Desc", "State is a set of notes in a depth-32 note-commitment Merkle tree plus a nullifier set. Spending reveals a nullifier — never which commitment it came from."), c: "#7c5cff" },
+          { t: t("techPage.privacyCard2Title", "No trusted setup"), d: t("techPage.privacyCard2Desc", "Poseidon-over-Goldilocks proofs with a plonky2-style backend. There is no toxic-waste ceremony to trust, and the circuit is default-on today."), c: "#60b8cc" },
+          { t: t("techPage.privacyCard3Title", "Auditable by choice"), d: t("techPage.privacyCard3Desc", "Viewing keys grant read-only visibility to an auditor or regulator without ever exposing the ability to spend — private for users, provable for oversight."), c: "#34d399" },
         ].map((x, i) => (
           <div data-reveal data-reveal-delay={String(i + 1)} class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
             <div class="h-1 w-10 rounded-full" style={`background:${x.c}`}></div>
@@ -113,7 +115,7 @@ const txTypes = ["Shielded", "Transparent", "Ethereum", "Escrow", "Stake", "Gove
         ))}
       </div>
       <div data-reveal class="mt-4 rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
-        <p class="text-sm text-muted"><span class="font-semibold text-ink">Recursive aggregation reconciles privacy with scale:</span> thousands of shielded proofs fold into one recursive proof, so a validator performs roughly a single verification per batch. A flat 100-base-unit shielded fee is burned per transfer as anti-DoS.</p>
+        <p class="text-sm text-muted"><span class="font-semibold text-ink">{t("techPage.privacyCalloutLead", "Recursive aggregation reconciles privacy with scale:")}</span>{t("techPage.privacyCalloutBody", " thousands of shielded proofs fold into one recursive proof, so a validator performs roughly a single verification per batch. A flat 100-base-unit shielded fee is burned per transfer as anti-DoS.")}</p>
       </div>
     </div>
   </section>
@@ -122,9 +124,9 @@ const txTypes = ["Shielded", "Transparent", "Ethereum", "Escrow", "Stake", "Gove
   <section id="vms" class="scroll-mt-32 border-b border-line">
     <div class="mx-auto max-w-7xl px-6 py-16">
       <div data-reveal class="max-w-3xl">
-        <div class="text-xs font-semibold uppercase tracking-wider text-[color:#34d399]">03 · Virtual machines</div>
-        <h2 class="mt-2 font-display text-3xl font-extrabold">Three VMs, cross-VM calls, one chain</h2>
-        <p class="mt-3 text-muted">Deploy in the language and toolchain you already know. All three virtual machines share one state, one gas market, and can call each other — and a recursive ZK-rollup layer folds thousands of proofs into one.</p>
+        <div class="text-xs font-semibold uppercase tracking-wider text-[color:#34d399]">{t("techPage.vmsEyebrow", "03 · Virtual machines")}</div>
+        <h2 class="mt-2 font-display text-3xl font-extrabold">{t("techPage.vmsTitle", "Three VMs, cross-VM calls, one chain")}</h2>
+        <p class="mt-3 text-muted">{t("techPage.vmsLede", "Deploy in the language and toolchain you already know. All three virtual machines share one state, one gas market, and can call each other — and a recursive ZK-rollup layer folds thousands of proofs into one.")}</p>
       </div>
       <div class="mt-8 grid gap-4 md:grid-cols-3">
         {vms.map((v, i) => (
@@ -138,11 +140,11 @@ const txTypes = ["Shielded", "Transparent", "Ethereum", "Escrow", "Stake", "Gove
         ))}
       </div>
       <div data-reveal class="mt-4 rounded-3xl border border-line bg-[color:var(--color-bg-2)] p-6">
-        <div class="text-xs font-semibold uppercase tracking-wider text-faint">Six transaction types, one ledger</div>
+        <div class="text-xs font-semibold uppercase tracking-wider text-faint">{t("techPage.txTypesTitle", "Six transaction types, one ledger")}</div>
         <div class="mt-3 flex flex-wrap gap-2">
-          {txTypes.map((t) => (<span class="rounded-full border border-line bg-[color:var(--color-surface)] px-3 py-1.5 text-sm text-ink">{t}</span>))}
+          {txTypes.map((tx) => (<span class="rounded-full border border-line bg-[color:var(--color-surface)] px-3 py-1.5 text-sm text-ink">{tx}</span>))}
         </div>
-        <p class="mt-3 text-sm text-muted">Escrow (Lock / Refund / Release / Drip / Split), Stake (Bond / Unbond / Withdraw / Slash), and Governance (Propose / Vote) are first-class transaction kinds — not bolted-on contracts.</p>
+        <p class="mt-3 text-sm text-muted">{t("techPage.txTypesBody", "Escrow (Lock / Refund / Release / Drip / Split), Stake (Bond / Unbond / Withdraw / Slash), and Governance (Propose / Vote) are first-class transaction kinds — not bolted-on contracts.")}</p>
       </div>
     </div>
   </section>
@@ -152,28 +154,28 @@ const txTypes = ["Shielded", "Transparent", "Ethereum", "Escrow", "Stake", "Gove
     <div class="mx-auto max-w-7xl px-6 py-16">
       <div class="grid gap-8 lg:grid-cols-2 lg:items-center">
         <div data-reveal>
-          <div class="text-xs font-semibold uppercase tracking-wider text-[color:#7c5cff]">04 · NEURAX</div>
-          <h2 class="mt-2 font-display text-3xl font-extrabold">Verifiable AI &amp; GPU compute</h2>
-          <p class="mt-3 text-muted">The same GPUs that mine Stream B run paid AI and compute jobs, funded by on-chain escrow and priced at a fixed <span class="text-ink">8 PYRX per compute unit</span>. Instead of trusting a provider's word, results climb a four-rung verification ladder.</p>
+          <div class="text-xs font-semibold uppercase tracking-wider text-[color:#7c5cff]">{t("techPage.neuraxEyebrow", "04 · NEURAX")}</div>
+          <h2 class="mt-2 font-display text-3xl font-extrabold">{t("techPage.neuraxTitle", "Verifiable AI & GPU compute")}</h2>
+          <p class="mt-3 text-muted">{t("techPage.neuraxLede1", "The same GPUs that mine Stream B run paid AI and compute jobs, funded by on-chain escrow and priced at a fixed ")}<span class="text-ink">{t("techPage.neuraxLedePrice", "8 PYRX per compute unit")}</span>{t("techPage.neuraxLede2", ". Instead of trusting a provider's word, results climb a four-rung verification ladder.")}</p>
           <ol class="mt-5 space-y-2">
-            {["Redundant re-execution across independent providers", "Fraud proofs that pin the single divergent step", "Interactive dispute — a bisection game to that step", "TEE attestation for hardware-sealed execution"].map((r, i) => (
+            {[t("techPage.neuraxLadder1", "Redundant re-execution across independent providers"), t("techPage.neuraxLadder2", "Fraud proofs that pin the single divergent step"), t("techPage.neuraxLadder3", "Interactive dispute — a bisection game to that step"), t("techPage.neuraxLadder4", "TEE attestation for hardware-sealed execution")].map((r, i) => (
               <li data-reveal data-reveal-delay={String(i + 1)} class="flex gap-3 rounded-2xl border border-line bg-[color:var(--color-surface)] p-3 text-sm text-muted"><span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[rgba(124,92,255,0.15)] font-mono text-xs font-bold text-[#7c5cff]">{i + 1}</span>{r}</li>
             ))}
           </ol>
         </div>
         <div class="grid grid-cols-2 gap-3">
           {[
-            { n: "8 PYRX", l: "per compute unit (1 reference-GPU-hour)" },
-            { n: "4B PYRX", l: "AI-compute pool · ~70M/month budget" },
-            { n: "1 receipt", l: "one on-chain ComputeReceipt per verified job" },
-            { n: "RTX 3060", l: "local-first baseline; ShardedExecutor pools GPUs" },
+            { n: "8 PYRX", l: t("techPage.neuraxStat1Label", "per compute unit (1 reference-GPU-hour)") },
+            { n: "4B PYRX", l: t("techPage.neuraxStat2Label", "AI-compute pool · ~70M/month budget") },
+            { n: "1 receipt", l: t("techPage.neuraxStat3Label", "one on-chain ComputeReceipt per verified job") },
+            { n: "RTX 3060", l: t("techPage.neuraxStat4Label", "local-first baseline; ShardedExecutor pools GPUs") },
           ].map((x, i) => (
             <div data-reveal data-reveal-delay={String(i + 1)} class="rounded-2xl border border-line bg-[rgba(9,11,18,0.6)] p-5">
               <div class="font-mono text-xl font-extrabold text-[color:#7c5cff]">{x.n}</div>
               <div class="mt-1 text-xs text-muted">{x.l}</div>
             </div>
           ))}
-          <a href={L("/industries/ai-data-compute")} class="col-span-2 rounded-2xl border border-line bg-[color:var(--color-surface)] p-4 text-sm font-semibold text-[color:#7c5cff] transition hover:border-[color:#34405a]">Explore AI &amp; compute use cases →</a>
+          <a href={L("/industries/ai-data-compute")} class="col-span-2 rounded-2xl border border-line bg-[color:var(--color-surface)] p-4 text-sm font-semibold text-[color:#7c5cff] transition hover:border-[color:#34405a]">{t("techPage.neuraxCta", "Explore AI & compute use cases →")}</a>
         </div>
       </div>
     </div>
@@ -183,15 +185,15 @@ const txTypes = ["Shielded", "Transparent", "Ethereum", "Escrow", "Stake", "Gove
   <section id="network" class="scroll-mt-32 border-b border-line">
     <div class="mx-auto max-w-7xl px-6 py-16">
       <div data-reveal class="max-w-3xl">
-        <div class="text-xs font-semibold uppercase tracking-wider text-[color:#60b8cc]">05 · Network</div>
-        <h2 class="mt-2 font-display text-3xl font-extrabold">Bootstrapless &amp; ISP-resistant</h2>
-        <p class="mt-3 text-muted">There is no company-run starter server that can be seized or blocked. Peers discover each other through a decentralized mesh, and traffic can ride an onion Sphinx mixnet so an on-path observer — including an ISP — sees only uniform, encrypted flows.</p>
+        <div class="text-xs font-semibold uppercase tracking-wider text-[color:#60b8cc]">{t("techPage.networkEyebrow", "05 · Network")}</div>
+        <h2 class="mt-2 font-display text-3xl font-extrabold">{t("techPage.networkTitle", "Bootstrapless & ISP-resistant")}</h2>
+        <p class="mt-3 text-muted">{t("techPage.networkLede", "There is no company-run starter server that can be seized or blocked. Peers discover each other through a decentralized mesh, and traffic can ride an onion Sphinx mixnet so an on-path observer — including an ISP — sees only uniform, encrypted flows.")}</p>
       </div>
       <div class="mt-8 grid gap-4 md:grid-cols-3">
         {[
-          { t: "No bootstrap authority", d: "Discovery is peer-to-peer with a relay directory and Kademlia routing. Nothing central to shut off.", c: "#60b8cc" },
-          { t: "Onion Sphinx mixnet", d: "Layered encryption with cover traffic hides who is talking to whom — metadata privacy, not just payload privacy.", c: "#7c5cff" },
-          { t: "Anonymous carriage", d: "A pull-based want/have engine moves files and media over the mixnet with reply-route loop guards and bounded reassembly.", c: "#34d399" },
+          { t: t("techPage.networkCard1Title", "No bootstrap authority"), d: t("techPage.networkCard1Desc", "Discovery is peer-to-peer with a relay directory and Kademlia routing. Nothing central to shut off."), c: "#60b8cc" },
+          { t: t("techPage.networkCard2Title", "Onion Sphinx mixnet"), d: t("techPage.networkCard2Desc", "Layered encryption with cover traffic hides who is talking to whom — metadata privacy, not just payload privacy."), c: "#7c5cff" },
+          { t: t("techPage.networkCard3Title", "Anonymous carriage"), d: t("techPage.networkCard3Desc", "A pull-based want/have engine moves files and media over the mixnet with reply-route loop guards and bounded reassembly."), c: "#34d399" },
         ].map((x, i) => (
           <div data-reveal data-reveal-delay={String(i + 1)} class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
             <div class="h-1 w-10 rounded-full" style={`background:${x.c}`}></div>
@@ -207,16 +209,16 @@ const txTypes = ["Shielded", "Transparent", "Ethereum", "Escrow", "Stake", "Gove
   <section id="security" class="scroll-mt-32 bg-[color:var(--color-bg-2)]">
     <div class="mx-auto max-w-7xl px-6 py-16">
       <div data-reveal class="max-w-3xl">
-        <div class="text-xs font-semibold uppercase tracking-wider text-[color:var(--color-gold)]">06 · Security</div>
-        <h2 class="mt-2 font-display text-3xl font-extrabold">Audit-gated to mainnet</h2>
-        <p class="mt-3 text-muted">PYRAX is open-core: the protocol, node, and SDK are public. The supply cap is enforced in consensus, the fee split is frozen, and a single external audit of consensus, ZK, and the bridge stands between the code and PYRAX One.</p>
+        <div class="text-xs font-semibold uppercase tracking-wider text-[color:var(--color-gold)]">{t("techPage.securityEyebrow", "06 · Security")}</div>
+        <h2 class="mt-2 font-display text-3xl font-extrabold">{t("techPage.securityTitle", "Audit-gated to mainnet")}</h2>
+        <p class="mt-3 text-muted">{t("techPage.securityLede", "PYRAX is open-core: the protocol, node, and SDK are public. The supply cap is enforced in consensus, the fee split is frozen, and a single external audit of consensus, ZK, and the bridge stands between the code and PYRAX One.")}</p>
       </div>
       <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { n: "Formal invariants", d: "Supply, finality, and nullifier-set invariants asserted in code and tested." },
-          { n: "Documented threat model", d: "51% across three resources, rogue-key defense, DoS bounds, mempool caps." },
-          { n: "External audit gate", d: "Consensus + ZK + bridge audited by an independent firm before mainnet." },
-          { n: "Open-core", d: "Apache-2.0 protocol — verify the claims on this page in the source." },
+          { n: t("techPage.securityCard1Title", "Formal invariants"), d: t("techPage.securityCard1Desc", "Supply, finality, and nullifier-set invariants asserted in code and tested.") },
+          { n: t("techPage.securityCard2Title", "Documented threat model"), d: t("techPage.securityCard2Desc", "51% across three resources, rogue-key defense, DoS bounds, mempool caps.") },
+          { n: t("techPage.securityCard3Title", "External audit gate"), d: t("techPage.securityCard3Desc", "Consensus + ZK + bridge audited by an independent firm before mainnet.") },
+          { n: t("techPage.securityCard4Title", "Open-core"), d: t("techPage.securityCard4Desc", "Apache-2.0 protocol — verify the claims on this page in the source.") },
         ].map((x, i) => (
           <div data-reveal data-reveal-delay={String((i % 4) + 1)} class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
             <div class="flex items-center gap-2 text-[color:var(--color-positive)]"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 7.8 7 9 4-1.2 7-4.5 7-9V6z"/><path d="m9.5 12 1.8 1.8L15 10"/></svg></div>
@@ -226,9 +228,9 @@ const txTypes = ["Shielded", "Transparent", "Ethereum", "Escrow", "Stake", "Gove
         ))}
       </div>
       <div class="mt-10 flex flex-wrap items-center gap-3">
-        <a href={L("/whitepaper")} class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">Read the whitepaper →</a>
-        <a href={L("/network")} class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">The four networks</a>
-        <a href={DOMAINS.explorer} class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">Open the explorer</a>
+        <a href={L("/whitepaper")} class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">{t("techPage.ctaWhitepaper", "Read the whitepaper →")}</a>
+        <a href={L("/network")} class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("techPage.ctaNetworks", "The four networks")}</a>
+        <a href={DOMAINS.explorer} class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("techPage.ctaExplorer", "Open the explorer")}</a>
       </div>
     </div>
   </section>

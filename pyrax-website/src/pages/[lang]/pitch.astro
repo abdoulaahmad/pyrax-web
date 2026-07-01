@@ -8,5 +8,5 @@ const { lang = DEFAULT_LOCALE } = Astro.params;
 if (!isLocale(lang)) return Astro.redirect(`/${DEFAULT_LOCALE}/pitch`, 302);
 ---
 <Site title="Investor Pitch — PYRAX™ Network" description="An interactive, animated investor deck: the problem, the technology, the market, NEURAX, traction, tokenomics, the roadmap, and the ask. Navigate with arrow keys, clicks, or swipe." lang={lang}>
-  <PitchDeck client:load />
+  <PitchDeck client:load lang={lang} />
 </Site>

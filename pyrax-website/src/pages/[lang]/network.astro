@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Site from "../../layouts/Site.astro";
 import { isLocale, DEFAULT_LOCALE, localizePath } from "../../i18n/config";
+import { useT } from "../../i18n";
 import { NETWORKS } from "../../lib/networks";
 import { allNetworkStats } from "../../server/chain";
 import { DOMAINS } from "../../lib/endpoints";
 
 const { lang = DEFAULT_LOCALE } = Astro.params;
 if (!isLocale(lang)) return Astro.redirect(`/${DEFAULT_LOCALE}/network`, 302);
+const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 
 // Live status at request time (honest: unreachable => offline).
@@ -16,18 +18,18 @@ const byChain = new Map(stats.map((s) => [s.chainId, s]));
 const nets = NETWORKS.map((n) => ({ ...n, live: byChain.get(n.chainId) }));
 
 const roles: Record<string, string> = {
-  seed: "Permanent developer sandbox — a byte-identical simulation on real primitives with play-money and a welcome faucet. It never becomes mainnet; it stays a sandbox forever.",
-  forge: "Closed public alpha on the real Production consensus, launched with three seeded genesis validators. The first network where the production path runs for outside testers.",
-  rise: "The official public testnet — incentivized and audit-facing, with a testnet emission ramp. The dress rehearsal for mainnet.",
-  one: "Mainnet. The genesis ceremony is pending the external audit gate — no faucet, no dev keys, real value.",
+  seed: t("networkPage.role1", "Permanent developer sandbox — a byte-identical simulation on real primitives with play-money and a welcome faucet. It never becomes mainnet; it stays a sandbox forever."),
+  forge: t("networkPage.role2", "Closed public alpha on the real Production consensus, launched with three seeded genesis validators. The first network where the production path runs for outside testers."),
+  rise: t("networkPage.role3", "The official public testnet — incentivized and audit-facing, with a testnet emission ramp. The dress rehearsal for mainnet."),
+  one: t("networkPage.role4", "Mainnet. The genesis ceremony is pending the external audit gate — no faucet, no dev keys, real value."),
 };
 
 const roadmap = [
-  { p: "Now", t: "PYRAX Seed is live", d: "A faithful simulation of the full protocol — GhostDAG, shielded pool, multi-VM contracts, NEURAX — running today as a permanent developer sandbox.", done: true },
-  { p: "Next", t: "PYRAX Forge · closed alpha", d: "The production consensus path (real 5-lane TriStream + BLS finality) opens to invited testers with seeded validators.", done: false },
-  { p: "Then", t: "PYRAX Rise · public testnet", d: "Open, incentivized testnet with the emission ramp — the audit-facing rehearsal, load-tested in the open.", done: false },
-  { p: "Gate", t: "External audit", d: "A single independent audit of consensus, the ZK circuits, and the bridge. Nothing reaches mainnet before it clears.", done: false },
-  { p: "Launch", t: "PYRAX One · mainnet", d: "The genesis ceremony, the 50B hard cap enforced in consensus, and real value — after the gate.", done: false },
+  { p: t("networkPage.roadmap1P", "Now"), t: t("networkPage.roadmap1Title", "PYRAX Seed is live"), d: t("networkPage.roadmap1Body", "A faithful simulation of the full protocol — GhostDAG, shielded pool, multi-VM contracts, NEURAX — running today as a permanent developer sandbox."), done: true },
+  { p: t("networkPage.roadmap2P", "Next"), t: t("networkPage.roadmap2Title", "PYRAX Forge · closed alpha"), d: t("networkPage.roadmap2Body", "The production consensus path (real 5-lane TriStream + BLS finality) opens to invited testers with seeded validators."), done: false },
+  { p: t("networkPage.roadmap3P", "Then"), t: t("networkPage.roadmap3Title", "PYRAX Rise · public testnet"), d: t("networkPage.roadmap3Body", "Open, incentivized testnet with the emission ramp — the audit-facing rehearsal, load-tested in the open."), done: false },
+  { p: t("networkPage.roadmap4P", "Gate"), t: t("networkPage.roadmap4Title", "External audit"), d: t("networkPage.roadmap4Body", "A single independent audit of consensus, the ZK circuits, and the bridge. Nothing reaches mainnet before it clears."), done: false },
+  { p: t("networkPage.roadmap5P", "Launch"), t: t("networkPage.roadmap5Title", "PYRAX One · mainnet"), d: t("networkPage.roadmap5Body", "The genesis ceremony, the 50B hard cap enforced in consensus, and real value — after the gate."), done: false },
 ];
 ---
 <Site title="The Four Networks — PYRAX™ Network" description="One binary, four chainspecs: PYRAX Seed (live simulation), Forge (closed alpha), Rise (public testnet), and One (mainnet). Live status, chain IDs, and the audit-gated roadmap to launch." lang={lang}>
@@ -35,9 +37,9 @@ const roadmap = [
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
     <div class="pointer-events-none absolute left-1/2 -top-40 h-[30rem] w-[30rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(245,134,34,0.14),transparent_62%)] blur-3xl"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20 text-center">
-      <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">The network</div>
-      <h1 class="mx-auto mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">One binary, <span class="flame-text">four networks</span></h1>
-      <p class="mx-auto mt-5 max-w-2xl text-lg text-muted">The node ships exactly four chainspecs. Seed is a permanent simulation; Forge, Rise, and One share the real Production consensus, differing only by launch order and audit gating. A production chain-id can never fake instant-seal.</p>
+      <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">{t("networkPage.eyebrow", "The network")}</div>
+      <h1 class="mx-auto mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">{t("networkPage.headingLead", "One binary,")} <span class="flame-text">{t("networkPage.headingFlame", "four networks")}</span></h1>
+      <p class="mx-auto mt-5 max-w-2xl text-lg text-muted">{t("networkPage.subtitle", "The node ships exactly four chainspecs. Seed is a permanent simulation; Forge, Rise, and One share the real Production consensus, differing only by launch order and audit gating. A production chain-id can never fake instant-seal.")}</p>
     </div>
   </section>
 
@@ -59,31 +61,31 @@ const roadmap = [
               </div>
               <span class="flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-[0.68rem] font-semibold" style={online ? "color:#34d399" : "color:#6a7286"}>
                 <span class="h-2 w-2 rounded-full" style={`background:${online ? "#34d399" : "#3a4152"};box-shadow:${online ? "0 0 7px #34d399" : "none"}`}></span>
-                {online ? "Online" : (n.rpc ? "Connecting" : "Not yet live")}
+                {online ? t("networkPage.statusOnline", "Online") : (n.rpc ? t("networkPage.statusConnecting", "Connecting") : t("networkPage.statusNotYetLive", "Not yet live"))}
               </span>
             </div>
             <p class="mt-4 text-sm text-muted">{roles[n.key]}</p>
             {online && (
               <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                <div class="rounded-xl border border-line-soft bg-[color:var(--color-bg-2)] p-3"><div class="font-mono text-base font-bold text-ink">#{Number(n.live?.height || 0).toLocaleString()}</div><div class="text-[0.62rem] text-faint">height</div></div>
-                <div class="rounded-xl border border-line-soft bg-[color:var(--color-bg-2)] p-3"><div class="font-mono text-base font-bold text-ink">{n.live?.peers ?? 0}</div><div class="text-[0.62rem] text-faint">peers</div></div>
-                <div class="rounded-xl border border-line-soft bg-[color:var(--color-bg-2)] p-3"><div class="font-mono text-base font-bold text-ink">{(n.live?.tps ?? 0).toFixed(2)}</div><div class="text-[0.62rem] text-faint">tps now</div></div>
+                <div class="rounded-xl border border-line-soft bg-[color:var(--color-bg-2)] p-3"><div class="font-mono text-base font-bold text-ink">#{Number(n.live?.height || 0).toLocaleString()}</div><div class="text-[0.62rem] text-faint">{t("networkPage.statHeight", "height")}</div></div>
+                <div class="rounded-xl border border-line-soft bg-[color:var(--color-bg-2)] p-3"><div class="font-mono text-base font-bold text-ink">{n.live?.peers ?? 0}</div><div class="text-[0.62rem] text-faint">{t("networkPage.statPeers", "peers")}</div></div>
+                <div class="rounded-xl border border-line-soft bg-[color:var(--color-bg-2)] p-3"><div class="font-mono text-base font-bold text-ink">{(n.live?.tps ?? 0).toFixed(2)}</div><div class="text-[0.62rem] text-faint">{t("networkPage.statTpsNow", "tps now")}</div></div>
               </div>
             )}
           </div>
         );
       })}
     </div>
-    <p class="mt-4 text-center text-xs text-faint">Live figures are read from each network's public RPC at page load. A network that isn't reachable shows honest status — never fabricated numbers.</p>
+    <p class="mt-4 text-center text-xs text-faint">{t("networkPage.liveFiguresCaption", "Live figures are read from each network's public RPC at page load. A network that isn't reachable shows honest status — never fabricated numbers.")}</p>
   </section>
 
   <!-- ROADMAP -->
   <section id="roadmap" class="scroll-mt-32 border-y border-line bg-[color:var(--color-bg-2)]">
     <div class="mx-auto max-w-4xl px-6 py-16">
       <div data-reveal class="text-center">
-        <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">Roadmap</div>
-        <h2 class="mt-2 font-display text-3xl font-extrabold sm:text-4xl">The path to mainnet</h2>
-        <p class="mx-auto mt-3 max-w-2xl text-muted">Deliberate and audit-gated. Each network de-risks the next; nothing carrying real value ships before the external audit clears.</p>
+        <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">{t("networkPage.roadmapEyebrow", "Roadmap")}</div>
+        <h2 class="mt-2 font-display text-3xl font-extrabold sm:text-4xl">{t("networkPage.roadmapHeading", "The path to mainnet")}</h2>
+        <p class="mx-auto mt-3 max-w-2xl text-muted">{t("networkPage.roadmapSubtitle", "Deliberate and audit-gated. Each network de-risks the next; nothing carrying real value ships before the external audit clears.")}</p>
       </div>
       <div class="relative mt-10 pl-8">
         <div class="absolute left-[11px] top-2 bottom-2 w-px bg-[color:var(--color-line)]"></div>
@@ -106,9 +108,9 @@ const roadmap = [
 
   <section class="mx-auto max-w-7xl px-6 py-16 text-center">
     <div class="flex flex-wrap items-center justify-center gap-3">
-      <a href={DOMAINS.explorer} class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">Explore Seed live →</a>
-      <a href={DOMAINS.nodes} class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">Run a node</a>
-      <a href={L("/technology")} class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">How it works</a>
+      <a href={DOMAINS.explorer} class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">{t("networkPage.ctaExplore", "Explore Seed live →")}</a>
+      <a href={DOMAINS.nodes} class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("networkPage.ctaRunNode", "Run a node")}</a>
+      <a href={L("/technology")} class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("networkPage.ctaHowItWorks", "How it works")}</a>
     </div>
   </section>
 </Site>

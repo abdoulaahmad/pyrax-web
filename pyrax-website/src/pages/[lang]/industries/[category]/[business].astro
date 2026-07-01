@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Site from "../../../../layouts/Site.astro";
 import { isLocale, DEFAULT_LOCALE, localizePath } from "../../../../i18n/config";
+import { useT } from "../../../../i18n";
 import { categoryBySlug, businessBySlug } from "../../../../lib/industries";
 import { contentFor } from "../../../../lib/industry-content";
 import { DOMAINS } from "../../../../lib/endpoints";
@@ -11,6 +12,7 @@ if (!isLocale(lang)) return Astro.redirect(`/${DEFAULT_LOCALE}/industries`, 302)
 const cat = categoryBySlug(category);
 const biz = businessBySlug(category, business);
 if (!cat || !biz) return Astro.redirect(`/${lang}/industries`, 302);
+const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 const c = contentFor(category, business);
 const idx = cat.businesses.findIndex((b) => b.slug === business);
@@ -23,16 +25,16 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
     <div class="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full blur-3xl" style={`background:radial-gradient(circle,${cat.color}22,transparent 62%)`}></div>
     <div class="mx-auto max-w-5xl px-6 py-16">
       <div class="flex flex-wrap items-center gap-2 text-sm text-muted">
-        <a href={L("/industries")} class="hover:text-ink">Industries</a><span class="text-faint">/</span>
+        <a href={L("/industries")} class="hover:text-ink">{t("industriesUi.breadcrumbIndustries", "Industries")}</a><span class="text-faint">/</span>
         <a href={L(`/industries/${cat.slug}`)} class="hover:text-ink" style={`color:${cat.color}`}>{cat.name}</a><span class="text-faint">/</span>
         <span class="text-ink">{biz.name}</span>
       </div>
-      <h1 class="mt-4 font-display text-4xl font-extrabold sm:text-5xl">{biz.name} <span class="text-faint">on PYRAX</span></h1>
+      <h1 class="mt-4 font-display text-4xl font-extrabold sm:text-5xl">{biz.name} <span class="text-faint">{t("industriesUi.onPyrax", "on PYRAX")}</span></h1>
       <p class="mt-4 max-w-3xl text-lg text-muted">{c?.overview ?? biz.hook}</p>
       {c && (
         <div class="mt-6 flex flex-wrap gap-3">
-          <div class="rounded-2xl border border-line bg-[color:var(--color-surface)] px-4 py-3"><div class="text-[0.62rem] uppercase tracking-wider text-faint">Market size</div><div class="mt-0.5 font-mono text-lg font-extrabold flame-text">{c.marketSize}</div></div>
-          <div class="rounded-2xl border border-line bg-[color:var(--color-surface)] px-4 py-3"><div class="text-[0.62rem] uppercase tracking-wider text-faint">Projection</div><div class="mt-0.5 font-mono text-lg font-extrabold text-[color:var(--color-positive)]">{c.projection}</div></div>
+          <div class="rounded-2xl border border-line bg-[color:var(--color-surface)] px-4 py-3"><div class="text-[0.62rem] uppercase tracking-wider text-faint">{t("industriesUi.marketSizeLabel", "Market size")}</div><div class="mt-0.5 font-mono text-lg font-extrabold flame-text">{c.marketSize}</div></div>
+          <div class="rounded-2xl border border-line bg-[color:var(--color-surface)] px-4 py-3"><div class="text-[0.62rem] uppercase tracking-wider text-faint">{t("industriesUi.projectionLabel", "Projection")}</div><div class="mt-0.5 font-mono text-lg font-extrabold text-[color:var(--color-positive)]">{c.projection}</div></div>
         </div>
       )}
     </div>
@@ -42,7 +44,7 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
     <div class="mx-auto max-w-5xl px-6 py-14">
       <!-- market -->
       <section>
-        <h2 class="font-display text-2xl font-extrabold">The market</h2>
+        <h2 class="font-display text-2xl font-extrabold">{t("industriesUi.theMarket", "The market")}</h2>
         <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {c.stats.map((s) => (
             <div class="rounded-2xl border border-line bg-[color:var(--color-surface)] p-5">
@@ -51,12 +53,12 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
             </div>
           ))}
         </div>
-        <p class="mt-3 text-xs text-faint">Source: {c.source}. Figures are indicative and provided for context.</p>
+        <p class="mt-3 text-xs text-faint">{t("industriesUi.sourcePrefix", "Source:")} {c.source}. {t("industriesUi.figuresNote", "Figures are indicative and provided for context.")}</p>
       </section>
 
       <!-- pain points -->
       <section class="mt-12">
-        <h2 class="font-display text-2xl font-extrabold">What's broken today</h2>
+        <h2 class="font-display text-2xl font-extrabold">{t("industriesUi.whatsBroken", "What's broken today")}</h2>
         <div class="mt-5 grid gap-3 sm:grid-cols-2">
           {c.painPoints.map((p) => (
             <div class="flex gap-3 rounded-2xl border border-line bg-[color:var(--color-surface)] p-4">
@@ -69,8 +71,8 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
 
       <!-- PYRAX solutions -->
       <section class="mt-12">
-        <h2 class="font-display text-2xl font-extrabold">How PYRAX transforms it</h2>
-        <p class="mt-1 text-muted">Concrete network elements mapped to this business.</p>
+        <h2 class="font-display text-2xl font-extrabold">{t("industriesUi.howPyraxTransforms", "How PYRAX transforms it")}</h2>
+        <p class="mt-1 text-muted">{t("industriesUi.solutionsSubtitle", "Concrete network elements mapped to this business.")}</p>
         <div class="mt-5 grid gap-3 md:grid-cols-2">
           {c.solutions.map((s) => (
             <div class="rounded-2xl border border-line bg-[color:var(--color-surface)] p-5">
@@ -84,8 +86,8 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
       <!-- dApp ideas / buildathon -->
       <section class="mt-12">
         <div class="flex items-end justify-between">
-          <div><h2 class="font-display text-2xl font-extrabold">Buildathon: dApp ideas</h2><p class="mt-1 text-muted">Ship-ready concepts for {biz.name.toLowerCase()} on PYRAX.</p></div>
-          <a href={DOMAINS.explorer} class="hidden shrink-0 rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a] sm:inline">Start building →</a>
+          <div><h2 class="font-display text-2xl font-extrabold">{t("industriesUi.buildathonTitle", "Buildathon: dApp ideas")}</h2><p class="mt-1 text-muted">{t("industriesUi.buildathonSubtitlePrefix", "Ship-ready concepts for ")}{biz.name.toLowerCase()}{t("industriesUi.buildathonSubtitleSuffix", " on PYRAX.")}</p></div>
+          <a href={DOMAINS.explorer} class="hidden shrink-0 rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a] sm:inline">{t("industriesUi.startBuilding", "Start building →")}</a>
         </div>
         <div class="mt-5 grid gap-3 sm:grid-cols-2">
           {c.dapps.map((d, i) => (
@@ -104,9 +106,9 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
   ) : (
     <div class="mx-auto max-w-3xl px-6 py-20 text-center">
       <div class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-10">
-        <h2 class="font-display text-2xl font-extrabold">Detailed brief in progress</h2>
-        <p class="mt-3 text-muted">{biz.hook} The full market analysis, PYRAX integration map, and buildathon dApp ideas for <span class="text-ink">{biz.name}</span> are being finalized.</p>
-        <a href={L(`/industries/${cat.slug}`)} class="mt-6 inline-flex rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">Back to {cat.name} →</a>
+        <h2 class="font-display text-2xl font-extrabold">{t("industriesUi.briefInProgress", "Detailed brief in progress")}</h2>
+        <p class="mt-3 text-muted">{biz.hook}{t("industriesUi.briefBodyPrefix", " The full market analysis, PYRAX integration map, and buildathon dApp ideas for ")}<span class="text-ink">{biz.name}</span>{t("industriesUi.briefBodySuffix", " are being finalized.")}</p>
+        <a href={L(`/industries/${cat.slug}`)} class="mt-6 inline-flex rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("industriesUi.backToPrefix", "Back to ")}{cat.name}{t("industriesUi.backToSuffix", " →")}</a>
       </div>
     </div>
   )}
@@ -115,7 +117,7 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
   <div class="mx-auto max-w-5xl px-6 pb-16">
     <div class="flex items-center justify-between gap-3 border-t border-line pt-6">
       <a href={L(`/industries/${cat.slug}/${prev.slug}`)} class="rounded-full border border-line px-4 py-2 text-sm text-muted transition hover:text-ink">← {prev.name}</a>
-      <a href={L(`/industries/${cat.slug}`)} class="text-sm text-faint hover:text-ink">All {cat.name}</a>
+      <a href={L(`/industries/${cat.slug}`)} class="text-sm text-faint hover:text-ink">{t("industriesUi.allCategoryPrefix", "All ")}{cat.name}</a>
       <a href={L(`/industries/${cat.slug}/${next.slug}`)} class="rounded-full border border-line px-4 py-2 text-sm text-muted transition hover:text-ink">{next.name} →</a>
     </div>
   </div>

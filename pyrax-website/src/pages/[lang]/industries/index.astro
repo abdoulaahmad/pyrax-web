@@ -14,9 +14,9 @@ const L = (p: string) => localizePath(lang, p);
   <section class="relative overflow-hidden border-b border-line">
     <div class="pointer-events-none absolute -left-40 -top-40 h-96 w-96 rounded-full bg-[radial-gradient(circle,rgba(245,134,34,0.16),transparent_62%)] blur-3xl"></div>
     <div class="mx-auto max-w-7xl px-6 py-20 text-center">
-      <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">Industries</div>
-      <h1 class="mx-auto mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">PYRAX blockchain solutions for <span class="flame-text">every industry</span></h1>
-      <p class="mx-auto mt-5 max-w-2xl text-lg text-muted">{CATEGORIES.length} categories · {TOTAL_INDUSTRIES} business types. Each with current market projections, concrete PYRAX integrations, and buildathon-ready dApp ideas.</p>
+      <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">{t("industriesUi.eyebrow", "Industries")}</div>
+      <h1 class="mx-auto mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">{t("industriesUi.h1Lead", "PYRAX blockchain solutions for ")}<span class="flame-text">{t("industriesUi.h1Highlight", "every industry")}</span></h1>
+      <p class="mx-auto mt-5 max-w-2xl text-lg text-muted">{CATEGORIES.length} {t("industriesUi.subtitleCategories", "categories")} · {TOTAL_INDUSTRIES} {t("industriesUi.subtitleBusinessTypes", "business types.")}{t("industriesUi.subtitleTail", " Each with current market projections, concrete PYRAX integrations, and buildathon-ready dApp ideas.")}</p>
     </div>
   </section>
 
@@ -32,7 +32,7 @@ const L = (p: string) => localizePath(lang, p);
                 <p class="text-sm text-muted">{c.blurb}</p>
               </div>
             </div>
-            <a href={L(`/industries/${c.slug}`)} class="shrink-0 rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">All 10 →</a>
+            <a href={L(`/industries/${c.slug}`)} class="shrink-0 rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("industriesUi.allTen", "All 10 →")}</a>
           </div>
           <div class="grid gap-1 p-3 sm:grid-cols-2 lg:grid-cols-5">
             {c.businesses.map((b) => (

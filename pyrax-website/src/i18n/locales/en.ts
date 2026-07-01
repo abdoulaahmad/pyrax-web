@@ -2,7 +2,32 @@
 //
 // English — the source-of-truth dictionary. Every other locale is a Partial<Dict> that falls back to
 // these strings key-by-key. Keep keys stable; translate values in the sibling locale files.
+import { tokenPage } from "../en-parts/tokenPage";
+import { networkPage } from "../en-parts/networkPage";
+import { pitch } from "../en-parts/pitch";
+import { homeExtra } from "../en-parts/homeExtra";
+import { navPanels } from "../en-parts/navPanels";
+import { industriesUi } from "../en-parts/industriesUi";
+import { companyPage } from "../en-parts/companyPage";
+import { wpPage } from "../en-parts/wpPage";
+import { notFound } from "../en-parts/notFound";
+import { techPage } from "../en-parts/techPage";
+import { devPage } from "../en-parts/devPage";
+import { tokData } from "../en-parts/tokData";
+
 export const en = {
+  tokenPage,
+  networkPage,
+  pitch,
+  homeExtra,
+  navPanels,
+  industriesUi,
+  companyPage,
+  wpPage,
+  notFound,
+  techPage,
+  devPage,
+  tokData,
   meta: {
     titleSuffix: "PYRAX™ Network",
     description: "PYRAX is a from-scratch Layer-1: a GhostDAG blockDAG, private by default, fully decentralized, ISP-resistant — with a verifiable AI compute marketplace. 500,000+ TPS target.",

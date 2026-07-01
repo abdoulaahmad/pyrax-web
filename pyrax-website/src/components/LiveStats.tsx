@@ -5,6 +5,7 @@
 // a grey dot + em-dashes and lights up the instant its RPC is reachable. Polls /api/net every ~4s.
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useT } from "../i18n";
 
 const TARGET_TPS = 500_000;
 const fmtInt = (n: number) => Math.round(n).toLocaleString("en-US");
@@ -30,7 +31,8 @@ function useCountUp(target: number) {
 
 interface NetRow { chainId: number; name: string; short: string; mode: string; color: string; online: boolean; height?: number; peers?: number; tps?: number; finalized?: number }
 
-export default function LiveStats({ compact = false }: { compact?: boolean }) {
+export default function LiveStats({ compact = false, lang = "en" }: { compact?: boolean; lang?: string }) {
+  const t = useT(lang);
   const [sel, setSel] = useState<NetRow | null>(null);
   const [selectedChain, setSelectedChain] = useState<number | null>(null);
 
@@ -53,10 +55,10 @@ export default function LiveStats({ compact = false }: { compact?: boolean }) {
   const tpsColor = !online || tps < 1 ? "var(--color-muted)" : tps < TARGET_TPS * 0.5 ? "var(--color-negative)" : tps < TARGET_TPS ? "var(--color-warning)" : "var(--color-positive)";
 
   const cells = [
-    { label: "Block height", value: online ? "#" + fmtInt(height) : "—", sub: online ? `blue score ${fmtInt(sel?.finalized ?? 0)} final` : "offline" },
-    { label: "Connected peers", value: online ? fmtInt(sel?.peers ?? 0) : "—", sub: online ? "P2P mesh" : "" },
-    { label: "Live TPS", value: online ? fmtTps(tps) : "—", sub: `target ${fmtTps(TARGET_TPS)}`, color: tpsColor },
-    { label: "Finality", value: online ? "BLS BFT" : "—", sub: "Stream C · >2/3 stake" },
+    { label: t("homeExtra.labelBlockHeight", "Block height"), value: online ? "#" + fmtInt(height) : "—", sub: online ? `${t("homeExtra.subBlueScore", "blue score")} ${fmtInt(sel?.finalized ?? 0)} ${t("homeExtra.subFinal", "final")}` : t("homeExtra.subOffline", "offline") },
+    { label: t("homeExtra.labelConnectedPeers", "Connected peers"), value: online ? fmtInt(sel?.peers ?? 0) : "—", sub: online ? t("homeExtra.subP2pMesh", "P2P mesh") : "" },
+    { label: t("homeExtra.labelLiveTps", "Live TPS"), value: online ? fmtTps(tps) : "—", sub: `${t("homeExtra.subTarget", "target")} ${fmtTps(TARGET_TPS)}`, color: tpsColor },
+    { label: t("homeExtra.labelFinality", "Finality"), value: online ? "BLS BFT" : "—", sub: t("homeExtra.subStreamC", "Stream C · >2/3 stake") },
   ];
 
   return (
@@ -67,7 +69,7 @@ export default function LiveStats({ compact = false }: { compact?: boolean }) {
           <span className="text-ink">{sel?.name || "PYRAX Seed"}</span>
           <span className="rounded px-1.5 py-0.5 text-[0.6rem] font-bold uppercase" style={{ color: sel?.color || "#60b8cc", background: `${sel?.color || "#60b8cc"}1a` }}>{sel?.mode || "Simulated"}</span>
         </div>
-        <span className="text-[0.65rem] uppercase tracking-wider text-faint">{online ? "live" : "awaiting RPC"}</span>
+        <span className="text-[0.65rem] uppercase tracking-wider text-faint">{online ? t("homeExtra.statusLive", "live") : t("homeExtra.statusAwaitingRpc", "awaiting RPC")}</span>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {cells.map((c, i) => (

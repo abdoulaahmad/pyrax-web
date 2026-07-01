@@ -2,19 +2,21 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Site from "../../../layouts/Site.astro";
 import { isLocale, DEFAULT_LOCALE, localizePath } from "../../../i18n/config";
+import { useT } from "../../../i18n";
 import { categoryBySlug } from "../../../lib/industries";
 
 const { lang = DEFAULT_LOCALE, category = "" } = Astro.params;
 if (!isLocale(lang)) return Astro.redirect(`/${DEFAULT_LOCALE}/industries`, 302);
 const cat = categoryBySlug(category);
 if (!cat) return Astro.redirect(`/${lang}/industries`, 302);
+const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 ---
 <Site title={`${cat.name} — PYRAX Blockchain Solutions | PYRAX™ Network`} description={cat.blurb} lang={lang}>
   <section class="relative overflow-hidden border-b border-line">
     <div class="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full blur-3xl" style={`background:radial-gradient(circle,${cat.color}22,transparent 62%)`}></div>
     <div class="mx-auto max-w-7xl px-6 py-16">
-      <a href={L("/industries")} class="text-sm text-muted hover:text-ink">← All industries</a>
+      <a href={L("/industries")} class="text-sm text-muted hover:text-ink">{t("industriesUi.allIndustries", "← All industries")}</a>
       <div class="mt-5 flex items-center gap-4">
         <span class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl" style={`background:linear-gradient(135deg,${cat.color},${cat.color}44)`}></span>
         <div>
@@ -36,7 +38,7 @@ const L = (p: string) => localizePath(lang, p);
           </div>
           <h3 class="mt-3 text-lg font-bold group-hover:text-[color:var(--color-brand)]">{b.name}</h3>
           <p class="mt-2 flex-1 text-sm text-muted">{b.hook}</p>
-          <span class="mt-4 inline-flex text-sm font-semibold text-[color:var(--color-brand)]">Financials · integrations · dApps →</span>
+          <span class="mt-4 inline-flex text-sm font-semibold text-[color:var(--color-brand)]">{t("industriesUi.cardCta", "Financials · integrations · dApps →")}</span>
         </a>
       ))}
     </div>

@@ -228,10 +228,10 @@ const featTone = "rounded-2xl border border-line bg-[radial-gradient(120%_120%_a
 
 function ProductsPanel({ t, L }: any) {
   const items = [
-    { icon: "explorer", name: t("nav.explorer"), desc: "GhostDAG blocks, shielded pool, multi-VM contracts.", href: DOMAINS.explorer, ext: true },
-    { icon: "node", name: t("nav.nodes"), desc: "Run an Inferno node, join the mesh, earn rewards.", href: DOMAINS.nodes, ext: true },
-    { icon: "flask", name: t("nav.devnet"), desc: "The closed-alpha tester portal for PYRAX Forge.", href: DOMAINS.devnet, ext: true },
-    { icon: "wallet", name: t("nav.wallet"), desc: "Shielded + transparent, keys never leave your device.", href: L("/technology"), ext: false },
+    { icon: "explorer", name: t("nav.explorer"), desc: t("navPanels.productsExplorerDesc", "GhostDAG blocks, shielded pool, multi-VM contracts."), href: DOMAINS.explorer, ext: true },
+    { icon: "node", name: t("nav.nodes"), desc: t("navPanels.productsNodesDesc", "Run an Inferno node, join the mesh, earn rewards."), href: DOMAINS.nodes, ext: true },
+    { icon: "flask", name: t("nav.devnet"), desc: t("navPanels.productsDevnetDesc", "The closed-alpha tester portal for PYRAX Forge."), href: DOMAINS.devnet, ext: true },
+    { icon: "wallet", name: t("nav.wallet"), desc: t("navPanels.productsWalletDesc", "Shielded + transparent, keys never leave your device."), href: L("/technology"), ext: false },
   ];
   return (
     <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
@@ -244,8 +244,8 @@ function ProductsPanel({ t, L }: any) {
         ))}
       </div>
       <a href={L("/network")} className={`${featTone} flex flex-col justify-between`}>
-        <div><div className="text-xs font-semibold uppercase tracking-wider text-[color:var(--color-brand)]">Network</div><div className="mt-2 font-display text-xl font-extrabold">One binary, four networks</div><p className="mt-1.5 text-sm text-muted">Seed, Forge, Rise, and One — a faithful simulation on real primitives, gated to mainnet by external audit.</p></div>
-        <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--color-brand)]">Explore the network →</span>
+        <div><div className="text-xs font-semibold uppercase tracking-wider text-[color:var(--color-brand)]">{t("navPanels.productsFeatureEyebrow", "Network")}</div><div className="mt-2 font-display text-xl font-extrabold">{t("navPanels.productsFeatureTitle", "One binary, four networks")}</div><p className="mt-1.5 text-sm text-muted">{t("navPanels.productsFeatureBody", "Seed, Forge, Rise, and One — a faithful simulation on real primitives, gated to mainnet by external audit.")}</p></div>
+        <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--color-brand)]">{t("navPanels.productsFeatureLink", "Explore the network →")}</span>
       </a>
     </div>
   );
@@ -255,7 +255,7 @@ function IndustriesPanel({ t, L }: any) {
   return (
     <div>
       <div className="mb-4 flex items-end justify-between">
-        <div><div className="font-display text-lg font-extrabold">PYRAX for every industry</div><p className="text-sm text-muted">10 categories · 100 business types · projections + buildathon dApp ideas.</p></div>
+        <div><div className="font-display text-lg font-extrabold">{t("navPanels.industriesTitle", "PYRAX for every industry")}</div><p className="text-sm text-muted">{t("navPanels.industriesBody", "10 categories · 100 business types · projections + buildathon dApp ideas.")}</p></div>
         <a href={L("/industries")} className="hidden shrink-0 text-sm font-semibold text-[color:var(--color-brand)] sm:inline">{t("nav.exploreIndustries")} →</a>
       </div>
       <div className="grid grid-cols-2 gap-1.5 md:grid-cols-5">
@@ -271,14 +271,14 @@ function IndustriesPanel({ t, L }: any) {
   );
 }
 
-function TechnologyPanel({ L }: any) {
+function TechnologyPanel({ t, L }: any) {
   const items = [
-    { icon: "layers", name: "GhostDAG + TriStream", desc: "A blockDAG ordered by GhostDAG; three streams, five seal lanes.", href: L("/technology#consensus") },
-    { icon: "lock", name: "Private by default", desc: "Shielded transfers with no-trusted-setup ZK proofs.", href: L("/technology#privacy") },
-    { icon: "chip", name: "Multi-VM (EVM/WASM/Cairo)", desc: "Three virtual machines, cross-VM calls, one chain.", href: L("/technology#vms") },
-    { icon: "chip", name: "NEURAX compute market", desc: "Verifiable, on-chain-settled AI & GPU compute.", href: L("/technology#neurax") },
-    { icon: "shield", name: "Security & audits", desc: "Formal invariants, threat model, external audit gate.", href: L("/technology#security") },
-    { icon: "book", name: "Whitepaper v4", desc: "The full technical + plain-English papers.", href: L("/whitepaper") },
+    { icon: "layers", name: t("navPanels.techConsensusName", "GhostDAG + TriStream"), desc: t("navPanels.techConsensusDesc", "A blockDAG ordered by GhostDAG; three streams, five seal lanes."), href: L("/technology#consensus") },
+    { icon: "lock", name: t("navPanels.techPrivacyName", "Private by default"), desc: t("navPanels.techPrivacyDesc", "Shielded transfers with no-trusted-setup ZK proofs."), href: L("/technology#privacy") },
+    { icon: "chip", name: t("navPanels.techVmsName", "Multi-VM (EVM/WASM/Cairo)"), desc: t("navPanels.techVmsDesc", "Three virtual machines, cross-VM calls, one chain."), href: L("/technology#vms") },
+    { icon: "chip", name: t("navPanels.techNeuraxName", "NEURAX compute market"), desc: t("navPanels.techNeuraxDesc", "Verifiable, on-chain-settled AI & GPU compute."), href: L("/technology#neurax") },
+    { icon: "shield", name: t("navPanels.techSecurityName", "Security & audits"), desc: t("navPanels.techSecurityDesc", "Formal invariants, threat model, external audit gate."), href: L("/technology#security") },
+    { icon: "book", name: t("navPanels.techWhitepaperName", "Whitepaper v4"), desc: t("navPanels.techWhitepaperDesc", "The full technical + plain-English papers."), href: L("/whitepaper") },
   ];
   return (
     <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -294,10 +294,10 @@ function TechnologyPanel({ L }: any) {
 
 function DevelopersPanel({ t, L }: any) {
   const items = [
-    { icon: "book", name: t("nav.docs"), desc: "Guides, RPC reference, SDK.", href: L("/developers") },
-    { icon: "book", name: t("nav.whitepaper"), desc: "Technical + plain-English v4.", href: L("/whitepaper") },
-    { icon: "chip", name: "GitHub", desc: "Apache-2.0 protocol, node & SDK.", href: SOCIAL.github, ext: true },
-    { icon: "coin", name: t("nav.token"), desc: "Tokenomics: 50B cap, emissions, fees.", href: L("/token") },
+    { icon: "book", name: t("nav.docs"), desc: t("navPanels.devDocsDesc", "Guides, RPC reference, SDK."), href: L("/developers") },
+    { icon: "book", name: t("nav.whitepaper"), desc: t("navPanels.devWhitepaperDesc", "Technical + plain-English v4."), href: L("/whitepaper") },
+    { icon: "chip", name: "GitHub", desc: t("navPanels.devGithubDesc", "Apache-2.0 protocol, node & SDK."), href: SOCIAL.github, ext: true },
+    { icon: "coin", name: t("nav.token"), desc: t("navPanels.devTokenDesc", "Tokenomics: 50B cap, emissions, fees."), href: L("/token") },
   ];
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
@@ -310,8 +310,8 @@ function DevelopersPanel({ t, L }: any) {
         ))}
       </div>
       <a href={L("/pitch")} className={`${featTone} flex flex-col justify-between`}>
-        <div><div className="text-xs font-semibold uppercase tracking-wider text-[color:var(--color-brand)]">Investors</div><div className="mt-2 font-display text-xl font-extrabold">See the pitch</div><p className="mt-1.5 text-sm text-muted">An interactive, animated investor deck — the vision, the tech, the tokenomics, the ask.</p></div>
-        <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--color-brand)]">Open the deck →</span>
+        <div><div className="text-xs font-semibold uppercase tracking-wider text-[color:var(--color-brand)]">{t("navPanels.devFeatureEyebrow", "Investors")}</div><div className="mt-2 font-display text-xl font-extrabold">{t("navPanels.devFeatureTitle", "See the pitch")}</div><p className="mt-1.5 text-sm text-muted">{t("navPanels.devFeatureBody", "An interactive, animated investor deck — the vision, the tech, the tokenomics, the ask.")}</p></div>
+        <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--color-brand)]">{t("navPanels.devFeatureLink", "Open the deck →")}</span>
       </a>
     </div>
   );

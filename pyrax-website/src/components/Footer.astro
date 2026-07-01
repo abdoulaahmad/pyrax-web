@@ -20,7 +20,7 @@ const cols = [
   { title: t("nav.industries"), links: CATEGORIES.slice(0, 5).map((c) => ({ label: c.name, href: L(`/industries/${c.slug}`) })).concat([{ label: t("nav.viewAll"), href: L("/industries") }]) },
   { title: t("nav.company"), links: [
     { label: t("nav.company"), href: L("/company") }, { label: t("nav.pitch"), href: L("/pitch") },
-    { label: "Roadmap", href: L("/network#roadmap") }, { label: "Security", href: L("/technology#security") },
+    { label: t("navPanels.footerRoadmap", "Roadmap"), href: L("/network#roadmap") }, { label: t("navPanels.footerSecurity", "Security"), href: L("/technology#security") },
   ] },
 ];
 const socials = [

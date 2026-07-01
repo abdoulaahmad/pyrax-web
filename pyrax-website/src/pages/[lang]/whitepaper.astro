@@ -2,24 +2,26 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Site from "../../layouts/Site.astro";
 import { isLocale, DEFAULT_LOCALE, localizePath } from "../../i18n/config";
+import { useT } from "../../i18n";
 
 const { lang = DEFAULT_LOCALE } = Astro.params;
 if (!isLocale(lang)) return Astro.redirect(`/${DEFAULT_LOCALE}/whitepaper`, 302);
+const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 
 const TECH = "/whitepaper/pyrax-whitepaper-v4-technical.md";
 const PLAIN = "/whitepaper/pyrax-whitepaper-v4-plain-english.md";
 
 const northStars = [
-  { n: "01", t: "DAG, not a chain", d: "A multi-parent blockDAG ordered by GhostDAG — honest parallel work is included, not orphaned.", c: "#f58722" },
-  { n: "02", t: "Privacy by default", d: "The default transaction hides sender, receiver, and amount with no-trusted-setup zk-SNARKs. Transparent is the exception.", c: "#7c5cff" },
-  { n: "03", t: "No boot node", d: "Peer discovery is bootstrapless — mDNS, Kademlia, peer exchange, and a signed seed list. No project server to join.", c: "#34d399" },
-  { n: "04", t: "ISP-resistance", d: "Traffic and services ride an onion Sphinx mixnet with fixed-size packets — an observer sees only uniform encrypted flows.", c: "#60b8cc" },
-  { n: "05", t: "Open & verifiable", d: "The protocol, consensus, ZK circuits, CLI, and SDK are Apache-2.0. A chain with secret rules is not trustless.", c: "#fcd03d" },
+  { n: "01", t: t("wpPage.northStar1Title", "DAG, not a chain"), d: t("wpPage.northStar1Desc", "A multi-parent blockDAG ordered by GhostDAG — honest parallel work is included, not orphaned."), c: "#f58722" },
+  { n: "02", t: t("wpPage.northStar2Title", "Privacy by default"), d: t("wpPage.northStar2Desc", "The default transaction hides sender, receiver, and amount with no-trusted-setup zk-SNARKs. Transparent is the exception."), c: "#7c5cff" },
+  { n: "03", t: t("wpPage.northStar3Title", "No boot node"), d: t("wpPage.northStar3Desc", "Peer discovery is bootstrapless — mDNS, Kademlia, peer exchange, and a signed seed list. No project server to join."), c: "#34d399" },
+  { n: "04", t: t("wpPage.northStar4Title", "ISP-resistance"), d: t("wpPage.northStar4Desc", "Traffic and services ride an onion Sphinx mixnet with fixed-size packets — an observer sees only uniform encrypted flows."), c: "#60b8cc" },
+  { n: "05", t: t("wpPage.northStar5Title", "Open & verifiable"), d: t("wpPage.northStar5Desc", "The protocol, consensus, ZK circuits, CLI, and SDK are Apache-2.0. A chain with secret rules is not trustless."), c: "#fcd03d" },
 ];
 
 const toc = [
-  "Design Goals — Five North Stars", "Architecture Overview", "Performance & Scalability", "Consensus: GhostDAG + TriStream + BLS PoS", "Privacy: Shielded by Default", "Execution: Multi-VM L2", "L3 — Recursive ZK Rollup", "Networking: Bootstrapless", "Metadata Privacy & Anonymous Services", "State, Storage & Proofs", "NEURAX — Verifiable Compute", "Crucible — Zero-Fee Mining", "NOVA — Autonomous Operations", "Tokenomics", "Governance & the DAO", "The Four Networks", "Wallet, Apps, CLI & SDK", "RPC Surface", "Cryptographic Primitives",
+  t("wpPage.toc1", "Design Goals — Five North Stars"), t("wpPage.toc2", "Architecture Overview"), t("wpPage.toc3", "Performance & Scalability"), t("wpPage.toc4", "Consensus: GhostDAG + TriStream + BLS PoS"), t("wpPage.toc5", "Privacy: Shielded by Default"), t("wpPage.toc6", "Execution: Multi-VM L2"), t("wpPage.toc7", "L3 — Recursive ZK Rollup"), t("wpPage.toc8", "Networking: Bootstrapless"), t("wpPage.toc9", "Metadata Privacy & Anonymous Services"), t("wpPage.toc10", "State, Storage & Proofs"), t("wpPage.toc11", "NEURAX — Verifiable Compute"), t("wpPage.toc12", "Crucible — Zero-Fee Mining"), t("wpPage.toc13", "NOVA — Autonomous Operations"), t("wpPage.toc14", "Tokenomics"), t("wpPage.toc15", "Governance & the DAO"), t("wpPage.toc16", "The Four Networks"), t("wpPage.toc17", "Wallet, Apps, CLI & SDK"), t("wpPage.toc18", "RPC Surface"), t("wpPage.toc19", "Cryptographic Primitives"),
 ];
 ---
 <Site title="Whitepaper v4 — PYRAX™ Network" description="The PYRAX v4 whitepaper: a from-scratch Rust Layer-1 with a GhostDAG blockDAG, TriStream consensus, BLS proof-of-stake finality, shielded-by-default privacy, a multi-VM execution layer, and the NEURAX compute market. Technical and plain-English editions." lang={lang}>
@@ -27,12 +29,12 @@ const toc = [
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
     <div class="pointer-events-none absolute right-0 -top-40 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(245,134,34,0.16),transparent_60%)] blur-3xl"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20">
-      <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">Whitepaper <span class="rounded-full border border-line px-2 py-0.5 text-faint">v4</span></div>
-      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">A system that is <span class="flame-text">built</span>, not merely designed</h1>
-      <p class="mt-5 max-w-3xl text-lg text-muted">v4 specifies PYRAX as it is implemented today — one binary across four chainspecs, a faithful simulation on real primitives, with the production consensus path wired end-to-end and honest about what remains gated behind external audit.</p>
+      <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">{t("wpPage.eyebrow", "Whitepaper")} <span class="rounded-full border border-line px-2 py-0.5 text-faint">{t("wpPage.eyebrowVersion", "v4")}</span></div>
+      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">{t("wpPage.headingPre", "A system that is ")}<span class="flame-text">{t("wpPage.headingWord", "built")}</span>{t("wpPage.headingPost", ", not merely designed")}</h1>
+      <p class="mt-5 max-w-3xl text-lg text-muted">{t("wpPage.subtitle", "v4 specifies PYRAX as it is implemented today — one binary across four chainspecs, a faithful simulation on real primitives, with the production consensus path wired end-to-end and honest about what remains gated behind external audit.")}</p>
       <div class="mt-8 flex flex-wrap gap-3">
-        <a href={TECH} download class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">Download technical paper</a>
-        <a href={PLAIN} download class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">Plain-English edition</a>
+        <a href={TECH} download class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">{t("wpPage.downloadTechnical", "Download technical paper")}</a>
+        <a href={PLAIN} download class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("wpPage.downloadPlain", "Plain-English edition")}</a>
       </div>
     </div>
   </section>
@@ -40,16 +42,16 @@ const toc = [
   <!-- ABSTRACT -->
   <section class="mx-auto max-w-4xl px-6 py-16">
     <div data-reveal class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-8">
-      <div class="text-xs font-semibold uppercase tracking-wider text-faint">Abstract</div>
-      <p class="mt-4 text-muted">PYRAX is a from-scratch, Rust-implemented Layer-1 organized around four properties most networks bolt on but PYRAX enforces as invariants: <span class="text-ink">high throughput, privacy by default, full decentralization, and resistance to ISP-level surveillance.</span> Consensus is a blockDAG ordered by GhostDAG, fed by a TriStream model — two proof-of-work families across four seal lanes plus proof-of-stake — and finalized by BLS-aggregated proof-of-stake BFT.</p>
-      <p class="mt-3 text-muted">Value transfer is shielded by default with an Orchard-style note model and recursive zk-SNARKs that need no trusted setup. The peer layer is bootstrapless, traffic rides an onion Sphinx mixnet, execution scales through a multi-VM L2 (EVM, WASM, Cairo) and a recursive ZK-rollup L3, and the same idle GPUs that mine Stream B power <span class="text-ink">NEURAX</span>, a verifiable on-chain-settled compute market.</p>
+      <div class="text-xs font-semibold uppercase tracking-wider text-faint">{t("wpPage.abstractLabel", "Abstract")}</div>
+      <p class="mt-4 text-muted">{t("wpPage.abstractPara1a", "PYRAX is a from-scratch, Rust-implemented Layer-1 organized around four properties most networks bolt on but PYRAX enforces as invariants: ")}<span class="text-ink">{t("wpPage.abstractPara1b", "high throughput, privacy by default, full decentralization, and resistance to ISP-level surveillance.")}</span>{t("wpPage.abstractPara1c", " Consensus is a blockDAG ordered by GhostDAG, fed by a TriStream model — two proof-of-work families across four seal lanes plus proof-of-stake — and finalized by BLS-aggregated proof-of-stake BFT.")}</p>
+      <p class="mt-3 text-muted">{t("wpPage.abstractPara2a", "Value transfer is shielded by default with an Orchard-style note model and recursive zk-SNARKs that need no trusted setup. The peer layer is bootstrapless, traffic rides an onion Sphinx mixnet, execution scales through a multi-VM L2 (EVM, WASM, Cairo) and a recursive ZK-rollup L3, and the same idle GPUs that mine Stream B power ")}<span class="text-ink">NEURAX</span>{t("wpPage.abstractPara2c", ", a verifiable on-chain-settled compute market.")}</p>
     </div>
   </section>
 
   <!-- NORTH STARS -->
   <section class="border-y border-line bg-[color:var(--color-bg-2)]">
     <div class="mx-auto max-w-7xl px-6 py-16">
-      <div data-reveal><h2 class="font-display text-2xl font-extrabold">Five north stars</h2><p class="mt-2 text-muted">Constraints, not aspirations — the foundation crates encode them so every later layer is built against them.</p></div>
+      <div data-reveal><h2 class="font-display text-2xl font-extrabold">{t("wpPage.northStarsTitle", "Five north stars")}</h2><p class="mt-2 text-muted">{t("wpPage.northStarsSubtitle", "Constraints, not aspirations — the foundation crates encode them so every later layer is built against them.")}</p></div>
       <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {northStars.map((s, i) => (
           <div data-reveal data-reveal-delay={String((i % 5) + 1)} class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
@@ -66,22 +68,22 @@ const toc = [
   <section class="mx-auto max-w-7xl px-6 py-16">
     <div class="grid gap-10 lg:grid-cols-[1fr_1.4fr]">
       <div data-reveal>
-        <h2 class="font-display text-2xl font-extrabold">Two editions</h2>
-        <p class="mt-3 text-muted">The technical paper is the full specification. The plain-English edition explains the same system without the mathematics — start there if PYRAX is new to you.</p>
+        <h2 class="font-display text-2xl font-extrabold">{t("wpPage.editionsTitle", "Two editions")}</h2>
+        <p class="mt-3 text-muted">{t("wpPage.editionsBody", "The technical paper is the full specification. The plain-English edition explains the same system without the mathematics — start there if PYRAX is new to you.")}</p>
         <div class="mt-6 space-y-3">
           <a href={TECH} download class="flex items-center justify-between rounded-2xl border border-line bg-[color:var(--color-surface)] p-4 transition hover:border-[color:#34405a]">
-            <span><span class="block font-bold text-ink">Technical paper</span><span class="text-xs text-faint">19 sections · full specification · Markdown</span></span>
+            <span><span class="block font-bold text-ink">{t("wpPage.editionTechnicalTitle", "Technical paper")}</span><span class="text-xs text-faint">{t("wpPage.editionTechnicalCaption", "19 sections · full specification · Markdown")}</span></span>
             <svg viewBox="0 0 24 24" class="h-5 w-5 text-[color:var(--color-brand)]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
           </a>
           <a href={PLAIN} download class="flex items-center justify-between rounded-2xl border border-line bg-[color:var(--color-surface)] p-4 transition hover:border-[color:#34405a]">
-            <span><span class="block font-bold text-ink">Plain-English edition</span><span class="text-xs text-faint">the same system, no equations · Markdown</span></span>
+            <span><span class="block font-bold text-ink">{t("wpPage.editionPlainTitle", "Plain-English edition")}</span><span class="text-xs text-faint">{t("wpPage.editionPlainCaption", "the same system, no equations · Markdown")}</span></span>
             <svg viewBox="0 0 24 24" class="h-5 w-5 text-[color:var(--color-brand)]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
           </a>
         </div>
-        <a href={L("/technology")} class="mt-6 inline-flex text-sm font-semibold text-[color:var(--color-brand)]">Prefer the interactive tour? See Technology →</a>
+        <a href={L("/technology")} class="mt-6 inline-flex text-sm font-semibold text-[color:var(--color-brand)]">{t("wpPage.technologyLink", "Prefer the interactive tour? See Technology →")}</a>
       </div>
       <div data-reveal data-reveal-delay="1">
-        <div class="text-xs font-semibold uppercase tracking-wider text-faint">Technical paper · contents</div>
+        <div class="text-xs font-semibold uppercase tracking-wider text-faint">{t("wpPage.contentsLabel", "Technical paper · contents")}</div>
         <ol class="mt-4 grid gap-1 sm:grid-cols-2">
           {toc.map((s, i) => (
             <li class="flex items-baseline gap-3 rounded-lg px-2 py-1.5 text-sm text-muted transition hover:bg-[rgba(255,255,255,0.03)] hover:text-ink"><span class="font-mono text-xs text-faint">{String(i + 1).padStart(2, "0")}</span>{s}</li>
