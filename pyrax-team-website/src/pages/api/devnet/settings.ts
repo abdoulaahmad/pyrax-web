@@ -4,6 +4,7 @@
 import type { APIRoute } from "astro";
 import { requireUser, subjectOf } from "../../../server/guard";
 import { getDevnetSettings, setDevnetSettings } from "../../../server/devnet-db";
+import { audit } from "../../../server/db";
 import { json } from "../../../server/http";
 import { can } from "../../../lib/permissions";
 
@@ -36,5 +37,6 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
     downloads,
   };
   await setDevnetSettings(next);
+  await audit({ actorId: me.id, actorEmail: me.email, action: "devnet.settings", detail: { version: next.version, downloadsOpen: next.downloadsOpen } });
   return json({ ok: true, settings: next });
 };

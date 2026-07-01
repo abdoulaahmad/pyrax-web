@@ -6,7 +6,7 @@
 // Invite enforces the @pyraxchain.com rule + email uniqueness (exactly one account per address),
 // and only grants permissions the inviter is actually allowed to grant (no privilege escalation).
 import type { APIRoute } from "astro";
-import { listUsers, createInvitedUser } from "../../../server/db";
+import { listUsers, createInvitedUser, audit } from "../../../server/db";
 import { requireUser, subjectOf } from "../../../server/guard";
 import { json, publicUser } from "../../../server/http";
 import { can, canGrant, sanitizePermissions, type Permission } from "../../../lib/permissions";
@@ -44,6 +44,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const res = await createInvitedUser({ email, display_name: displayName, position, permissions: granted, created_by: me.id });
   if (!res.ok) return json({ ok: false, errors: { email: "A member with that email already exists." } }, 409);
 
+  await audit({ actorId: me.id, actorEmail: me.email, action: "user.invite", targetId: res.user.id, targetEmail: res.user.email, detail: { displayName, position, permissions: granted } });
   void sendInvite(email, displayName, me.display_name); // fire-and-forget branded invite
   return json({ ok: true, user: publicUser(res.user) }, 201);
 };

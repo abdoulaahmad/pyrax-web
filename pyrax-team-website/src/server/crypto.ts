@@ -4,12 +4,16 @@
 // clear — only their keyed HMAC-SHA256 is persisted, so a database read can't reveal a live code
 // or hijack a session. Comparisons are constant-time.
 import crypto from "node:crypto";
+import { resolveSecret } from "../lib/env-guard";
 
-const SECRET = process.env.SESSION_SECRET || "";
-if (!SECRET && process.env.NODE_ENV === "production") {
-  throw new Error("SESSION_SECRET is required in production.");
-}
-const KEY = SECRET || "dev-only-insecure-secret";
+// Fail-closed: a missing (or dev-default) SESSION_SECRET in production refuses to boot, so OTP/session
+// HMACs are never keyed with a guessable value. Outside production a dev key is used.
+const KEY = resolveSecret({
+  value: process.env.SESSION_SECRET,
+  devDefault: "dev-only-insecure-secret",
+  nodeEnv: process.env.NODE_ENV,
+  name: "SESSION_SECRET",
+});
 
 /** Keyed HMAC-SHA256, hex. Used to store OTP codes + session ids as non-reversible digests. */
 export function hmac(value: string): string {

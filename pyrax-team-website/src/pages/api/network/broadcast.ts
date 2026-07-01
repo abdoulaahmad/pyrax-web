@@ -5,6 +5,7 @@ import type { APIRoute } from "astro";
 import { requireUser, subjectOf } from "../../../server/guard";
 import { json } from "../../../server/http";
 import { can } from "../../../lib/permissions";
+import { audit } from "../../../server/db";
 
 export const prerender = false;
 const NODES_URL = process.env.NODES_SITE_URL || "https://nodes.pyraxchain.com";
@@ -22,6 +23,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
     const data = await r.json().catch(() => ({}));
     if (!r.ok || !data.ok) return json({ ok: false, error: data.error || `Nodes site returned ${r.status}` }, 502);
+    await audit({ actorId: me.id, actorEmail: me.email, action: "nodes.broadcast", detail: { kind: b?.kind === "updates" ? "updates" : "portal", title: b?.title, emailed: data.emailed, pushed: data.pushed } });
     return json({ ok: true, emailed: data.emailed, pushed: data.pushed, subscribers: data.subscribers });
   } catch {
     return json({ ok: false, error: "Couldn't reach the nodes site." }, 502);

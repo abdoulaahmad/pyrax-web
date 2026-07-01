@@ -4,6 +4,7 @@
 import type { APIRoute } from "astro";
 import { requireUser, subjectOf } from "../../../server/guard";
 import { createDevnetInvite } from "../../../server/devnet-db";
+import { audit } from "../../../server/db";
 import { json } from "../../../server/http";
 import { can } from "../../../lib/permissions";
 import { sendDevnetInvite } from "../../../server/email";
@@ -26,6 +27,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   const r = await createDevnetInvite(email, handle, me.id);
   if (!r.ok) return json({ ok: false, errors: { email: "That tester is already whitelisted." } }, 409);
+  await audit({ actorId: me.id, actorEmail: me.email, action: "devnet.invite", targetEmail: email, detail: { handle } });
   void sendDevnetInvite(email, r.token);
   return json({ ok: true });
 };

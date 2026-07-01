@@ -6,7 +6,7 @@
 // Saving takes effect for every member's signature immediately (it's rendered server-side from
 // this row). Members re-copy from "My Signature" to pick up structural changes.
 import type { APIRoute } from "astro";
-import { getSignatureSettings, setSignatureSettings } from "../../../server/db";
+import { getSignatureSettings, setSignatureSettings, audit } from "../../../server/db";
 import { requireUser, subjectOf } from "../../../server/guard";
 import { json } from "../../../server/http";
 import { can } from "../../../lib/permissions";
@@ -28,5 +28,6 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
   const body = await request.json().catch(() => ({}));
   const clean = sanitizeSettings(body?.settings);
   await setSignatureSettings(clean, me.id);
+  await audit({ actorId: me.id, actorEmail: me.email, action: "signature.update", detail: { tagline: clean.tagline } });
   return json({ ok: true, settings: clean });
 };

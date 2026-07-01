@@ -90,6 +90,31 @@ export function init(): Promise<void> {
         last_seen  BIGINT NOT NULL
       );
       CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+      -- DB-backed rate-limit buckets (sliding window). One row per (bucket,key); hits is a JSONB
+      -- array of epoch-ms timestamps. Survives redeploys + works across replicas, unlike in-process
+      -- Maps. Reaped opportunistically (stale rows are pruned on read) + by the GC sweep.
+      CREATE TABLE IF NOT EXISTS rate_limits (
+        bucket     TEXT NOT NULL,
+        key        TEXT NOT NULL,
+        hits       JSONB NOT NULL DEFAULT '[]'::jsonb,
+        updated_at BIGINT NOT NULL,
+        PRIMARY KEY (bucket, key)
+      );
+      CREATE INDEX IF NOT EXISTS idx_rate_limits_updated ON rate_limits(updated_at);
+      -- Append-only audit log of sensitive admin mutations (invites, removals, permission changes,
+      -- company-signature + nodes-site edits). Surfaced via an admin-only API. Never updated/deleted
+      -- in normal operation (the GC sweep only trims very old rows if a retention is configured).
+      CREATE TABLE IF NOT EXISTS audit_log (
+        id         BIGSERIAL PRIMARY KEY,
+        at         BIGINT NOT NULL,
+        actor_id   TEXT,
+        actor_email TEXT,
+        action     TEXT NOT NULL,
+        target_id  TEXT,
+        target_email TEXT,
+        detail     JSONB NOT NULL DEFAULT '{}'::jsonb
+      );
+      CREATE INDEX IF NOT EXISTS idx_audit_at ON audit_log(at DESC);
       -- Case-insensitive email uniqueness: exactly one account per address (we also lowercase on write).
       CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_lower ON users (lower(email));
       -- Company-wide email-signature design (single row, edited by Signature Managers).
@@ -109,6 +134,8 @@ export function init(): Promise<void> {
        ON CONFLICT (email) DO UPDATE SET is_superuser = TRUE, status = 'active'`,
       [SUPERUSER_EMAIL, Date.now()],
     );
+    // Reap expired OTPs/sessions + stale rate-limit rows: an immediate sweep + hourly thereafter.
+    startGc();
   })();
   return ready;
 }
@@ -182,6 +209,103 @@ export async function removeUser(id: string): Promise<boolean> {
   await init();
   const r = await db().query("DELETE FROM users WHERE id = $1 AND is_superuser = FALSE", [id]);
   return (r.rowCount ?? 0) > 0;
+}
+
+/* =============================================================== Rate limiting =====
+ * DB-backed sliding-window limiter. Survives redeploys + scales across replicas (the previous
+ * in-process Maps reset on every deploy + didn't share state). Atomic: a single UPSERT prunes the
+ * window, counts, and records the new hit, returning whether the request is allowed. */
+export async function rateAllow(bucket: string, key: string, max: number, windowMs: number): Promise<boolean> {
+  await init();
+  const now = Date.now();
+  const cutoff = now - windowMs;
+  // Atomic read-modify-write under the row's primary-key lock: prune old hits, decide, append.
+  // We do it in a transaction so concurrent requests for the same key can't both slip past `max`.
+  const client = await db().connect();
+  try {
+    await client.query("BEGIN");
+    const r = await client.query("SELECT hits FROM rate_limits WHERE bucket=$1 AND key=$2 FOR UPDATE", [bucket, key]);
+    const prev: number[] = Array.isArray(r.rows[0]?.hits) ? r.rows[0].hits : [];
+    const recent = prev.filter((t) => typeof t === "number" && t > cutoff);
+    if (recent.length >= max) {
+      // Persist the pruned window (keeps the row small) but do not record a new hit.
+      await client.query(
+        `INSERT INTO rate_limits (bucket, key, hits, updated_at) VALUES ($1,$2,$3::jsonb,$4)
+         ON CONFLICT (bucket, key) DO UPDATE SET hits = $3::jsonb, updated_at = $4`,
+        [bucket, key, JSON.stringify(recent), now],
+      );
+      await client.query("COMMIT");
+      return false;
+    }
+    recent.push(now);
+    await client.query(
+      `INSERT INTO rate_limits (bucket, key, hits, updated_at) VALUES ($1,$2,$3::jsonb,$4)
+       ON CONFLICT (bucket, key) DO UPDATE SET hits = $3::jsonb, updated_at = $4`,
+      [bucket, key, JSON.stringify(recent), now],
+    );
+    await client.query("COMMIT");
+    return true;
+  } catch (e) {
+    try { await client.query("ROLLBACK"); } catch { /* ignore */ }
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
+/* ============================================================= Audit logging =====
+ * Append-only record of sensitive admin actions. Best-effort: a logging failure must never block
+ * the underlying mutation, so writes are caught + logged, not thrown. */
+export interface AuditEntry {
+  actorId: string | null;
+  actorEmail: string | null;
+  action: string;
+  targetId?: string | null;
+  targetEmail?: string | null;
+  detail?: Record<string, unknown>;
+}
+export async function audit(e: AuditEntry): Promise<void> {
+  try {
+    await init();
+    await db().query(
+      `INSERT INTO audit_log (at, actor_id, actor_email, action, target_id, target_email, detail)
+       VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb)`,
+      [Date.now(), e.actorId, e.actorEmail, e.action, e.targetId ?? null, e.targetEmail ?? null, JSON.stringify(e.detail ?? {})],
+    );
+  } catch (err) {
+    console.error("[audit] write failed:", err);
+  }
+}
+export async function listAudit(limit = 200): Promise<any[]> {
+  await init();
+  const n = Math.max(1, Math.min(1000, Math.floor(limit) || 200));
+  const r = await db().query("SELECT id, at, actor_id, actor_email, action, target_id, target_email, detail FROM audit_log ORDER BY at DESC, id DESC LIMIT $1", [n]);
+  return r.rows;
+}
+
+/* ============================================================ Garbage collection =====
+ * Expired OTPs + sessions and stale rate-limit rows are never read again — reap them so the tables
+ * don't grow without bound. Runs once at boot + on an hourly interval. */
+export async function reapExpired(): Promise<{ otps: number; sessions: number; rateLimits: number }> {
+  await init();
+  const now = Date.now();
+  const otps = await db().query("DELETE FROM login_otps WHERE expires_at < $1", [now]);
+  const sessions = await db().query("DELETE FROM sessions WHERE expires_at < $1", [now]);
+  // Rate-limit rows older than 24h can't be inside any live window we use (max window is 15 min).
+  const rl = await db().query("DELETE FROM rate_limits WHERE updated_at < $1", [now - 24 * 60 * 60_000]);
+  return { otps: otps.rowCount ?? 0, sessions: sessions.rowCount ?? 0, rateLimits: rl.rowCount ?? 0 };
+}
+
+let gcTimer: ReturnType<typeof setInterval> | null = null;
+/** Start the periodic GC (idempotent). Sweeps immediately, then hourly. */
+export function startGc(intervalMs = 60 * 60_000): void {
+  if (gcTimer) return;
+  void reapExpired().catch((e) => console.error("[gc] startup sweep failed:", e));
+  gcTimer = setInterval(() => {
+    void reapExpired().catch((e) => console.error("[gc] sweep failed:", e));
+  }, intervalMs);
+  // Don't keep the event loop alive solely for the GC timer.
+  if (typeof gcTimer.unref === "function") gcTimer.unref();
 }
 
 /** Update a member's OWN editable profile fields (never email/permissions/superuser). */

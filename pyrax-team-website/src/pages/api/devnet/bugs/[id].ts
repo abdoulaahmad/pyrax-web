@@ -2,6 +2,7 @@
 import type { APIRoute } from "astro";
 import { requireUser, subjectOf } from "../../../../server/guard";
 import { getDevnetBug, triageDevnetBug } from "../../../../server/devnet-db";
+import { audit } from "../../../../server/db";
 import { json } from "../../../../server/http";
 import { can } from "../../../../lib/permissions";
 
@@ -23,6 +24,7 @@ export const PUT: APIRoute = async ({ params, request, cookies }) => {
   const b = await request.json().catch(() => ({}));
   const r = await triageDevnetBug(String(params.id), { status: b?.status, assignedSeverity: b?.assignedSeverity, bountyPyrx: b?.bountyPyrx });
   if (!r.ok) return json({ ok: false, error: "Not found." }, 404);
+  await audit({ actorId: me.id, actorEmail: me.email, action: "devnet.bug.triage", targetId: String(params.id), detail: { status: b?.status, assignedSeverity: b?.assignedSeverity, awarded: r.awarded?.amount } });
   const bug = await getDevnetBug(String(params.id));
   return json({ ok: true, bug });
 };

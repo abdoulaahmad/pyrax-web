@@ -47,10 +47,17 @@ export function Logo({ className = "h-7 w-[5.1rem]", tag = "Team" }: { className
 }
 
 /* ----------------------------------------------------------------- primitives */
-export function Card({ children, className = "", hover = false, delay = 0 }: { children: React.ReactNode; className?: string; hover?: boolean; delay?: number }) {
+type CardProps = {
+  children: React.ReactNode;
+  className?: string;
+  hover?: boolean;
+  delay?: number;
+} & Pick<React.HTMLAttributes<HTMLDivElement>, "onClick" | "style" | "role" | "id" | "title">;
+
+export function Card({ children, className = "", hover = false, delay = 0, ...rest }: CardProps) {
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={`card ${hover ? "card-hover" : ""} ${className}`}>{children}</motion.div>
+      className={`card ${hover ? "card-hover" : ""} ${className}`} {...rest}>{children}</motion.div>
   );
 }
 

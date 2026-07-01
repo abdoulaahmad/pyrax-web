@@ -3,6 +3,7 @@
 import type { APIRoute } from "astro";
 import { requireUser, subjectOf } from "../../../server/guard";
 import { getNodesSettings, setNodesSettings, type DownloadItem } from "../../../server/nodes-db";
+import { audit } from "../../../server/db";
 import { json } from "../../../server/http";
 import { can } from "../../../lib/permissions";
 
@@ -50,5 +51,6 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
   }
   if (!Object.keys(patch).length) return json({ ok: false, error: "Nothing to update." }, 422);
   const settings = await setNodesSettings(patch, me.display_name || me.email);
+  await audit({ actorId: me.id, actorEmail: me.email, action: "nodes.settings", detail: { fields: Object.keys(patch) } });
   return json({ ok: true, settings });
 };

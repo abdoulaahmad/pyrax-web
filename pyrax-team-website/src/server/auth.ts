@@ -3,7 +3,7 @@
 // OTP login + sessions. Codes + session ids are stored only as keyed HMACs (never plaintext),
 // rate-limited and attempt-capped, compared in constant time. Sessions last 7 DAYS (sliding on
 // activity) or until logout — after that, a fresh sign-in is required.
-import { db, init, userByEmail, userById, touchLogin, type UserRow } from "./db";
+import { db, init, rateAllow, userByEmail, userById, touchLogin, type UserRow } from "./db";
 import { hmac, randomOtp, randomSessionId, timingSafeEqual, newUserId } from "./crypto";
 import { sendOtp } from "./email";
 
@@ -18,16 +18,10 @@ export const SESSION_COOKIE = "tp_session";
  *  the rid is 256-bit random, so an unknown rid is indistinguishable from a still-pending one. */
 export type OtpState = "pending" | "used" | "expired";
 
-// In-memory limiters (per process). Request: 5 codes / 15 min / email. Verify: 8 tries / 10 min.
-const reqBucket = new Map<string, number[]>();
-const verBucket = new Map<string, number[]>();
-function allow(map: Map<string, number[]>, key: string, max: number, windowMs: number): boolean {
-  const now = Date.now();
-  const arr = (map.get(key) || []).filter((t) => now - t < windowMs);
-  if (arr.length >= max) { map.set(key, arr); return false; }
-  arr.push(now); map.set(key, arr);
-  return true;
-}
+// DB-backed limiters (survive redeploys + work across replicas, unlike per-process Maps).
+// Request: 5 codes / 15 min / email. Verify: 8 tries / 10 min / email.
+const REQ_MAX = 5, REQ_WINDOW_MS = 15 * 60_000;
+const VER_MAX = 8, VER_WINDOW_MS = 10 * 60_000;
 
 /** Issue a sign-in code to a whitelisted email. Anti-enumeration: always reports success — and
  *  always returns a watch-token (rid) + ttl — so a caller can't probe which addresses are on the
@@ -35,8 +29,8 @@ function allow(map: Map<string, number[]>, key: string, max: number, windowMs: n
  *  a throwaway that the status endpoint treats as "pending" until the page's own timer expires. */
 export async function requestLoginCode(email: string): Promise<{ ok: true; ttl: number; rid: string } | { ok: false; reason: "rate" }> {
   const e = email.trim().toLowerCase();
-  if (!allow(reqBucket, e, 5, 15 * 60_000)) return { ok: false, reason: "rate" };
   await init();
+  if (!(await rateAllow("otp_request", e, REQ_MAX, REQ_WINDOW_MS))) return { ok: false, reason: "rate" };
   const rid = randomSessionId();
   const user = await userByEmail(e);
   if (user) {
@@ -71,9 +65,9 @@ export async function otpStatus(rid: string): Promise<OtpState> {
 export async function verifyLoginCode(email: string, code: string): Promise<{ ok: true; user: UserRow } | { ok: false; reason: "rate" | "invalid" }> {
   const e = email.trim().toLowerCase();
   const c = (code || "").replace(/\D/g, "");
-  if (!allow(verBucket, e, 8, 10 * 60_000)) return { ok: false, reason: "rate" };
-  if (c.length !== OTP_LEN) return { ok: false, reason: "invalid" };
   await init();
+  if (!(await rateAllow("otp_verify", e, VER_MAX, VER_WINDOW_MS))) return { ok: false, reason: "rate" };
+  if (c.length !== OTP_LEN) return { ok: false, reason: "invalid" };
   const hash = hmac(`${e}:${c}`);
   const now = Date.now();
   // Atomically consume: only if it exists, matches the email, is unused and unexpired.

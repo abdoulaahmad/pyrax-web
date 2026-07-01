@@ -4,8 +4,18 @@
 // each mint one for their signed-in user; the standalone chat WS server verifies it. This decouples
 // the shared chat from each app's session cookie. (The team site ships an identical copy.)
 import crypto from "node:crypto";
+import { resolveSecret } from "./env-guard";
 
-const SECRET = process.env.DEVNET_CHAT_SECRET || "dev-chat-secret-change-me";
+// Fail-closed: in production the secret MUST be set to a real, non-default value — otherwise the
+// chat-token HMAC would be forgeable by anyone who knows the public placeholder. Mirrors the
+// SESSION_SECRET guard in src/server/crypto.ts. Outside production we fall back to a dev placeholder
+// so local previews and tests don't require the secret to be configured.
+const SECRET = resolveSecret({
+  value: process.env.DEVNET_CHAT_SECRET,
+  devDefault: "dev-chat-secret-change-me",
+  nodeEnv: process.env.NODE_ENV,
+  name: "DEVNET_CHAT_SECRET",
+});
 
 export interface ChatClaims { uid: string; name: string; user: string; admin: boolean; role: "admin" | "support" | "tester"; exp: number }
 

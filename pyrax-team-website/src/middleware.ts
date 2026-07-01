@@ -1,11 +1,44 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 //
-// Security hardening: every response gets strict security headers. The Content-Security-Policy
-// is applied in production only (the dev server's HMR needs eval/inline + websockets, which a
-// strict CSP would block). HSTS is production-only too (meaningful only over HTTPS).
+// Security middleware, applied to every request:
+//   1. CSRF defense-in-depth — same-origin Origin/Referer check on state-changing /api requests.
+//   2. Server-side gate on /app — resolve the session BEFORE rendering the portal shell (no
+//      client-side auth flash); unauthenticated users are 302'd to "/".
+//   3. Strict security headers + (production-only) CSP/HSTS on every response.
 import { defineMiddleware } from "astro:middleware";
+import { checkRequestCsrf } from "./server/csrf";
+import { requireUser } from "./server/guard";
+import { json } from "./server/http";
+import { buildCsp } from "./server/csp";
 
-export const onRequest = defineMiddleware(async (_ctx, next) => {
+// The production CSP, computed once from the environment. It allows the shared chat WebSocket origin
+// (CHAT_WS_URL) under connect-src and giphy's media hosts under img-src ONLY when the GIF picker is
+// enabled — otherwise a strict `connect-src 'self'` / `img-src 'self' data:` would silently break
+// Devnet Chat. See src/server/csp.ts (pure + unit-tested).
+const CSP = buildCsp({ chatWsUrl: process.env.CHAT_WS_URL, giphyKey: process.env.GIPHY_API_KEY });
+
+export const onRequest = defineMiddleware(async (ctx, next) => {
+  const { request, url } = ctx;
+
+  // --- 1. CSRF: reject cross-origin state-changing API calls (belt-and-suspenders to SameSite=Lax).
+  // Auth bootstrap routes (request/verify a sign-in code) run before a session exists; they are
+  // anti-enumeration-safe and rate-limited, and a browser still sends a same-origin Origin for them,
+  // so they go through the same check. We scope the check to the JSON API surface.
+  if (url.pathname.startsWith("/api/")) {
+    const csrf = checkRequestCsrf(request);
+    if (!csrf.ok) {
+      return json({ ok: false, error: "Cross-origin request blocked." }, 403);
+    }
+  }
+
+  // --- 2. Server-side guard for the authenticated portal shell. Doing this here (instead of a
+  // client redirect in Portal.tsx) removes the brief unauthenticated flash and never ships the
+  // shell to a signed-out visitor.
+  if (url.pathname === "/app" || url.pathname === "/app/") {
+    const me = await requireUser(ctx.cookies);
+    if (!me) return ctx.redirect("/", 302);
+  }
+
   const res = await next();
   const h = res.headers;
   h.set("X-Frame-Options", "DENY");
@@ -18,22 +51,7 @@ export const onRequest = defineMiddleware(async (_ctx, next) => {
 
   if (import.meta.env.PROD) {
     h.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
-    h.set(
-      "Content-Security-Policy",
-      [
-        "default-src 'self'",
-        "script-src 'self' 'unsafe-inline'",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-        "font-src 'self' https://fonts.gstatic.com",
-        "img-src 'self' data:",
-        "connect-src 'self'",
-        "frame-ancestors 'none'",
-        "base-uri 'self'",
-        "form-action 'self'",
-        "object-src 'none'",
-        "upgrade-insecure-requests",
-      ].join("; "),
-    );
+    h.set("Content-Security-Policy", CSP);
   }
   return res;
 });

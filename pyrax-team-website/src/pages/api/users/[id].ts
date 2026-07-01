@@ -6,7 +6,7 @@
 // Privilege-escalation safe: an admin may only change permissions THEY can grant; a target's
 // out-of-scope permissions are preserved. The superuser is immutable; you can't remove yourself.
 import type { APIRoute } from "astro";
-import { userById, setUserPermissions, removeUser } from "../../../server/db";
+import { userById, setUserPermissions, removeUser, audit } from "../../../server/db";
 import { requireUser, subjectOf } from "../../../server/guard";
 import { json, publicUser } from "../../../server/http";
 import { can, canGrant, sanitizePermissions, ALL_PERMISSIONS, type Permission } from "../../../lib/permissions";
@@ -33,6 +33,7 @@ export const PUT: APIRoute = async ({ params, request, cookies }) => {
 
   const updated = await setUserPermissions(target.id, next);
   if (!updated) return json({ ok: false, error: "Could not update permissions." }, 500);
+  await audit({ actorId: me.id, actorEmail: me.email, action: "user.permissions", targetId: target.id, targetEmail: target.email, detail: { before: target.permissions, after: next } });
   return json({ ok: true, user: publicUser(updated) });
 };
 
@@ -48,5 +49,6 @@ export const DELETE: APIRoute = async ({ params, cookies }) => {
   if (target.is_superuser) return json({ ok: false, error: "The superuser can't be removed." }, 403);
 
   const gone = await removeUser(id);
+  if (gone) await audit({ actorId: me.id, actorEmail: me.email, action: "user.remove", targetId: target.id, targetEmail: target.email, detail: {} });
   return gone ? json({ ok: true }) : json({ ok: false, error: "Could not remove member." }, 500);
 };
