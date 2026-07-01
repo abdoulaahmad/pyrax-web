@@ -57,7 +57,7 @@ peers.pyraxchain.com {
 }
 
 # --- team portal: the magic-link-gated Node server serves the SPA + the gated API ---
-team-pyrax.pyraxchain.com {
+team.pyraxchain.com {
 	reverse_proxy team-pyrax:8790
 }
 

@@ -8,10 +8,13 @@ const SENDER_EMAIL = process.env.BREVO_SENDER || "no-reply@pyraxchain.com";
 const SENDER_NAME = process.env.BREVO_DEVNET_SENDER_NAME || "PYRAX Devnet";
 const PUBLIC_URL = process.env.PUBLIC_URL || "https://devnet.pyraxchain.com";
 const CDN = "https://pyrax.tor1.cdn.digitaloceanspaces.com/email";
-const OTP_TEMPLATE_ID = Number(process.env.BREVO_DEVNET_OTP_TEMPLATE_ID || 0);
-const INVITE_TEMPLATE_ID = Number(process.env.BREVO_DEVNET_INVITE_TEMPLATE_ID || 0);
-const RELEASE_TEMPLATE_ID = Number(process.env.BREVO_DEVNET_RELEASE_TEMPLATE_ID || 0);
-const NOTIFY_TEMPLATE_ID = Number(process.env.BREVO_DEVNET_NOTIFY_TEMPLATE_ID || 0);
+// On-brand Brevo templates (params already match each sender below). Env-overridable if they move.
+//   2 "PYRAX Devnet — Sign-in code"  · 3 "PYRAX Devnet — Invite"
+//   4 "PYRAX Devnet — New build"     · 5 "PYRAX Devnet — Activity"
+const OTP_TEMPLATE_ID = Number(process.env.BREVO_DEVNET_OTP_TEMPLATE_ID) || 2;
+const INVITE_TEMPLATE_ID = Number(process.env.BREVO_DEVNET_INVITE_TEMPLATE_ID) || 3;
+const RELEASE_TEMPLATE_ID = Number(process.env.BREVO_DEVNET_RELEASE_TEMPLATE_ID) || 4;
+const NOTIFY_TEMPLATE_ID = Number(process.env.BREVO_DEVNET_NOTIFY_TEMPLATE_ID) || 5;
 
 const C = { bg: "#06070b", card: "#0e1018", box: "#05060a", line: "#222838", ink: "#f7f9fd", muted: "#9aa4ba", faint: "#6a7286", gold: "#fcd03d", brand: "#f58622" };
 

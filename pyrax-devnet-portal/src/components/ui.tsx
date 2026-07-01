@@ -49,10 +49,10 @@ export function Logo({ className = "h-7 w-[5.1rem]", tag = "Team" }: { className
 }
 
 /* ----------------------------------------------------------------- primitives */
-export function Card({ children, className = "", hover = false, delay = 0 }: { children: React.ReactNode; className?: string; hover?: boolean; delay?: number }) {
+export function Card({ children, className = "", hover = false, delay = 0, onClick }: { children: React.ReactNode; className?: string; hover?: boolean; delay?: number; onClick?: () => void }) {
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={`card ${hover ? "card-hover" : ""} ${className}`}>{children}</motion.div>
+      onClick={onClick} className={`card ${hover ? "card-hover" : ""} ${className}`}>{children}</motion.div>
   );
 }
 

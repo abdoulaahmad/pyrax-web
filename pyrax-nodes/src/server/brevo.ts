@@ -5,7 +5,8 @@
 // are sent via the stored template using the existing premium email design.
 const API_KEY = process.env.BREVO_API_KEY || "";
 const LIST_ID = Number(process.env.BREVO_NODES_LIST_ID || 0);
-const NOTIFY_TPL = Number(process.env.BREVO_NODES_NOTIFY_TEMPLATE_ID || 0);
+// On-brand Brevo template "PYRAX Nodes — Notify" (id 6; params title/body/link/button). Overridable.
+const NOTIFY_TPL = Number(process.env.BREVO_NODES_NOTIFY_TEMPLATE_ID) || 6;
 const SENDER_EMAIL = process.env.BREVO_SENDER || "no-reply@pyraxchain.com";
 const H = { "api-key": API_KEY, "content-type": "application/json", accept: "application/json" };
 

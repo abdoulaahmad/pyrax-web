@@ -201,39 +201,76 @@ export function TosPage() {
   );
 }
 
-/* ============================================================== Downloads (admin-gated) */
+/* ============================================================== Downloads (real presigned feed) */
+const PLATFORM_LABEL: Record<string, string> = { win: "Windows", mac: "macOS", linux: "Linux" };
+const PRODUCT_NOTE: Record<string, string> = { inferno: "Desktop node app", cli: "Command-line node tool" };
+function fmtSize(bytes: number): string {
+  if (!bytes || bytes < 1024) return `${bytes || 0} B`;
+  const mb = bytes / (1024 * 1024);
+  return mb >= 1 ? `${mb.toFixed(mb >= 10 ? 0 : 1)} MB` : `${(bytes / 1024).toFixed(0)} KB`;
+}
+
+function DownloadCard({ name, product, feed }: { name: string; product: "inferno" | "cli"; feed: any }) {
+  const assets: any[] = feed?.assets || [];
+  return (
+    <Card className="p-5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-line bg-[rgba(255,255,255,0.03)]">{React.createElement(Icon[product === "cli" ? "activity" : "download"], { className: "h-5 w-5 text-muted" })}</div>
+          <div><div className="text-base font-bold">{name}</div><div className="text-xs text-faint">{PRODUCT_NOTE[product]}</div></div>
+        </div>
+        {feed?.version && <Badge tone="brand">v{String(feed.version).replace(/^v/, "")}</Badge>}
+      </div>
+      {assets.length === 0 ? (
+        <div className="mt-4 rounded-xl border border-dashed border-line p-4 text-center text-sm text-muted">No build published yet. You'll be notified when {name} is available.</div>
+      ) : (
+        <div className="mt-4 grid gap-2">
+          {assets.map((a: any) => (
+            <a key={a.platform} className="flex items-center justify-between rounded-lg border border-line px-3 py-2 text-sm hover:border-[color:var(--color-brand)]" href={a.url} rel="noreferrer">
+              <span className="flex items-center gap-2 font-semibold">{React.createElement(Icon[osIcon(a.platform)], { className: "h-4 w-4 text-muted" })}{PLATFORM_LABEL[a.platform] || a.platform}</span>
+              <span className="flex items-center gap-3 text-xs text-faint">{fmtSize(a.size)}<Icon.download className="h-4 w-4 text-[color:var(--color-brand)]" /></span>
+            </a>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
 export function Downloads() {
   const [d, setD] = useState<any>(null);
-  useEffect(() => { fetch("/api/dashboard").then((r) => r.json()).then((x) => x?.ok && setD(x.devnet)).catch(() => {}); }, []);
+  const [err, setErr] = useState("");
+  useEffect(() => { fetch("/api/downloads").then((r) => r.json()).then((x) => { if (x?.ok) setD(x); else setErr("Couldn't load downloads."); }).catch(() => setErr("Network error.")); }, []);
+  if (err) return <Card className="p-8 text-center text-sm text-[color:var(--color-negative)]">{err}</Card>;
   if (!d) return <Card className="p-10 text-center text-sm text-muted"><span className="mr-2 inline-block h-4 w-4 animate-spin-slow rounded-full border-2 border-line border-t-[color:var(--color-brand)] align-middle" />Loading…</Card>;
-  if (!d.downloadsOpen) {
+
+  if (!d.open) {
     return (
       <>
         <PageHeader title="Downloads" subtitle="Get the Inferno app or the CLI node tool." />
         <Card className="p-10 text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[rgba(215,84,39,0.12)] text-[color:var(--color-ember)]"><Icon.shield className="h-6 w-6" /></div>
           <p className="mt-4 text-lg font-bold">Downloads are closed</p>
-          <p className="mx-auto mt-1 max-w-md text-sm text-muted">{d.downloadsClosedMessage}</p>
+          <p className="mx-auto mt-1 max-w-md text-sm text-muted">{d.message}</p>
           <div className="mt-3"><Badge tone="warning">Disabled by admin</Badge></div>
         </Card>
       </>
     );
   }
+
+  const noBuilds = !d.inferno?.assets?.length && !d.cli?.assets?.length;
   return (
     <>
       <PageHeader title="Downloads" subtitle="Get the Inferno app or the CLI node tool, then connect it to your account." />
+      {d.error && <Card className="mb-4 p-4 text-sm text-[color:var(--color-negative)]">{d.error}</Card>}
+      {!d.error && noBuilds && (
+        <Card className="mb-4 p-4 text-sm text-muted">No builds are published yet. Links appear here automatically the moment a build lands — and you'll get a release notification.</Card>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
-        {(d.downloads || []).map((it: any, i: number) => (
-          <Card key={i} className="flex items-center justify-between p-5">
-            <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-line bg-[rgba(255,255,255,0.03)]">{React.createElement(Icon[osIcon(it.platform)], { className: "h-5 w-5 text-muted" })}</div>
-              <div><div className="text-base font-bold">{it.name}</div><div className="text-xs text-faint">{it.platform}{it.note ? ` · ${it.note}` : ""}</div></div>
-            </div>
-            <a className="btn btn-primary" href={it.url} target="_blank" rel="noreferrer">{React.createElement(Icon[osIcon(it.platform)], { className: "h-4 w-4" })} Download</a>
-          </Card>
-        ))}
+        <DownloadCard name="Inferno" product="inferno" feed={d.inferno} />
+        <DownloadCard name="PYRAX CLI" product="cli" feed={d.cli} />
       </div>
-      <Card className="mt-4 p-5 text-sm text-muted">After installing, sign in to the app with this portal to link your node — uptime then tracks here automatically.</Card>
+      <Card className="mt-4 p-5 text-sm text-muted">After installing, sign in to the app with this portal to link your node — uptime then tracks here automatically. Download links are private and expire after a short time; reload this page to refresh them.</Card>
     </>
   );
 }

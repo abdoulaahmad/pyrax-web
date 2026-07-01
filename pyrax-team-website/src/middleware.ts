@@ -24,7 +24,11 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   // Auth bootstrap routes (request/verify a sign-in code) run before a session exists; they are
   // anti-enumeration-safe and rate-limited, and a browser still sends a same-origin Origin for them,
   // so they go through the same check. We scope the check to the JSON API surface.
-  if (url.pathname.startsWith("/api/")) {
+  // The `/api/ember/*` endpoints are called server-to-server by the Ember desktop app (no browser
+  // Origin) and are NOT cookie-authenticated — they use an email 9-digit code + a bearer device
+  // token, so CSRF (which protects cookie-auth'd browser requests) does not apply. Every other /api
+  // route keeps the same-origin check.
+  if (url.pathname.startsWith("/api/") && !url.pathname.startsWith("/api/ember/")) {
     const csrf = checkRequestCsrf(request);
     if (!csrf.ok) {
       return json({ ok: false, error: "Cross-origin request blocked." }, 403);

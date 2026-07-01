@@ -7,8 +7,10 @@
 const API_KEY = process.env.BREVO_API_KEY || "";
 const SENDER_EMAIL = process.env.BREVO_SENDER || "no-reply@pyraxchain.com";
 const SENDER_NAME = process.env.BREVO_SENDER_NAME || "PYRAX Team";
-// When set, the OTP is delivered through this stylized Brevo template ({{params.otp}}).
-const OTP_TEMPLATE_ID = Number(process.env.BREVO_OTP_TEMPLATE_ID || 0);
+// The OTP is delivered through the on-brand Brevo template "PYRAX Team — Sign-in code" (id 1;
+// params {{params.otp}} + {{params.expires}}). Override with BREVO_OTP_TEMPLATE_ID only if it moves;
+// the inline HTML below is a fallback for when Brevo is unreachable / the id is invalid.
+const OTP_TEMPLATE_ID = Number(process.env.BREVO_OTP_TEMPLATE_ID) || 1;
 
 const C = {
   bg: "#06070b", card: "#0e1018", box: "#05060a", line: "#222838",

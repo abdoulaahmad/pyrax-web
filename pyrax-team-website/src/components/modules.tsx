@@ -100,12 +100,76 @@ export function Faucet({ subject }: { subject: AccessSubject }) {
 }
 
 /* ============================================================== Downloads */
+type DlPlatform = "win" | "mac" | "linux";
+interface PlatformDownload { platform: DlPlatform; label: string; filename: string; url: string }
+interface DownloadProduct { id: string; name: string; note: string; restricted?: boolean; version: string | null; downloads: PlatformDownload[] }
+interface DownloadsResponse { ok: boolean; configured?: boolean; canEmber?: boolean; products?: DownloadProduct[]; error?: string }
+
+function DlIcon({ platform }: { platform: DlPlatform }) {
+  const I = platform === "win" ? Icon.windows : platform === "mac" ? Icon.apple : Icon.linux;
+  return <I className="h-4 w-4" />;
+}
+
 export function Downloads({ subject }: { subject: AccessSubject }) {
   if (!can(subject, "downloads.view")) return <Locked what="downloads" />;
+  const [state, setState] = useState<DownloadsResponse | null>(null);
+  const [err, setErr] = useState("");
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/downloads", { headers: { accept: "application/json" } })
+      .then((r) => r.json() as Promise<DownloadsResponse>)
+      .then((d) => { if (!alive) return; if (!d.ok) { setErr(d.error || "Couldn't load downloads."); setState({ ok: true, products: [] }); return; } setState(d); })
+      .catch(() => { if (alive) { setErr("Network error loading downloads."); setState({ ok: true, products: [] }); } });
+    return () => { alive = false; };
+  }, []);
+
+  const subtitle = "Latest signed builds. The download role grants Inferno + CLI — the internal Ember build needs its own access.";
+  if (!state) {
+    return (
+      <>
+        <PageHeader title="Downloads" subtitle={subtitle} />
+        <Card className="p-10 text-center text-sm text-muted"><span className="mr-2 inline-block h-4 w-4 animate-spin-slow rounded-full border-2 border-line border-t-[color:var(--color-brand)] align-middle" />Loading builds…</Card>
+      </>
+    );
+  }
+
+  const products = state.products || [];
+  const anyBuild = products.some((p) => p.downloads.length > 0);
+
   return (
     <>
-      <PageHeader title="Downloads" subtitle="Latest signed builds. The download role grants everything — restricted products need their own access." />
-      <ComingSoon title="No builds connected yet" detail="Once the release pipeline is connected, the latest signed Ember, Inferno + CLI builds will be listed here — with individually-restricted products gated to their own access." />
+      <PageHeader title="Downloads" subtitle={subtitle} />
+      {err && <p className="mb-3 text-sm text-[color:var(--color-negative)]">{err}</p>}
+      {!anyBuild ? (
+        <ComingSoon title="No builds published yet" detail="The signed Ember, Inferno + CLI builds appear here the moment the release pipeline publishes them. Restricted products stay gated to their own access." />
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {products.map((p) => (
+            <Card key={p.id} className="p-5">
+              <div className="flex items-baseline justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold">{p.name}</h3>
+                  {p.restricted && <Badge tone="danger">Restricted</Badge>}
+                </div>
+                {p.version && <Badge tone="muted">v{p.version}</Badge>}
+              </div>
+              <p className="mt-1 text-sm text-muted">{p.note}</p>
+              {p.downloads.length === 0 ? (
+                <div className="mt-4 rounded-lg border border-line bg-[rgba(5,6,9,0.4)] p-3 text-sm text-faint">No published build yet for this product.</div>
+              ) : (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {p.downloads.map((d) => (
+                    <a key={d.platform} href={d.url} rel="noreferrer" className="btn btn-ghost" title={d.filename}>
+                      <DlIcon platform={d.platform} /> {d.label}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </Card>
+          ))}
+        </div>
+      )}
+      <p className="mt-4 text-xs text-faint">Download links are individually signed and expire after a few minutes — reopen this page to refresh them. Builds are served from the private release store.{state.canEmber ? " You have access to the internal Ember build." : ""}</p>
     </>
   );
 }
