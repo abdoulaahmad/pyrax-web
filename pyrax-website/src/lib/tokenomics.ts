@@ -8,7 +8,9 @@ export const TOKEN = {
   name: "PYRAX",
   ticker: "PYRX",
   decimals: 18,
-  baseUnit: "ash", // 1 PYRX = 10^18 ash; EVM wei ↔ base unit is 1:1
+  baseUnit: "Ash", // 1 PYRX = 10^18 Ash (the base unit; EVM wei ↔ Ash is 1:1)
+  gasUnit: "Cinder", // gas prices are quoted in Cinders — 1 Cinder = 10^9 Ash (the gwei-equivalent)
+  cinderInAsh: "10⁹",
   maxSupply: 50_000_000_000, // hard cap enforced in consensus (assert_genesis_supply)
   composition: "37.5B premine + 12.5B mined = 50B",
   genesisPrice: 0.0025, // USD / PYRX
@@ -52,15 +54,18 @@ export const FEES = {
     { label: "PYRAX treasury", pct: 20, color: "#60b8cc" },
     { label: "DAO", pct: 10, color: "#fcd03d" },
   ],
-  shielded: "Flat shielded fee (100 base units) is burned per shielded transfer",
-  gasLimit: "30,000,000 block gas · base fee moves ±12.5%/block",
+  shielded: "Flat shielded fee (100 Ash) is burned per shielded transfer",
+  gasLimit: "30,000,000 block gas · base fee moves ±12.5%/block · gas priced in Cinders (1 Cinder = 10⁹ Ash)",
 };
 
 export const STAKING = {
-  minStake: "32 PYRX",
+  soloMin: "260,000 PYRX",
+  soloUsd: "≈ $650 at genesis",
+  poolMin: "10,000 PYRX",
   unbonding: "~7 days",
   slash: "5% equivocation slash + 10% reporter bounty",
   earns: "Stream-C emission share · 70% producer tip · staking rewards",
+  poolNote: "Below the solo bond, join a native staking pool behind an operator: rewards are pro-rata, minus the operator commission (≤ 20%), and slashing is shared pro-rata.",
 };
 
 export const GOVERNANCE = {

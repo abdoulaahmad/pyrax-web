@@ -32,8 +32,8 @@ export const tokData = {
   feePyraxTreasury: "PYRAX treasury",
   feeDao: "DAO",
   feeBlockProducer: "Block producer",
-  feeShielded: "Flat shielded fee (100 base units) is burned per shielded transfer",
-  feeGasLimit: "30,000,000 block gas · base fee moves ±12.5%/block",
+  feeShielded: "Flat shielded fee (100 Ash) is burned per shielded transfer",
+  feeGasLimit: "30,000,000 block gas · base fee moves ±12.5%/block · gas priced in Cinders (1 Cinder = 10⁹ Ash)",
   // STAKING
   stakeMinStake: "32 PYRX",
   stakeUnbonding: "~7 days",

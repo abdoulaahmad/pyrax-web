@@ -158,11 +158,12 @@ const emVals = [EMISSIONS.initialSubsidy, EMISSIONS.halving, EMISSIONS.cap, EMIS
       <div data-reveal class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
         <h3 class="font-display text-xl font-extrabold">{t("tokenPage.stakingTitle", "Staking")}</h3>
         <dl class="mt-4 space-y-2 text-sm">
-          <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.minStake", "Min stake")}</dt><dd class="font-mono text-ink">{t("tokData.stakeMinStake", STAKING.minStake)}</dd></div>
+          <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.runValidator", "Run a validator")}</dt><dd class="font-mono text-ink text-right">{t("tokData.stakeSoloMin", STAKING.soloMin)} <span class="text-faint">{t("tokData.stakeSoloUsd", STAKING.soloUsd)}</span></dd></div>
+          <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.joinPool", "Join a pool")}</dt><dd class="font-mono text-ink">{t("tokData.stakePoolMin", STAKING.poolMin)}</dd></div>
           <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.unbonding", "Unbonding")}</dt><dd class="font-mono text-ink">{t("tokData.stakeUnbonding", STAKING.unbonding)}</dd></div>
           <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.slashing", "Slashing")}</dt><dd class="font-mono text-ink text-right">{t("tokData.stakeSlash", STAKING.slash)}</dd></div>
         </dl>
-        <p class="mt-4 text-xs text-muted">{t("tokenPage.validatorsEarnPre", "Validators earn ")}{t("tokData.stakeEarns", STAKING.earns)}{t("tokenPage.validatorsEarnPost", ".")}</p>
+        <p class="mt-4 text-xs text-muted">{t("tokenPage.validatorsEarnPre", "Validators earn ")}{t("tokData.stakeEarns", STAKING.earns)}{t("tokenPage.validatorsEarnPost", ".")} {t("tokData.stakePoolNote", STAKING.poolNote)}</p>
       </div>
       <div data-reveal data-reveal-delay="1" class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
         <h3 class="font-display text-xl font-extrabold">{t("tokenPage.governanceTitle", "Governance")}</h3>
