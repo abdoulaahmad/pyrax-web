@@ -62,6 +62,17 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
   const selected = net?.networks?.find((n: any) => n.chainId === net?.selected) || NETWORKS[0];
   const pickNet = (chainId: number) => { document.cookie = `pyrax_net=${chainId}; path=/; max-age=31536000; samesite=lax`; location.reload(); };
 
+  // Language switch: strip the current locale prefix from the LIVE path and rebuild it in the target
+  // locale, then do a FULL navigation (not a client-side view transition). A full load is deliberate —
+  // it guarantees the whole page (including this nav) re-renders server-side in the new language, which a
+  // transition:persist'd island cannot do on its own.
+  const restOf = (pathname: string) => {
+    const parts = pathname.split("/").filter(Boolean);
+    return parts.length && LOCALES.some((l) => l.code === parts[0]) ? "/" + parts.slice(1).join("/") : (pathname || "/");
+  };
+  const langHref = (code: string) => localizePath(code, restOf(typeof window !== "undefined" ? window.location.pathname : `/${lang}`));
+  const switchLang = (code: string, e?: React.MouseEvent) => { e?.preventDefault(); window.location.assign(langHref(code)); };
+
   const topItems: { key: PanelKey; label: string }[] = [
     { key: "products", label: t("nav.products") },
     { key: "industries", label: t("nav.industries") },
@@ -130,7 +141,7 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
                     className="absolute right-0 mt-2 max-h-[70vh] w-56 overflow-y-auto rounded-2xl border border-line bg-[rgba(10,12,19,0.98)] p-1.5 shadow-2xl backdrop-blur-xl">
                     <div className="px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wider text-faint">{t("footer.selectLanguage")}</div>
                     {LOCALES.map((lc) => (
-                      <a key={lc.code} href={localizePath(lc.code, "/")} className={`flex items-center justify-between rounded-xl px-3 py-2 text-sm transition hover:bg-[rgba(255,255,255,0.04)] ${lc.code === lang ? "text-[color:var(--color-brand)]" : "text-ink"}`}>
+                      <a key={lc.code} href={langHref(lc.code)} onClick={(e) => switchLang(lc.code, e)} className={`flex items-center justify-between rounded-xl px-3 py-2 text-sm transition hover:bg-[rgba(255,255,255,0.04)] ${lc.code === lang ? "text-[color:var(--color-brand)]" : "text-ink"}`}>
                         <span>{lc.native}</span><span className="text-[0.62rem] uppercase text-faint">{lc.code}</span>
                       </a>
                     ))}
@@ -192,7 +203,7 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
               </div>
               <a href={DOMAINS.explorer} className="mt-5 block rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-4 py-2.5 text-center text-sm font-bold text-[#1a0f06]">{t("nav.launchApp")}</a>
               <div className="mt-4 flex flex-wrap gap-2">
-                {LOCALES.slice(0, 12).map((lc) => <a key={lc.code} href={localizePath(lc.code, "/")} className={`rounded-full border border-line px-2 py-1 text-xs ${lc.code === lang ? "text-[color:var(--color-brand)]" : "text-faint"}`}>{lc.code}</a>)}
+                {LOCALES.map((lc) => <a key={lc.code} href={langHref(lc.code)} onClick={(e) => switchLang(lc.code, e)} className={`rounded-full border px-2 py-1 text-xs ${lc.code === lang ? "border-[color:var(--color-brand)] text-[color:var(--color-brand)]" : "border-line text-faint"}`}>{lc.native}</a>)}
               </div>
             </motion.div>
           </motion.div>
