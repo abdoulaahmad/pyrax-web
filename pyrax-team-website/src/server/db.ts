@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 //
 // Postgres data layer for the team portal (DigitalOcean Managed PG, database `team_pyrax`).
-// Connects from DATABASE_URL (we map DATABASE_URL_TEAM_PYRAX -> DATABASE_URL at boot), creates
-// the schema on first run, and seeds the immutable superuser. Timestamps are ms since epoch.
+// Connects from the app-specific DATABASE_URL_TEAM_PYRAX (its own unique per-app URL), falling back to
+// a generic DATABASE_URL only if that is unset. Creates the schema on first run and seeds the immutable
+// superuser. Timestamps are ms since epoch.
 
 import pg from "pg";
 import type { Permission } from "../lib/permissions";
 import { newUserId } from "./crypto";
 import { DEFAULT_SIGNATURE_SETTINGS, sanitizeSettings, type SignatureSettings } from "../lib/signature-settings";
 
-const URL_RAW = process.env.DATABASE_URL || process.env.DATABASE_URL_TEAM_PYRAX || "";
+const URL_RAW = process.env.DATABASE_URL_TEAM_PYRAX || process.env.DATABASE_URL || "";
 // DO managed PG presents a CA the node trust store doesn't have; the connection is still TLS.
 const connectionString = URL_RAW.replace(/[?&]sslmode=[^&]*/, "");
 
