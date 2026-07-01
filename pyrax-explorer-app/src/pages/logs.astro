@@ -5,21 +5,50 @@ import { selectedChainId, netFor, getLogs } from "../server/chain";
 import { shortHash, shortAddr, fmtNum, timeAgo } from "../lib/format";
 
 const net = netFor(selectedChainId(Astro.request.headers.get("cookie")));
-const { source, logs } = await getLogs(net);
+const sp = Astro.url.searchParams;
+const fAddress = (sp.get("address") || "").trim();
+const fTopic0 = (sp.get("topic0") || "").trim();
+const fFrom = sp.get("fromBlock"); const fTo = sp.get("toBlock");
+const PAGE = 40;
+const offset = Math.max(0, Number(sp.get("offset")) || 0);
+const filter = {
+  address: fAddress || undefined, topic0: fTopic0 || undefined,
+  fromBlock: fFrom != null && fFrom !== "" ? Number(fFrom) : undefined,
+  toBlock: fTo != null && fTo !== "" ? Number(fTo) : undefined,
+  limit: PAGE, offset,
+};
+const { source, logs } = await getLogs(net, filter);
 const sample = source === "sample";
+const filtered = !!(fAddress || fTopic0 || fFrom || fTo);
+const qs = (extra: Record<string, string | number>) => {
+  const p = new URLSearchParams();
+  if (fAddress) p.set("address", fAddress);
+  if (fTopic0) p.set("topic0", fTopic0);
+  if (fFrom) p.set("fromBlock", fFrom);
+  if (fTo) p.set("toBlock", fTo);
+  for (const [k, v] of Object.entries(extra)) p.set(k, String(v));
+  return "/logs?" + p.toString();
+};
 ---
 <Shell title="Event Logs" description="Contract event logs on PYRAX — filter by address, topic and block range via eth_getLogs.">
   <div class="flex flex-wrap items-center gap-2">
     <h1 class="text-2xl font-extrabold sm:text-3xl">Event Logs</h1>
     {sample && <span class="rounded-full border border-[color:rgba(252,208,61,0.4)] bg-[rgba(252,208,61,0.08)] px-2 py-0.5 text-[0.66rem] font-semibold uppercase tracking-wider text-[color:var(--color-gold)]">sample</span>}
   </div>
-  <p class="mt-1 max-w-2xl text-sm text-muted">EVM contract events from the recent block window via <span class="text-ink">eth_getLogs</span>. Deep historical search by address and topic arrives with the indexer.</p>
+  <p class="mt-1 max-w-2xl text-sm text-muted">EVM contract events via <span class="text-ink">eth_getLogs</span> (recent window) or the indexer (deep history). Filter by contract address, topic and block range.</p>
 
-  <!-- filter form (GET — re-renders server-side; topic/address filtering deepens with the indexer) -->
-  <form method="get" class="card mt-5 grid gap-3 p-4 sm:grid-cols-[1fr_1fr_auto]">
-    <div><label class="label">Contract address</label><input class="input font-mono" name="address" placeholder="0x…" /></div>
-    <div><label class="label">Topic 0 (event signature)</label><input class="input font-mono" name="topic0" placeholder="0x…" /></div>
-    <div class="flex items-end"><button class="btn btn-primary w-full sm:w-auto" type="submit">Filter</button></div>
+  <!-- filter form (GET — re-renders server-side; threaded into the indexer + the live eth_getLogs filter) -->
+  <form method="get" class="card mt-5 grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto]">
+    <div><label class="label">Contract address</label><input class="input font-mono" name="address" placeholder="0x…" value={fAddress} /></div>
+    <div><label class="label">Topic 0 (event signature)</label><input class="input font-mono" name="topic0" placeholder="0x…" value={fTopic0} /></div>
+    <div class="grid grid-cols-2 gap-2 lg:contents">
+      <div><label class="label">From block</label><input class="input font-mono" name="fromBlock" inputmode="numeric" placeholder="0" value={fFrom || ""} /></div>
+      <div><label class="label">To block</label><input class="input font-mono" name="toBlock" inputmode="numeric" placeholder="latest" value={fTo || ""} /></div>
+    </div>
+    <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-1">
+      <button class="btn btn-primary" type="submit">Filter</button>
+      {filtered && <a class="btn btn-ghost" href="/logs">Clear</a>}
+    </div>
   </form>
 
   <div class="card mt-5 overflow-hidden p-0">
@@ -29,7 +58,9 @@ const sample = source === "sample";
           <th class="px-4 py-3 font-semibold">Event</th><th class="px-4 py-3 font-semibold">Contract</th><th class="px-4 py-3 font-semibold">Topics</th><th class="px-4 py-3 font-semibold">Block</th><th class="px-4 py-3 text-right font-semibold">Tx</th>
         </tr></thead>
         <tbody>
-          {logs.map((l: any) => (
+          {logs.length === 0 ? (
+            <tr><td colspan="5" class="px-4 py-10 text-center text-sm text-muted">No logs match this filter{net.rpc ? "" : " (network offline)"}.</td></tr>
+          ) : logs.map((l: any) => (
             <tr class="border-b border-line-soft last:border-0 align-top hover:bg-[rgba(255,255,255,0.02)]">
               <td class="px-4 py-3"><span class="font-mono text-xs text-ink">{l.event || shortHash(l.topic0, 8)}</span>{l.timestamp ? <div class="text-[0.7rem] text-faint">{timeAgo(l.timestamp)}</div> : null}</td>
               <td class="px-4 py-3"><a href={`/address/${l.address}`} class="font-mono text-xs text-[color:var(--color-brand)]">{shortAddr(l.address)}</a></td>
@@ -40,6 +71,13 @@ const sample = source === "sample";
           ))}
         </tbody>
       </table>
+    </div>
+  </div>
+  <div class="mt-4 flex items-center justify-between">
+    <div class="text-xs text-faint">{offset > 0 ? `from #${fmtNum(offset + 1)}` : ""}</div>
+    <div class="flex gap-2">
+      {offset > 0 && <a class="btn btn-ghost" href={qs({ offset: Math.max(0, offset - PAGE) })}>← Newer</a>}
+      {!sample && logs.length === PAGE && <a class="btn btn-ghost" href={qs({ offset: offset + PAGE })}>Older →</a>}
     </div>
   </div>
 </Shell>

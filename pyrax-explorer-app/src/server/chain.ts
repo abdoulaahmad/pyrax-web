@@ -6,7 +6,7 @@
 import { NETWORKS, networkByChain, DEFAULT_CHAIN, type ExplorerNetwork } from "../lib/networks";
 import { rpc, rpcAll, hexToNum, deriveSeal } from "./rpc";
 import * as idx from "./indexer";
-import { sampleOverview, sampleBlocks, sampleBlockDetail, sampleTxs, sampleTxDetail, sampleAddress, sampleShielded, sampleDag, sampleNetwork, sampleGas, sampleValidators, sampleContracts, sampleTokens, sampleLogs } from "./sample";
+import { sampleOverview, sampleBlocks, sampleBlockDetail, sampleTxs, sampleTxDetail, sampleAddress, sampleShielded, sampleDag, sampleNetwork, sampleGas, sampleValidators, sampleContracts, sampleTokens, sampleLogs, sampleContractDetail, sampleTokenDetail } from "./sample";
 
 export function selectedChainId(cookieHeader: string | null): number {
   const m = (cookieHeader || "").match(/(?:^|;\s*)pyrax_net=(\d+)/);
@@ -14,6 +14,11 @@ export function selectedChainId(cookieHeader: string | null): number {
   return networkByChain(id) ? id : DEFAULT_CHAIN;
 }
 export function netFor(chainId: number): ExplorerNetwork { return networkByChain(chainId) || NETWORKS[0]; }
+
+/** A 0x-prefixed 20-byte hex address, lower-cased — or null. Used to gate detail getters so a
+ *  non-address path param (junk, oversized, SQLi probe) never reaches the indexer SQL or the node RPC;
+ *  callers fall straight through to clearly-labeled sample data instead. */
+const asAddress = (a: unknown): string | null => (typeof a === "string" && /^0x[0-9a-fA-F]{40}$/.test(a) ? a.toLowerCase() : null);
 
 export async function liveStatus(net: ExplorerNetwork): Promise<{ online: boolean; height?: number }> {
   if (!net.rpc) return { online: false };
@@ -39,10 +44,13 @@ async function dagStreamMap(net: ExplorerNetwork): Promise<Map<number, string>> 
 const ethBlock = (b: any, streams?: Map<number, string>) => {
   const blueScore = hexToNum(b.blueScore ?? b.number);
   const stream = b.stream || streams?.get(blueScore) || "A";
-  const sealAlgo = b.sealAlgo || deriveSeal(stream, blueScore);
+  // `seal_algo` is NOT surfaced by eth_getBlockBy* or pyrax_dagRecent; when absent we reconstruct the
+  // lane from the (real) stream and flag it `sealDerived` so the UI never presents the guess as fact.
+  const realSeal = typeof b.sealAlgo === "string" && b.sealAlgo;
+  const sealAlgo = realSeal || deriveSeal(stream, blueScore);
   return {
     number: hexToNum(b.number), blueScore, hash: b.hash,
-    parents: b.parents || (b.parentHash ? [b.parentHash] : []), stream, sealAlgo,
+    parents: b.parents || (b.parentHash ? [b.parentHash] : []), stream, sealAlgo, sealDerived: !realSeal,
     miner: b.miner || b.coinbase || "0x", timestamp: hexToNum(b.timestamp), txCount: Array.isArray(b.transactions) ? b.transactions.length : hexToNum(b.txCount),
     gasUsed: hexToNum(b.gasUsed), gasLimit: hexToNum(b.gasLimit), baseFee: b.baseFeePerGas ? (Number(hexToNum(b.baseFeePerGas)) / 1e9).toFixed(2) : "0", size: hexToNum(b.size),
   };
@@ -106,10 +114,10 @@ export async function getBlock(net: ExplorerNetwork, idOrHash: string) {
   const ix = await idx.block(net.chainId, idOrHash); if (ix) return ix;
   return sampleBlockDetail(/^0x/.test(idOrHash) ? 4_812_800 : Number(idOrHash) || 4_812_800);
 }
-export async function getTxs(net: ExplorerNetwork) {
+export async function getTxs(net: ExplorerNetwork, page: { limit?: number; offset?: number } = {}) {
   // A live tx FEED needs the indexer (the RPC can't list txs); when it's wired we serve real history.
-  const ix = await idx.txs(net.chainId); if (ix) return ix;
-  return { source: "sample" as const, txs: sampleTxs(25) };
+  const ix = await idx.txs(net.chainId, page); if (ix) return ix;
+  return { source: "sample" as const, txs: sampleTxs(page.limit ?? 25) };
 }
 export async function getTx(net: ExplorerNetwork, hash: string) {
   if (net.rpc) try {
@@ -122,14 +130,18 @@ export async function getTx(net: ExplorerNetwork, hash: string) {
   return sampleTxDetail(hash);
 }
 export async function getAddress(net: ExplorerNetwork, a: string) {
+  // Reject a non-address path param up front so junk/oversized/SQLi-probe input never reaches the
+  // indexer SQL or the node RPC — fall straight through to (clearly-labeled) sample data.
+  const addr = asAddress(a);
+  if (!addr) return sampleAddress(a);
   // Indexed history (real tx list + count + contract flag) and live state (balance/nonce/code) are
   // complementary — the RPC has no tx history, the indexer has no balance. Fetch both and merge.
   const [ix, live] = await Promise.all([
-    idx.address(net.chainId, a),
+    idx.address(net.chainId, addr),
     (async () => {
       if (!net.rpc) return null;
       try {
-        const [bal, nonce, code] = await Promise.all([rpc(net.rpc, "eth_getBalance", [a, "latest"], 4000).catch(() => null), rpc(net.rpc, "eth_getTransactionCount", [a, "latest"], 4000).catch(() => null), rpc(net.rpc, "eth_getCode", [a, "latest"], 4000).catch(() => null)]);
+        const [bal, nonce, code] = await Promise.all([rpc(net.rpc, "eth_getBalance", [addr, "latest"], 4000).catch(() => null), rpc(net.rpc, "eth_getTransactionCount", [addr, "latest"], 4000).catch(() => null), rpc(net.rpc, "eth_getCode", [addr, "latest"], 4000).catch(() => null)]);
         if (bal === null) return null;
         return { balance: (Number(hexToNum(bal)) / 1e18).toFixed(4), nonce: hexToNum(nonce), isContract: !!code && code !== "0x" };
       } catch { return null; }
@@ -138,12 +150,12 @@ export async function getAddress(net: ExplorerNetwork, a: string) {
   if (ix || live) {
     const isContract = ix?.isContract || live?.isContract || false;
     return {
-      source: (ix ? "indexer" : "live") as const, address: a, isContract, vm: isContract ? "evm" : null,
+      source: (ix ? "indexer" : "live") as const, address: addr, isContract, vm: isContract ? "evm" : null,
       balance: live?.balance ?? "—", nonce: live?.nonce ?? 0, txCount: ix?.txCount ?? live?.nonce ?? 0,
       verified: false, txs: ix?.txs ?? [], tokens: [],
     };
   }
-  return sampleAddress(a);
+  return sampleAddress(addr);
 }
 export async function getShielded(net: ExplorerNetwork) {
   if (net.rpc) try { const n = await rpc(net.rpc, "pyrax_noteState", [], 5000); if (n) return { source: "live" as const, anchor: n.anchor, noteCount: Number(n.note_count) || 0, nullifierCount: Number(n.nullifier_count) || 0, shieldedTxShare: "—", treeDepth: 32, capacity: 2 ** 32, recent: [] }; } catch {}
@@ -161,11 +173,13 @@ export async function getDag(net: ExplorerNetwork) {
       const nodes = recent.map((d: any) => {
         const blueScore = Number(d.blueScore);
         const stream = d.stream === "A" || d.stream === "B" || d.stream === "C" ? d.stream : "A";
-        return { hash: d.hash, blueScore, stream, sealAlgo: deriveSeal(stream, blueScore), timestamp: Number(d.timestamp), parents: (d.parents || []).map((p: string) => idx.get(p)).filter((n: number | undefined) => n !== undefined) as number[] };
+        // pyrax_dagRecent doesn't carry seal_algo → the lane is reconstructed from the stream (derived).
+        const realSeal = typeof d.sealAlgo === "string" && d.sealAlgo;
+        return { hash: d.hash, blueScore, stream, sealAlgo: realSeal || deriveSeal(stream, blueScore), sealDerived: !realSeal, timestamp: Number(d.timestamp), parents: (d.parents || []).map((p: string) => idx.get(p)).filter((n: number | undefined) => n !== undefined) as number[] };
       });
       const streamCounts: Record<string, number> = { A: 0, B: 0, C: 0 };
       for (const n of nodes) streamCounts[n.stream]++;
-      return { source: "live" as const, nodes, streamCounts, tips: [nodes[0]?.hash].filter(Boolean), head: nodes[0]?.blueScore || 0 };
+      return { source: "live" as const, sealDerived: nodes.some((n: any) => n.sealDerived), nodes, streamCounts, tips: [nodes[0]?.hash].filter(Boolean), head: nodes[0]?.blueScore || 0 };
     }
   } catch {}
   return sampleDag();
@@ -185,10 +199,11 @@ export async function getNetwork(net: ExplorerNetwork) {
       dagStreamMap(net),
     ]);
     if (sync || consensus) {
+      // Lanes are tallied from the stream via deriveSeal (RPC doesn't surface seal_algo) → derived.
       const sealLanes: Record<string, number> = { blake3: 0, sha256d: 0, kheavyhash: 0, argon2id: 0, pos: 0 };
       for (const [bs, st] of dag.entries()) sealLanes[deriveSeal(st, bs)]++;
       return {
-        source: "live" as const, mode: consensus?.mode || "—", modeNote: consensus?.single_stream_note || null,
+        source: "live" as const, sealLanesDerived: true, mode: consensus?.mode || "—", modeNote: consensus?.single_stream_note || null,
         activeStreams: consensus?.active_streams || [], height: Number(sync?.height) || 0, target: Number(sync?.target) || 0,
         finalizedHeight: Number(sync?.finalizedBlueScore ?? sync?.height) || 0, syncing: !!sync?.syncing, targetKnown: !!sync?.targetKnown,
         peerCount: Number(peerCount) || (Array.isArray(peers) ? peers.length : 0), incompatiblePeers: Number(sync?.incompatiblePeers) || 0, updateRequired: !!sync?.updateRequired,
@@ -212,8 +227,18 @@ export async function getGas(net: ExplorerNetwork) {
       const oldest = hexToNum(fh.oldestBlock);
       const history = fh.baseFeePerGas.slice(0, -1).map((b: string, i: number) => ({ block: oldest + i, baseFee: Number((Number(hexToNum(b)) / 1e9).toFixed(3)), gasUsedRatio: Number(fh.gasUsedRatio?.[i]) || 0 }));
       const cur = Number(hexToNum(fh.baseFeePerGas[fh.baseFeePerGas.length - 1])) / 1e9;
-      const tip = gp ? Number(hexToNum(gp)) / 1e9 : 0.1;
-      return { source: "live" as const, baseFee: cur.toFixed(2), tiers: { low: (cur + tip * 0.5).toFixed(2), avg: (cur + tip).toFixed(2), high: (cur + tip * 2).toFixed(2) }, history, avgUtil: history.length ? (history.reduce((a: number, h: any) => a + h.gasUsedRatio, 0) / history.length * 100).toFixed(0) : "0" };
+      // Priority-tip tiers from the requested reward percentiles [10,50,90] = Low/Avg/High, averaged
+      // across the window (gwei). Falls back to a fraction of eth_gasPrice when no reward data exists.
+      const rewards: string[][] = Array.isArray(fh.reward) ? fh.reward : [];
+      const tipPctl = (col: number): number | null => {
+        const vals = rewards.map((r) => (Array.isArray(r) ? Number(hexToNum(r[col])) / 1e9 : NaN)).filter((v) => Number.isFinite(v));
+        return vals.length ? vals.reduce((a, v) => a + v, 0) / vals.length : null;
+      };
+      const gpTip = gp ? Number(hexToNum(gp)) / 1e9 : 0.1;
+      const lowTip = tipPctl(0) ?? gpTip * 0.5;
+      const avgTip = tipPctl(1) ?? gpTip;
+      const highTip = tipPctl(2) ?? gpTip * 2;
+      return { source: "live" as const, baseFee: cur.toFixed(2), tiers: { low: (cur + lowTip).toFixed(2), avg: (cur + avgTip).toFixed(2), high: (cur + highTip).toFixed(2) }, history, avgUtil: history.length ? (history.reduce((a: number, h: any) => a + h.gasUsedRatio, 0) / history.length * 100).toFixed(0) : "0" };
     }
   } catch {}
   return sampleGas();
@@ -225,27 +250,117 @@ export async function getValidators(_net: ExplorerNetwork) {
 }
 
 /** Contracts registry. Enumerated by the indexer from verifications/deployments — sample until wired. */
-export async function getContracts(net: ExplorerNetwork) {
-  const ix = await idx.contracts(net.chainId); if (ix) return ix;
+export async function getContracts(net: ExplorerNetwork, page: { limit?: number; offset?: number } = {}) {
+  const ix = await idx.contracts(net.chainId, page); if (ix) return ix;
   return { source: "sample" as const, contracts: sampleContracts() };
 }
 
 /** Token registry. Discovered from Transfer events by the indexer — sample until it's wired. */
-export async function getTokens(net: ExplorerNetwork) {
-  const ix = await idx.tokens(net.chainId); if (ix) return ix;
+export async function getTokens(net: ExplorerNetwork, page: { limit?: number; offset?: number } = {}) {
+  const ix = await idx.tokens(net.chainId, page); if (ix) return ix;
   return { source: "sample" as const, tokens: sampleTokens() };
 }
 
+/** A single deployed contract: indexer verification metadata + live eth_getCode → sample fallback. */
+export async function getContract(net: ExplorerNetwork, a: string) {
+  const addr = asAddress(a);
+  if (!addr) return sampleContractDetail(a);
+  const [ix, live] = await Promise.all([
+    idx.contract(net.chainId, addr),
+    (async () => {
+      if (!net.rpc) return null;
+      try {
+        const [code, bal] = await Promise.all([
+          rpc(net.rpc, "eth_getCode", [addr, "latest"], 4000).catch(() => null),
+          rpc(net.rpc, "eth_getBalance", [addr, "latest"], 4000).catch(() => null),
+        ]);
+        if (code === null) return null;
+        const isContract = !!code && code !== "0x";
+        return { isContract, codeSize: isContract ? (code.length - 2) / 2 : 0, balance: bal !== null ? (Number(hexToNum(bal)) / 1e18).toFixed(4) : "—" };
+      } catch { return null; }
+    })(),
+  ]);
+  if (ix || live) {
+    const isContract = live ? live.isContract : true;
+    return {
+      source: (ix ? "indexer" : "live") as const, address: addr, isContract,
+      name: ix?.name || (isContract ? "Contract" : "Address"), vm: "evm",
+      verified: !!ix?.verified, compiler: ix?.compiler || null, language: ix?.language || "Solidity",
+      optimization: ix?.optimization ?? null, runs: ix?.runs ?? null, evmVersion: ix?.evmVersion || null,
+      verifiedAt: ix?.verifiedAt || null, sourceCode: ix?.sourceCode || null, abi: ix?.abi || null,
+      codeSize: live?.codeSize ?? 0, balance: live?.balance ?? "—",
+    };
+  }
+  return sampleContractDetail(a);
+}
+
+/** A single token: indexer registry row + live eth_call (name/symbol/decimals) → sample fallback. */
+export async function getToken(net: ExplorerNetwork, a: string) {
+  const addr = asAddress(a);
+  if (!addr) return sampleTokenDetail(a);
+  const ix = await idx.token(net.chainId, addr);
+  const live = await (async () => {
+    if (!net.rpc) return null;
+    try {
+      // ERC-20 metadata via eth_call: name() 0x06fdde03, symbol() 0x95d89b41, decimals() 0x313ce567.
+      const [nameHex, symHex, decHex] = await Promise.all([
+        rpc(net.rpc, "eth_call", [{ to: addr, data: "0x06fdde03" }, "latest"], 4000).catch(() => null),
+        rpc(net.rpc, "eth_call", [{ to: addr, data: "0x95d89b41" }, "latest"], 4000).catch(() => null),
+        rpc(net.rpc, "eth_call", [{ to: addr, data: "0x313ce567" }, "latest"], 4000).catch(() => null),
+      ]);
+      const name = decodeAbiString(nameHex), symbol = decodeAbiString(symHex);
+      const decimals = decHex && decHex !== "0x" ? hexToNum(decHex) : null;
+      if (!name && !symbol && decimals === null) return null;
+      return { name, symbol, decimals };
+    } catch { return null; }
+  })();
+  if (ix || live) {
+    return {
+      source: (ix ? "indexer" : "live") as const, address: addr,
+      name: live?.name || ix?.name || "Token", symbol: live?.symbol || ix?.symbol || "—",
+      decimals: (live?.decimals ?? ix?.decimals ?? 18) as number, kind: ix?.kind || "ERC-20",
+      holders: ix?.holders ?? 0, transfers: ix?.transfers ?? 0, supply: ix?.supply ?? "—", verified: !!ix?.verified,
+      transfersList: ix?.transfersList ?? [],
+    };
+  }
+  return sampleTokenDetail(a);
+}
+
+/** Decode an ABI-encoded `string` return (offset + length + UTF-8 bytes). Returns "" on failure. */
+function decodeAbiString(hex: unknown): string {
+  if (typeof hex !== "string" || !hex.startsWith("0x") || hex.length < 130) return "";
+  try {
+    const body = hex.slice(2);
+    const len = parseInt(body.slice(64, 128), 16);
+    if (!Number.isFinite(len) || len <= 0 || len > 256) return "";
+    const bytes = body.slice(128, 128 + len * 2);
+    let s = "";
+    for (let i = 0; i < bytes.length; i += 2) { const c = parseInt(bytes.slice(i, i + 2), 16); if (c >= 32 && c < 127) s += String.fromCharCode(c); }
+    return s.trim();
+  } catch { return ""; }
+}
+
+export interface LogFilter { address?: string; topic0?: string; fromBlock?: number; toBlock?: number; limit?: number; offset?: number }
+
 /** Event logs: indexer (deep history + filters) → live eth_getLogs over a recent window → sample. */
-export async function getLogs(net: ExplorerNetwork) {
-  const ix = await idx.logs(net.chainId); if (ix) return ix;
+export async function getLogs(net: ExplorerNetwork, filter: LogFilter = {}) {
+  const address = /^0x[0-9a-fA-F]{40}$/.test(filter.address || "") ? filter.address!.toLowerCase() : undefined;
+  const topic0 = /^0x[0-9a-fA-F]{64}$/.test(filter.topic0 || "") ? filter.topic0!.toLowerCase() : undefined;
+  const ix = await idx.logs(net.chainId, { address, topic0, fromBlock: filter.fromBlock, toBlock: filter.toBlock, limit: filter.limit, offset: filter.offset }); if (ix) return ix;
   if (net.rpc) try {
     const head = hexToNum(await rpc(net.rpc, "eth_blockNumber", [], 4000));
     if (Number.isFinite(head)) {
-      const from = Math.max(0, head - 50);
-      const raw = await rpc(net.rpc, "eth_getLogs", [{ fromBlock: "0x" + from.toString(16), toBlock: "0x" + head.toString(16) }], 8000);
+      // Cap the live window so a wide explicit range can't ask the node for an unbounded scan.
+      const MAX_WINDOW = 5000;
+      let to = Number.isFinite(filter.toBlock!) ? Math.min(filter.toBlock!, head) : head;
+      let from = Number.isFinite(filter.fromBlock!) ? Math.max(0, filter.fromBlock!) : Math.max(0, to - 50);
+      if (to - from > MAX_WINDOW) from = to - MAX_WINDOW;
+      const f: Record<string, unknown> = { fromBlock: "0x" + from.toString(16), toBlock: "0x" + to.toString(16) };
+      if (address) f.address = address;
+      if (topic0) f.topics = [topic0];
+      const raw = await rpc(net.rpc, "eth_getLogs", [f], 8000);
       if (Array.isArray(raw)) return {
-        source: "live" as const, logs: raw.slice(-40).reverse().map((l: any) => ({
+        source: "live" as const, logs: raw.slice(-(filter.limit ?? 40)).reverse().map((l: any) => ({
           address: l.address, event: null, topic0: (l.topics || [])[0] || "0x", topics: l.topics || [], data: l.data || "0x",
           block: hexToNum(l.blockNumber), txHash: l.transactionHash, logIndex: hexToNum(l.logIndex), timestamp: 0,
         })),

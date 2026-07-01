@@ -5,12 +5,15 @@ import { selectedChainId, netFor, getTxs } from "../server/chain";
 import { TX_TYPE_LABEL } from "../server/sample";
 import { shortHash, shortAddr, fmtNum, timeAgo, TX_TYPE_TONE } from "../lib/format";
 const net = netFor(selectedChainId(Astro.request.headers.get("cookie")));
-const { source, txs } = await getTxs(net);
+const PAGE = 25;
+const offset = Math.max(0, Number(Astro.url.searchParams.get("offset")) || 0);
+const { source, txs } = await getTxs(net, { limit: PAGE, offset });
+const sample = source === "sample";
 ---
 <Shell title="Transactions">
   <div class="flex items-center gap-2">
     <h1 class="text-2xl font-extrabold sm:text-3xl">Transactions</h1>
-    {source === "sample" && <span class="rounded-full border border-[color:rgba(252,208,61,0.4)] bg-[rgba(252,208,61,0.08)] px-2 py-0.5 text-[0.66rem] font-semibold uppercase tracking-wider text-[color:var(--color-gold)]">sample</span>}
+    {sample && <span class="rounded-full border border-[color:rgba(252,208,61,0.4)] bg-[rgba(252,208,61,0.08)] px-2 py-0.5 text-[0.66rem] font-semibold uppercase tracking-wider text-[color:var(--color-gold)]">sample</span>}
   </div>
   <p class="mt-1 text-sm text-muted">PYRAX carries six transaction kinds — transparent, Ethereum, shielded, escrow, stake and governance.</p>
   <div class="card mt-5 overflow-hidden p-0">
@@ -32,6 +35,13 @@ const { source, txs } = await getTxs(net);
           ))}
         </tbody>
       </table>
+    </div>
+  </div>
+  <div class="mt-4 flex items-center justify-between">
+    <div class="text-xs text-faint">{offset > 0 ? `from #${fmtNum(offset + 1)}` : ""}</div>
+    <div class="flex gap-2">
+      {offset > 0 && <a class="btn btn-ghost" href={`/txs?offset=${Math.max(0, offset - PAGE)}`}>← Newer</a>}
+      {!sample && txs.length === PAGE && <a class="btn btn-ghost" href={`/txs?offset=${offset + PAGE}`}>Older →</a>}
     </div>
   </div>
 </Shell>

@@ -5,6 +5,8 @@
  * every other PYRAX site (we consolidate into @pyrax/shared as the shared React UI lands).
  */
 @import "tailwindcss";
+/* Self-hosted fonts — no third-party origin (keeps the CSP tight). */
+@import "./fonts.css";
 
 @theme {
   /* Field (near-black, faint warm/cool undertone) */

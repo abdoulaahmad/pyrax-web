@@ -188,6 +188,55 @@ export function sampleContracts(count = 18) {
   });
 }
 
+// ---- Contract detail (single) ----
+const SAMPLE_ABI = JSON.stringify([
+  { type: "function", name: "name", stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
+  { type: "function", name: "symbol", stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
+  { type: "function", name: "balanceOf", stateMutability: "view", inputs: [{ name: "account", type: "address" }], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "transfer", stateMutability: "nonpayable", inputs: [{ name: "to", type: "address" }, { name: "amount", type: "uint256" }], outputs: [{ type: "bool" }] },
+  { type: "event", name: "Transfer", inputs: [{ name: "from", type: "address", indexed: true }, { name: "to", type: "address", indexed: true }, { name: "value", type: "uint256", indexed: false }] },
+], null, 2);
+const SAMPLE_SOURCE = `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+/// @title Sample verified contract (illustrative — network offline)
+contract PyraxSample {
+    string public name = "Pyrax Sample";
+    string public symbol = "PXS";
+    mapping(address => uint256) public balanceOf;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    function transfer(address to, uint256 amount) external returns (bool) {
+        balanceOf[msg.sender] -= amount;
+        balanceOf[to] += amount;
+        emit Transfer(msg.sender, to, amount);
+        return true;
+    }
+}`;
+export function sampleContractDetail(a: string) {
+  const verified = rnd() > 0.4;
+  return {
+    source: "sample" as const, address: a, isContract: true, name: CONTRACT_NAMES[Math.floor(rnd() * CONTRACT_NAMES.length)],
+    vm: "evm", verified, compiler: verified ? "v0.8.24+commit.e11b9ed9" : null, language: "Solidity",
+    optimization: verified ? rnd() > 0.5 : null, runs: verified ? 200 : null, evmVersion: verified ? "cancun" : null,
+    verifiedAt: verified ? Math.floor(Date.now() / 1000) - Math.floor(rnd() * 5_000_000) : null,
+    abi: verified ? SAMPLE_ABI : null, sourceCode: verified ? SAMPLE_SOURCE : null,
+    codeSize: 1200 + Math.floor(rnd() * 9000), balance: pyrx(Math.floor(rnd() * 50000)),
+  };
+}
+
+// ---- Token detail (single) ----
+export function sampleTokenDetail(a: string) {
+  const [name, symbol, decimals, kind] = TOKEN_DEFS[Math.floor(rnd() * TOKEN_DEFS.length)];
+  return {
+    source: "sample" as const, address: a, name, symbol, decimals, kind,
+    holders: Math.floor(500 + rnd() * 40000), transfers: Math.floor(1000 + rnd() * 900000),
+    supply: kind === "ERC-20" ? (Math.floor(rnd() * 900) + 100).toLocaleString("en-US") + "M" : fmtCount(Math.floor(rnd() * 10000) + 100),
+    verified: rnd() > 0.25,
+    transfersList: Array.from({ length: 12 }, (_, i) => ({ txHash: hash(), from: addr(), to: addr(), amount: pyrx(Math.floor(rnd() * 5000)), block: HEAD - i * 2, timestamp: Math.floor(Date.now() / 1000) - i * 300 })),
+  };
+}
+
 // ---- Tokens ----
 const TOKEN_DEFS = [
   ["Pyrax USD", "pUSD", 6, "ERC-20"], ["Wrapped PYRX", "WPYRX", 18, "ERC-20"], ["Phoenix Gold", "PXG", 18, "ERC-20"],

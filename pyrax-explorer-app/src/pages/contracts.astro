@@ -5,9 +5,12 @@ import { selectedChainId, netFor, getContracts } from "../server/chain";
 import { shortAddr, fmtNum } from "../lib/format";
 
 const net = netFor(selectedChainId(Astro.request.headers.get("cookie")));
-const { source, contracts } = await getContracts(net);
+const PAGE = 50;
+const offset = Math.max(0, Number(Astro.url.searchParams.get("offset")) || 0);
+const { source, contracts } = await getContracts(net, { limit: PAGE, offset });
 const sample = source === "sample";
 const vmFilter = (Astro.url.searchParams.get("vm") || "all").toLowerCase();
+const pageHref = (off: number) => `/contracts?vm=${vmFilter}&offset=${off}`;
 const shown = vmFilter === "all" ? contracts : contracts.filter((c: any) => c.vm === vmFilter);
 const VM_TONE: Record<string, string> = { evm: "#f58622", wasm: "#60b8cc", cairo: "#7c5cff" };
 const VM_LABEL: Record<string, string> = { evm: "EVM", wasm: "WASM", cairo: "Cairo" };
@@ -47,6 +50,13 @@ const tabs = [["all", "All VMs"], ["evm", "EVM"], ["wasm", "WASM"], ["cairo", "C
           ))}
         </tbody>
       </table>
+    </div>
+  </div>
+  <div class="mt-4 flex items-center justify-between">
+    <div class="text-xs text-faint">{offset > 0 ? `from #${fmtNum(offset + 1)}` : ""}</div>
+    <div class="flex gap-2">
+      {offset > 0 && <a class="btn btn-ghost" href={pageHref(Math.max(0, offset - PAGE))}>← Newer</a>}
+      {!sample && contracts.length === PAGE && <a class="btn btn-ghost" href={pageHref(offset + PAGE)}>Older →</a>}
     </div>
   </div>
 </Shell>

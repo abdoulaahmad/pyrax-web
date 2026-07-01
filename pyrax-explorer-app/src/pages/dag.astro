@@ -8,6 +8,9 @@ import { shortHash, fmtNum, timeAgo, STREAM_TONE } from "../lib/format";
 const net = netFor(selectedChainId(Astro.request.headers.get("cookie")));
 const d: any = await getDag(net);
 const sample = d.source === "sample";
+// On a live chain the seal lane is reconstructed from the stream (RPC doesn't surface seal_algo);
+// the legend/dots are labeled "derived" so the lane is never presented as read-from-header fact.
+const sealDerived = !sample && !!d.sealDerived;
 const nodes = d.nodes as any[];
 
 // Layout: newest (index 0) on the LEFT, time flows right toward older parents.
@@ -76,8 +79,11 @@ const SEAL_TONE: Record<string, string> = { blake3: "#f58622", sha256d: "#f5a623
   <!-- seal-lane legend + recent list -->
   <div class="mt-5 grid gap-5 lg:grid-cols-3">
     <div class="card p-5">
-      <h3 class="text-base font-bold">Seal lanes</h3>
-      <p class="text-xs text-muted">Five proof lanes across the three streams.</p>
+      <div class="flex items-center gap-2">
+        <h3 class="text-base font-bold">Seal lanes</h3>
+        {sealDerived && <span class="chip chip-muted" title="seal_algo isn't surfaced by pyrax_dagRecent — the inner dot's lane is reconstructed from each block's (real) stream">derived</span>}
+      </div>
+      <p class="text-xs text-muted">Five proof lanes across the three streams.{sealDerived ? " The inner dot shows the lane reconstructed from each block's stream (the RPC doesn't expose seal_algo)." : ""}</p>
       <div class="mt-3 space-y-2 text-sm">
         {Object.entries(SEAL_LABEL).map(([k, label]) => (
           <div class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full" style={`background:${SEAL_TONE[k]}`}></span><span class="text-ink">{label}</span></div>

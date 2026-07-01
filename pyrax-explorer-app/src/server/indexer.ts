@@ -91,8 +91,13 @@ export async function block(chainId: number, idOrHash: string) {
   };
 }
 
-export async function txs(chainId: number) {
-  const rows = await q("SELECT * FROM txns WHERE chain_id=$1 ORDER BY block_number DESC, tx_index DESC LIMIT 25", [chainId]);
+// clamp + normalize pagination so the page layer can pass user query params straight through.
+const lim = (v?: number, def = 25, max = 100) => Math.min(Math.max(1, Math.floor(Number(v) || def)), max);
+const off = (v?: number) => Math.max(0, Math.floor(Number(v) || 0));
+
+export async function txs(chainId: number, page: { limit?: number; offset?: number } = {}) {
+  const limit = lim(page.limit), offset = off(page.offset);
+  const rows = await q("SELECT * FROM txns WHERE chain_id=$1 ORDER BY block_number DESC, tx_index DESC LIMIT $2 OFFSET $3", [chainId, limit, offset]);
   if (!rows || !rows.length) return null;
   return { source: "indexer" as const, txs: rows.map(mapTxRow) };
 }
@@ -127,11 +132,15 @@ export async function address(chainId: number, a: string) {
   };
 }
 
-export async function logs(chainId: number, opts: { address?: string; topic0?: string } = {}) {
+export async function logs(chainId: number, opts: { address?: string; topic0?: string; fromBlock?: number; toBlock?: number; limit?: number; offset?: number } = {}) {
   const where = ["chain_id=$1"]; const args: unknown[] = [chainId];
   if (opts.address) { args.push(opts.address.toLowerCase()); where.push(`address=$${args.length}`); }
   if (opts.topic0) { args.push(opts.topic0.toLowerCase()); where.push(`topic0=$${args.length}`); }
-  const rows = await q(`SELECT * FROM logs WHERE ${where.join(" AND ")} ORDER BY block_number DESC, log_index DESC LIMIT 40`, args);
+  if (Number.isFinite(opts.fromBlock!)) { args.push(opts.fromBlock); where.push(`block_number>=$${args.length}`); }
+  if (Number.isFinite(opts.toBlock!)) { args.push(opts.toBlock); where.push(`block_number<=$${args.length}`); }
+  args.push(lim(opts.limit, 40)); const lp = args.length;
+  args.push(off(opts.offset)); const op = args.length;
+  const rows = await q(`SELECT * FROM logs WHERE ${where.join(" AND ")} ORDER BY block_number DESC, log_index DESC LIMIT $${lp} OFFSET $${op}`, args);
   if (!rows || !rows.length) return null;
   return { source: "indexer" as const, logs: rows.map((l: any) => ({
     address: l.address, event: null, topic0: l.topic0, topics: [l.topic0, l.topic1, l.topic2, l.topic3].filter(Boolean),
@@ -139,8 +148,8 @@ export async function logs(chainId: number, opts: { address?: string; topic0?: s
   })) };
 }
 
-export async function contracts(chainId: number) {
-  const rows = await q("SELECT chain_id,address,name,compiler,verified_at FROM contracts WHERE chain_id=$1 ORDER BY verified_at DESC LIMIT 50", [chainId]);
+export async function contracts(chainId: number, page: { limit?: number; offset?: number } = {}) {
+  const rows = await q("SELECT chain_id,address,name,compiler,verified_at FROM contracts WHERE chain_id=$1 ORDER BY verified_at DESC LIMIT $2 OFFSET $3", [chainId, lim(page.limit, 50), off(page.offset)]);
   if (!rows || !rows.length) return null;
   return { source: "indexer" as const, contracts: rows.map((c: any) => ({
     address: c.address, name: c.name || "Contract", vm: "evm", verified: !!c.verified_at,
@@ -148,14 +157,45 @@ export async function contracts(chainId: number) {
   })) };
 }
 
-export async function tokens(chainId: number) {
+export async function tokens(chainId: number, page: { limit?: number; offset?: number } = {}) {
   const rows = await q(
     `SELECT t.*, (SELECT COUNT(*) FROM transfers x WHERE x.chain_id=t.chain_id AND x.token=t.address) AS transfer_count
-     FROM tokens t WHERE t.chain_id=$1 ORDER BY transfer_count DESC LIMIT 50`, [chainId]);
+     FROM tokens t WHERE t.chain_id=$1 ORDER BY transfer_count DESC LIMIT $2 OFFSET $3`, [chainId, lim(page.limit, 50), off(page.offset)]);
   if (!rows || !rows.length) return null;
   return { source: "indexer" as const, tokens: rows.map((t: any) => ({
     address: t.address, name: t.name || "Token", symbol: t.symbol || "—", decimals: Number(t.decimals) || 18,
     kind: t.kind === "erc721" ? "ERC-721" : t.kind === "erc1155" ? "ERC-1155" : "ERC-20",
     holders: 0, transfers: Number(t.transfer_count) || 0, supply: "—", verified: false,
   })) };
+}
+
+/** One contract's verification metadata (source/abi/compiler) — null when not verified/not indexed. */
+export async function contract(chainId: number, a: string) {
+  const rows = await q("SELECT * FROM contracts WHERE chain_id=$1 AND address=$2", [chainId, a.toLowerCase()]);
+  if (!rows || !rows.length) return null;
+  const c: any = rows[0];
+  return {
+    source: "indexer" as const, address: c.address, name: c.name || "Contract", vm: "evm",
+    verified: !!c.verified_at, compiler: c.compiler || null, language: "Solidity",
+    optimization: c.optimization == null ? null : !!c.optimization, runs: c.runs == null ? null : Number(c.runs),
+    evmVersion: c.evm_version || null, verifiedAt: c.verified_at == null ? null : Number(c.verified_at),
+    sourceCode: c.source || null, abi: c.abi || null,
+  };
+}
+
+/** One token's registry row + recent transfers — null when the token isn't indexed. */
+export async function token(chainId: number, a: string) {
+  const lc = a.toLowerCase();
+  const rows = await q(
+    `SELECT t.*, (SELECT COUNT(*) FROM transfers x WHERE x.chain_id=t.chain_id AND x.token=t.address) AS transfer_count
+     FROM tokens t WHERE t.chain_id=$1 AND t.address=$2`, [chainId, lc]);
+  if (!rows || !rows.length) return null;
+  const t: any = rows[0];
+  const xfers = (await q("SELECT * FROM transfers WHERE chain_id=$1 AND token=$2 ORDER BY block_number DESC, log_index DESC LIMIT 25", [chainId, lc])) || [];
+  return {
+    source: "indexer" as const, address: t.address, name: t.name || "Token", symbol: t.symbol || "—",
+    decimals: Number(t.decimals) || 18, kind: t.kind === "erc721" ? "ERC-721" : t.kind === "erc1155" ? "ERC-1155" : "ERC-20",
+    holders: 0, transfers: Number(t.transfer_count) || 0, supply: "—", verified: false,
+    transfersList: xfers.map((x: any) => ({ txHash: x.tx_hash, from: x.from_addr, to: x.to_addr, amount: PYRX(x.amount), block: Number(x.block_number), timestamp: Number(x.block_time) || 0 })),
+  };
 }

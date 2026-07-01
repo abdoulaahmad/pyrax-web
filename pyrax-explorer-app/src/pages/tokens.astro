@@ -5,7 +5,9 @@ import { selectedChainId, netFor, getTokens } from "../server/chain";
 import { shortAddr, fmtNum } from "../lib/format";
 
 const net = netFor(selectedChainId(Astro.request.headers.get("cookie")));
-const { source, tokens } = await getTokens(net);
+const PAGE = 50;
+const offset = Math.max(0, Number(Astro.url.searchParams.get("offset")) || 0);
+const { source, tokens } = await getTokens(net, { limit: PAGE, offset });
 const sample = source === "sample";
 const KIND_TONE: Record<string, string> = { "ERC-20": "#f58622", "ERC-721": "#7c5cff", "ERC-1155": "#60b8cc" };
 ---
@@ -25,7 +27,7 @@ const KIND_TONE: Record<string, string> = { "ERC-20": "#f58622", "ERC-721": "#7c
         <tbody>
           {tokens.map((t: any, i: number) => (
             <tr class="border-b border-line-soft last:border-0 hover:bg-[rgba(255,255,255,0.02)]">
-              <td class="px-4 py-3 font-mono text-faint">{i + 1}</td>
+              <td class="px-4 py-3 font-mono text-faint">{offset + i + 1}</td>
               <td class="px-4 py-3">
                 <div class="flex items-center gap-2.5">
                   <span class="grid h-8 w-8 place-items-center rounded-full text-[0.62rem] font-bold" style={`color:${KIND_TONE[t.kind]};background:${KIND_TONE[t.kind]}1a`}>{t.symbol.slice(0, 3)}</span>
@@ -40,6 +42,13 @@ const KIND_TONE: Record<string, string> = { "ERC-20": "#f58622", "ERC-721": "#7c
           ))}
         </tbody>
       </table>
+    </div>
+  </div>
+  <div class="mt-4 flex items-center justify-between">
+    <div class="text-xs text-faint">{offset > 0 ? `rank ${fmtNum(offset + 1)}+` : ""}</div>
+    <div class="flex gap-2">
+      {offset > 0 && <a class="btn btn-ghost" href={`/tokens?offset=${Math.max(0, offset - PAGE)}`}>← Prev</a>}
+      {!sample && tokens.length === PAGE && <a class="btn btn-ghost" href={`/tokens?offset=${offset + PAGE}`}>Next →</a>}
     </div>
   </div>
 </Shell>
