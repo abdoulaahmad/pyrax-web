@@ -37,8 +37,19 @@ const connectionString = URL_RAW.replace(/[?&]sslmode=[^&]*/, "");
 let pool: pg.Pool | null = null;
 let ready: Promise<void> | null = null;
 function db(): pg.Pool {
-  if (!pool) pool = new pg.Pool({ connectionString, ssl: { rejectUnauthorized: false }, max: 4, idleTimeoutMillis: 30_000 });
+  // connectionTimeoutMillis bounds a connect attempt to an unreachable host (pg default is 0 = wait
+  // indefinitely, which would hang /healthz, the HEALTHCHECK, and every page render that reads settings).
+  if (!pool) pool = new pg.Pool({ connectionString, ssl: { rejectUnauthorized: false }, max: 4, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 4_000 });
   return pool;
+}
+
+/** Resolve `p`, or `fallback` if it doesn't settle within `ms`. The slow promise is left to settle on
+ *  its own (its rejection is swallowed) so a hung DB connect can never stall the caller. */
+function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise<T>((resolve) => {
+    const t = setTimeout(() => resolve(fallback), ms);
+    p.then((v) => { clearTimeout(t); resolve(v); }, () => { clearTimeout(t); resolve(fallback); });
+  });
 }
 function init(): Promise<void> {
   if (!ready) ready = (async () => {
@@ -48,16 +59,27 @@ function init(): Promise<void> {
 }
 export const settingsConfigured = () => !!connectionString;
 
+/** Lightweight DB reachability probe for /healthz. Never throws or hangs — reports a status string,
+ *  treating a slow/unreachable DB as "down" within a bounded time so the health check stays responsive. */
+export async function pingDb(): Promise<"up" | "down" | "unconfigured"> {
+  if (!connectionString) return "unconfigured";
+  return withTimeout(db().query("SELECT 1").then(() => "up" as const, () => "down" as const), 4_500, "down");
+}
+
 export async function getSiteSettings(): Promise<SiteSettings> {
   if (!connectionString) return DEFAULT_SETTINGS;
-  try {
-    await init();
-    const r = await db().query("SELECT data, updated_at, updated_by FROM site_settings WHERE id=1");
-    if (!r.rows[0]) return DEFAULT_SETTINGS;
-    return { ...DEFAULT_SETTINGS, ...r.rows[0].data, updatedAt: Number(r.rows[0].updated_at) || 0, updatedBy: r.rows[0].updated_by || null };
-  } catch {
-    return DEFAULT_SETTINGS; // DB not provisioned yet — degrade gracefully
-  }
+  // Bounded read: this runs on EVERY page render (Base layout), so a slow/unreachable DB must fall back
+  // to safe defaults promptly rather than stalling the whole site.
+  return withTimeout((async () => {
+    try {
+      await init();
+      const r = await db().query("SELECT data, updated_at, updated_by FROM site_settings WHERE id=1");
+      if (!r.rows[0]) return DEFAULT_SETTINGS;
+      return { ...DEFAULT_SETTINGS, ...r.rows[0].data, updatedAt: Number(r.rows[0].updated_at) || 0, updatedBy: r.rows[0].updated_by || null };
+    } catch {
+      return DEFAULT_SETTINGS; // DB not provisioned yet — degrade gracefully
+    }
+  })(), 4_500, DEFAULT_SETTINGS);
 }
 
 export async function setSiteSettings(patch: Partial<SiteSettings>, by: string | null): Promise<SiteSettings> {

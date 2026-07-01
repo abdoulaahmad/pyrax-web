@@ -4,12 +4,17 @@
 import type { APIRoute } from "astro";
 import { upsertNotifyContact } from "../../../server/brevo";
 import { savePushSub } from "../../../server/push";
+import { notifySubscribeLimiter } from "../../../server/ratelimit";
 
 export const prerender = false;
 const json = (d: unknown, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, clientAddress }) => {
+  // Tight per-IP rate limit: each call can hit Brevo (sends/queues email) ⇒ email-bomb amplification.
+  const limiterKey = (clientAddress || "unknown").replace(/^::ffff:/i, "");
+  if (!notifySubscribeLimiter.take(limiterKey)) return json({ ok: false, error: "Too many requests — please wait a moment." }, 429);
+
   const b = await request.json().catch(() => ({}));
   const email = String(b?.email ?? "").trim().toLowerCase();
   const sub = b?.push && b.push.endpoint ? b.push : null;

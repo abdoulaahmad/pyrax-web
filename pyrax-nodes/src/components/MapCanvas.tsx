@@ -8,7 +8,9 @@
 // online" panel, and a branded snapshot export at social-media sizes incl. 4K UHD. The 2D/3D choice
 // persists. All assets are bundled — no third-party CDN.
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import Globe from "globe.gl";
+// globe.gl pulls in three.js (~1.9MB). It's only needed in 3D mode, so it's loaded on demand via a
+// dynamic import() in the 3D-init effect below — 2D-only visitors never download it. (2D is pure
+// d3-geo canvas.)
 import { geoNaturalEarth1, geoPath, geoGraticule10, geoCircle, geoDistance, geoInterpolate, type GeoProjection } from "d3-geo";
 
 interface NetRow { label: string; name: string; color: string; online: boolean; peers: number }
@@ -169,12 +171,24 @@ export default function MapCanvas() {
   }, [tick, focus, nets]);
 
   // ===================== 3D (globe.gl) =====================
-  // Create the globe ONCE, as soon as the host is mounted + world is loaded + 3D is active.
+  // Create the globe ONCE, as soon as the host is mounted + world is loaded + 3D is active. globe.gl
+  // (and its three.js dependency) is imported on demand here so 2D-only visitors never download it.
+  const globeInitingRef = useRef(false);
   useEffect(() => {
-    if (globeRef.current || !worldReady || mode !== "3d" || !globeHostRef.current) return;
-    try {
-      const el = globeHostRef.current;
-      const g = new (Globe as any)(el, { rendererConfig: { preserveDrawingBuffer: true, antialias: true } })
+    if (globeRef.current || globeInitingRef.current || !worldReady || mode !== "3d" || !globeHostRef.current) return;
+    let cancelled = false;
+    globeInitingRef.current = true;
+    (async () => {
+      const Globe = (await import("globe.gl")).default;
+      // Guard against unmount / mode-switch while the chunk was loading. Only this run may clear the
+      // in-flight flag, and ONLY if it wasn't cancelled — a cancelled run's flag is already owned (and
+      // cleared) by the cleanup below, so clearing it here could clobber a newer run's flag and wedge
+      // a second init. (Without this guard, a rapid 3D→2D→3D toggle during the first chunk load could
+      // leave the globe permanently uninitialized.)
+      if (cancelled || globeRef.current || mode !== "3d" || !globeHostRef.current) { if (!cancelled) globeInitingRef.current = false; return; }
+      try {
+        const el = globeHostRef.current;
+        const g = new (Globe as any)(el, { rendererConfig: { preserveDrawingBuffer: true, antialias: true } })
         .backgroundColor("rgba(0,0,0,0)")
         .globeImageUrl("/globe/earth-dark.jpg")
         .showGraticules(true).showAtmosphere(true).atmosphereColor(P.primary).atmosphereAltitude(0.18)
@@ -185,13 +199,18 @@ export default function MapCanvas() {
         .arcStartLat((d: any) => d.startLat).arcStartLng((d: any) => d.startLng).arcEndLat((d: any) => d.endLat).arcEndLng((d: any) => d.endLng)
         .labelLat((d: any) => d.lat).labelLng((d: any) => d.lng).labelText(() => "").labelDotRadius(0.16).labelColor(() => "rgba(255,255,255,0.45)").labelResolution(2)
         .labelLabel((d: any) => `<div style="font:600 12px Inter,sans-serif;color:#f6f8fc;background:rgba(10,12,19,.96);border:1px solid #232838;border-radius:8px;padding:6px 9px">${d.n}, ${d.c}<br><span style="color:#99a2b5;font-weight:400">${d.tz} · ${tzClock(d.tz)} local</span></div>`);
-      const ctrl = g.controls(); ctrl.autoRotate = !paused; ctrl.autoRotateSpeed = 0.5; ctrl.enableZoom = true; ctrl.enableRotate = true;
-      g.pointOfView({ lat: 20, lng: 0, altitude: 2.4 });
-      try { g.renderer().setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); } catch {}
-      g.width(el.clientWidth || 800).height(el.clientHeight || 500);
-      globeRef.current = g;
-      setTick((t) => t + 1); // kick the first data push
-    } catch (e) { console.error("[map] globe init failed", e); }
+        const ctrl = g.controls(); ctrl.autoRotate = !paused; ctrl.autoRotateSpeed = 0.5; ctrl.enableZoom = true; ctrl.enableRotate = true;
+        g.pointOfView({ lat: 20, lng: 0, altitude: 2.4 });
+        try { g.renderer().setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); } catch {}
+        g.width(el.clientWidth || 800).height(el.clientHeight || 500);
+        globeRef.current = g;
+        setTick((t) => t + 1); // kick the first data push
+      } catch (e) { console.error("[map] globe init failed", e); }
+      finally { if (!cancelled) globeInitingRef.current = false; }
+    })().catch((e) => { console.error("[map] globe load failed", e); if (!cancelled) globeInitingRef.current = false; });
+    // On cleanup (unmount / mode-switch), cancel this run AND release the in-flight flag so the next
+    // 3D-entry effect can start a fresh init instead of being blocked by a flag whose async will bail.
+    return () => { cancelled = true; globeInitingRef.current = false; };
   }, [worldReady, mode]);
 
   // Push node/arc/capital data to the globe whenever it changes (not every frame).

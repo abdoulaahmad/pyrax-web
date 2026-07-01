@@ -2,13 +2,15 @@
 // Immediate peer removal (HMAC-gated) — the app calls this when a node is destroyed, so it drops from
 // the directory without waiting for the TTL to lapse.
 import type { APIRoute } from "astro";
-import { verifyHmac } from "../../server/hmac";
+import { verifyHmac, ingestSecretReady } from "../../server/hmac";
 import { removePeer } from "../../server/directory";
 
 export const prerender = false;
 const json = (d: unknown, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 
 export const POST: APIRoute = async ({ request }) => {
+  // Fail closed: refuse in production when no real directory secret is configured (see hmac.ts).
+  if (!ingestSecretReady()) return json({ ok: false, error: "ingest not configured" }, 503);
   const raw = await request.text();
   if (!verifyHmac("POST", "/api/deregister", raw, request.headers.get("authorization"))) return json({ ok: false, error: "unauthorized" }, 401);
   let b: any;
