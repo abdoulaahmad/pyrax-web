@@ -176,7 +176,6 @@ export default function Landing() {
     <div className="pointer-events-none absolute inset-0 -z-10">
       <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(245,134,34,0.2),transparent_62%)] blur-2xl animate-float" />
       <div className="absolute -bottom-24 left-1/3 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(28,99,166,0.18),transparent_62%)] blur-2xl" style={{ animation: "float 9s ease-in-out infinite" }} />
-      <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px)", backgroundSize: "44px 44px", maskImage: "radial-gradient(circle at 50% 25%,#000,transparent 78%)" }} />
     </div>
   );
 
