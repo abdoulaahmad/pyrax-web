@@ -153,37 +153,76 @@ const emVals = [EMISSIONS.initialSubsidy, EMISSIONS.halving, EMISSIONS.cap, EMIS
   </section>
 
   <!-- STAKING / GOV / COMPUTE -->
-  <section class="mx-auto max-w-7xl px-6 py-16">
-    <div class="grid gap-4 lg:grid-cols-3">
-      <div data-reveal class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
-        <h3 class="font-display text-xl font-extrabold">{t("tokenPage.stakingTitle", "Staking")}</h3>
-        <dl class="mt-4 space-y-2 text-sm">
-          <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.runValidator", "Run a validator")}</dt><dd class="font-mono text-ink text-right">{t("tokData.stakeSoloMin", STAKING.soloMin)} <span class="text-faint">{t("tokData.stakeSoloUsd", STAKING.soloUsd)}</span></dd></div>
-          <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.joinPool", "Join a pool")}</dt><dd class="font-mono text-ink">{t("tokData.stakePoolMin", STAKING.poolMin)}</dd></div>
-          <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.unbonding", "Unbonding")}</dt><dd class="font-mono text-ink">{t("tokData.stakeUnbonding", STAKING.unbonding)}</dd></div>
-          <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.slashing", "Slashing")}</dt><dd class="font-mono text-ink text-right">{t("tokData.stakeSlash", STAKING.slash)}</dd></div>
-        </dl>
-        <p class="mt-4 text-xs text-muted">{t("tokenPage.validatorsEarnPre", "Validators earn ")}{t("tokData.stakeEarns", STAKING.earns)}{t("tokenPage.validatorsEarnPost", ".")} {t("tokData.stakePoolNote", STAKING.poolNote)}</p>
+  <section class="border-t border-line bg-[color:var(--color-bg-2)]">
+    <div class="mx-auto max-w-7xl px-6 py-20">
+      <div data-reveal class="mx-auto mb-14 max-w-2xl text-center">
+        <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">{t("tokenPage.participate", "Put PYRX to work")}</div>
+        <h2 class="mt-3 font-display text-3xl font-extrabold sm:text-4xl">{t("tokenPage.participateTitle", "Staking, governance & compute")}</h2>
+        <p class="mx-auto mt-3 max-w-xl text-muted">{t("tokenPage.participateBody", "Three ways the token is used: secure finality by staking, steer the protocol by voting, and turn idle GPUs into verifiable compute.")}</p>
       </div>
-      <div data-reveal data-reveal-delay="1" class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
-        <h3 class="font-display text-xl font-extrabold">{t("tokenPage.governanceTitle", "Governance")}</h3>
-        <p class="mt-3 text-xs text-faint">{t("tokenPage.governableIntro", "Exactly three parameters are governable:")}</p>
-        <ul class="mt-2 space-y-1 text-sm text-muted">{GOVERNANCE.governable.map((g, gi) => (<li class="flex gap-2"><span class="text-[color:var(--color-brand)]">·</span>{t(`tokData.govParam${gi}`, g)}</li>))}</ul>
-        <dl class="mt-4 space-y-2 text-sm">
-          <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.quorum", "Quorum")}</dt><dd class="font-mono text-ink">{t("tokData.govQuorum", GOVERNANCE.quorum)}</dd></div>
-          <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.pass", "Pass")}</dt><dd class="font-mono text-ink">{t("tokData.govPass", GOVERNANCE.pass)}</dd></div>
-        </dl>
-        <p class="mt-4 text-xs text-muted"><span class="text-[color:var(--color-negative)]">{t("tokenPage.frozenForever", "Frozen forever:")}</span> {t("tokData.govFrozen", GOVERNANCE.frozen)}.</p>
-      </div>
-      <div data-reveal data-reveal-delay="2" class="rounded-3xl border border-line bg-[radial-gradient(120%_120%_at_100%_0%,rgba(124,92,255,0.14),transparent_60%)] p-6">
-        <h3 class="font-display text-xl font-extrabold">{t("tokenPage.computeTitle", "NEURAX compute")}</h3>
-        <dl class="mt-4 space-y-2 text-sm">
-          <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.price", "Price")}</dt><dd class="font-mono text-ink">{t("tokData.computePerCu", COMPUTE.perCu)}</dd></div>
-          <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.poolBudget", "Pool budget")}</dt><dd class="font-mono text-ink text-right">{t("tokData.computePoolBudget", COMPUTE.poolBudget)}</dd></div>
-          <div class="flex justify-between gap-3"><dt class="text-faint">{t("tokenPage.jobCap", "Job cap")}</dt><dd class="font-mono text-ink text-right">{t("tokData.computeDrawdownCap", COMPUTE.drawdownCap)}</dd></div>
-        </dl>
-        <p class="mt-4 text-xs text-muted">{t("tokData.computeCu", COMPUTE.cu)}. {t("tokData.computeTransition", COMPUTE.transition)}.</p>
-        <a href={L("/technology#neurax")} class="mt-4 inline-flex text-sm font-semibold text-[color:#7c5cff]">{t("tokenPage.neuraxLink", "How NEURAX works →")}</a>
+
+      <div class="grid gap-6 lg:grid-cols-3">
+        <!-- STAKING -->
+        <div data-reveal class="group flex flex-col rounded-[1.75rem] border border-line bg-[color:var(--color-surface)] p-7 transition hover:border-[color:#34405a]">
+          <div class="flex items-center gap-3">
+            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-line text-[color:var(--color-brand)]"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 7.8 7 9 4-1.2 7-4.5 7-9V6z"/><path d="m9.5 12 1.8 1.8L15 10"/></svg></span>
+            <h3 class="font-display text-xl font-extrabold">{t("tokenPage.stakingTitle", "Staking")}</h3>
+          </div>
+          <div class="mt-7 space-y-3">
+            <div class="rounded-2xl border border-line bg-[color:var(--color-bg-2)] p-4">
+              <div class="text-[0.62rem] font-semibold uppercase tracking-wider text-faint">{t("tokenPage.runValidator", "Run a validator")}</div>
+              <div class="mt-2 flex items-baseline justify-between gap-3">
+                <span class="whitespace-nowrap font-mono text-2xl font-extrabold leading-none flame-text">{t("tokData.stakeSoloMin", STAKING.soloMin)}</span>
+                <span class="shrink-0 text-right text-[0.72rem] text-muted">{t("tokData.stakeSoloUsd", STAKING.soloUsd)}</span>
+              </div>
+            </div>
+            <div class="rounded-2xl border border-line bg-[color:var(--color-bg-2)] p-4">
+              <div class="text-[0.62rem] font-semibold uppercase tracking-wider text-faint">{t("tokenPage.joinPool", "Join a pool")}</div>
+              <div class="mt-2 flex items-baseline justify-between gap-3">
+                <span class="whitespace-nowrap font-mono text-2xl font-extrabold leading-none text-ink">{t("tokData.stakePoolMin", STAKING.poolMin)}</span>
+                <span class="shrink-0 text-right text-[0.72rem] text-muted">{t("tokenPage.poolMinSub", "minimum to delegate")}</span>
+              </div>
+            </div>
+          </div>
+          <dl class="mt-6 space-y-2.5 border-t border-line-soft pt-6 text-sm">
+            <div class="flex items-center justify-between gap-3"><dt class="text-faint">{t("tokenPage.unbonding", "Unbonding")}</dt><dd class="font-mono font-semibold text-ink">{t("tokData.stakeUnbonding", STAKING.unbonding)}</dd></div>
+            <div class="flex items-center justify-between gap-3"><dt class="text-faint">{t("tokenPage.slashing", "Slashing")}</dt><dd class="font-mono font-semibold text-ink">{t("tokData.stakeSlashShort", "5% + 10% bounty")}</dd></div>
+          </dl>
+          <p class="mt-6 flex-1 text-xs leading-relaxed text-muted">{t("tokenPage.validatorsEarnPre", "Validators earn ")}{t("tokData.stakeEarns", STAKING.earns)}{t("tokenPage.validatorsEarnPost", ".")} {t("tokData.stakeSlashLong", "Equivocation is slashed 5% (burned) with a 10% reporter bounty.")} {t("tokData.stakePoolNote", STAKING.poolNote)}</p>
+        </div>
+
+        <!-- GOVERNANCE -->
+        <div data-reveal data-reveal-delay="1" class="group flex flex-col rounded-[1.75rem] border border-line bg-[color:var(--color-surface)] p-7 transition hover:border-[color:#34405a]">
+          <div class="flex items-center gap-3">
+            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-line text-[color:var(--color-bolt-bright)]"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg></span>
+            <h3 class="font-display text-xl font-extrabold">{t("tokenPage.governanceTitle", "Governance")}</h3>
+          </div>
+          <p class="mt-6 text-xs font-semibold uppercase tracking-wider text-faint">{t("tokenPage.governableIntro", "Exactly three parameters are governable:")}</p>
+          <ul class="mt-3 space-y-2">{GOVERNANCE.governable.map((g, gi) => (<li class="flex items-center gap-2.5 rounded-xl border border-line-soft bg-[color:var(--color-bg-2)] px-3 py-2 font-mono text-[0.78rem] text-ink"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--color-bolt-bright)]"></span>{t(`tokData.govParam${gi}`, g)}</li>))}</ul>
+          <div class="mt-6 grid grid-cols-2 gap-3">
+            <div class="rounded-2xl border border-line bg-[color:var(--color-bg-2)] p-4"><div class="text-[0.62rem] font-semibold uppercase tracking-wider text-faint">{t("tokenPage.quorum", "Quorum")}</div><div class="mt-1.5 font-mono text-lg font-extrabold text-ink">{t("tokData.govQuorum", GOVERNANCE.quorum)}</div></div>
+            <div class="rounded-2xl border border-line bg-[color:var(--color-bg-2)] p-4"><div class="text-[0.62rem] font-semibold uppercase tracking-wider text-faint">{t("tokenPage.pass", "Pass")}</div><div class="mt-1.5 font-mono text-lg font-extrabold text-ink">{t("tokData.govPass", GOVERNANCE.pass)}</div></div>
+          </div>
+          <div class="mt-6 flex-1 rounded-2xl border border-[rgba(251,111,115,0.25)] bg-[rgba(251,111,115,0.06)] p-4">
+            <div class="flex items-center gap-1.5 text-[0.68rem] font-bold uppercase tracking-wider text-[color:var(--color-negative)]"><svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>{t("tokenPage.frozenForever", "Frozen forever")}</div>
+            <p class="mt-2 text-xs leading-relaxed text-muted">{t("tokData.govFrozen", GOVERNANCE.frozen)}.</p>
+          </div>
+        </div>
+
+        <!-- NEURAX -->
+        <div data-reveal data-reveal-delay="2" class="group relative flex flex-col overflow-hidden rounded-[1.75rem] border border-line bg-[radial-gradient(130%_120%_at_100%_0%,rgba(124,92,255,0.16),transparent_58%)] p-7 transition hover:border-[color:#4b3d80]">
+          <div class="flex items-center gap-3">
+            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-line text-[color:#7c5cff]"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M10 2v3M14 2v3M10 19v3M14 19v3M2 10h3M2 14h3M19 10h3M19 14h3"/></svg></span>
+            <h3 class="font-display text-xl font-extrabold">{t("tokenPage.computeTitle", "NEURAX compute")}</h3>
+          </div>
+          <div class="mt-7 space-y-3">
+            <div class="flex items-center justify-between gap-3 rounded-2xl border border-line bg-[rgba(9,11,18,0.55)] px-4 py-3"><span class="text-[0.62rem] font-semibold uppercase tracking-wider text-faint">{t("tokenPage.price", "Price")}</span><span class="font-mono text-lg font-extrabold text-[color:#a78bff]">{t("tokData.computePerCu", COMPUTE.perCu)}</span></div>
+            <div class="flex items-center justify-between gap-3 rounded-2xl border border-line bg-[rgba(9,11,18,0.55)] px-4 py-3"><span class="shrink-0 text-[0.62rem] font-semibold uppercase tracking-wider text-faint">{t("tokenPage.poolBudget", "Pool budget")}</span><span class="text-right font-mono text-xs font-bold text-ink">{t("tokData.computePoolBudget", COMPUTE.poolBudget)}</span></div>
+            <div class="flex items-center justify-between gap-3 rounded-2xl border border-line bg-[rgba(9,11,18,0.55)] px-4 py-3"><span class="shrink-0 text-[0.62rem] font-semibold uppercase tracking-wider text-faint">{t("tokenPage.jobCap", "Job cap")}</span><span class="text-right font-mono text-xs font-bold text-ink">{t("tokData.computeDrawdownCap", COMPUTE.drawdownCap)}</span></div>
+          </div>
+          <p class="mt-6 flex-1 text-xs leading-relaxed text-muted">{t("tokData.computeCu", COMPUTE.cu)}. {t("tokData.computeTransition", COMPUTE.transition)}.</p>
+          <a href={L("/technology#neurax")} class="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-[color:#a78bff] transition hover:gap-2">{t("tokenPage.neuraxLink", "How NEURAX works →")}</a>
+        </div>
       </div>
     </div>
 
