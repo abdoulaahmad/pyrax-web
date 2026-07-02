@@ -23,10 +23,15 @@ describe("RateLimiter token bucket", () => {
   });
 
   it("refills over time", async () => {
-    const rl = new RateLimiter({ ratePerSec: 1000, burst: 1 });
+    // rate=20/s (1 token per 50ms), burst=1: the second immediate take is reliably denied — two
+    // synchronous calls elapse well under 50ms, so far less than one token refills — while the
+    // 150ms wait refills ~3 tokens so the following take is allowed. Deliberately NOT 1000/s: at
+    // 1 token/ms a loaded CI runner can refill a whole token between the two synchronous takes and
+    // flake the deny (the failure this replaces).
+    const rl = new RateLimiter({ ratePerSec: 20, burst: 1 });
     expect(rl.take("z").ok).toBe(true);
     expect(rl.take("z").ok).toBe(false);
-    await new Promise((r) => setTimeout(r, 20)); // ~20 tokens refilled at 1000/s
+    await new Promise((r) => setTimeout(r, 150)); // ~3 tokens refilled at 20/s
     expect(rl.take("z").ok).toBe(true);
   });
 });
