@@ -373,10 +373,69 @@ function InviteDrawer({ grantor, onClose, onInvited }: { grantor: AccessSubject;
 /* ============================================================== Node Control */
 export function NodeControl({ subject }: { subject: AccessSubject }) {
   if (!can(subject, "node_control.view")) return <Locked what="node control" />;
+  const canKill = can(subject, "node_control.kill");
+  const [data, setData] = useState<any>(null);
+  const [tab, setTab] = useState<"active" | "archived">("active");
+  const [page, setPage] = useState(1);
+  const [busy, setBusy] = useState("");
+  const [note, setNote] = useState("");
+  const PAGE_SIZE = 12;
+  async function load() { try { setData(await (await fetch("/api/nodes")).json()); } catch { setData({ ok: false, nodes: [] }); } }
+  useEffect(() => { load(); const t = setInterval(load, 15000); return () => clearInterval(t); }, []);
+  useEffect(() => setPage(1), [tab]);
+  const nodes: any[] = data?.nodes || [];
+  const netV = data?.networkVersion || "";
+  const active = nodes.filter((n) => !n.killed);
+  const archived = nodes.filter((n) => n.killed);
+  const shown = tab === "active" ? active : archived;
+  const agoOf = (ms: number) => { if (!ms) return "—"; const s = Math.floor((Date.now() - ms) / 1000); return s < 60 ? "just now" : s < 3600 ? Math.floor(s / 60) + "m ago" : s < 86400 ? Math.floor(s / 3600) + "h ago" : Math.floor(s / 86400) + "d ago"; };
+  async function act(id: string, url: string, body?: any) {
+    setBusy(id); setNote("");
+    try { const d = await (await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body || {}) })).json(); if (!d.ok) setNote(d.error || "Action failed."); await load(); }
+    catch { setNote("Network error."); }
+    setBusy("");
+  }
   return (
     <>
-      <PageHeader title="Node Control" subtitle="Monitor node versions; remotely retire an out-of-date node (last resort)." />
-      <ComingSoon title="Node fleet not connected yet" detail="Live node versions, peer counts + health — and the superuser-only remote kill-switch — appear here once the portal is wired to the node fleet." />
+      <PageHeader title="Node Control" subtitle={`Live node fleet + the remote kill switch. Network release: ${netV || "unknown"}.`} />
+      {data && data.configured === false && <Card className="mb-4 p-4 text-sm text-[color:var(--color-negative)]">Node control isn't wired to the tunnel relay yet (admin secret unset).</Card>}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <button onClick={() => setTab("active")} className={`chip ${tab === "active" ? "chip-brand" : ""}`}>Active · {active.length}</button>
+        <button onClick={() => setTab("archived")} className={`chip ${tab === "archived" ? "chip-brand" : ""}`}>Archived (killed) · {archived.length}</button>
+        <span className="ml-auto text-xs text-faint">auto-refreshes every 15s</span>
+      </div>
+      {note && <p className="mb-2 text-sm text-[color:var(--color-negative)]">{note}</p>}
+      {!data ? <Card className="p-8 text-center text-sm text-muted">Loading…</Card> : shown.length === 0 ? <Card className="p-8 text-center text-sm text-muted">{tab === "active" ? "No nodes connected." : "No archived (killed) nodes."}</Card> : (<>
+        <Card className="overflow-hidden p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b border-line text-left text-xs uppercase tracking-wider text-faint">
+                <th className="px-4 py-2.5">Node</th><th className="px-4 py-2.5">Network</th><th className="px-4 py-2.5">Version</th><th className="px-4 py-2.5">Status</th><th className="px-4 py-2.5 text-right">Actions</th>
+              </tr></thead>
+              <tbody>
+                {shown.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((n) => (
+                  <tr key={n.id} className="border-b border-line-soft last:border-0">
+                    <td className="px-4 py-2.5"><div className="font-mono text-xs text-ink">{n.id}</div>{n.peerId && <div className="font-mono text-[0.65rem] text-faint">{String(n.peerId).slice(0, 16)}…</div>}</td>
+                    <td className="px-4 py-2.5 text-muted">{n.network || "—"}</td>
+                    <td className="px-4 py-2.5"><span className="font-mono text-xs">{n.nodeVersion || "?"}</span> {n.current ? <Badge tone="positive">current</Badge> : <span className="rounded px-1.5 py-0.5 text-[0.65rem] font-semibold" style={{ background: "rgba(224,163,74,0.16)", color: "#e0a34a" }}>outdated</span>}</td>
+                    <td className="px-4 py-2.5"><div className="flex flex-wrap items-center gap-1">{n.connected ? <Badge tone="positive">online</Badge> : <Badge>offline</Badge>}{n.killed && <span className="rounded px-1.5 py-0.5 text-[0.65rem] font-semibold" style={{ background: "rgba(224,99,74,0.16)", color: "#e0634a" }}>killed</span>}<span className="text-[0.65rem] text-faint">{agoOf(Number(n.lastSeen))}</span></div></td>
+                    <td className="px-4 py-2.5 text-right">
+                      {canKill ? (
+                        <div className="flex justify-end gap-1.5">
+                          {!n.killed && <Button variant="danger" className="px-2 py-1 text-xs" disabled={busy === n.id} onClick={() => { if (confirm(`HARD kill ${n.id}? It stays down (bypassing auto-start) until it updates to ${netV || "the current release"} or you restore it.`)) act(n.id, `/api/nodes/${n.id}/kill`, { soft: false }); }}>Kill</Button>}
+                          {!n.killed && <Button variant="ghost" className="px-2 py-1 text-xs" disabled={busy === n.id} onClick={() => act(n.id, `/api/nodes/${n.id}/kill`, { soft: true })}>Soft</Button>}
+                          {n.killed && <Button variant="primary" className="px-2 py-1 text-xs" disabled={busy === n.id} onClick={() => act(n.id, `/api/nodes/${n.id}/unkill`)}>Restore</Button>}
+                        </div>
+                      ) : <span className="text-xs text-faint">view only</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+        <Pagination page={page} total={shown.length} pageSize={PAGE_SIZE} onPage={setPage} />
+      </>)}
     </>
   );
 }
