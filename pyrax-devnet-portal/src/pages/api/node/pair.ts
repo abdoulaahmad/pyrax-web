@@ -8,6 +8,11 @@ import { REWARDS } from "../../../lib/rewards";
 
 export const prerender = false;
 
+// The live node-status WebSocket the paired node connects to (?token=<nodeToken>). Returned in the
+// redeem response so the CLIENT is told where to report — "the code picks the dashboard": a code minted
+// by THIS portal hands back THIS portal's status WS. Overridable per environment.
+const STATUS_WS_URL = process.env.NODE_STATUS_WS_URL || "wss://devnet.pyraxchain.com/__nodews";
+
 export const POST: APIRoute = async ({ request }) => {
   const b = await request.json().catch(() => ({}));
   const code = String(b?.code ?? "");
@@ -18,6 +23,7 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ ok: false, error: msg }, 400);
   }
   const founding = await claimFounding(r.testerId, REWARDS.foundingTester.bonus, REWARDS.foundingTester.count);
-  // The app stores nodeToken and sends it as `Authorization: Bearer <token>` on every heartbeat.
-  return json({ ok: true, nodePk: r.nodePk, nodeToken: r.nodeToken, heartbeatEverySec: 30, foundingRank: founding });
+  // The app/CLI stores nodeToken and either (a) opens the live status WS at statusWsUrl?token=<token>,
+  // or (b) falls back to POST /api/node/heartbeat with `Authorization: Bearer <token>`.
+  return json({ ok: true, nodePk: r.nodePk, nodeToken: r.nodeToken, heartbeatEverySec: 30, statusWsUrl: STATUS_WS_URL, foundingRank: founding });
 };
