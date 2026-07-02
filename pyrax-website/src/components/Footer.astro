@@ -50,7 +50,11 @@ const socials = [
     </div>
     <div class="mt-12 flex flex-col gap-3 border-t border-line-soft pt-6 text-xs text-faint sm:flex-row sm:items-center sm:justify-between">
       <div>© {year} PYRAX™ Network. {t("footer.rights")}</div>
-      <div class="max-w-2xl sm:text-right">{t("footer.openCore")}</div>
+      <div class="flex items-center gap-4">
+        <a href={L("/privacy")} class="transition hover:text-ink">{t("footer.privacy", "Privacy")}</a>
+        <a href={L("/terms")} class="transition hover:text-ink">{t("footer.terms", "Terms")}</a>
+      </div>
+      <div class="max-w-xl sm:text-right">{t("footer.openCore")}</div>
     </div>
   </div>
 </footer>

@@ -1,0 +1,138 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Site from "../layouts/Site.astro";
+import { DEFAULT_LOCALE } from "../i18n/config";
+
+const lang = DEFAULT_LOCALE;
+const UPDATED = "2 July 2026";
+const CONTACT = "legal@pyrax.org";
+
+type Block = string | { list: string[] };
+const sections: { id: string; h: string; blocks: Block[] }[] = [
+  {
+    id: "acceptance", h: "1. Acceptance of these terms",
+    blocks: [
+      "These Terms & Conditions (“Terms”) govern your access to and use of the PYRAX Network project’s websites, apps, and services — including this marketing site, the block explorer, the node hub and peer directory, the closed-alpha tester portal, the desktop node apps, the command-line node, the wallet, and the public faucet (together, the “Services”). By accessing or using the Services, you agree to these Terms. If you do not agree, do not use the Services.",
+    ],
+  },
+  {
+    id: "eligibility", h: "2. Eligibility",
+    blocks: [
+      "You must be at least the age of majority in your jurisdiction (and at minimum 18) and legally able to enter into these Terms. You are responsible for ensuring your use of the Services is lawful where you are. The Services are not offered to anyone barred from using them under applicable law or sanctions.",
+    ],
+  },
+  {
+    id: "services", h: "3. The Services (development-stage)",
+    blocks: [
+      "PYRAX is an evolving, development-stage project. Networks may run as simulations, closed alphas, or public test networks before any production launch. Features may change, break, or be removed, and networks may be reset, wiped, or discontinued at any time. The Services are provided on an “as is” and “as available” basis.",
+      "Tokens, balances, rewards, and other values on non-production networks are for testing only, have no monetary value, are not redeemable, and may be reset or lost at any time.",
+    ],
+  },
+  {
+    id: "notinvestment", h: "4. No financial, investment, or legal advice",
+    blocks: [
+      "Nothing on the Services is financial, investment, tax, or legal advice, or an offer or solicitation to buy or sell any asset. Any tokenomics, roadmap, or forward-looking statements describe current intentions only, are subject to change, and are not promises. Distributed-ledger technology and digital assets carry significant risk, including total loss. Do your own research and consult qualified professionals before making decisions.",
+    ],
+  },
+  {
+    id: "selfcustody", h: "5. Wallets and self-custody",
+    blocks: [
+      "The wallet and node apps are self-custodial. You are solely responsible for your private keys, seed phrase, passwords, and devices, and for all activity conducted through them. We cannot access, recover, freeze, reverse, or reset your keys or transactions. Blockchain transactions are generally irreversible. Loss of your keys or seed phrase may mean permanent, unrecoverable loss of access.",
+    ],
+  },
+  {
+    id: "acceptable", h: "6. Acceptable use",
+    blocks: [
+      "You agree not to:",
+      { list: [
+        "use the Services for any unlawful, fraudulent, or harmful purpose, or to launder money or evade sanctions;",
+        "attack, overload, disrupt, or gain unauthorized access to the Services, networks, or other users’ systems;",
+        "probe, scan, or test the vulnerability of the Services without our prior written permission;",
+        "misrepresent your identity, impersonate others, or abuse rewards, faucets, or referral mechanisms;",
+        "upload malware or post unlawful, infringing, harassing, or abusive content; or",
+        "scrape, resell, or misuse the Services or data in violation of these Terms or applicable law.",
+      ] },
+      "We may suspend or terminate access that violates these Terms or threatens the Services or other users.",
+    ],
+  },
+  {
+    id: "ip", h: "7. Intellectual property",
+    blocks: [
+      "The PYRAX protocol, node, and SDK are released under an open-source license as described in their repositories; your use of that code is governed by the applicable license. The PYRAX name, logos, brand, website content, and non-open-sourced software are the property of the project or its licensors and are protected by intellectual-property laws. Except as expressly permitted (including applicable open-source licenses), you may not copy, modify, distribute, or create derivative works of them.",
+    ],
+  },
+  {
+    id: "thirdparty", h: "8. Third-party content and links",
+    blocks: [
+      "The Services may link to or integrate third-party sites, software, or services that we do not control. We are not responsible for third-party content, and your use of it is at your own risk and subject to the third party’s terms.",
+    ],
+  },
+  {
+    id: "disclaimer", h: "9. Disclaimers",
+    blocks: [
+      "To the fullest extent permitted by law, the Services are provided “as is” and “as available”, without warranties of any kind, whether express, implied, or statutory, including merchantability, fitness for a particular purpose, title, non-infringement, and any warranty that the Services will be uninterrupted, secure, error-free, or free of harmful components. We do not warrant any particular outcome, uptime, value, or availability.",
+    ],
+  },
+  {
+    id: "liability", h: "10. Limitation of liability",
+    blocks: [
+      "To the fullest extent permitted by law, PYRAX and its contributors will not be liable for any indirect, incidental, special, consequential, exemplary, or punitive damages, or for any loss of profits, data, tokens, goodwill, or other intangible losses, arising from or related to your use of (or inability to use) the Services — even if advised of the possibility. Our aggregate liability for any claim relating to the Services will not exceed the greater of the amount you paid us for the Services in the prior twelve months or USD $100.",
+    ],
+  },
+  {
+    id: "indemnity", h: "11. Indemnification",
+    blocks: [
+      "You agree to indemnify and hold harmless PYRAX and its contributors from any claims, damages, liabilities, and expenses (including reasonable legal fees) arising from your use of the Services, your content, or your violation of these Terms or applicable law.",
+    ],
+  },
+  {
+    id: "law", h: "12. Governing law & disputes",
+    blocks: [
+      "These Terms are governed by the laws applicable to the project’s operating entity, without regard to conflict-of-laws rules. You agree to resolve disputes on an individual basis in the courts of that jurisdiction, to the extent permitted by law. Where mandatory local consumer-protection laws apply to you, nothing here removes rights you cannot waive.",
+    ],
+  },
+  {
+    id: "changes", h: "13. Changes & termination",
+    blocks: [
+      "We may modify these Terms or the Services at any time. Material changes will be reflected by updating the “last updated” date and, where appropriate, additional notice. Continued use after changes means you accept them. We may suspend or discontinue any part of the Services at any time.",
+    ],
+  },
+  {
+    id: "contact", h: "14. Contact",
+    blocks: [
+      "Questions about these Terms? Email " + CONTACT + ".",
+    ],
+  },
+];
+---
+<Site title="Terms & Conditions — PYRAX™ Network" description="The terms that govern your use of the PYRAX Network websites, apps, and services." lang={lang}>
+  <section class="relative overflow-hidden border-b border-line">
+    <div class="grid-backdrop absolute inset-0 opacity-40"></div>
+    <div class="relative mx-auto max-w-3xl px-6 py-16">
+      <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">Legal</div>
+      <h1 class="mt-3 font-display text-4xl font-extrabold sm:text-5xl">Terms &amp; Conditions</h1>
+      <p class="mt-4 text-sm text-faint">Last updated: {UPDATED}</p>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-3xl px-6 py-14">
+    <p class="text-muted">Please read these Terms carefully. They are provided for transparency and are not legal advice; your specific rights and obligations depend on your jurisdiction.</p>
+    <div class="mt-10 space-y-10">
+      {sections.map((s) => (
+        <div id={s.id} class="scroll-mt-24">
+          <h2 class="font-display text-2xl font-extrabold text-ink">{s.h}</h2>
+          <div class="mt-3 space-y-3">
+            {s.blocks.map((b) => (
+              typeof b === "string"
+                ? <p class="text-muted leading-relaxed">{b}</p>
+                : <ul class="list-disc space-y-2 pl-6 text-muted">{b.list.map((li) => (<li class="leading-relaxed">{li}</li>))}</ul>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+    <div class="mt-14 border-t border-line-soft pt-6 text-sm text-faint">
+      See also our <a href="/privacy" class="text-[color:var(--color-brand)] hover:underline">Privacy Policy</a>.
+    </div>
+  </section>
+</Site>

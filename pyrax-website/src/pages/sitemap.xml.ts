@@ -20,6 +20,8 @@ function routes(): { path: string; priority: number }[] {
     { path: "/pitch", priority: 0.7 },
     { path: "/company", priority: 0.6 },
     { path: "/industries", priority: 0.9 },
+    { path: "/privacy", priority: 0.3 },
+    { path: "/terms", priority: 0.3 },
   ];
   for (const c of CATEGORIES) {
     base.push({ path: `/industries/${c.slug}`, priority: 0.7 });
