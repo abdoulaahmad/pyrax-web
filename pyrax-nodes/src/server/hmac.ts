@@ -58,15 +58,29 @@ export function verifyHmac(method: string, path: string, rawBody: string, authHe
   return true;
 }
 
-/** Same-origin browser read gate: the request's Origin/Referer host must equal the request host.
- *  Lets the site's own pages read /api/peers while deterring casual cross-origin scraping. */
+/** Same-origin browser read gate: the request's Origin/Referer host must equal the host the browser
+ *  addressed. Lets the site's own pages read /api/peers while deterring casual cross-origin scraping.
+ *
+ *  PROXY-ROBUST: behind Cloudflare -> Caddy -> Astro, `new URL(request.url).host` is NOT the public
+ *  host (it reflects the internal bind), so comparing only against it makes EVERY same-origin browser
+ *  poll 401 in production — which silently froze the live peer list + network map. We therefore accept
+ *  a match against ANY host the request legitimately carries: the reconstructed URL host, the Host
+ *  header, or the proxy-attested X-Forwarded-Host. For a genuine same-origin fetch the browser's Origin
+ *  host always equals its Host header, so this stays a valid same-origin gate while working behind the
+ *  edge. (The public read is already IP-redacted in publicPeerList, so this gate is low-stakes.) */
 export function sameOrigin(request: Request): boolean {
   try {
-    const host = new URL(request.url).host;
+    const allowed = new Set<string>();
+    try { allowed.add(new URL(request.url).host); } catch { /* ignore */ }
+    const host = request.headers.get("host");
+    if (host) allowed.add(host.trim());
+    const xfh = request.headers.get("x-forwarded-host");
+    if (xfh) xfh.split(",").forEach((h) => allowed.add(h.trim()));
+    const hostMatches = (u: string) => { try { return allowed.has(new URL(u).host); } catch { return false; } };
     const o = request.headers.get("origin");
-    if (o) return new URL(o).host === host;
+    if (o) return hostMatches(o);
     const r = request.headers.get("referer");
-    if (r) return new URL(r).host === host;
+    if (r) return hostMatches(r);
   } catch { /* fallthrough */ }
   return false;
 }
