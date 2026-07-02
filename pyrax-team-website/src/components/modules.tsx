@@ -92,10 +92,38 @@ function QuickAction({ icon, label, desc, onClick }: { icon: keyof typeof Icon; 
 /* ============================================================== Faucet */
 export function Faucet({ subject }: { subject: AccessSubject }) {
   if (!can(subject, "faucet.view")) return <Locked what="the faucet" />;
+  const canDrip = can(subject, "faucet.drip");
+  const [address, setAddress] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; hash?: string; amount?: string; network?: string; error?: string } | null>(null);
+  async function drip() {
+    setBusy(true); setResult(null);
+    try {
+      const r = await fetch("/api/faucet/drip", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ address: address.trim() }) });
+      const d = await r.json().catch(() => ({ ok: false, error: "Bad response." }));
+      setResult(d);
+      if (d.ok) setAddress("");
+    } catch { setResult({ ok: false, error: "Network error." }); }
+    setBusy(false);
+  }
   return (
     <>
-      <PageHeader title="Faucet" subtitle="Dispense test PYRX to a wallet on a development network." />
-      <ComingSoon title="The faucet isn't connected yet" detail="Once the team portal is wired to the live PYRAX network RPC, role-holders will dispense rate-limited test PYRX to an address here." />
+      <PageHeader title="Faucet" subtitle="Dispense test PYRX to a wallet on PYRAX Forge (the tester devnet)." />
+      <Card className="max-w-xl p-6">
+        <div className="flex items-center justify-between"><div className="text-sm font-semibold">PYRAX Forge test faucet</div><Badge tone="brand">Forge · 710823</Badge></div>
+        <p className="mt-1 text-xs text-faint">Sends a fixed drip of test PYRX from the Forge faucet wallet. Rate-limited per address — play money on the devnet only.</p>
+        <div className="mt-4">
+          <label className="label">Recipient wallet address</label>
+          <input className="input font-mono" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="0x…" spellCheck={false} disabled={busy || !canDrip} />
+        </div>
+        <div className="mt-4 flex items-center gap-3">
+          <Button variant="primary" onClick={drip} disabled={busy || !canDrip || !address.trim()}>{busy ? "Sending…" : "Send drip"}</Button>
+          {!canDrip && <span className="text-xs text-faint">You have view-only access to the faucet.</span>}
+        </div>
+        {result && (result.ok
+          ? <div className="mt-4 rounded-xl border border-[color:rgba(63,207,142,0.3)] bg-[rgba(63,207,142,0.06)] p-3 text-sm"><div className="font-semibold text-[color:var(--color-positive)]">Sent {result.amount} PYRX on {result.network}.</div>{result.hash && <div className="mt-1 break-all font-mono text-xs text-muted">tx {result.hash}</div>}</div>
+          : <div className="mt-4 rounded-xl border border-[color:rgba(224,99,74,0.3)] bg-[rgba(224,99,74,0.06)] p-3 text-sm text-[color:var(--color-negative)]">{result.error || "Couldn't send."}</div>)}
+      </Card>
     </>
   );
 }
