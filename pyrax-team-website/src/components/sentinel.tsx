@@ -4,8 +4,13 @@
 // ALL Sentinel activity happens here now; status.pyraxchain.com is the PUBLIC status page only.
 // Every panel calls the team site's `/api/sentinel/*` proxy, which forwards to the Sentinel backend
 // with a shared bearer and is gated by the SRE `sentinel.*` permissions.
+//
+// Layout: a fixed LEFT column (the on-GPU Brain + control panel) and a tabbed RIGHT column
+// (Advisories / Actions / Ask / Mind). Advisories are de-duplicated, severity-ranked (5-tier),
+// default-filtered, paginated, and each expands into its investigation report → dispatch → repair
+// history. UI state (tab, filters, page, expanded cards, the Mind stream) persists across navigation.
 import React, { useEffect, useRef, useState } from "react";
-import { Card, Button, Badge, PageHeader, Icon } from "./ui";
+import { Card, Button, Badge, PageHeader, Icon, Pagination } from "./ui";
 import { can, type AccessSubject } from "../lib/permissions";
 
 function Locked({ what }: { what: string }) {
@@ -27,8 +32,34 @@ async function postJSON(url: string, body?: unknown): Promise<any> {
   } catch { return { ok: false, error: "Network error." }; }
 }
 
-function sev(s: string): "danger" | "warning" | "muted" {
-  return s === "critical" ? "danger" : s === "warn" || s === "warning" ? "warning" : "muted";
+// --- severity (5-tier: info / low / medium / high / critical; legacy warn ≈ medium) ---------------
+const SEV_RANK: Record<string, number> = { info: 0, low: 1, medium: 2, warn: 2, warning: 2, high: 3, critical: 4 };
+function sevMeta(s?: string): { tone: "danger" | "warning" | "muted"; label: string; rank: number; dot: string } {
+  const k = String(s || "info").toLowerCase();
+  const rank = SEV_RANK[k] ?? 0;
+  return {
+    rank,
+    tone: rank >= 3 ? "danger" : rank === 2 ? "warning" : "muted",
+    label: k === "warn" || k === "warning" ? "medium" : k,
+    dot: rank >= 3 ? "bg-[color:#f87171]" : rank === 2 ? "bg-[color:var(--color-brand)]" : "bg-[color:rgba(148,163,184,0.7)]",
+  };
+}
+/** Rebrand the raw issue source to a friendly Sentinel label (nova-patrol → NEURAX Sentinel (PATROL)). */
+function sourceLabel(src?: string): string {
+  const s = String(src || "").toLowerCase();
+  if (s.includes("security")) return "NEURAX Sentinel (SECURITY)";
+  if (s.includes("patrol")) return "NEURAX Sentinel (PATROL)";
+  if (s === "nova" || s === "nova-agent" || s === "sentinel" || s === "") return "NEURAX Sentinel";
+  return src as string;
+}
+function isSecurity(a: any): boolean {
+  return String(a?.source || "").includes("security") || a?.dossier?.category === "security" || /^\[security\]/i.test(a?.title || "");
+}
+function statusTone(s?: string): "danger" | "warning" | "positive" | "muted" {
+  if (s === "reopened" || s === "escalated") return "danger";
+  if (s === "deployed" || s === "monitoring" || s === "resolved") return "positive";
+  if (s === "fixing" || s === "investigating" || s === "dispatched" || s === "deploying") return "warning";
+  return "muted";
 }
 function timeAgo(at?: number | string): string {
   if (!at) return "";
@@ -41,7 +72,21 @@ function timeAgo(at?: number | string): string {
   return `${Math.floor(s / 86400)}d ago`;
 }
 
-type Tab = "overview" | "actions" | "ask" | "mind";
+/** Persist a piece of UI state to localStorage so the whole section survives navigation. */
+function useLocalState<T>(key: string, initial: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const [v, setV] = useState<T>(() => {
+    if (typeof window === "undefined") return initial;
+    try { const raw = window.localStorage.getItem(key); return raw != null ? (JSON.parse(raw) as T) : initial; } catch { return initial; }
+  });
+  useEffect(() => { try { window.localStorage.setItem(key, JSON.stringify(v)); } catch { /* ignore quota */ } }, [key, v]);
+  return [v, setV];
+}
+
+type Tab = "advisories" | "actions" | "ask" | "mind";
+const PAGE_SIZE = 8;
+const MIN_SEV_OPTS = [
+  { id: "all", label: "All" }, { id: "low", label: "Low+" }, { id: "medium", label: "Medium+" }, { id: "high", label: "High+" }, { id: "critical", label: "Critical" },
+];
 
 export function SentinelConsole({ subject }: { subject: AccessSubject }) {
   if (!can(subject, "sentinel.view")) return <Locked what="the NEURAX Sentinel console" />;
@@ -49,7 +94,7 @@ export function SentinelConsole({ subject }: { subject: AccessSubject }) {
   const canApprove = can(subject, "sentinel.approve");
   const canAsk = can(subject, "sentinel.ask");
 
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useLocalState<Tab>("sentinel.tab", "advisories");
   const [status, setStatus] = useState<any>(null);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState("");
@@ -93,7 +138,7 @@ export function SentinelConsole({ subject }: { subject: AccessSubject }) {
   }
 
   const TABS: { id: Tab; label: string; badge?: number }[] = [
-    { id: "overview", label: "Overview" },
+    { id: "advisories", label: "Advisories", badge: advisories.length || undefined },
     { id: "actions", label: "Actions", badge: openActions.length || undefined },
     { id: "ask", label: "Ask Sentinel" },
     { id: "mind", label: "NEURAX Mind" },
@@ -123,23 +168,9 @@ export function SentinelConsole({ subject }: { subject: AccessSubject }) {
         </Card>
       )}
 
-      <div className="mb-5 flex flex-wrap gap-2">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition ${
-              tab === t.id ? "border-[color:rgba(245,134,34,0.4)] bg-[rgba(245,134,34,0.1)] text-ink" : "border-line text-muted hover:text-ink"
-            }`}
-          >
-            {t.label}
-            {t.badge ? <span className="rounded-full bg-[rgba(245,134,34,0.18)] px-2 text-xs text-[color:var(--color-brand)]">{t.badge}</span> : null}
-          </button>
-        ))}
-      </div>
-
-      {tab === "overview" && (
-        <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+        {/* LEFT — the Brain + control panel (sticky) */}
+        <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
           <Card className="p-5">
             <h3 className="text-sm font-bold uppercase tracking-wide text-muted">Brain</h3>
             <div className="mt-3 space-y-2 text-sm">
@@ -148,8 +179,12 @@ export function SentinelConsole({ subject }: { subject: AccessSubject }) {
               <Row k="Autonomy" v={autonomy === "autonomous" ? "Autonomous" : "Advisory"} tone={autonomy === "autonomous" ? "brand" : "muted"} />
               <Row k="Kill-switch" v={killed ? "Engaged (paused)" : "Clear"} tone={killed ? "danger" : "positive"} />
             </div>
+          </Card>
+
+          <Card className="p-5">
+            <h3 className="text-sm font-bold uppercase tracking-wide text-muted">Control</h3>
             {canControl ? (
-              <div className="mt-4 space-y-2 border-t border-line pt-4">
+              <div className="mt-3 space-y-2">
                 <Button
                   variant={killed ? "primary" : "danger"}
                   className="w-full"
@@ -162,110 +197,250 @@ export function SentinelConsole({ subject }: { subject: AccessSubject }) {
                   {killed ? "Resume Sentinel" : "Trip kill-switch"}
                 </Button>
                 <div className="flex gap-2">
-                  <Button
-                    variant={autonomy === "advisory" ? "primary" : "ghost"}
-                    className="flex-1"
-                    disabled={busy === "auto" || autonomy === "advisory"}
-                    onClick={() => setSettings({ autonomy: "advisory" }, "auto")}
-                  >
-                    Advisory
-                  </Button>
+                  <Button variant={autonomy === "advisory" ? "primary" : "ghost"} className="flex-1" disabled={busy === "auto" || autonomy === "advisory"} onClick={() => setSettings({ autonomy: "advisory" }, "auto")}>Advisory</Button>
                   <Button
                     variant={autonomy === "autonomous" ? "primary" : "ghost"}
                     className="flex-1"
                     disabled={busy === "auto" || autonomy === "autonomous"}
                     onClick={() => {
-                      if (!window.confirm("Switch Sentinel to AUTONOMOUS? It may execute approved-class high-confidence actions without asking (still audited; red-lines still need approval).")) return;
+                      if (!window.confirm("Switch Sentinel to AUTONOMOUS? It will investigate, fix, adversarially review, deploy and roll back on its own for non-red-line issues (still fully audited; red lines always need approval).")) return;
                       setSettings({ autonomy: "autonomous" }, "auto");
                     }}
                   >
                     Autonomous
                   </Button>
                 </div>
+                <p className="pt-1 text-xs text-faint">In autonomous mode NEURAX fixes non-red-line issues end-to-end; auth/secrets/consensus/wallet always escalate to you.</p>
               </div>
             ) : (
-              <p className="mt-4 border-t border-line pt-4 text-xs text-faint">Kill-switch + autonomy require the elevated <code>sentinel.control</code> permission.</p>
+              <p className="mt-3 text-xs text-faint">Kill-switch + autonomy require the elevated <code>sentinel.control</code> permission.</p>
             )}
           </Card>
-
-          <Card className="p-5 lg:col-span-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold uppercase tracking-wide text-muted">Advisories</h3>
-              <Badge tone={advisories.length ? "warning" : "positive"}>{advisories.length ? `${advisories.length} open` : "all clear"}</Badge>
-            </div>
-            <div className="mt-3 space-y-3">
-              {advisories.length === 0 && <p className="text-sm text-muted">Sentinel hasn't raised anything. It sweeps logs + probes continuously.</p>}
-              {advisories.slice(0, 12).map((a) => (
-                <div key={a.id} className="rounded-lg border border-line p-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge tone={sev(a.severity)}>{a.severity || "info"}</Badge>
-                    <span className="text-sm font-semibold">{a.title || "(untitled)"}</span>
-                    {a.count ? <span className="text-xs text-faint">×{a.count}</span> : null}
-                    <span className="ml-auto text-xs text-faint">{a.source || "sentinel"} · {timeAgo(a.last_seen || a.lastSeen)}</span>
-                  </div>
-                  {a.dossier?.summary && <p className="mt-2 text-xs text-muted">{String(a.dossier.summary).slice(0, 300)}</p>}
-                  {canApprove && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      <Button variant="ghost" disabled={busy === `investigate:${a.id}`} onClick={() => issueAction(a.id, "investigate")}>Investigate</Button>
-                      <Button variant="primary" disabled={busy === `dispatch:${a.id}`} onClick={() => { if (window.confirm("Dispatch to Sentinel's auto-repair? It proposes a fix for your approval.")) issueAction(a.id, "dispatch"); }}>Dispatch fix</Button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </Card>
         </div>
-      )}
 
-      {tab === "actions" && (
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold uppercase tracking-wide text-muted">Action approval queue</h3>
-            <Badge tone={openActions.length ? "warning" : "positive"}>{openActions.length ? `${openActions.length} awaiting` : "nothing queued"}</Badge>
-          </div>
-          <p className="mt-1 text-xs text-faint">Red-line actions (consensus / comms / p2p and other high-impact changes) require your approval before Sentinel executes them.</p>
-          <div className="mt-3 space-y-3">
-            {actions.length === 0 && <p className="text-sm text-muted">No proposed actions.</p>}
-            {actions.slice(0, 20).map((a) => (
-              <div key={a.id} className="rounded-lg border border-line p-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone="brand">{a.kind || "action"}</Badge>
-                  <span className="text-sm font-semibold">{a.target || ""}</span>
-                  {typeof a.confidence === "number" && <span className="text-xs text-faint">confidence {(a.confidence * 100).toFixed(0)}%</span>}
-                  <span className="ml-auto text-xs text-faint">{a.status} · {timeAgo(a.proposed_at || a.proposedAt)}</span>
-                </div>
-                {a.rationale && <p className="mt-2 text-xs text-muted">{String(a.rationale).slice(0, 400)}</p>}
-                {canApprove && a.status === "proposed" && (
-                  <div className="mt-2 flex gap-2">
-                    <Button variant="primary" disabled={busy === `action:${a.id}`} onClick={() => { if (window.confirm(`Approve "${a.kind}"${a.target ? " on " + a.target : ""}? It will execute.`)) decide(a.id, "approve"); }}>Approve</Button>
-                    <Button variant="danger" disabled={busy === `action:${a.id}`} onClick={() => decide(a.id, "reject")}>Reject</Button>
-                  </div>
-                )}
-                {!canApprove && <p className="mt-2 text-xs text-faint">Approving needs the <code>sentinel.approve</code> permission.</p>}
-              </div>
+        {/* RIGHT — tabbed workspace */}
+        <div className="min-w-0">
+          <div className="mb-4 flex flex-wrap gap-2">
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition ${
+                  tab === t.id ? "border-[color:rgba(245,134,34,0.4)] bg-[rgba(245,134,34,0.1)] text-ink" : "border-line text-muted hover:text-ink"
+                }`}
+              >
+                {t.label}
+                {t.badge ? <span className="rounded-full bg-[rgba(245,134,34,0.18)] px-2 text-xs text-[color:var(--color-brand)]">{t.badge}</span> : null}
+              </button>
             ))}
           </div>
-        </Card>
-      )}
 
-      {tab === "ask" && <AskSentinel canAsk={canAsk} online={edgeOnline && !killed} />}
-      {tab === "mind" && <MindStream />}
+          {tab === "advisories" && <Advisories advisories={advisories} canApprove={canApprove} busy={busy} onAction={issueAction} />}
+          {tab === "actions" && <ActionsQueue actions={actions} openCount={openActions.length} canApprove={canApprove} busy={busy} onDecide={decide} />}
+          {tab === "ask" && <AskSentinel canAsk={canAsk} online={edgeOnline && !killed} />}
+          {tab === "mind" && <MindStream />}
+        </div>
+      </div>
     </>
   );
 }
 
 function Row({ k, v, tone }: { k: string; v: string; tone?: "positive" | "warning" | "danger" | "brand" | "muted" }) {
-  const color = tone === "positive" ? "text-positive" : tone === "warning" || tone === "danger" ? "text-[color:var(--color-brand)]" : tone === "brand" ? "text-[color:var(--color-brand)]" : "text-ink";
+  const color = tone === "positive" ? "text-positive" : tone === "warning" || tone === "danger" || tone === "brand" ? "text-[color:var(--color-brand)]" : "text-ink";
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-2">
       <span className="text-muted">{k}</span>
-      <span className={`font-semibold ${color}`}>{v}</span>
+      <span className={`text-right font-semibold ${color}`}>{v}</span>
     </div>
   );
 }
 
+function FilterChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-md border px-2.5 py-1 text-xs font-semibold transition ${active ? "border-[color:rgba(245,134,34,0.4)] bg-[rgba(245,134,34,0.1)] text-ink" : "border-line text-muted hover:text-ink"}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ---------------------------------------------------------------- Advisories
+function Advisories({ advisories, canApprove, busy, onAction }: { advisories: any[]; canApprove: boolean; busy: string; onAction: (id: string, kind: "investigate" | "dispatch") => void }) {
+  const [minSev, setMinSev] = useLocalState<string>("sentinel.minSev", "high");
+  const [secOnly, setSecOnly] = useLocalState<boolean>("sentinel.secOnly", false);
+  const [page, setPage] = useLocalState<number>("sentinel.page", 1);
+  const [openIds, setOpenIds] = useLocalState<number[]>("sentinel.open", []);
+
+  const minRank = minSev === "all" ? -1 : (SEV_RANK[minSev] ?? 0);
+  let list = advisories.filter((a) => sevMeta(a.severity).rank >= minRank);
+  if (secOnly) list = list.filter(isSecurity);
+  list = list.slice().sort((a, b) => sevMeta(b.severity).rank - sevMeta(a.severity).rank || (b.last_seen || b.lastSeen || 0) - (a.last_seen || a.lastSeen || 0));
+
+  const total = list.length;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const clamped = Math.min(Math.max(1, page), pages);
+  const pageItems = list.slice((clamped - 1) * PAGE_SIZE, clamped * PAGE_SIZE);
+
+  let critical = 0, high = 0, sec = 0;
+  for (const a of advisories) { const r = sevMeta(a.severity).rank; if (r === 4) critical++; else if (r === 3) high++; if (isSecurity(a)) sec++; }
+
+  return (
+    <Card className="p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-sm font-bold uppercase tracking-wide text-muted">Advisories</h3>
+        <div className="flex flex-wrap gap-1">
+          {MIN_SEV_OPTS.map((o) => <FilterChip key={o.id} active={minSev === o.id} onClick={() => { setMinSev(o.id); setPage(1); }}>{o.label}</FilterChip>)}
+          <FilterChip active={secOnly} onClick={() => { setSecOnly(!secOnly); setPage(1); }}>🛡 Security{sec ? ` ${sec}` : ""}</FilterChip>
+        </div>
+      </div>
+      <p className="mt-1 text-xs text-faint">{critical} critical · {high} high · {advisories.length} total — de-duplicated, severity-ranked. Click an advisory to open its report.</p>
+
+      <div className="mt-3 space-y-3">
+        {total === 0 && <p className="py-6 text-center text-sm text-muted">Nothing at this severity. NEURAX sweeps logs, probes endpoints, and runs the white-hat security patrol continuously.</p>}
+        {pageItems.map((a) => (
+          <AdvisoryCard
+            key={a.id}
+            a={a}
+            open={openIds.includes(a.id)}
+            onToggle={() => setOpenIds((ids) => (ids.includes(a.id) ? ids.filter((x) => x !== a.id) : [...ids, a.id]))}
+            canApprove={canApprove}
+            busy={busy}
+            onAction={onAction}
+          />
+        ))}
+      </div>
+
+      {total > PAGE_SIZE && <div className="mt-4"><Pagination page={clamped} total={total} pageSize={PAGE_SIZE} onPage={setPage} /></div>}
+    </Card>
+  );
+}
+
+function AdvisoryCard({ a, open, onToggle, canApprove, busy, onAction }: { a: any; open: boolean; onToggle: () => void; canApprove: boolean; busy: string; onAction: (id: string, kind: "investigate" | "dispatch") => void }) {
+  const sm = sevMeta(a.severity);
+  const d = a.dossier || {};
+  const hasReport = !!(d.rootCause || d.whatToFix);
+  const fix = d.fix;
+  const sec = isSecurity(a);
+  return (
+    <div className={`rounded-lg border ${sm.rank >= 4 ? "border-[color:rgba(248,113,113,0.4)]" : "border-line"}`}>
+      <button onClick={onToggle} className="flex w-full flex-wrap items-center gap-2 p-3 text-left">
+        <span className={`inline-block h-2 w-2 shrink-0 rounded-full ${sm.dot}`} />
+        <Badge tone={sm.tone}>{sm.label}</Badge>
+        {sec && <Badge tone="brand">🛡 security</Badge>}
+        <span className="text-sm font-semibold">{a.title || "(untitled)"}</span>
+        {a.count > 1 ? <span className="text-xs text-faint">×{a.count}</span> : null}
+        {hasReport && <span title="Investigation report ready" className="ml-1 inline-flex items-center gap-1 rounded-full bg-[rgba(245,134,34,0.15)] px-2 py-0.5 text-[0.6rem] font-semibold text-[color:var(--color-brand)]">📋 report</span>}
+        {fix && <span title="Repaired" className="inline-flex items-center gap-1 rounded-full bg-[rgba(74,222,128,0.15)] px-2 py-0.5 text-[0.6rem] font-semibold text-positive">✓ fixed</span>}
+        <span className="ml-auto flex items-center gap-2 text-xs text-faint">
+          <Badge tone={statusTone(a.status)}>{a.status || "open"}</Badge>
+          <span className="hidden sm:inline">{sourceLabel(a.source)}</span>
+          {timeAgo(a.last_seen || a.lastSeen)}
+          <span aria-hidden>{open ? "▲" : "▼"}</span>
+        </span>
+      </button>
+
+      {open && (
+        <div className="space-y-3 border-t border-line px-3 pb-3 pt-3">
+          {hasReport ? (
+            <div className="space-y-2 text-sm">
+              <ReportRow label="Root cause" value={`${d.rootCause || "—"}${typeof d.confidence === "number" ? `   ·   ${(d.confidence * 100) | 0}% confidence` : ""}`} strong />
+              {d.whatToFix && <ReportRow label="What to fix" value={d.whatToFix} />}
+              {d.howToFix && <ReportRow label="How" value={d.howToFix} />}
+              {d.whyToFix && <ReportRow label="Why" value={d.whyToFix} />}
+              {d.blastRadius && <ReportRow label="Blast radius" value={d.blastRadius} />}
+              {d.testPlan && <ReportRow label="Test plan" value={d.testPlan} />}
+              {d.rollback && <ReportRow label="Rollback" value={d.rollback} />}
+              {Array.isArray(d.evidence) && d.evidence.length > 0 && <ReportRow label="Evidence" value={d.evidence.slice(0, 6).map((e: string) => `• ${e}`).join("\n")} />}
+              {Array.isArray(d.hypotheses) && d.hypotheses.length > 0 && <ReportRow label="Hypotheses" value={d.hypotheses.slice(0, 5).map((h: string) => `• ${h}`).join("\n")} />}
+            </div>
+          ) : (
+            <p className="text-sm text-muted">Not investigated yet — run an investigation for a full root-cause report (what to fix, how, why, blast radius, test plan, rollback).</p>
+          )}
+
+          {fix && (
+            <div className="rounded-md border border-[color:rgba(74,222,128,0.35)] bg-[rgba(74,222,128,0.06)] p-3 text-sm">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge tone="positive">repaired</Badge>
+                <span className="font-semibold">{fix.fixRef}</span>
+                <span className="ml-auto text-xs text-faint">{timeAgo(fix.at)}</span>
+              </div>
+              {fix.summary && <p className="mt-1 text-muted">{fix.summary}</p>}
+              {Array.isArray(fix.files) && fix.files.length > 0 && (
+                <p className="mt-1 text-xs text-faint"><span className="uppercase tracking-wide">Files touched:</span> {fix.files.join(", ")}</p>
+              )}
+            </div>
+          )}
+
+          {canApprove ? (
+            <div className="flex flex-wrap gap-2 border-t border-line pt-3">
+              <Button variant="ghost" disabled={busy === `investigate:${a.id}`} onClick={() => onAction(a.id, "investigate")}>
+                {busy === `investigate:${a.id}` ? "Investigating…" : hasReport ? "Re-investigate" : "Investigate"}
+              </Button>
+              <Button
+                variant="primary"
+                disabled={busy === `dispatch:${a.id}`}
+                onClick={() => { if (window.confirm("Dispatch to NEURAX auto-repair? It fixes, runs the full test suite, adversarially reviews (design/security/over-hardening), deploys, and auto-rolls-back on any regression.")) onAction(a.id, "dispatch"); }}
+              >
+                {busy === `dispatch:${a.id}` ? "Dispatching…" : "Dispatch fix"}
+              </Button>
+            </div>
+          ) : (
+            <p className="border-t border-line pt-3 text-xs text-faint">Investigate / dispatch need the <code>sentinel.approve</code> permission.</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ReportRow({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+  return (
+    <div>
+      <span className="text-[0.65rem] uppercase tracking-wide text-faint">{label}</span>
+      <p className={`whitespace-pre-wrap ${strong ? "font-semibold text-ink" : "text-muted"}`}>{value}</p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------- Actions queue
+function ActionsQueue({ actions, openCount, canApprove, busy, onDecide }: { actions: any[]; openCount: number; canApprove: boolean; busy: string; onDecide: (id: string, decision: "approve" | "reject") => void }) {
+  return (
+    <Card className="p-5">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold uppercase tracking-wide text-muted">Action approval queue</h3>
+        <Badge tone={openCount ? "warning" : "positive"}>{openCount ? `${openCount} awaiting` : "nothing queued"}</Badge>
+      </div>
+      <p className="mt-1 text-xs text-faint">Red-line actions (consensus / comms / p2p, chain-affecting pushes, and other high-impact changes) require your approval before Sentinel executes them.</p>
+      <div className="mt-3 space-y-3">
+        {actions.length === 0 && <p className="py-6 text-center text-sm text-muted">No proposed actions.</p>}
+        {actions.slice(0, 30).map((a) => (
+          <div key={a.id} className="rounded-lg border border-line p-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge tone="brand">{a.kind || "action"}</Badge>
+              <span className="text-sm font-semibold">{a.target || ""}</span>
+              {typeof a.confidence === "number" && <span className="text-xs text-faint">confidence {(a.confidence * 100).toFixed(0)}%</span>}
+              <span className="ml-auto text-xs text-faint">{a.status} · {timeAgo(a.proposed_at || a.proposedAt)}</span>
+            </div>
+            {a.rationale && <p className="mt-2 text-xs text-muted">{String(a.rationale).slice(0, 400)}</p>}
+            {canApprove && a.status === "proposed" && (
+              <div className="mt-2 flex gap-2">
+                <Button variant="primary" disabled={busy === `action:${a.id}`} onClick={() => { if (window.confirm(`Approve "${a.kind}"${a.target ? " on " + a.target : ""}? It will execute.`)) onDecide(a.id, "approve"); }}>Approve</Button>
+                <Button variant="danger" disabled={busy === `action:${a.id}`} onClick={() => onDecide(a.id, "reject")}>Reject</Button>
+              </div>
+            )}
+            {!canApprove && <p className="mt-2 text-xs text-faint">Approving needs the <code>sentinel.approve</code> permission.</p>}
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------- Ask Sentinel
 function AskSentinel({ canAsk, online }: { canAsk: boolean; online: boolean }) {
-  const [msgs, setMsgs] = useState<{ role: "you" | "sentinel"; text: string }[]>([]);
+  const [msgs, setMsgs] = useLocalState<{ role: "you" | "sentinel"; text: string }[]>("sentinel.ask.log", []);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
   const scroller = useRef<HTMLDivElement | null>(null);
@@ -284,13 +459,16 @@ function AskSentinel({ canAsk, online }: { canAsk: boolean; online: boolean }) {
 
   if (!canAsk) return <Locked what="Ask Sentinel" />;
   return (
-    <Card className="flex flex-col p-5" style={{ minHeight: 460 }}>
+    <Card className="flex flex-col p-5" style={{ minHeight: 480 }}>
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold uppercase tracking-wide text-muted">Ask Sentinel</h3>
-        <span className="text-xs text-faint">{online ? "on the on-GPU brain" : "brain offline — answers may be limited"}</span>
+        <div className="flex items-center gap-2">
+          {msgs.length > 0 && <button className="text-xs text-faint hover:text-ink" onClick={() => setMsgs([])}>Clear</button>}
+          <span className="text-xs text-faint">{online ? "on the on-GPU brain" : "brain offline — answers may be limited"}</span>
+        </div>
       </div>
       <div ref={scroller} className="my-3 flex-1 space-y-3 overflow-y-auto" style={{ minHeight: 0 }}>
-        {msgs.length === 0 && <p className="text-sm text-muted">Ask about incidents, the fleet, an advisory, or what to do next. Sentinel has the ops context.</p>}
+        {msgs.length === 0 && <p className="text-sm text-muted">Ask about incidents, the fleet, an advisory, or what to do next. Sentinel has the ops context + the whole codebase indexed.</p>}
         {msgs.map((m, i) => (
           <div key={i} className={m.role === "you" ? "text-right" : "text-left"}>
             <div className="text-[0.65rem] uppercase tracking-wide text-faint">{m.role === "you" ? "You" : "🛰 Sentinel"}</div>
@@ -315,27 +493,40 @@ function AskSentinel({ canAsk, online }: { canAsk: boolean; online: boolean }) {
   );
 }
 
+// ---------------------------------------------------------------- NEURAX Mind (persistent)
 function MindStream() {
-  const [entries, setEntries] = useState<any[]>([]);
+  // Cache the stream locally so navigating away + back shows it instantly, then refresh from the server.
+  const [entries, setEntries] = useLocalState<any[]>("sentinel.mind.cache", []);
   const [err, setErr] = useState("");
+  const [autoscroll, setAutoscroll] = useLocalState<boolean>("sentinel.mind.autoscroll", true);
+  const scroller = useRef<HTMLDivElement | null>(null);
+
   async function load() {
     const d = await getJSON("/api/sentinel/mind");
-    if (d.ok) { setEntries(d.entries || d.mind || []); setErr(""); } else setErr(d.error || "Couldn't load the Mind stream.");
+    if (d.ok) { setEntries((d.entries || d.mind || []).slice(-500)); setErr(""); } else setErr(d.error || "Couldn't load the Mind stream.");
   }
-  useEffect(() => { load(); const t = setInterval(load, 8000); return () => clearInterval(t); }, []);
+  useEffect(() => { load(); const t = setInterval(load, 6000); return () => clearInterval(t); }, []);
+  useEffect(() => { if (autoscroll && scroller.current) scroller.current.scrollTop = scroller.current.scrollHeight; }, [entries, autoscroll]);
+
+  const kindColor = (k: string) =>
+    k === "action" ? "text-[color:var(--color-brand)]" : k === "advisory" ? "text-gold" : k === "review" ? "text-positive" : k === "dossier" ? "text-[color:var(--color-brand)]" : "text-faint";
+
   return (
     <Card className="p-5">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold uppercase tracking-wide text-muted">NEURAX Mind</h3>
-        <span className="text-xs text-faint">everything Sentinel is thinking / doing</span>
+        <label className="flex items-center gap-1.5 text-xs text-faint">
+          <input type="checkbox" checked={autoscroll} onChange={(e) => setAutoscroll(e.target.checked)} /> follow
+        </label>
       </div>
+      <p className="mt-1 text-xs text-faint">Everything Sentinel is thinking + doing — investigations, reviews, deploys, rollbacks, security findings. Persisted.</p>
       {err && <p className="mt-2 text-sm text-[color:#fca5a5]">{err}</p>}
-      <div className="mt-3 max-h-[520px] space-y-2 overflow-y-auto font-mono text-xs leading-relaxed">
+      <div ref={scroller} className="mt-3 max-h-[560px] space-y-2 overflow-y-auto font-mono text-xs leading-relaxed">
         {entries.length === 0 && !err && <p className="text-muted">No recent activity.</p>}
         {entries.map((e, i) => (
           <div key={e.id || i} className="flex gap-2">
             <span className="shrink-0 text-faint">{new Date(e.at || Date.now()).toLocaleTimeString()}</span>
-            <span className={`shrink-0 uppercase ${e.kind === "action" ? "text-[color:var(--color-brand)]" : e.kind === "advisory" ? "text-gold" : "text-faint"}`}>{e.kind || "log"}</span>
+            <span className={`shrink-0 uppercase ${kindColor(e.kind)}`}>{e.kind || "log"}</span>
             <span className="whitespace-pre-wrap text-ink">{e.text}</span>
           </div>
         ))}
