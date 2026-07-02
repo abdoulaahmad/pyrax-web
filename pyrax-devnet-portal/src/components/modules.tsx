@@ -4,6 +4,7 @@ import { Card, Button, Badge, PageHeader, Icon, StatTile } from "./ui";
 import { type AccessSubject } from "../lib/permissions";
 import { LEDGER_LABELS, REWARDS, usd } from "../lib/rewards";
 import ChatRoom from "./ChatRoom";
+import MacGatekeeperBanner from "./MacGatekeeperBanner";
 import { RewardsModal, LegalDocBody } from "./Legal";
 import { NDA, TOS } from "../lib/legal-docs";
 
@@ -262,6 +263,7 @@ export function Downloads() {
   return (
     <>
       <PageHeader title="Downloads" subtitle="Get the Inferno or Ember node app, or the headless pyrax CLI, then connect it to your account." />
+      <MacGatekeeperBanner />
       {d.error && <Card className="mb-4 p-4 text-sm text-[color:var(--color-negative)]">{d.error}</Card>}
       {!d.error && noBuilds && (
         <Card className="mb-4 p-4 text-sm text-muted">No builds are published yet. Links appear here automatically the moment a build lands — and you'll get a release notification.</Card>

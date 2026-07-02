@@ -9,6 +9,7 @@
 import React, { useEffect, useState } from "react";
 import { platformIcon } from "./ui";
 import NotifyForm from "./NotifyForm";
+import MacGatekeeperBanner from "./MacGatekeeperBanner";
 
 interface PlatformDownload { platform: "win" | "mac" | "linux"; label: string; filename: string; url: string }
 interface Product { id: string; name: string; note: string; version: string | null; downloads: PlatformDownload[] }
@@ -69,6 +70,8 @@ export default function Downloads() {
         <h1 className="text-3xl font-extrabold sm:text-4xl">Download a PYRAX node</h1>
         <p className="mt-3 text-lg text-muted">Pick your platform and join the network in minutes. Nodes connect outbound — no port-forwarding required. Every release is checksum-verified by the app on update.</p>
       </div>
+
+      <MacGatekeeperBanner />
 
       {state.kind === "loading" ? (
         <div className="card mt-8 p-10 text-center text-sm text-muted">Loading downloads…</div>

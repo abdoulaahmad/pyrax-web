@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, Button, StatTile, Badge, PageHeader, Icon } from "./ui";
+import MacGatekeeperBanner from "./MacGatekeeperBanner";
 import { can, canGrant, type AccessSubject, type Permission, PERMISSIONS, permissionGroups, PRESETS, isSuperuserOnly } from "../lib/permissions";
 import { SOCIAL_FIELDS, validateProfile, formatPhone, validatePhone, COMPANY_EMAIL_DOMAIN, type MemberProfile } from "../lib/profile";
 import { type Member } from "../lib/mock";
@@ -139,6 +140,7 @@ export function Downloads({ subject }: { subject: AccessSubject }) {
   return (
     <>
       <PageHeader title="Downloads" subtitle={subtitle} />
+      <MacGatekeeperBanner />
       {err && <p className="mb-3 text-sm text-[color:var(--color-negative)]">{err}</p>}
       {!anyBuild ? (
         <ComingSoon title="No builds published yet" detail="The signed Inferno + Ember builds appear here the moment the release pipeline publishes them. Restricted products stay gated to their own access." />
