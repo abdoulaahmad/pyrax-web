@@ -98,7 +98,11 @@ export async function sessionTester(sid: string | undefined): Promise<TesterRow 
   const now = Date.now();
   const r = await db().query("UPDATE sessions SET last_seen=$1 WHERE sid_hash=$2 AND expires_at > $1 RETURNING tester_id", [now, hmac(sid)]);
   if (r.rowCount === 0) return null;
-  return testerById(r.rows[0].tester_id);
+  const t = await testerById(r.rows[0].tester_id);
+  // Banned/suspended testers lose access immediately, even on an already-open session — the team can
+  // kick someone off the devnet site by suspending them (see the team portal's tester management).
+  if (!t || t.status === "suspended") return null;
+  return t;
 }
 export async function destroySession(sid: string | undefined): Promise<void> {
   if (!sid) return; await db().query("DELETE FROM sessions WHERE sid_hash=$1", [hmac(sid)]);

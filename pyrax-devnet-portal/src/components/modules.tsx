@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import React, { useEffect, useState } from "react";
-import { Card, Button, Badge, PageHeader, Icon, StatTile } from "./ui";
+import { Card, Button, Badge, PageHeader, Icon, StatTile, Pagination } from "./ui";
 import { type AccessSubject } from "../lib/permissions";
 import { LEDGER_LABELS, REWARDS, usd } from "../lib/rewards";
 import ChatRoom from "./ChatRoom";
@@ -358,8 +358,10 @@ export function IssueCouncil({ me, subject, initialStatus = "", title = "Issue C
   const [bugs, setBugs] = useState<any[] | null>(null);
   const [status, setStatus] = useState(initialStatus); const [sort, setSort] = useState("recent");
   const [creating, setCreating] = useState(false); const [openId, setOpenId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 8; // 2-up grid → compact, no endless scroll
   async function load() { const q = new URLSearchParams(); if (status) q.set("status", status); if (sort) q.set("sort", sort); const d = await (await fetch("/api/bugs?" + q)).json(); setBugs(d.ok ? d.bugs : []); }
-  useEffect(() => { load(); }, [status, sort]);
+  useEffect(() => { load(); setPage(1); }, [status, sort]);
   return (
     <>
       <PageHeader title={title} subtitle={subtitle}
@@ -369,20 +371,23 @@ export function IssueCouncil({ me, subject, initialStatus = "", title = "Issue C
         <select className="input w-auto py-1.5 text-sm" value={sort} onChange={(e) => setSort(e.target.value)}><option value="recent">Most recent</option><option value="votes">Most votes</option><option value="severity">Severity</option></select>
       </div>
       {!bugs ? <Card className="p-8 text-center text-sm text-muted">Loading…</Card> : bugs.length === 0 ? <Card className="p-8 text-center text-sm text-muted">No reports yet — be the first to file one.</Card> : (
-        <div className="space-y-2">
-          {bugs.map((b) => (
-            <Card key={b.id} hover className="cursor-pointer p-4" onClick={() => setOpenId(b.id)}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2"><Badge tone={SEV[b.assigned_severity || b.severity]?.tone}>{SEV[b.assigned_severity || b.severity]?.label}</Badge><Badge>{STATUS[b.status]}</Badge>{b.bounty_pyrx > 0 && <Badge tone="brand">{fmt(Number(b.bounty_pyrx))} PYRX</Badge>}</div>
-                  <div className="mt-1.5 truncate font-semibold">{b.title}</div>
-                  <div className="text-xs text-faint">{b.component ? b.component + " · " : ""}by {b.reporter_handle ? "@" + b.reporter_handle : b.reporter_name} · {ago(Number(b.created_at))}</div>
+        <>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {bugs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((b) => (
+              <Card key={b.id} hover className="cursor-pointer p-3" onClick={() => setOpenId(b.id)}>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5"><Badge tone={SEV[b.assigned_severity || b.severity]?.tone}>{SEV[b.assigned_severity || b.severity]?.label}</Badge><Badge>{STATUS[b.status]}</Badge>{b.bounty_pyrx > 0 && <Badge tone="brand">{fmt(Number(b.bounty_pyrx))} PYRX</Badge>}</div>
+                    <div className="mt-1 truncate text-sm font-semibold">{b.title}</div>
+                    <div className="truncate text-[0.7rem] text-faint">{b.component ? b.component + " · " : ""}by {b.reporter_handle ? "@" + b.reporter_handle : b.reporter_name} · {ago(Number(b.created_at))}</div>
+                  </div>
+                  <div className="shrink-0 text-right text-[0.7rem] text-faint"><div>▲ {b.votes}</div><div>✓ {b.confirms}</div>{(b.attachments?.length || 0) > 0 && <div>📎 {b.attachments.length}</div>}</div>
                 </div>
-                <div className="shrink-0 text-right text-xs text-faint"><div>▲ {b.votes} votes</div><div>✓ {b.confirms} repro</div>{(b.attachments?.length || 0) > 0 && <div>📎 {b.attachments.length}</div>}</div>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+          <Pagination page={page} total={bugs.length} pageSize={PAGE_SIZE} onPage={setPage} />
+        </>
       )}
       {creating && <BugForm onClose={() => setCreating(false)} onCreated={() => { setCreating(false); load(); }} />}
       {openId && <BugDetail id={openId} me={me} subject={subject} onClose={() => setOpenId(null)} onChanged={load} />}

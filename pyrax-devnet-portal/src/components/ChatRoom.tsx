@@ -83,7 +83,25 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
   const headerLabel = channels.includes(current) ? "# " + current : convLabel(convos.find((c) => c.id === current) || {});
 
   const mentionMatch = useMemo(() => { const m = input.match(/@([a-z0-9_]*)$/i); return m ? m[1].toLowerCase() : null; }, [input]);
-  const mentionList = mentionMatch !== null ? presence.filter((p) => p.user && p.user.toLowerCase().startsWith(mentionMatch)).slice(0, 5) : [];
+  // @-autocomplete: the on-GPU Sentinel assistant first, then ONLINE ADMINS, a divider, ONLINE USERS,
+  // then OFFLINE users (dimmed). Sourced from the full roster (not just channel presence) + online set.
+  const mentionList = useMemo(() => {
+    if (mentionMatch === null) return [] as Array<Member & { _off?: boolean; _sentinel?: boolean; _divider?: "users" | "offline" }>;
+    const q = mentionMatch;
+    const src = (roster.length ? roster : presence) as Member[];
+    const seen = new Set<string>();
+    const uniq = src.filter((u) => u.user && u.user.toLowerCase().startsWith(q) && !seen.has(u.user) && (seen.add(u.user), true));
+    const on = (u: Member) => onlineSet.has(u.user);
+    const onlineAdmins = uniq.filter((u) => u.admin && on(u));
+    const onlineUsers = uniq.filter((u) => !u.admin && on(u));
+    const offline = uniq.filter((u) => !on(u));
+    const out: Array<Member & { _off?: boolean; _sentinel?: boolean; _divider?: "users" | "offline" }> = [];
+    if ("sentinel".startsWith(q)) out.push({ id: "sentinel", user: "Sentinel", name: "NEURAX Sentinel", admin: false, _sentinel: true });
+    onlineAdmins.forEach((u) => out.push(u));
+    onlineUsers.forEach((u, i) => out.push({ ...u, _divider: i === 0 && onlineAdmins.length ? "users" : undefined }));
+    offline.forEach((u, i) => out.push({ ...u, _off: true, _divider: i === 0 && (onlineAdmins.length || onlineUsers.length) ? "offline" : undefined }));
+    return out.slice(0, 10);
+  }, [mentionMatch, roster, presence, onlineSet]);
   function renderBody(text: string) { return text.split(/(@[a-z0-9_]+)/gi).map((p, i) => /^@/.test(p) ? <span key={i} className="rounded bg-[rgba(245,134,34,0.18)] px-1 font-semibold text-gold">{p}</span> : <React.Fragment key={i}>{p}</React.Fragment>); }
 
   return (
@@ -127,8 +145,18 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
         <div className="relative border-t border-line p-3">
           {(emojiOpen || gifOpen) && <div className="fixed inset-0 z-40" onClick={() => { setEmojiOpen(false); setGifOpen(false); }} />}
           {mentionList.length > 0 && (
-            <div className="absolute bottom-full left-3 z-50 mb-1 w-48 overflow-hidden rounded-lg border border-line bg-[rgba(8,10,17,0.98)]">
-              {mentionList.map((p) => <button key={p.user} onClick={() => setInput(input.replace(/@([a-z0-9_]*)$/i, "@" + p.user + " "))} className="block w-full px-3 py-1.5 text-left text-sm hover:bg-[rgba(245,134,34,0.1)]">@{p.user} {p.admin && <span className="text-xs text-[color:var(--color-brand)]">admin</span>}</button>)}
+            <div className="absolute bottom-full left-3 z-50 mb-1 w-56 overflow-hidden rounded-lg border border-line bg-[rgba(8,10,17,0.98)] py-1">
+              {mentionList.map((p) => (
+                <React.Fragment key={(p._off ? "off:" : p._sentinel ? "s:" : "") + p.user}>
+                  {p._divider === "users" && <div className="my-1 border-t border-line" />}
+                  {p._divider === "offline" && <div className="mt-1 border-t border-line px-3 pt-1 text-[0.6rem] font-semibold uppercase tracking-wide text-faint">Offline</div>}
+                  <button onClick={() => setInput(input.replace(/@([a-z0-9_]*)$/i, "@" + p.user + " "))} className={`flex w-full items-center gap-1.5 px-3 py-1.5 text-left text-sm hover:bg-[rgba(245,134,34,0.1)] ${p._off ? "opacity-50" : ""}`}>
+                    {p._sentinel ? <span className="text-gold">✦</span> : <span className={`h-1.5 w-1.5 rounded-full ${onlineSet.has(p.user) ? "bg-[color:var(--color-positive)]" : "bg-faint"}`} />}
+                    <span>@{p.user}</span>
+                    {p._sentinel ? <span className="text-xs text-gold">AI assistant</span> : p.admin ? <span className="text-xs text-[color:var(--color-brand)]">admin</span> : null}
+                  </button>
+                </React.Fragment>
+              ))}
             </div>
           )}
           {emojiOpen && <div className="absolute bottom-full left-3 z-50 mb-1 grid w-64 grid-cols-8 gap-1 rounded-lg border border-line bg-[rgba(8,10,17,0.98)] p-2">{EMOJI.map((e) => <button key={e} onClick={() => { setInput(input + e); setEmojiOpen(false); }} className="rounded p-1 text-lg hover:bg-[rgba(255,255,255,0.06)]">{e}</button>)}</div>}
