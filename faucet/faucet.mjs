@@ -11,6 +11,9 @@
 //   FAUCET_DRIP_ASH     drip amount in base units (ash). default 100 PYRX = 100e18
 //   FAUCET_WELCOME_ASH  one-time new-wallet welcome grant in ash. default 1,000,000 PYRX
 //   FAUCET_WINDOW_H     per-address/IP cooldown hours. default 12
+//   FAUCET_BOT_KEY      trusted bearer for the Discord bot: rate-limit /drip + /welcome per
+//                       caller-supplied `subject` (Discord user id) instead of the shared bot IP.
+//                       Per-address cooldown + global ceiling still apply. Unset ⇒ no trusted path.
 //   FAUCET_NETWORK      label shown in the public HTML UI (e.g. "Pyrax Seed Network")
 //   PYRAX_KEY_PASSPHRASE  unlocks the faucet keystore key (name: "faucet")
 //   PORT                listen port (default 8800)
@@ -23,7 +26,7 @@
 import http from "node:http";
 import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 
 const RPC = process.env.FAUCET_RPC || "";
 // Keystore key NAME the faucet signs Seed (881109) txs with. Its address is the
@@ -70,6 +73,14 @@ const DRIP_IP_PER_H = Number(process.env.FAUCET_DRIP_IP_PER_H || 20);
 // the faucet is being scripted. Kept small (a few bits) — enough to deter bulk automation,
 // cheap for one legitimate request.
 const DRIP_POW_BITS = Math.max(0, Math.min(24, Number(process.env.FAUCET_DRIP_POW_BITS || 0)));
+// Trusted server-to-server caller (the PYRAX Discord bot). When a request presents this bearer, the
+// /drip + /welcome anti-automation cap is keyed by a caller-supplied `subject` (e.g. the Discord
+// user id) INSTEAD of the source IP — because every bot request shares ONE server IP, so an IP key
+// would throttle all bot users collectively (a false limit). This ONLY changes the rate-limit
+// DIMENSION: the per-address cooldown, the once-per-life welcome grant, and the GLOBAL hourly
+// ceiling still apply unconditionally, so even a compromised bot key can never over-fund an address
+// or exceed the global drain bound. Unset ⇒ no trusted path (default). Must be a high-entropy value.
+const BOT_KEY = process.env.FAUCET_BOT_KEY || "";
 const WINDOW_MS = Number(process.env.FAUCET_WINDOW_H || 12) * 3600 * 1000;
 const NETWORK = process.env.FAUCET_NETWORK || "the test network";
 const PORT = Number(process.env.PORT || 8800);
@@ -264,6 +275,26 @@ function clientIp(req) {
     }
   }
   return req.socket?.remoteAddress || "unknown";
+}
+// Constant-time check for the trusted bot bearer (Authorization: Bearer FAUCET_BOT_KEY). Fails
+// closed when unset, and length-guards before the timing-safe compare so a length mismatch can't
+// throw or leak.
+function botTrusted(req) {
+  if (!BOT_KEY) return false;
+  const h = req.headers["authorization"] || "";
+  const tok = /^Bearer /i.test(h) ? h.slice(7).trim() : "";
+  if (!tok) return false;
+  const a = Buffer.from(tok), b = Buffer.from(BOT_KEY);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+// The anti-automation rate-limit KEY for a request: a trusted caller that supplies a `subject` is
+// bounded PER-SUBJECT (hashed) so one Discord user is limited independently of the shared bot IP;
+// everyone else (and a trusted caller with no subject) is keyed by the trusted client IP as before.
+function rlKeyFor(req, subject) {
+  if (botTrusted(req) && typeof subject === "string" && subject) {
+    return "u:" + createHash("sha256").update(subject).digest("hex").slice(0, 32);
+  }
+  return clientIp(req);
 }
 // GLOBAL hourly dispense ceiling across ALL endpoints/IPs/addresses — the backstop that
 // bounds total drain even if every other gate is bypassed (mining refills the operator key
@@ -477,7 +508,7 @@ const server = http.createServer((req, res) => {
       if (body.length > 4096) req.destroy();
     });
     req.on("end", () => {
-      let address, chainId, pow, reqKind;
+      let address, chainId, pow, reqKind, subject;
       try {
         const j = JSON.parse(body);
         address = j.address;
@@ -487,6 +518,9 @@ const server = http.createServer((req, res) => {
         // apps/CLI omit it and rely on auto-detection; when present we ENFORCE it so a user who
         // picked "Shielded" but pasted a transparent address is told, not silently sent transparent.
         reqKind = typeof j.kind === "string" ? j.kind : undefined;
+        // Optional per-user identity for the trusted-caller rate-limit dimension (see rlKeyFor).
+        // Only honoured when the request also presents the trusted bot bearer; ignored otherwise.
+        subject = typeof j.subject === "string" ? j.subject : undefined;
       } catch {
         return send(res, 400, { error: "bad request" });
       }
@@ -510,15 +544,20 @@ const server = http.createServer((req, res) => {
       // `powCleared` is true ONLY when PoW is enabled AND a valid single-use solution was
       // presented — that (and only that) exempts the per-IP cap. When PoW is disabled it is
       // false, so the per-IP cap always applies in the default config.
+      const trusted = botTrusted(req);
       const powCleared = DRIP_POW_BITS > 0 && verifyPow(pow);
-      if (DRIP_POW_BITS > 0 && !powCleared) {
+      // A trusted server-to-server caller (the bot) is authenticated, so it is exempt from the PoW
+      // REQUIREMENT — but it is NOT exempt from the cap: it is still bounded per-subject below, plus
+      // the per-address cooldown + the global ceiling. Untrusted callers still need a valid PoW.
+      if (DRIP_POW_BITS > 0 && !powCleared && !trusted) {
         return send(res, 428, { error: "proof-of-work required — GET /drip/challenge first", powRequired: true, bits: DRIP_POW_BITS });
       }
-      const ip = clientIp(req);
-      // A PoW solve exempts the per-IP cap (so a genuine user behind a shared portal IP is
-      // never blocked); otherwise the caller must be under the per-IP hourly cap.
+      // Rate-limit key: per-subject for a trusted caller (so all bot users don't share the one bot
+      // IP), else the trusted client IP. A PoW solve still exempts the cap (a genuine user behind a
+      // shared portal IP is never blocked); otherwise the caller must be under the hourly cap.
+      const ip = rlKeyFor(req, subject);
       if (!powCleared && !dripIpUnder(ip)) {
-        return send(res, 429, { error: "too many requests from your network — please slow down and try again shortly" });
+        return send(res, 429, { error: "too many requests — please slow down and try again shortly" });
       }
       // Rate-limit PER-ADDRESS: a given address is fundable at most once per cooldown window.
       const akey = `a:${address.toLowerCase()}`;
@@ -563,11 +602,14 @@ const server = http.createServer((req, res) => {
       if (body.length > 4096) req.destroy();
     });
     req.on("end", () => {
-      let address, chainId;
+      let address, chainId, subject;
       try {
         const j = JSON.parse(body);
         address = j.address;
         chainId = Number(j.chainId) || DEFAULT_CHAIN;
+        // Per-user identity for the trusted-caller rate-limit dimension (see rlKeyFor); only
+        // honoured with the trusted bot bearer. The once-per-(chain,address) grant is unaffected.
+        subject = typeof j.subject === "string" ? j.subject : undefined;
       } catch {
         return send(res, 400, { error: "bad request" });
       }
@@ -591,8 +633,9 @@ const server = http.createServer((req, res) => {
       if (already) {
         return send(res, 200, { ok: true, already: true, amount: welcome_pyrx, network: net.label, kind });
       }
-      // Abuse cap: bound NEW grants per source host per hour (see WELCOME_IP_PER_H).
-      if (!welcomeIpAllowed(clientIp(req))) {
+      // Abuse cap: bound NEW grants per source host per hour (see WELCOME_IP_PER_H) — keyed
+      // per-subject for a trusted caller so the shared bot IP doesn't throttle all users.
+      if (!welcomeIpAllowed(rlKeyFor(req, subject))) {
         return send(res, 429, { error: "welcome grants are rate-limited from this network — try again later" });
       }
       if (!globalAllowed()) {
