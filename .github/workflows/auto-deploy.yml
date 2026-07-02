@@ -1,0 +1,106 @@
+# SPDX-License-Identifier: LicenseRef-PYRAX-Proprietary
+#
+# Push-to-main auto-deploy bridge. When the `ci` workflow finishes SUCCESSFULLY on main, this
+# figures out which site directories changed in that commit and dispatches ONLY those sites'
+# image-build workflows over in pyrax-infra (which then push to GHCR and, via their own
+# workflow_run triggers, roll onto the droplet). Shared code (pyrax-shared/** or a root build
+# file) affects every site, so it fans out to all five image workflows.
+#
+# This never builds or deploys anything itself — it only translates "CI passed on main" into
+# targeted `gh workflow run` dispatches. Uses secrets.INFRA_DISPATCH_PAT (actions:write on
+# pyrax-infra). No cross-trigger back into `ci`, so there is no deploy loop.
+name: auto-deploy
+
+on:
+  workflow_run:
+    workflows: ["ci"]
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: auto-deploy-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    # Only fan out when CI actually passed. A failed/cancelled CI run must NOT deploy.
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Checkout the built commit
+        uses: actions/checkout@v4
+        with:
+          # Check out the exact commit CI validated, with its parent, so we can diff the two.
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 2
+
+      - name: Dispatch image builds for the changed sites
+        env:
+          GH_TOKEN: ${{ secrets.INFRA_DISPATCH_PAT }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+
+          INFRA_REPO="PYRAX-NETWORK/pyrax-infra"
+
+          # site dir -> image workflow file (must match each workflow's `name:` /filename in pyrax-infra)
+          declare -A SITE_WF=(
+            [pyrax-nodes]=web-nodes-image.yml
+            [pyrax-devnet-portal]=web-devnet-image.yml
+            [pyrax-explorer-app]=web-explorer-image.yml
+            [pyrax-team-website]=team-website-image.yml
+            [pyrax-website]=web-website-image.yml
+          )
+
+          # Compute changed paths for the built commit (HEAD_SHA^..HEAD_SHA).
+          if ! CHANGED="$(git diff --name-only "${HEAD_SHA}^" "${HEAD_SHA}")"; then
+            echo "Could not diff ${HEAD_SHA}^..${HEAD_SHA} (shallow/first commit?) — nothing to dispatch."
+            exit 0
+          fi
+
+          echo "=== changed files ==="
+          printf '%s\n' "${CHANGED:-<none>}"
+          echo "====================="
+
+          if [ -z "${CHANGED}" ]; then
+            echo "No changed files — clean no-op."
+            exit 0
+          fi
+
+          # Shared code / root build files affect every site → dispatch all five.
+          SHARED_CHANGED=0
+          if printf '%s\n' "${CHANGED}" | grep -Eq '^(pyrax-shared/|package\.json$|package-lock\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.github/workflows/)'; then
+            SHARED_CHANGED=1
+          fi
+
+          # Collect the image workflows to dispatch (de-duplicated via an associative set).
+          declare -A TO_DISPATCH=()
+
+          if [ "${SHARED_CHANGED}" -eq 1 ]; then
+            echo "Shared/root build files changed → fanning out to ALL sites."
+            for site in "${!SITE_WF[@]}"; do
+              TO_DISPATCH["${SITE_WF[$site]}"]=1
+            done
+          else
+            for site in "${!SITE_WF[@]}"; do
+              if printf '%s\n' "${CHANGED}" | grep -Eq "^${site}/"; then
+                echo "Changed site: ${site} -> ${SITE_WF[$site]}"
+                TO_DISPATCH["${SITE_WF[$site]}"]=1
+              fi
+            done
+          fi
+
+          if [ "${#TO_DISPATCH[@]}" -eq 0 ]; then
+            echo "No site directories changed — clean no-op (nothing to deploy)."
+            exit 0
+          fi
+
+          echo "=== dispatching image builds ==="
+          for wf in "${!TO_DISPATCH[@]}"; do
+            echo "gh workflow run ${wf} -R ${INFRA_REPO} --ref main"
+            gh workflow run "${wf}" -R "${INFRA_REPO}" --ref main
+          done
+          echo "Dispatched ${#TO_DISPATCH[@]} image workflow(s)."
