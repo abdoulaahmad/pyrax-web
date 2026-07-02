@@ -51,7 +51,8 @@ export function matchDesktop(keys: string[]): Record<Platform, string | null> {
     // .exe but never the .blockmap sidecar; installers only.
     win: pick((n) => /\.exe$/i.test(n)),
     mac: pick((n) => /\.dmg$/i.test(n)),
-    linux: pick((n) => /\.AppImage$/i.test(n)),
+    // Prefer the portable .AppImage; fall back to a .deb if that's all the feed published.
+    linux: pick((n) => /\.AppImage$/i.test(n)) ?? pick((n) => /\.deb$/i.test(n)),
   };
 }
 

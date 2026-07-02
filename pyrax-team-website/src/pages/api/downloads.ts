@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 //
-// Authenticated download resolver for the team portal. The team portal serves the internal Ember app
-// ONLY — and ONLY to users who hold `downloads.ember`. Inferno is distributed exclusively on the devnet
-// + nodes sites, and the CLI is not published this round, so neither is offered here. Ember is returned
-// with a real version and a short-lived PRESIGNED URL from the private DigitalOcean Spaces bucket.
+// Authenticated download resolver for the team portal. The team portal serves BOTH desktop apps —
+// Inferno (the public node app) to anyone with `downloads.view`, and the internal Ember app to users
+// who additionally hold `downloads.ember`. The CLI is not published this round, so it is not offered.
+// Each app is returned with a real version and short-lived PRESIGNED URLs from the private
+// DigitalOcean Spaces bucket.
 //
 // RBAC is enforced SERVER-SIDE: the Ember feed is listed + presigned only when can(subject,
 // "downloads.ember") is true, so a user without that permission never receives an Ember presigned URL
@@ -32,14 +33,15 @@ export const GET: APIRoute = async ({ cookies }) => {
     return json({ ok: true, configured: false, canEmber, products: [] });
   }
 
-  // Resolve each permitted feed in parallel. Ember is included ONLY when the user holds downloads.ember
-  // — its presigned URLs are never even minted for anyone else.
-  const tasks: Promise<Product>[] = [];
+  // Resolve each permitted feed in parallel. Inferno (the public node app) is offered to everyone with
+  // downloads.view. Ember is included ONLY when the user holds downloads.ember — its presigned URLs are
+  // never even minted for anyone else. The CLI is intentionally NOT offered (not published this round).
+  const tasks: Promise<Product>[] = [
+    resolveDesktopFeed("node", { id: "inferno", name: "Inferno Node App", note: "Public desktop node app — run, mine, and manage the network from a UI." }),
+  ];
   if (canEmber) {
     tasks.push(resolveDesktopFeed("ember", { id: "ember", name: "Ember (Internal Seed)", note: "Internal seed node app — restricted. Do not distribute outside the team.", restricted: true }));
   }
-  // Inferno + the CLI are intentionally NOT offered on the team portal — Inferno is distributed via the
-  // devnet + nodes sites, and the CLI is not published this round. The team portal serves Ember only.
 
   let products: Product[];
   try {

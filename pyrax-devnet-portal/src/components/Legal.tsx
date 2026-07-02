@@ -32,7 +32,16 @@ function ScrollDoc({ doc, onEnd }: { doc: LegalDoc; onEnd: () => void }) {
   };
   useEffect(() => { const el = ref.current; if (el && el.scrollHeight <= el.clientHeight + 28) { fired.current = true; onEnd(); } }, []);
   return (
-    <div ref={ref} onScroll={check} className="flex-1 overflow-y-auto rounded-xl border border-line bg-[rgba(5,6,9,0.55)] px-5 py-4">
+    // Mobile scroll reliability: `overscroll-contain` stops the gesture chaining to the scroll-locked
+    // <body> (the iOS cause of "it won't scroll"); `touch-pan-y` + `-webkit-overflow-scrolling` keep
+    // momentum touch-scroll working; `min-h-[8rem]` keeps a usable window so the doc never collapses to
+    // an untouchable sliver on short screens.
+    <div
+      ref={ref}
+      onScroll={check}
+      className="min-h-[8rem] flex-1 touch-pan-y overflow-y-auto overscroll-contain rounded-xl border border-line bg-[rgba(5,6,9,0.55)] px-5 py-4"
+      style={{ WebkitOverflowScrolling: "touch" }}
+    >
       <LegalDocBody doc={doc} />
     </div>
   );
@@ -49,8 +58,10 @@ function ModalShell({ title, subtitle, children }: { title: string; subtitle?: s
     return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", onKey, true); };
   }, []);
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true">
-      <div className="flex h-full max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-line bg-[rgba(10,12,19,0.98)] shadow-2xl">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overscroll-none bg-black/80 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true">
+      {/* `dvh` (not `vh`) so mobile browser bars don't push the footer form/buttons off-screen. `h-full`
+          gives the inner document a bounded height so it scrolls internally instead of growing the modal. */}
+      <div className="flex h-full max-h-[92dvh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-line bg-[rgba(10,12,19,0.98)] shadow-2xl">
         <div className="flame-bar h-1 shrink-0" />
         <div className="shrink-0 px-6 pb-3 pt-5">
           <h2 className="text-lg font-extrabold text-ink sm:text-xl">{title}</h2>
@@ -256,7 +267,7 @@ export function RewardsContent() {
 export function RewardsModal({ onClose, firstTime }: { onClose: () => void; firstTime?: boolean }) {
   return (
     <ModalShell title={firstTime ? "Welcome — here's how rewards work" : "Rewards & how to earn"} subtitle={firstTime ? "Full transparency on what you can earn as a PYRAX tester." : undefined}>
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-2"><RewardsContent /></div>
+      <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-6 py-2" style={{ WebkitOverflowScrolling: "touch" }}><RewardsContent /></div>
       <div className="shrink-0 border-t border-line bg-[rgba(5,6,9,0.6)] px-6 py-4 text-right">
         <Button variant="primary" onClick={onClose}>{firstTime ? "Got it — enter the portal" : "Close"}</Button>
       </div>

@@ -86,7 +86,10 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
   function renderBody(text: string) { return text.split(/(@[a-z0-9_]+)/gi).map((p, i) => /^@/.test(p) ? <span key={i} className="rounded bg-[rgba(245,134,34,0.18)] px-1 font-semibold text-gold">{p}</span> : <React.Fragment key={i}>{p}</React.Fragment>); }
 
   return (
-    <div className="flex h-[calc(100vh-9rem)] overflow-hidden rounded-2xl border border-line bg-[rgba(8,10,17,0.6)]">
+    // Fill the parent container (which owns the height) rather than a fixed viewport calc — that let the
+    // inner panel grow taller than its wrapper and clip. `min-h-0` lets the messages column scroll inside
+    // the flex layout.
+    <div className="flex h-full min-h-0 overflow-hidden rounded-2xl border border-line bg-[rgba(8,10,17,0.6)]">
       {/* left: channels + conversations */}
       <div className="hidden w-48 shrink-0 flex-col overflow-y-auto border-r border-line p-3 lg:flex">
         <div className="px-2 text-[0.66rem] font-semibold uppercase tracking-wider text-faint">Channels</div>

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 //
-// Public downloads hub. Fetches the CURRENT Inferno + CLI installers (Windows / macOS / Linux) with
+// Public downloads hub. Fetches the CURRENT Inferno + Ember installers (Windows / macOS / Linux) with
 // real versions and short-lived PRESIGNED download links from /api/downloads (which lists + presigns
-// the private Spaces bucket server-side). No Ember here — the nodes site never exposes the seed app.
+// the private Spaces bucket server-side). The CLI is not published this round, so it is not offered.
 // Handles three honest states: closed (team kill-switch → notice + signup), no build published yet
 // (disabled buttons, no fake links), and live (working per-platform download buttons).
 import React, { useEffect, useState } from "react";
@@ -49,7 +49,7 @@ export default function Downloads() {
             <p className="mt-4 text-lg leading-relaxed text-muted">{state.message}</p>
             <ul className="mt-5 space-y-2 text-sm text-muted">
               <li className="flex items-center gap-2"><span className="text-[color:var(--color-positive)]">✓</span> Official, checksum-verified public builds</li>
-              <li className="flex items-center gap-2"><span className="text-[color:var(--color-positive)]">✓</span> Windows · macOS · Linux + CLI</li>
+              <li className="flex items-center gap-2"><span className="text-[color:var(--color-positive)]">✓</span> Inferno + Ember — Windows · macOS · Linux</li>
               <li className="flex items-center gap-2"><span className="text-[color:var(--color-positive)]">✓</span> One email the moment they go live</li>
             </ul>
           </div>
@@ -74,7 +74,7 @@ export default function Downloads() {
       ) : !anyBuild ? (
         <div className="card mt-8 p-10 text-center">
           <div className="text-base font-semibold">No public build is available yet</div>
-          <p className="mx-auto mt-2 max-w-md text-sm text-muted">Official Inferno + CLI installers appear here the moment the first release is published. Get notified below so you don't miss it.</p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-muted">Official Inferno + Ember installers appear here the moment the first release is published. Get notified below so you don't miss it.</p>
           <a href="/notify" className="btn btn-primary mt-5">Notify me when it's ready</a>
         </div>
       ) : (

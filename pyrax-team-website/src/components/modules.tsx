@@ -60,7 +60,7 @@ export function Dashboard({ subject, onNavigate }: { subject: AccessSubject; onN
           <h3 className="text-base font-bold">Quick actions</h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {can(subject, "faucet.drip") && <QuickAction icon="droplet" label="Dispense test PYRX" desc="Fund an address from the faucet" onClick={() => onNavigate("faucet")} />}
-            {can(subject, "downloads.view") && <QuickAction icon="download" label="Get the apps" desc="Ember, Inferno + the CLI" onClick={() => onNavigate("downloads")} />}
+            {can(subject, "downloads.view") && <QuickAction icon="download" label="Get the apps" desc="Inferno + Ember (internal)" onClick={() => onNavigate("downloads")} />}
             {can(subject, "users.invite") && <QuickAction icon="users" label="Invite a teammate" desc="Whitelist + set their access" onClick={() => onNavigate("team")} />}
             {can(subject, "node_control.view") && <QuickAction icon="power" label="Monitor nodes" desc="Versions + health" onClick={() => onNavigate("nodes")} />}
           </div>
@@ -123,7 +123,7 @@ export function Downloads({ subject }: { subject: AccessSubject }) {
     return () => { alive = false; };
   }, []);
 
-  const subtitle = "Latest signed builds. The download role grants Inferno + CLI — the internal Ember build needs its own access.";
+  const subtitle = "Latest signed builds. The download role grants the Inferno app — the internal Ember build needs its own access.";
   if (!state) {
     return (
       <>
@@ -141,7 +141,7 @@ export function Downloads({ subject }: { subject: AccessSubject }) {
       <PageHeader title="Downloads" subtitle={subtitle} />
       {err && <p className="mb-3 text-sm text-[color:var(--color-negative)]">{err}</p>}
       {!anyBuild ? (
-        <ComingSoon title="No builds published yet" detail="The signed Ember, Inferno + CLI builds appear here the moment the release pipeline publishes them. Restricted products stay gated to their own access." />
+        <ComingSoon title="No builds published yet" detail="The signed Inferno + Ember builds appear here the moment the release pipeline publishes them. Restricted products stay gated to their own access." />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           {products.map((p) => (
@@ -1245,7 +1245,10 @@ export function DevnetChat({ subject }: { subject: AccessSubject }) {
             <p className="mt-1 text-muted">Add a <span className="text-[color:var(--color-brand)]">Devnet chat username</span> on your <span className="font-medium">Profile</span> to post in the community chat. Testers will see you as an Admin.</p>
           </Card>
         ) : (
-          <Card className="overflow-hidden p-0" style={{ height: "calc(100vh - 220px)", minHeight: 480 }}>
+          /* The Card OWNS the height (ChatRoom fills it via h-full). Sized to the portal chrome — the
+             sticky header + main padding + this module's PageHeader — with `dvh` so mobile browser bars
+             don't clip it, and a floor so it stays usable on short screens. */
+          <Card className="overflow-hidden p-0" style={{ height: "calc(100dvh - 190px)", minHeight: 460 }}>
             <ChatRoom apiBase="/api/devnet-chat" />
           </Card>
         )}
