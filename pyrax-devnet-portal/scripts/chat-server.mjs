@@ -123,6 +123,128 @@ async function history(channel) {
   return r.rows.reverse();
 }
 
+// --- NEURAX Sentinel in chat -------------------------------------------------------------------
+// The on-GPU brain answers @Sentinel / slash commands and passively moderates. Reached server-side
+// the same way the team portal does: POST ${SENTINEL_BACKEND_URL}/api/nova/ask with a bearer service
+// secret. Fully INERT (a no-op) until SENTINEL_ADMIN_SECRET is set — @mentions just post as plain text.
+const BRAIN_BASE = (process.env.SENTINEL_BACKEND_URL || "https://status.pyraxchain.com").replace(/\/+$/, "");
+const BRAIN_SECRET = process.env.SENTINEL_ADMIN_SECRET || "";
+const SENTINEL_ON = !!BRAIN_SECRET;
+const BRAIN_TIMEOUT_MS = 130_000; // matches the team proxy (nova's infer timeout is 120s)
+const SENTINEL_BOT = { uid: "sentinel", name: "NEURAX Sentinel", user: "Sentinel", role: "sentinel" };
+const SENTINEL_SYSTEM = "You are NEURAX Sentinel, the PYRAX network's on-GPU AI assistant, replying inside a team/tester chat. Be concise, accurate, and friendly — a few sentences suited to chat. If you are unsure, say so.";
+const sentinelBusy = new Set(); // channels with a public request in flight (protects the single GPU)
+
+async function brainAsk(question, context) {
+  const r = await fetch(`${BRAIN_BASE}/api/nova/ask`, {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${BRAIN_SECRET}` },
+    body: JSON.stringify({ question: String(question).slice(0, 8000), context: context ? String(context).slice(0, 12000) : undefined }),
+    signal: AbortSignal.timeout(BRAIN_TIMEOUT_MS),
+  });
+  if (!r.ok) throw new Error(`brain HTTP ${r.status}`);
+  const j = await r.json().catch(() => ({}));
+  return String(j?.answer ?? "").trim();
+}
+
+// A message is a Sentinel request if it @mentions Sentinel or uses a slash command. `draft` is a
+// private team affordance (never broadcast); the rest post a public Sentinel reply to the channel.
+function parseSentinelCommand(body) {
+  const t = (body || "").trim();
+  let m = t.match(/^\/(ask|summarize|catchup|catch-up|draft|moderate)\b[:,]?\s*([\s\S]*)$/i);
+  if (m) {
+    const cmd = m[1].toLowerCase();
+    const arg = (m[2] || "").trim();
+    if (cmd === "ask") return { kind: "ask", arg };
+    if (cmd === "summarize" || cmd === "catchup" || cmd === "catch-up") return { kind: "summarize", arg };
+    if (cmd === "draft") return { kind: "draft", arg };
+    if (cmd === "moderate") return { kind: "moderate", arg };
+  }
+  m = t.match(/^@sentinel\b[:,]?\s*([\s\S]*)$/i);
+  if (m) return { kind: "ask", arg: m[1].trim() };
+  if (/(^|\s)@sentinel\b/i.test(t)) return { kind: "ask", arg: t.replace(/@sentinel\b[:,]?/i, " ").trim() };
+  return null;
+}
+
+// Fast, brain-free heuristics so admins get an INSTANT moderation alert on obvious problems. Kept
+// conservative (security-relevant + spam) to avoid noise; a deeper review is available via /moderate.
+function heuristicFlags(body) {
+  const flags = [];
+  const s = String(body || "");
+  const low = s.toLowerCase();
+  if (/\b(0x)?[0-9a-f]{64}\b/i.test(s)) flags.push("possible private key / secret");
+  if (/(seed|mnemonic|recovery)\s*(phrase|words)?/.test(low) && (s.match(/\b[a-z]{3,}\b/gi) || []).length >= 12) flags.push("possible seed phrase");
+  if (/\b(free|claim|airdrop|giveaway|double your|1000x|guaranteed)\b[\s\S]{0,50}(https?:\/\/|t\.me\/|discord\.gg\/|\.io\b|\.xyz\b)/i.test(s)) flags.push("possible scam / phishing");
+  if ((s.match(/@\w+/g) || []).length >= 6) flags.push("mass mention");
+  if (/(.)\1{18,}/.test(s)) flags.push("spam (repeated characters)");
+  if ((s.match(/https?:\/\//g) || []).length >= 4) flags.push("link flood");
+  return flags;
+}
+function alertAdmins(channel, alert) {
+  for (const c of wss.clients) if (c.readyState === 1 && c.channel === channel && c.claims && c.claims.admin) send(c, { type: "modalert", ...alert });
+}
+
+// Recent channel transcript (oldest→newest) as compact context for the brain.
+async function recentContext(channel, limit = 30) {
+  const rows = await history(channel);
+  return rows.slice(-limit).map((r) => `${r.author_name || r.author_user || "user"}${r.author_admin ? " (team)" : ""}: ${r.body || (r.gif ? "[gif]" : "")}`).join("\n");
+}
+
+async function postSentinel(channel, body) {
+  const msg = { id: id("m"), channel, author_id: SENTINEL_BOT.uid, author_name: SENTINEL_BOT.name, author_user: SENTINEL_BOT.user, author_admin: false, author_role: SENTINEL_BOT.role, body: String(body || "").slice(0, 4000), gif: null, created_at: Date.now() };
+  await pool.query("INSERT INTO chat_messages (id,channel,author_id,author_name,author_user,author_admin,author_role,body,gif,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",
+    [msg.id, msg.channel, msg.author_id, msg.author_name, msg.author_user, msg.author_admin, msg.author_role, msg.body, null, msg.created_at]);
+  broadcast(channel, { type: "msg", message: msg });
+}
+
+async function handleSentinelPublic(channel, claims, cmd) {
+  if (sentinelBusy.has(channel)) { await postSentinel(channel, "One moment — I'm still working on the previous request in this channel.").catch(() => {}); return; }
+  sentinelBusy.add(channel);
+  broadcast(channel, { type: "sentinel", channel, state: "thinking" });
+  try {
+    let answer = "";
+    if (cmd.kind === "ask") {
+      if (!cmd.arg) answer = "Hi — I'm NEURAX Sentinel. Ask me anything about PYRAX, the devnet, your node, mining, or this chat: just mention @Sentinel with a question, or use /summarize to catch up.";
+      else answer = await brainAsk(`${SENTINEL_SYSTEM}\n\nChannel: #${channel}. ${claims.name || "A member"} asked:\n${cmd.arg}`, `Recent messages in #${channel}:\n${await recentContext(channel, 24)}`);
+    } else if (cmd.kind === "summarize") {
+      const n = Math.min(100, Math.max(5, parseInt(cmd.arg, 10) || 40));
+      const ctx = await recentContext(channel, n);
+      answer = ctx.trim()
+        ? await brainAsk(`${SENTINEL_SYSTEM}\n\nSummarize the recent activity in #${channel} as a short catch-up: key topics, decisions, open questions, and anything needing attention. Use tight bullet points.`, `Recent messages in #${channel} (oldest first):\n${ctx}`)
+        : "There's nothing to summarize here yet.";
+    } else if (cmd.kind === "moderate") {
+      const ctx = await recentContext(channel, 30);
+      answer = ctx.trim()
+        ? await brainAsk(`${SENTINEL_SYSTEM}\n\nModerating #${channel}: review the recent messages for spam, harassment, scams/phishing, leaked secrets (private keys/seed phrases), or disruption. List only real concerns as "@user — reason"; if all clear, say so in one line.`, `Recent messages in #${channel}:\n${ctx}`)
+        : "Nothing to review yet.";
+    }
+    await postSentinel(channel, answer || "I couldn't come up with an answer just now — please try again in a moment.");
+  } catch (e) {
+    sentinelReport("sentinel.public", e);
+    await postSentinel(channel, "⚠️ I couldn't reach the Sentinel brain just now. Please try again shortly.").catch(() => {});
+  } finally {
+    sentinelBusy.delete(channel);
+    broadcast(channel, { type: "sentinel", channel, state: "idle" });
+  }
+}
+
+async function handleSentinelDraft(ws, channel, arg) {
+  send(ws, { type: "sentinel", channel, state: "thinking" });
+  try {
+    const ctx = await recentContext(channel, 20);
+    const want = arg
+      ? `Draft a reply I (a PYRAX team member) can send in #${channel}. What I want to convey: ${arg}. Return only the message text, ready to send — friendly, clear, on-brand.`
+      : `Draft a helpful reply I (a PYRAX team member) can send next in #${channel}, responding to the most recent messages. Return only the message text, ready to send.`;
+    const text = await brainAsk(`${SENTINEL_SYSTEM}\n\n${want}`, `Recent messages in #${channel}:\n${ctx}`);
+    send(ws, { type: "draft", channel, text: text || "" });
+  } catch (e) {
+    sentinelReport("sentinel.draft", e);
+    send(ws, { type: "draft", channel, text: "", error: "Sentinel is unavailable right now." });
+  } finally {
+    send(ws, { type: "sentinel", channel, state: "idle" });
+  }
+}
+
 wss.on("connection", (ws, req) => {
   const url = new URL(req.url, "http://x");
   const claims = verify(url.searchParams.get("token"));
@@ -150,10 +272,24 @@ wss.on("connection", (ws, req) => {
       const body = String(m.body || "").slice(0, 2000).trim();
       const gif = typeof m.gif === "string" && /^https:\/\//.test(m.gif) ? m.gif.slice(0, 500) : null;
       if (!body && !gif) return;
+      const cmd = SENTINEL_ON && body ? parseSentinelCommand(body) : null;
+      // /draft is a private team affordance — never broadcast the request; reply only to the requester.
+      if (cmd && cmd.kind === "draft") {
+        if (!claims.admin) { send(ws, { type: "error", error: "Draft is available to team members only." }); return; }
+        handleSentinelDraft(ws, ws.channel, cmd.arg).catch((e) => sentinelReport("sentinel.draft", e));
+        return;
+      }
       const msg = { id: id("m"), channel: ws.channel, author_id: claims.uid, author_name: claims.name, author_user: claims.user, author_admin: !!claims.admin, author_role: claims.role || "tester", body, gif, created_at: now };
       await pool.query("INSERT INTO chat_messages (id,channel,author_id,author_name,author_user,author_admin,author_role,body,gif,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",
         [msg.id, msg.channel, msg.author_id, msg.author_name, msg.author_user, msg.author_admin, msg.author_role, body, gif, now]);
       broadcast(ws.channel, { type: "msg", message: msg });
+      // Route @Sentinel / slash commands to the brain (async — the reply posts when it's ready).
+      if (cmd) handleSentinelPublic(ws.channel, claims, cmd).catch((e) => sentinelReport("sentinel.public", e));
+      // Passive moderation on ordinary member messages (skip bot commands + team/staff posts).
+      else if (body && !claims.admin) {
+        const flags = heuristicFlags(body);
+        if (flags.length) alertAdmins(ws.channel, { channel: ws.channel, messageId: msg.id, author_name: msg.author_name, author_user: msg.author_user, snippet: body.slice(0, 160), flags, created_at: now });
+      }
     } else if (m.type === "delete" && claims.admin) {
       await pool.query("UPDATE chat_messages SET deleted=TRUE WHERE id=$1", [m.id]);
       broadcast(ws.channel, { type: "deleted", id: m.id });

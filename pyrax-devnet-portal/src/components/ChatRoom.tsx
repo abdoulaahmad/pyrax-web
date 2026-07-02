@@ -8,8 +8,9 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "./ui";
 
 const EMOJI = ["😀", "😂", "🤣", "😊", "😍", "😎", "🤔", "👀", "🔥", "🚀", "💪", "🙌", "👍", "👎", "🎉", "✅", "❌", "⚠️", "💯", "🐛", "⚡", "🧪", "🛠️", "💎", "🦅", "❤️", "🙏", "😅", "😉", "🤝", "👋", "💀"];
-// Chat name colors: testers = PYRAX orange, community-support = green, admins = PYRAX blue.
-const ROLE_COLOR: Record<string, string> = { admin: "#5aa6e0", support: "#3fcf8e", tester: "#f58622" };
+// Chat name colors: testers = PYRAX orange, community-support = green, admins = PYRAX blue, and the
+// on-GPU NEURAX Sentinel assistant = gold.
+const ROLE_COLOR: Record<string, string> = { admin: "#5aa6e0", support: "#3fcf8e", tester: "#f58622", sentinel: "#fcd03d" };
 const roleColor = (r?: string) => ROLE_COLOR[r || "tester"] || "#f58622";
 
 interface Msg { id: string; channel: string; author_id: string; author_name: string; author_user: string; author_admin: boolean; author_role?: string; body: string; gif: string | null; created_at: number }
@@ -32,10 +33,15 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
   const [gifs, setGifs] = useState<any[]>([]);
   const [gifQ, setGifQ] = useState("");
   const [newChat, setNewChat] = useState<null | "dm" | "group">(null);
+  // NEURAX Sentinel: a "thinking" indicator per channel, admin moderation alerts, and a pending draft.
+  const [sentinelThinking, setSentinelThinking] = useState(false);
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [draft, setDraft] = useState<string | null>(null);
   const [mobileNav, setMobileNav] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
   const curRef = useRef("general");
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   async function loadConvos() { try { const d = await (await fetch(`${apiBase}/conversations`)).json(); if (d.ok) { setConvos(d.conversations || []); if (d.me) setMe(d.me); } } catch {} }
   async function loadRoster() { try { const d = await (await fetch(`${apiBase}/users?roster=1`)).json(); if (d.ok) setRoster(d.roster || []); } catch {} }
@@ -59,6 +65,11 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
           else if (m.type === "deleted") setMessages((x) => x.filter((y) => y.id !== m.id));
           else if (m.type === "presence" && m.channel === curRef.current) setPresence(m.users);
           else if (m.type === "online") setOnline(m.users || []);
+          // NEURAX Sentinel: thinking indicator (current channel), admin-only moderation alerts, and a
+          // private draft reply pushed only to the requester.
+          else if (m.type === "sentinel") { if (m.channel === curRef.current) setSentinelThinking(m.state === "thinking"); }
+          else if (m.type === "modalert") setAlerts((x) => [{ ...m, _id: `${m.messageId || "a"}:${m.created_at || Date.now()}` }, ...x].slice(0, 20));
+          else if (m.type === "draft") setDraft(typeof m.text === "string" ? m.text : "");
         };
       }).catch(() => {});
     }
@@ -68,10 +79,14 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
-  function switchTo(id: string) { setCurrent(id); curRef.current = id; setMessages([]); setMobileNav(false); wsRef.current?.send(JSON.stringify({ type: "join", channel: id })); }
+  function switchTo(id: string) { setCurrent(id); curRef.current = id; setMessages([]); setMobileNav(false); setSentinelThinking(false); setDraft(null); wsRef.current?.send(JSON.stringify({ type: "join", channel: id })); }
   function send() { const body = input.trim(); if (!body) return; wsRef.current?.send(JSON.stringify({ type: "msg", body })); setInput(""); setEmojiOpen(false); }
   function sendGif(url: string) { wsRef.current?.send(JSON.stringify({ type: "msg", gif: url })); setGifOpen(false); }
   function del(id: string) { wsRef.current?.send(JSON.stringify({ type: "delete", id })); }
+  // Send a Sentinel command (/summarize, /draft, /moderate) as a normal chat message — the WS server
+  // recognizes it and routes it to the on-GPU brain.
+  function sendCmd(body: string) { wsRef.current?.send(JSON.stringify({ type: "msg", body })); }
+  function askSentinel() { setInput((v) => (/^@sentinel\b/i.test(v.trim()) ? v : "@Sentinel " + v)); setTimeout(() => inputRef.current?.focus(), 0); }
   async function searchGifs(q: string) { setGifQ(q); const d = await (await fetch(`${apiBase}/giphy?q=${encodeURIComponent(q)}`)).json(); setGifs(d.gifs || []); }
   async function startDm(handle: string) {
     const d = await (await fetch(`${apiBase}/conversations`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type: "dm", memberHandles: [handle] }) })).json();
@@ -127,18 +142,37 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
           </div>
           <div className="flex items-center gap-2 text-xs text-faint"><span className={`h-1.5 w-1.5 rounded-full ${connected ? "bg-[color:var(--color-positive)]" : "bg-faint"}`} />{connected ? "connected" : "reconnecting…"}</div>
         </div>
+        {alerts.length > 0 && (
+          <div className="space-y-1 border-b border-line bg-[rgba(224,99,74,0.06)] px-3 py-2">
+            {alerts.slice(0, 4).map((a) => (
+              <div key={a._id} className="flex items-start gap-2 text-xs">
+                <span className="mt-0.5 text-[color:var(--color-negative)]">⚠</span>
+                <div className="min-w-0 flex-1"><span className="font-semibold text-[color:var(--color-negative)]">Sentinel flag</span> <span className="text-muted">@{a.author_user || a.author_name || "user"}: {(a.flags || []).join(", ")}</span>{a.snippet ? <span className="text-faint"> — “{a.snippet}”</span> : null}</div>
+                {me?.admin && a.messageId ? <button onClick={() => del(a.messageId)} className="text-faint hover:text-[color:var(--color-negative)]" title="Delete the flagged message">🗑</button> : null}
+                <button onClick={() => setAlerts((x) => x.filter((y) => y._id !== a._id))} className="text-faint hover:text-ink" title="Dismiss">✕</button>
+              </div>
+            ))}
+            {alerts.length > 4 && <div className="pl-6 text-[0.66rem] text-faint">+{alerts.length - 4} more flag{alerts.length - 4 === 1 ? "" : "s"}…</div>}
+          </div>
+        )}
         <div className="flex-1 space-y-3 overflow-y-auto p-4">
           {messages.length === 0 && <p className="text-center text-sm text-faint">No messages yet — say hi 👋</p>}
           {messages.map((m) => (
             <div key={m.id} className="group flex gap-2.5">
-              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[rgba(255,255,255,0.05)] text-xs font-bold">{(m.author_name || "?").slice(0, 2).toUpperCase()}</div>
+              <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-bold ${m.author_role === "sentinel" ? "bg-[rgba(252,208,61,0.14)] text-gold" : "bg-[rgba(255,255,255,0.05)]"}`}>{m.author_role === "sentinel" ? "✦" : (m.author_name || "?").slice(0, 2).toUpperCase()}</div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2 text-xs"><span className="font-semibold" style={{ color: roleColor(m.author_role) }}>{m.author_user ? "@" + m.author_user : m.author_name}</span>{m.author_admin ? <span className="rounded bg-[rgba(90,166,224,0.18)] px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide" style={{ color: "#5aa6e0" }}>Admin</span> : m.author_role === "support" && <span className="rounded bg-[rgba(63,207,142,0.16)] px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide" style={{ color: "#3fcf8e" }}>Support</span>}<span className="text-faint">{new Date(Number(m.created_at)).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>{me?.admin && <button onClick={() => del(m.id)} className="opacity-0 transition group-hover:opacity-100 text-faint hover:text-[color:var(--color-negative)]">✕</button>}</div>
+                <div className="flex items-center gap-2 text-xs"><span className="font-semibold" style={{ color: roleColor(m.author_role) }}>{m.author_user ? "@" + m.author_user : m.author_name}</span>{m.author_role === "sentinel" ? <span className="rounded bg-[rgba(252,208,61,0.16)] px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-gold">✦ Sentinel</span> : m.author_admin ? <span className="rounded bg-[rgba(90,166,224,0.18)] px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide" style={{ color: "#5aa6e0" }}>Admin</span> : m.author_role === "support" && <span className="rounded bg-[rgba(63,207,142,0.16)] px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide" style={{ color: "#3fcf8e" }}>Support</span>}<span className="text-faint">{new Date(Number(m.created_at)).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>{me?.admin && <button onClick={() => del(m.id)} className="opacity-0 transition group-hover:opacity-100 text-faint hover:text-[color:var(--color-negative)]">✕</button>}</div>
                 {m.body && <div className="mt-0.5 whitespace-pre-wrap break-words text-sm">{renderBody(m.body)}</div>}
                 {m.gif && <img src={m.gif} className="mt-1 max-h-48 rounded-lg border border-line" />}
               </div>
             </div>
           ))}
+          {sentinelThinking && (
+            <div className="flex items-center gap-2.5">
+              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[rgba(252,208,61,0.14)] text-xs font-bold text-gold">✦</div>
+              <div className="flex items-center gap-1 text-sm text-gold"><span>NEURAX Sentinel is thinking</span><span className="inline-flex gap-0.5"><span className="animate-bounce">.</span><span className="animate-bounce [animation-delay:120ms]">.</span><span className="animate-bounce [animation-delay:240ms]">.</span></span></div>
+            </div>
+          )}
           <div ref={endRef} />
         </div>
         {/* input */}
@@ -168,10 +202,23 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
               </>}
             </div>
           )}
+          {draft !== null && (
+            <div className="relative z-50 mb-2 rounded-lg border border-[rgba(252,208,61,0.4)] bg-[rgba(252,208,61,0.06)] p-2.5 text-sm">
+              <div className="mb-1 flex items-center justify-between text-xs text-gold"><span className="font-semibold">✦ Sentinel draft</span><button onClick={() => setDraft(null)} className="text-faint hover:text-ink">✕</button></div>
+              {draft ? (<><div className="whitespace-pre-wrap break-words text-muted">{draft}</div><div className="mt-2 flex items-center gap-2"><Button variant="primary" onClick={() => { setInput(draft); setDraft(null); setTimeout(() => inputRef.current?.focus(), 0); }}>Use draft</Button><button onClick={() => { setDraft(""); sendCmd("/draft"); }} className="text-xs text-faint hover:text-ink">Regenerate</button></div></>) : (<div className="flex items-center gap-1 text-gold"><span>Drafting</span><span className="animate-pulse">…</span></div>)}
+            </div>
+          )}
+          <div className="relative z-50 mb-2 flex flex-wrap items-center gap-1.5 text-xs">
+            <span className="text-gold" title="NEURAX Sentinel">✦</span>
+            <button onClick={askSentinel} className="rounded-full border border-line px-2.5 py-1 text-muted transition hover:border-[rgba(252,208,61,0.5)] hover:text-gold">Ask Sentinel</button>
+            <button onClick={() => sendCmd("/summarize")} className="rounded-full border border-line px-2.5 py-1 text-muted transition hover:border-[rgba(252,208,61,0.5)] hover:text-gold" title="Catch me up on this channel">Summarize</button>
+            {me?.admin && <button onClick={() => { setDraft(""); sendCmd("/draft"); }} className="rounded-full border border-line px-2.5 py-1 text-muted transition hover:border-[rgba(252,208,61,0.5)] hover:text-gold" title="Draft a reply I can edit and send">Draft reply</button>}
+            {me?.admin && <button onClick={() => sendCmd("/moderate")} className="rounded-full border border-line px-2.5 py-1 text-muted transition hover:border-[rgba(252,208,61,0.5)] hover:text-gold" title="Scan recent messages for issues">Moderate</button>}
+          </div>
           <div className="relative z-50 flex items-center gap-2">
             <button onClick={() => { setEmojiOpen(!emojiOpen); setGifOpen(false); }} className="text-lg text-faint hover:text-ink" title="Emoji">😊</button>
             <button onClick={() => { setGifOpen(!gifOpen); setEmojiOpen(false); if (!gifs.length) searchGifs(""); }} className="rounded border border-line px-1.5 py-0.5 text-xs font-bold text-faint hover:text-ink" title="GIF">GIF</button>
-            <input className="input" placeholder={`Message ${headerLabel}`} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} />
+            <input ref={inputRef} className="input" placeholder={`Message ${headerLabel}`} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} />
             <Button variant="primary" onClick={send}>Send</Button>
           </div>
         </div>
