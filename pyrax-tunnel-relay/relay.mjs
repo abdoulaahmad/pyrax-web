@@ -23,7 +23,7 @@
 // Zero runtime dependencies (pure Node built-ins), matching the other pyrax-web services.
 
 import { createServer } from "node:http";
-import { createHmac, createHash, timingSafeEqual } from "node:crypto";
+import { createHmac, createHash, timingSafeEqual, createPrivateKey, sign } from "node:crypto";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -380,15 +380,46 @@ function enforceKill(id, e) {
     console.log(`node ${id}: auto-un-killed (version ${e.nodeVersion} == network ${networkVersion})`);
   } else {
     e.hub.kill?.();
-    sendKill(e);
+    sendKill(id, e); // hard re-kill: still outdated on reconnect — signed
     console.log(`node ${id}: re-killed on connect (version ${e.nodeVersion || "?"} != network ${networkVersion || "?"})`);
   }
 }
 
-function sendKill(e) {
-  // The agent WS carries control messages too; `{t:"kill"}` tells the app to stop the
-  // node + set its persistent kill flag. Sent via the hub's agent socket.
-  e.hub.sendControl?.({ t: "kill" });
+// ── node-control signer (ed25519; the team fleet kill switch) ─────────────────
+// The PRIVATE half of the node-control key. The app bakes the PUBLIC half and verifies EVERY
+// kill/softkill/unkill against it (fail-closed), so a signature from this relay is the ONLY way to
+// control a node — a bare {t:"kill"} frame is rejected. Base64 PKCS8 DER, provisioned via the deploy.
+// Unset ⇒ signing disabled (the admin control plane refuses to act rather than send an unsigned frame).
+const NODE_CONTROL_PRIV_B64 = process.env.PYRAX_NODE_CONTROL_PRIVATE_KEY ?? "";
+let nodeControlPriv = null;
+try {
+  if (NODE_CONTROL_PRIV_B64) nodeControlPriv = createPrivateKey({ key: Buffer.from(NODE_CONTROL_PRIV_B64, "base64"), format: "der", type: "pkcs8" });
+} catch {
+  nodeControlPriv = null; // an unparseable key ⇒ signing disabled
+}
+const NODE_CONTROL_TTL_MS = 4 * 60 * 1000; // < the app's 5-min max; a fresh, short-lived signature per command
+
+/** Sign the canonical message the app verifies: `PYRAX_NODE_CONTROL\n{verb}\n{sub}\n{sub}\n{exp}`.
+ *  `sub` is the node's subdomain (its map key here) — the identity the app binds the command to.
+ *  Returns { exp, sig(base64) } or null when no signing key is configured. */
+function signControl(verb, sub) {
+  if (!nodeControlPriv) return null;
+  const exp = Date.now() + NODE_CONTROL_TTL_MS;
+  const sig = sign(null, Buffer.from(`PYRAX_NODE_CONTROL\n${verb}\n${sub}\n${sub}\n${exp}`, "utf8"), nodeControlPriv).toString("base64");
+  return { exp, sig };
+}
+
+/** Push a SIGNED node-control command down the node's live agent WS. `id` is the node's subdomain.
+ *  `verb`: "kill" (hard — persisted + version-gated), "softkill" (stop; owner may restart), "unkill".
+ *  Returns false (and sends nothing) when the signing key is unset — the caller then refuses the op. */
+function sendKill(id, e, verb = "kill") {
+  const signed = signControl(verb, id);
+  if (!signed) {
+    console.warn(`node ${id}: ${verb} NOT sent — PYRAX_NODE_CONTROL_PRIVATE_KEY unset (signing disabled)`);
+    return false;
+  }
+  e.hub.sendControl?.({ t: verb, exp: signed.exp, sig: signed.sig });
+  return true;
 }
 
 // ── HMAC admin auth (same scheme as the peer directory) ───────────────────────
@@ -462,17 +493,27 @@ const server = createServer(async (req, res) => {
     if (req.method === "POST" && km) {
       const [, id, action] = km;
       const e = entry(id);
+      let opts = {};
+      try { opts = body ? JSON.parse(body) : {}; } catch { opts = {}; }
       if (action === "kill") {
-        e.killed = true;
-        sendKill(e);
-        console.log(`ADMIN kill: ${id}`);
+        // `{ soft: true }` ⇒ SOFT kill: stop the node now, but the owner may restart it — do NOT persist
+        // the kill flag (so it is not re-killed on reconnect, and the registry shows it as not killed).
+        if (opts.soft === true) {
+          if (!sendKill(id, e, "softkill")) { res.writeHead(503, { "content-type": "application/json" }).end(JSON.stringify({ error: "node-control signing key unset" })); return; }
+          console.log(`ADMIN softkill: ${id}`);
+        } else {
+          e.killed = true;
+          if (!sendKill(id, e, "kill")) { e.killed = false; res.writeHead(503, { "content-type": "application/json" }).end(JSON.stringify({ error: "node-control signing key unset" })); return; }
+          console.log(`ADMIN kill: ${id}`);
+        }
       } else {
         e.killed = false;
-        e.hub.sendControl?.({ t: "unkill" });
+        const signed = signControl("unkill", id);
+        if (signed) e.hub.sendControl?.({ t: "unkill", exp: signed.exp, sig: signed.sig });
         console.log(`ADMIN unkill: ${id}`);
       }
       persistNow(); // an admin kill/unkill must survive an immediate crash
-      res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ ok: true, id, killed: e.killed }));
+      res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ ok: true, id, killed: e.killed, soft: action === "kill" && opts.soft === true }));
       return;
     }
     res.writeHead(404, { "content-type": "application/json" }).end(JSON.stringify({ error: "not found" }));
