@@ -61,6 +61,28 @@ export async function listDevnetInvitesAndTesters(): Promise<any[]> {
     ...pending.rows.filter((p) => !r.rows.find((t) => t.email === p.email)).map((p) => ({ email: p.email, handle: p.telegram_handle, status: "invited", kind: "pending" })),
   ];
 }
+/** Resend the pending invite ("welcome") email for `email`, refreshing its 14-day expiry. Returns the
+ *  invite token to email, or null if there is no pending invite (e.g. the tester is already active). */
+export async function resendDevnetInvite(email: string): Promise<string | null> {
+  const e = email.trim().toLowerCase();
+  const r = await db().query("SELECT token FROM invites WHERE lower(email)=lower($1) AND accepted_at IS NULL ORDER BY created_at DESC LIMIT 1", [e]);
+  if (!r.rows[0]) return null;
+  const token = r.rows[0].token as string;
+  await db().query("UPDATE invites SET expires_at=$2 WHERE token=$1", [token, Date.now() + 14 * 864e5]);
+  return token;
+}
+
+/** Kick/ban (status='suspended') or restore (status='active') a tester by email. Suspending also wipes
+ *  their live sessions so they are kicked off the devnet site immediately. Returns rows affected. */
+export async function setDevnetTesterStatus(email: string, status: "active" | "suspended"): Promise<number> {
+  const e = email.trim().toLowerCase();
+  const r = await db().query("UPDATE testers SET status=$2 WHERE lower(email)=lower($1) AND is_staff=FALSE RETURNING id", [e, status]);
+  if (status === "suspended" && r.rows[0]) {
+    await db().query("DELETE FROM sessions WHERE tester_id=$1", [r.rows[0].id]).catch(() => {});
+  }
+  return r.rowCount ?? 0;
+}
+
 export async function getDevnetSettings(): Promise<Record<string, any>> {
   const r = await db().query("SELECT data FROM app_settings WHERE id=1");
   return { ...DEFAULT_SETTINGS, ...(r.rows[0]?.data || {}) };

@@ -65,6 +65,21 @@ export function Button({ children, variant = "ghost", className = "", ...rest }:
   return <button className={`btn btn-${variant} ${className}`} {...rest}>{children}</button>;
 }
 
+/** Compact, centered pager for client-side paginated lists so a page never scrolls endlessly.
+ *  Renders nothing when there is only one page. */
+export function Pagination({ page, total, pageSize, onPage }: { page: number; total: number; pageSize: number; onPage: (p: number) => void }) {
+  const pages = Math.max(1, Math.ceil(total / Math.max(1, pageSize)));
+  if (pages <= 1) return null;
+  const clamped = Math.min(Math.max(1, page), pages);
+  return (
+    <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+      <Button variant="ghost" disabled={clamped <= 1} onClick={() => onPage(clamped - 1)}>← Prev</Button>
+      <span className="text-faint tabular-nums">Page {clamped} of {pages} · {total} total</span>
+      <Button variant="ghost" disabled={clamped >= pages} onClick={() => onPage(clamped + 1)}>Next →</Button>
+    </div>
+  );
+}
+
 export function StatTile({ label, value, sub, accent = "brand", icon, delay = 0 }: { label: string; value: React.ReactNode; sub?: string; accent?: "brand" | "water" | "positive"; icon?: React.ReactNode; delay?: number }) {
   const ring = accent === "water" ? "rgba(96,184,204,0.35)" : accent === "positive" ? "rgba(52,211,153,0.35)" : "rgba(245,134,34,0.35)";
   return (

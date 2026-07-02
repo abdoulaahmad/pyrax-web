@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import React, { useEffect, useMemo, useState } from "react";
-import { Card, Button, StatTile, Badge, PageHeader, Icon } from "./ui";
+import { Card, Button, StatTile, Badge, PageHeader, Icon, Pagination } from "./ui";
 import MacGatekeeperBanner from "./MacGatekeeperBanner";
 import { can, canGrant, type AccessSubject, type Permission, PERMISSIONS, permissionGroups, PRESETS, isSuperuserOnly } from "../lib/permissions";
 import { SOCIAL_FIELDS, validateProfile, formatPhone, validatePhone, COMPANY_EMAIL_DOMAIN, type MemberProfile } from "../lib/profile";
@@ -674,8 +674,12 @@ export function DevnetUsers({ subject }: { subject: AccessSubject }) {
   const [list, setList] = useState<any[] | null>(null);
   const [email, setEmail] = useState(""); const [handle, setHandle] = useState("");
   const [busy, setBusy] = useState(false); const [errs, setErrs] = useState<any>({}); const [sent, setSent] = useState("");
+  const [page, setPage] = useState(1); const PAGE_SIZE = 12;
   async function load() { try { const d = await (await fetch("/api/devnet/testers")).json(); setList(d.ok ? d.testers : []); } catch { setList([]); } }
   useEffect(() => { load(); }, []);
+  async function post(url: string, body: any) { try { const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }); return await r.json().catch(() => ({ ok: false })); } catch { return { ok: false }; } }
+  async function resend(email: string) { setSent(""); const d = await post("/api/devnet/testers/resend", { email }); setSent(d.ok ? `Welcome email resent to ${email}.` : (d.error || "Couldn't resend.")); }
+  async function setSuspended(email: string, suspend: boolean) { const d = await post("/api/devnet/testers/suspend", { email, suspend }); if (d.ok) load(); else setSent(d.error || "Couldn't update."); }
   async function invite() {
     setBusy(true); setErrs({}); setSent("");
     try {
@@ -701,20 +705,29 @@ export function DevnetUsers({ subject }: { subject: AccessSubject }) {
       </Card>
       <Card className="overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="text-left text-xs uppercase tracking-wider text-faint"><tr className="border-b border-line"><th className="p-3">Tester</th><th className="p-3">Status</th><th className="p-3 hidden sm:table-cell">Nodes</th><th className="p-3">PYRX</th></tr></thead>
+          <thead className="text-left text-xs uppercase tracking-wider text-faint"><tr className="border-b border-line"><th className="p-3">Tester</th><th className="p-3">Status</th><th className="p-3 hidden sm:table-cell">Nodes</th><th className="p-3">PYRX</th><th className="p-3 text-right">Actions</th></tr></thead>
           <tbody>
-            {!list ? <tr><td colSpan={4} className="p-6 text-center text-muted">Loading…</td></tr> : list.length === 0 ? <tr><td colSpan={4} className="p-6 text-center text-muted">No testers yet — whitelist your first.</td></tr> :
-              list.map((t, i) => (
+            {!list ? <tr><td colSpan={5} className="p-6 text-center text-muted">Loading…</td></tr> : list.length === 0 ? <tr><td colSpan={5} className="p-6 text-center text-muted">No testers yet — whitelist your first.</td></tr> :
+              list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((t, i) => (
                 <tr key={i} className="border-b border-line-soft last:border-0">
                   <td className="p-3"><div className="font-semibold">{t.handle ? "@" + t.handle : t.email}</div><div className="text-xs text-faint">{t.email}</div></td>
-                  <td className="p-3"><div className="flex flex-wrap gap-1">{t.status === "active" ? <Badge tone="positive">Active</Badge> : <Badge tone="warning">Invited</Badge>}{t.founding_rank && <Badge tone="brand">Founding #{t.founding_rank}</Badge>}</div></td>
+                  <td className="p-3"><div className="flex flex-wrap gap-1">{t.status === "suspended" ? <span className="rounded px-2 py-0.5 text-[0.7rem] font-semibold" style={{ background: "rgba(224,99,74,0.16)", color: "#e0634a" }}>Banned</span> : t.status === "active" ? <Badge tone="positive">Active</Badge> : <Badge tone="warning">Invited</Badge>}{t.founding_rank && <Badge tone="brand">Founding #{t.founding_rank}</Badge>}</div></td>
                   <td className="p-3 hidden sm:table-cell text-muted">{t.nodes ?? 0}</td>
                   <td className="p-3 font-mono text-muted">{(t.pyrx ?? 0).toLocaleString("en-US")}</td>
+                  <td className="p-3 text-right">
+                    <div className="flex justify-end gap-1.5">
+                      {(t.kind === "pending" || t.status === "invited") && <Button className="px-2 py-1 text-xs" onClick={() => resend(t.email)}>Resend</Button>}
+                      {t.status === "active" && <Button variant="danger" className="px-2 py-1 text-xs" onClick={() => { if (confirm(`Ban ${t.email}? They will be logged out and blocked from the devnet site.`)) setSuspended(t.email, true); }}>Ban</Button>}
+                      {t.status === "suspended" && <Button className="px-2 py-1 text-xs" onClick={() => setSuspended(t.email, false)}>Restore</Button>}
+                    </div>
+                  </td>
                 </tr>
               ))}
           </tbody>
         </table>
       </Card>
+      <Pagination page={page} total={list?.length ?? 0} pageSize={PAGE_SIZE} onPage={setPage} />
+      {sent && <p className="mt-2 text-center text-sm text-[color:var(--color-positive)]">{sent}</p>}
     </>
   );
 }
@@ -779,6 +792,8 @@ export function DevnetLegal({ subject }: { subject: AccessSubject }) {
   const [rows, setRows] = useState<any[] | null>(null);
   const [filter, setFilter] = useState<"all" | "nda" | "tos">("all");
   const [open, setOpen] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 12;
   useEffect(() => { fetch("/api/devnet/legal").then((r) => r.json()).then((d) => setRows(d.ok ? d.acceptances : [])); }, []);
   const shown = (rows || []).filter((r) => filter === "all" || r.doc_type === filter);
   const when = (ms: number) => new Date(ms).toLocaleString("en-US", { timeZone: "UTC", year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) + " UTC";
@@ -786,9 +801,9 @@ export function DevnetLegal({ subject }: { subject: AccessSubject }) {
     <>
       <PageHeader title="Devnet Legal" subtitle="Signed NDA and Alpha Test Program acceptances — name, digital signature, IP address, and timestamp for each signer." />
       <div className="mb-3 flex flex-wrap gap-2">
-        {(["all", "nda", "tos"] as const).map((f) => <button key={f} onClick={() => setFilter(f)} className={`chip ${filter === f ? "chip-brand" : ""}`}>{f === "all" ? "All" : DOC_LABEL[f]}</button>)}
+        {(["all", "nda", "tos"] as const).map((f) => <button key={f} onClick={() => { setFilter(f); setPage(1); }} className={`chip ${filter === f ? "chip-brand" : ""}`}>{f === "all" ? "All" : DOC_LABEL[f]}</button>)}
       </div>
-      {!rows ? <Card className="p-8 text-center text-sm text-muted">Loading…</Card> : shown.length === 0 ? <Card className="p-8 text-center text-sm text-muted">No signed agreements yet.</Card> : (
+      {!rows ? <Card className="p-8 text-center text-sm text-muted">Loading…</Card> : shown.length === 0 ? <Card className="p-8 text-center text-sm text-muted">No signed agreements yet.</Card> : (<>
         <Card className="overflow-hidden p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -796,7 +811,7 @@ export function DevnetLegal({ subject }: { subject: AccessSubject }) {
                 <th className="px-4 py-2.5 font-semibold">Tester</th><th className="px-4 py-2.5 font-semibold">Document</th><th className="px-4 py-2.5 font-semibold">Recipient / Signature</th><th className="px-4 py-2.5 font-semibold">IP address</th><th className="px-4 py-2.5 font-semibold">Signed</th>
               </tr></thead>
               <tbody>
-                {shown.map((r) => (
+                {shown.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((r) => (
                   <tr key={r.id} className="cursor-pointer border-b border-line-soft last:border-0 hover:bg-[rgba(255,255,255,0.02)]" onClick={() => setOpen(r)}>
                     <td className="px-4 py-2.5"><div className="font-medium text-ink">{r.handle ? "@" + r.handle : r.display_name || "—"}</div><div className="text-xs text-faint">{r.email}</div></td>
                     <td className="px-4 py-2.5"><Badge tone={r.doc_type === "nda" ? "brand" : "muted"}>{DOC_LABEL[r.doc_type] || r.doc_type}</Badge> <span className="text-xs text-faint">v{r.doc_version}</span></td>
@@ -809,6 +824,8 @@ export function DevnetLegal({ subject }: { subject: AccessSubject }) {
             </table>
           </div>
         </Card>
+        <Pagination page={page} total={shown.length} pageSize={PAGE_SIZE} onPage={setPage} />
+        </>
       )}
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setOpen(null)}>
