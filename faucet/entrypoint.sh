@@ -54,15 +54,27 @@ import_key "$FAUCET_KEY_710823" "${FAUCET_SK_710823:-}"
 # RPC may not be reachable yet at boot, in which case we skip and the faucet still serves
 # transparent drips. (Shielding is idempotent in effect — re-running just shields more.)
 SHIELD_RPC="${FAUCET_RPC:-http://node:8545}"
-SHIELD_ASH="${FAUCET_SHIELD_ASH:-100000000000000000000000}" # 100k PYRX
+# Shielded note values are range-proof-capped at < 2^60 ash (~1.15 PYRX per note), so ONE large
+# shield (the old 100k-PYRX default) is always rejected by the CLI ("amount must be > 0 and < 2^60").
+# Pre-shield the pool with a LOOP of per-note shields (each < 2^60) to build a usable shielded balance
+# for `wallet shielded-send`. Best-effort + non-fatal — transparent drips/grants work regardless.
+SHIELD_NOTE_ASH="${FAUCET_SHIELD_NOTE_ASH:-1000000000000000000}" # 1 PYRX per note (< 2^60)
+SHIELD_NOTES="${FAUCET_SHIELD_NOTES:-8}"                          # ~8 PYRX pre-shielded (8 notes)
 # Probe the node with a raw JSON-RPC call (curl is in the image; works regardless of
 # which CLI subcommands exist). Only attempt the shield when the node answers.
 if curl -fsS --max-time 4 -H 'content-type: application/json' \
      -d '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' \
      "$SHIELD_RPC" >/dev/null 2>&1; then
-  echo "[faucet] node reachable — pre-shielding $SHIELD_ASH ash into the shielded pool…"
-  if pyrax --rpc-url "$SHIELD_RPC" wallet shield "$SHIELD_ASH" --from "$FAUCET_KEY"; then
-    echo "[faucet] shielded pool funded."
+  echo "[faucet] node reachable — pre-shielding ${SHIELD_NOTES} x ${SHIELD_NOTE_ASH} ash into the pool…"
+  shielded_ok=0; n=0
+  while [ "$n" -lt "$SHIELD_NOTES" ]; do
+    if pyrax --rpc-url "$SHIELD_RPC" wallet shield "$SHIELD_NOTE_ASH" --from "$FAUCET_KEY" >/dev/null 2>&1; then
+      shielded_ok=$((shielded_ok + 1))
+    fi
+    n=$((n + 1))
+  done
+  if [ "$shielded_ok" -gt 0 ]; then
+    echo "[faucet] shielded pool funded ($shielded_ok/$SHIELD_NOTES notes)."
   else
     echo "[faucet] WARN: pre-shield failed — shielded-send may have no notes yet (transparent still works)."
   fi
