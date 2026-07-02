@@ -60,9 +60,21 @@ export function resolveClientIp(opts: {
    *  and must never determine a node's public multiaddr/geo. Kept so existing callers/tests compile. */
   bodyIp?: unknown;
   xForwardedFor?: string | null;
+  /** Cloudflare's `CF-Connecting-IP` header. Cloudflare OVERWRITES this with the real client IP on every
+   *  request through the orange-proxied edge, so a client behind CF cannot forge it. When we sit behind
+   *  Cloudflare (nodes.pyraxchain.com IS orange-proxied), BOTH the socket peer and the rightmost XFF hop
+   *  resolve to a ROTATING Cloudflare edge address (172.7x / 108.162.x), which poisons geo — every node
+   *  geolocates to a Cloudflare datacenter (or fails), so no peer ever gets lat/lon and the globe drops
+   *  them all. CF-Connecting-IP is the authoritative real-node IP; prefer it. Gated on trustProxy() so a
+   *  request that reached the origin DIRECTLY (bypassing CF) can't forge this header. */
+  cfConnectingIp?: string | null;
 }): string {
   const fromSocket = normalizeIp(String(opts.clientAddress || ""));
   if (!trustProxy()) return isValidIp(fromSocket) ? fromSocket : "";
+
+  // Highest trust behind the CF edge: the Cloudflare-attested real client IP.
+  const cf = normalizeIp(String(opts.cfConnectingIp || ""));
+  if (isValidIp(cf)) return cf;
 
   // Parse XFF right-to-left: the trusted proxy appends the address it saw, so the attested client hop is
   // `hops` entries in from the right. Everything further left is attacker-controlled and must be ignored.

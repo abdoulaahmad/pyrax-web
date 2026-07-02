@@ -52,6 +52,9 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   const ip = resolveClientIp({
     clientAddress,
     xForwardedFor: request.headers.get("x-forwarded-for"),
+    // Authoritative real-node IP behind the Cloudflare edge (unforgeable; honored only with
+    // TRUSTED_PROXY=1). Without this the ingest records the rotating CF edge IP and geo never resolves.
+    cfConnectingIp: request.headers.get("cf-connecting-ip"),
   });
   const multiaddr = multiaddrFor(ip, port, peerId);
 

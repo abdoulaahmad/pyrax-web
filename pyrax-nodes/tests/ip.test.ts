@@ -114,3 +114,30 @@ describe("resolveClientIp (TRUSTED_PROXY=1)", () => {
     expect(resolveClientIp({ clientAddress: "203.0.113.41", xForwardedFor: null })).toBe("203.0.113.41");
   });
 });
+
+describe("resolveClientIp (Cloudflare CF-Connecting-IP)", () => {
+  it("prefers CF-Connecting-IP over the (rotating CF-edge) XFF/socket when behind the trusted proxy", () => {
+    process.env.TRUSTED_PROXY = "1";
+    // Real topology: node -> Cloudflare -> Caddy -> app. XFF's rightmost hop is the CF EDGE IP (Caddy
+    // appended it), which rotates and poisons geo; CF-Connecting-IP is the real node IP CF attests.
+    const ip = resolveClientIp({
+      clientAddress: "10.0.0.1",
+      xForwardedFor: "203.0.113.20, 172.71.151.227", // rightmost = CF edge (what we WRONGLY recorded before)
+      cfConnectingIp: "198.51.100.77",               // the real node IP
+    });
+    expect(ip).toBe("198.51.100.77");
+  });
+
+  it("IGNORES CF-Connecting-IP without a trusted proxy (a direct-to-origin request could forge it)", () => {
+    // TRUSTED_PROXY unset (default). A client hitting the origin directly, bypassing CF, must not be able
+    // to set its own location via a forged CF-Connecting-IP.
+    const ip = resolveClientIp({ clientAddress: "203.0.113.10", cfConnectingIp: "8.8.8.8" });
+    expect(ip).toBe("203.0.113.10");
+  });
+
+  it("falls through to the XFF-attested hop when CF-Connecting-IP is absent/invalid", () => {
+    process.env.TRUSTED_PROXY = "1";
+    expect(resolveClientIp({ clientAddress: "10.0.0.1", xForwardedFor: "8.8.8.8, 203.0.113.20", cfConnectingIp: "" })).toBe("203.0.113.20");
+    expect(resolveClientIp({ clientAddress: "10.0.0.1", xForwardedFor: "8.8.8.8, 203.0.113.20", cfConnectingIp: "not-an-ip" })).toBe("203.0.113.20");
+  });
+});
