@@ -70,11 +70,22 @@ export async function pingDb(): Promise<"up" | "down" | "unconfigured"> {
   return withTimeout(db().query("SELECT 1").then(() => "up" as const, () => "down" as const), 4_500, "down");
 }
 
+/** Deploy-level downloads switch. When NODES_DOWNLOADS_OPEN is set it OVERRIDES the stored/default
+ *  downloadsOpen flag, so the team can force public node downloads open (or closed) from the deploy
+ *  without a shared-DB write. Unset (the normal case) = use the stored/default value + the portal
+ *  toggle. "1"/"true" = force open; "0"/"false" = force closed. */
+function applyDownloadsOverride(s: SiteSettings): SiteSettings {
+  const v = (process.env.NODES_DOWNLOADS_OPEN || "").trim().toLowerCase();
+  if (v === "1" || v === "true") return { ...s, downloadsOpen: true };
+  if (v === "0" || v === "false") return { ...s, downloadsOpen: false };
+  return s;
+}
+
 export async function getSiteSettings(): Promise<SiteSettings> {
-  if (!connectionString) return DEFAULT_SETTINGS;
+  if (!connectionString) return applyDownloadsOverride(DEFAULT_SETTINGS);
   // Bounded read: this runs on EVERY page render (Base layout), so a slow/unreachable DB must fall back
   // to safe defaults promptly rather than stalling the whole site.
-  return withTimeout((async () => {
+  const stored = await withTimeout((async () => {
     try {
       await init();
       const r = await db().query("SELECT data, updated_at, updated_by FROM site_settings WHERE id=1");
@@ -84,6 +95,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       return DEFAULT_SETTINGS; // DB not provisioned yet — degrade gracefully
     }
   })(), 4_500, DEFAULT_SETTINGS);
+  return applyDownloadsOverride(stored);
 }
 
 export async function setSiteSettings(patch: Partial<SiteSettings>, by: string | null): Promise<SiteSettings> {
