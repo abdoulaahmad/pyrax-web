@@ -44,7 +44,9 @@ const newest = (a: SpacesObject, b: SpacesObject) => b.lastModified - a.lastModi
 /** Best-effort semver-ish version pulled from a filename, e.g. "Inferno-0.3.1.exe" → "0.3.1".
  *  Exported for fuzzing: the input is an attacker-influenceable object key from a bucket listing. */
 export function versionFromName(name: string): string | null {
-  const m = name.match(/(\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?)/);
+  // Match the semver ONLY. The old `(?:-[0-9A-Za-z.]+)?` tail greedily ate filename suffixes
+  // (e.g. "0.1.1-Setup.exe" from `Inferno Node-0.1.1-Setup.exe`), showing junk on the download cards.
+  const m = name.match(/(\d+\.\d+\.\d+)/) ?? name.match(/(\d+\.\d+)/);
   return m ? m[1] : null;
 }
 

@@ -38,7 +38,10 @@ export const base = (key: string) => key.split("/").pop() || key;
 /** Extract a semver-ish version from an installer filename (first N.N[.N…] run).
  *  Exported for fuzzing: the input is an attacker-influenceable object key from a bucket listing. */
 export function versionFromFilename(name: string): string | null {
-  const m = name.match(/(\d+\.\d+(?:\.\d+)?(?:[-.][0-9A-Za-z]+)*)/);
+  // Match the semver ONLY — a bare 3-part (or 2-part) version. Do NOT trail into filename tokens like
+  // `-Setup.exe` / `-arm64.dmg`: the artifactName is `<productName>-<version>-<suffix>.<ext>`, and a
+  // greedy suffix match previously produced junk versions like "0.1.1-Setup.exe" on the download cards.
+  const m = name.match(/(\d+\.\d+\.\d+)/) ?? name.match(/(\d+\.\d+)/);
   return m ? m[1] : null;
 }
 
