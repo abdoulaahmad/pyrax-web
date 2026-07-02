@@ -442,10 +442,66 @@ export function NodeControl({ subject }: { subject: AccessSubject }) {
 
 /* ============================================================== Error Reports */
 export function ErrorReports() {
+  const [status, setStatus] = useState("");
+  const [level, setLevel] = useState("");
+  const [page, setPage] = useState(1);
+  const [d, setD] = useState<any>(null);
+  const [open, setOpen] = useState<any>(null);
+  const [busy, setBusy] = useState("");
+  async function load() {
+    const q = new URLSearchParams(); if (status) q.set("status", status); if (level) q.set("level", level); q.set("page", String(page));
+    try { setD(await (await fetch(`/api/error-reports?${q}`)).json()); } catch { setD({ ok: false, reports: [] }); }
+  }
+  useEffect(() => { load(); }, [status, level, page]);
+  async function setStat(id: string, s: string) {
+    setBusy(id);
+    try { await fetch(`/api/error-reports/${id}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: s }) }); await load(); if (open?.id === id) setOpen({ ...open, status: s }); } catch { /* ignore */ }
+    setBusy("");
+  }
+  const when = (ms: number) => new Date(ms).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  const lchip = (l: string) => l === "warn" ? { bg: "rgba(224,163,74,0.16)", c: "#e0a34a" } : l === "info" ? { bg: "rgba(90,166,224,0.16)", c: "#5aa6e0" } : { bg: "rgba(224,99,74,0.16)", c: "#e0634a" };
+  const reports: any[] = d?.reports || [];
   return (
     <>
-      <PageHeader title="Error Reports" subtitle="Inbound crash + error reports from nodes and apps." />
-      <ComingSoon title="No reports connected yet" detail="Inbound crash + error reports from nodes and apps will stream in here once the reporting pipeline is connected." />
+      <PageHeader title="Error Reports" subtitle="Redacted crash + error reports from the node apps + CLI. Grouped by signature — a crash loop is one row with a count." />
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <select className="input w-auto py-1.5 text-sm" value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}><option value="">All statuses</option><option value="new">New</option><option value="ack">Acknowledged</option><option value="resolved">Resolved</option></select>
+        <select className="input w-auto py-1.5 text-sm" value={level} onChange={(e) => { setLevel(e.target.value); setPage(1); }}><option value="">All levels</option><option value="error">Error</option><option value="warn">Warn</option><option value="info">Info</option></select>
+      </div>
+      {!d ? <Card className="p-8 text-center text-sm text-muted">Loading…</Card> : !reports.length ? <Card className="p-8 text-center text-sm text-muted">No error reports{status || level ? " match the filter" : " yet"}.</Card> : (<>
+        <Card className="overflow-hidden p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b border-line text-left text-xs uppercase tracking-wider text-faint"><th className="px-4 py-2.5">Report</th><th className="px-4 py-2.5">App</th><th className="px-4 py-2.5">Count</th><th className="px-4 py-2.5">Status</th><th className="px-4 py-2.5">Last seen</th></tr></thead>
+              <tbody>
+                {reports.map((r) => { const lc = lchip(r.level); return (
+                  <tr key={r.id} className="cursor-pointer border-b border-line-soft last:border-0 hover:bg-[rgba(255,255,255,0.02)]" onClick={() => setOpen(r)}>
+                    <td className="px-4 py-2.5"><div className="flex items-center gap-2"><span className="shrink-0 rounded px-1.5 py-0.5 text-[0.6rem] font-bold uppercase" style={{ background: lc.bg, color: lc.c }}>{r.level || "error"}</span><span className="truncate font-medium text-ink" style={{ maxWidth: 420 }}>{r.title}</span></div></td>
+                    <td className="px-4 py-2.5 text-muted">{r.app || r.source || "?"}{r.app_version ? ` · ${r.app_version}` : ""}</td>
+                    <td className="px-4 py-2.5 font-mono text-muted">{r.count}</td>
+                    <td className="px-4 py-2.5">{r.status === "resolved" ? <Badge tone="positive">Resolved</Badge> : r.status === "ack" ? <Badge tone="warning">Ack</Badge> : <span className="rounded px-2 py-0.5 text-[0.7rem] font-semibold" style={{ background: "rgba(224,99,74,0.16)", color: "#e0634a" }}>New</span>}</td>
+                    <td className="px-4 py-2.5 text-xs text-muted">{when(Number(r.last_ts))}</td>
+                  </tr>
+                ); })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+        <Pagination page={d.page || page} total={d.total || 0} pageSize={d.pageSize || 25} onPage={setPage} />
+      </>)}
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setOpen(null)}>
+          <div className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-line bg-[rgba(10,12,19,0.98)]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between gap-3 border-b border-line p-4"><div className="min-w-0"><div className="text-xs text-faint">{open.app || open.source} · {open.app_version || "?"} · {open.os || "?"} · seen {open.count}×</div><h2 className="mt-0.5 break-words font-bold">{open.title}</h2></div><button onClick={() => setOpen(null)} className="shrink-0 text-faint hover:text-ink">✕</button></div>
+            <pre className="flex-1 overflow-auto whitespace-pre-wrap break-words p-4 text-xs text-muted" style={{ fontFamily: "ui-monospace, monospace" }}>{open.detail || "(no detail attached)"}</pre>
+            <div className="flex flex-wrap gap-2 border-t border-line p-3">
+              <Button onClick={() => setStat(open.id, "ack")} disabled={busy === open.id}>Acknowledge</Button>
+              <Button variant="primary" onClick={() => setStat(open.id, "resolved")} disabled={busy === open.id}>Resolve</Button>
+              {open.status !== "new" && <Button onClick={() => setStat(open.id, "new")} disabled={busy === open.id}>Reopen</Button>}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

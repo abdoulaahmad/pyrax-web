@@ -100,6 +100,15 @@ export function init(): Promise<void> {
       );
       CREATE INDEX IF NOT EXISTS idx_telemetry_install_ts ON telemetry(install_id, ts);
       CREATE INDEX IF NOT EXISTS idx_telemetry_ts ON telemetry(ts);
+      -- Redacted, deduped crash/error reports from the apps + CLI (the same payload they send to
+      -- Sentinel). Grouped by a normalized signature so a crash loop is one row with a count.
+      CREATE TABLE IF NOT EXISTS error_reports (
+        id TEXT PRIMARY KEY, source TEXT, app TEXT, app_version TEXT, os TEXT, level TEXT,
+        title TEXT NOT NULL, detail TEXT, count INT NOT NULL DEFAULT 1, status TEXT NOT NULL DEFAULT 'new',
+        first_ts BIGINT NOT NULL, last_ts BIGINT NOT NULL, sig TEXT
+      );
+      CREATE INDEX IF NOT EXISTS idx_error_reports_last ON error_reports(last_ts);
+      CREATE INDEX IF NOT EXISTS idx_error_reports_sig ON error_reports(sig);
       CREATE TABLE IF NOT EXISTS earnings_ledger (
         id TEXT PRIMARY KEY, tester_id TEXT NOT NULL REFERENCES testers(id) ON DELETE CASCADE,
         reason TEXT NOT NULL, pyrx BIGINT NOT NULL, note TEXT, ref TEXT, created_at BIGINT NOT NULL
@@ -395,6 +404,53 @@ export async function recordTelemetry(installId: string, info: { app?: string; a
     "INSERT INTO telemetry (id,install_id,ts,app,app_version,os,country,data) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb)",
     [id("tm"), String(installId).slice(0, 64), Date.now(), info.app ?? null, info.appVersion ?? null, info.os ?? null, info.country ?? null, JSON.stringify(info.data ?? {})],
   );
+}
+
+/** Store a redacted crash/error report, deduped by a normalized signature (source + title with the
+ *  ×count and volatile numbers collapsed): a repeat bumps the count + last_ts + freshens the detail,
+ *  so a crash loop stays a single row. A resolved row is left closed; a new occurrence opens a fresh one. */
+export async function recordErrorReport(r: { source?: string; app?: string; appVersion?: string; os?: string; level?: string; title: string; detail?: string }): Promise<void> {
+  await init();
+  const now = Date.now();
+  const title = r.title.slice(0, 300);
+  const sig = `${r.source ?? ""}|${title.replace(/\s*×\d+\s*$/, "").replace(/\d+/g, "#").slice(0, 200)}`;
+  const detail = r.detail ? r.detail.slice(0, 20000) : null;
+  const open = await db().query("SELECT id FROM error_reports WHERE sig=$1 AND status <> 'resolved' ORDER BY last_ts DESC LIMIT 1", [sig]);
+  if (open.rows[0]) {
+    await db().query("UPDATE error_reports SET count=count+1, last_ts=$2, detail=COALESCE($3,detail), level=COALESCE($4,level), app_version=COALESCE($5,app_version) WHERE id=$1",
+      [open.rows[0].id, now, detail, r.level ?? null, r.appVersion ?? null]);
+  } else {
+    await db().query(
+      "INSERT INTO error_reports (id,source,app,app_version,os,level,title,detail,count,status,first_ts,last_ts,sig) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,1,'new',$9,$9,$10)",
+      [id("er"), r.source ?? null, r.app ?? null, r.appVersion ?? null, r.os ?? null, r.level ?? null, title, detail, now, sig],
+    );
+  }
+}
+
+/** Paginated error-report list for the team page, with optional app/level/status filters. */
+export async function listErrorReports(opts: { status?: string; level?: string; app?: string; limit?: number; offset?: number } = {}): Promise<{ rows: any[]; total: number }> {
+  await init();
+  const where: string[] = [];
+  const params: any[] = [];
+  if (opts.status && ["new", "ack", "resolved"].includes(opts.status)) { params.push(opts.status); where.push(`status=$${params.length}`); }
+  if (opts.level && ["error", "warn", "info"].includes(opts.level)) { params.push(opts.level); where.push(`level=$${params.length}`); }
+  if (opts.app) { params.push(opts.app); where.push(`app=$${params.length}`); }
+  const w = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const limit = Math.min(100, Math.max(1, opts.limit ?? 25));
+  const offset = Math.max(0, opts.offset ?? 0);
+  const total = await db().query(`SELECT COUNT(*)::int AS n FROM error_reports ${w}`, params);
+  const rows = await db().query(
+    `SELECT id,source,app,app_version,os,level,title,detail,count,status,first_ts,last_ts FROM error_reports ${w} ORDER BY last_ts DESC LIMIT ${limit} OFFSET ${offset}`,
+    params,
+  );
+  return { rows: rows.rows, total: total.rows[0]?.n ?? 0 };
+}
+
+/** Set an error report's triage status (new | ack | resolved). Returns rows affected. */
+export async function setErrorReportStatus(reportId: string, status: "new" | "ack" | "resolved"): Promise<number> {
+  await init();
+  const r = await db().query("UPDATE error_reports SET status=$2 WHERE id=$1", [reportId, status]);
+  return r.rowCount ?? 0;
 }
 export async function listNodesFor(testerId: string): Promise<any[]> {
   await init();

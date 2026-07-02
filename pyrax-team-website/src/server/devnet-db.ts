@@ -119,6 +119,30 @@ export async function telemetryStats(windowMs = 7 * 864e5): Promise<any> {
   };
 }
 
+/** Paginated crash/error reports (from the apps + CLI) for the team Error Reports page. */
+export async function listErrorReports(opts: { status?: string; level?: string; app?: string; limit?: number; offset?: number } = {}): Promise<{ rows: any[]; total: number }> {
+  const where: string[] = [];
+  const params: any[] = [];
+  if (opts.status && ["new", "ack", "resolved"].includes(opts.status)) { params.push(opts.status); where.push(`status=$${params.length}`); }
+  if (opts.level && ["error", "warn", "info"].includes(opts.level)) { params.push(opts.level); where.push(`level=$${params.length}`); }
+  if (opts.app) { params.push(opts.app); where.push(`app=$${params.length}`); }
+  const w = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const limit = Math.min(100, Math.max(1, opts.limit ?? 25));
+  const offset = Math.max(0, opts.offset ?? 0);
+  const total = await db().query(`SELECT COUNT(*)::int AS n FROM error_reports ${w}`, params);
+  const rows = await db().query(
+    `SELECT id,source,app,app_version,os,level,title,detail,count,status,first_ts,last_ts FROM error_reports ${w} ORDER BY last_ts DESC LIMIT ${limit} OFFSET ${offset}`,
+    params,
+  );
+  return { rows: rows.rows, total: total.rows[0]?.n ?? 0 };
+}
+
+/** Set a report's triage status (new | ack | resolved). Returns rows affected. */
+export async function setErrorReportStatus(reportId: string, status: "new" | "ack" | "resolved"): Promise<number> {
+  const r = await db().query("UPDATE error_reports SET status=$2 WHERE id=$1", [reportId, status]);
+  return r.rowCount ?? 0;
+}
+
 export async function getDevnetSettings(): Promise<Record<string, any>> {
   const r = await db().query("SELECT data FROM app_settings WHERE id=1");
   return { ...DEFAULT_SETTINGS, ...(r.rows[0]?.data || {}) };
