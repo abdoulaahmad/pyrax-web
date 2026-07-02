@@ -346,6 +346,7 @@ function AdvisoryCard({ a, open, onToggle, canApprove, busy, onAction }: { a: an
           {hasReport ? (
             <div className="space-y-2 text-sm">
               <ReportRow label="Root cause" value={`${d.rootCause || "—"}${typeof d.confidence === "number" ? `   ·   ${(d.confidence * 100) | 0}% confidence` : ""}`} strong />
+              {d.likelyChange && <ReportRow label="Likely change" value={d.likelyChange} />}
               {d.whatToFix && <ReportRow label="What to fix" value={d.whatToFix} />}
               {d.howToFix && <ReportRow label="How" value={d.howToFix} />}
               {d.whyToFix && <ReportRow label="Why" value={d.whyToFix} />}
