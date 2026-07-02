@@ -9,13 +9,13 @@ import { defineMiddleware } from "astro:middleware";
 import { checkRequestCsrf } from "./server/csrf";
 import { requireUser } from "./server/guard";
 import { json } from "./server/http";
-import { buildCsp } from "./server/csp";
+import { buildCsp, spacesCdnOrigin } from "./server/csp";
 
 // The production CSP, computed once from the environment. It allows the shared chat WebSocket origin
 // (CHAT_WS_URL) under connect-src and giphy's media hosts under img-src ONLY when the GIF picker is
 // enabled — otherwise a strict `connect-src 'self'` / `img-src 'self' data:` would silently break
 // Devnet Chat. See src/server/csp.ts (pure + unit-tested).
-const CSP = buildCsp({ chatWsUrl: process.env.CHAT_WS_URL, giphyKey: process.env.GIPHY_API_KEY });
+const CSP = buildCsp({ chatWsUrl: process.env.CHAT_WS_URL, giphyKey: process.env.GIPHY_API_KEY, spacesCdn: spacesCdnOrigin() });
 
 export const onRequest = defineMiddleware(async (ctx, next) => {
   const { request, url } = ctx;

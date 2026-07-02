@@ -16,11 +16,23 @@ export function originOf(u: string | undefined | null): string | null {
   }
 }
 
+/** DigitalOcean Spaces CDN host that serves Issue Council attachment images/videos. Derived from the
+ *  SAME SPACES_* env as the presigner (src/server/s3presign.ts), so img-src/media-src can never drift
+ *  from the stored attachment URLs. Returns "" when Spaces isn't configured. */
+export function spacesCdnOrigin(env: NodeJS.ProcessEnv = process.env): string {
+  if (!env.SPACES_KEY || !env.SPACES_SECRET) return "";
+  const region = env.SPACES_REGION || "tor1";
+  const bucket = env.SPACES_BUCKET || "pyrax";
+  return `https://${bucket}.${region}.cdn.digitaloceanspaces.com`;
+}
+
 export interface CspEnv {
   /** CHAT_WS_URL — the shared chat WebSocket host (e.g. wss://chat.pyraxchain.com). */
   chatWsUrl?: string | null;
   /** GIPHY_API_KEY — when set, the in-chat GIF picker is enabled (giphy media <img>s render). */
   giphyKey?: string | null;
+  /** Spaces CDN origin (spacesCdnOrigin()) — lets Issue Council attachment <img>/<video> render inline. */
+  spacesCdn?: string | null;
 }
 
 /**
@@ -31,14 +43,17 @@ export interface CspEnv {
  */
 export function buildCsp(env: CspEnv): string {
   const chatOrigin = originOf(env.chatWsUrl);
+  const cdn = env.spacesCdn || "";
   const connectSrc = ["'self'", chatOrigin].filter(Boolean).join(" ");
-  const imgSrc = env.giphyKey ? "'self' data: https://*.giphy.com" : "'self' data:";
+  const imgSrc = ["'self'", "data:", env.giphyKey ? "https://*.giphy.com" : "", cdn].filter(Boolean).join(" ");
+  const mediaSrc = ["'self'", cdn].filter(Boolean).join(" ");
   return [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     `img-src ${imgSrc}`,
+    `media-src ${mediaSrc}`,
     `connect-src ${connectSrc}`,
     "frame-ancestors 'none'",
     "base-uri 'self'",
