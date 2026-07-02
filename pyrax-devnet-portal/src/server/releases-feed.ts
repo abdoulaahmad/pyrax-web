@@ -5,7 +5,7 @@
 //   node/  — Inferno desktop installers (Inferno-*.exe / *.dmg / *.AppImage) + latest*.yml
 //   ember/ — Ember desktop installers (same electron-builder shapes as node/)
 //   cli/   — pyrax-cli-*-windows-x86_64.zip / *-mac.tar.gz / *-linux.tar.gz + manifest.json
-//            (NOT offered to devnet testers this round — intentionally ignored here)
+//            (the headless pyrax CLI — now offered to testers alongside Inferno + Ember)
 // Only the newest version is retained per feed, so "the file that matches this platform" IS the
 // current build. The bucket is PRIVATE → every link is a presigned SigV4 GET, never a public URL.
 import { listPrefix, presignGet, getObjectText, spacesConfigured, type SpacesObject } from "./s3presign";
@@ -115,14 +115,14 @@ export async function cliFeed(): Promise<FeedResult> {
   return { available: assets.length > 0, version, assets };
 }
 
-/** The full downloads payload for the portal: Inferno (node feed) + Ember, each with a version + links.
- *  The CLI is not offered to devnet testers this round. */
-export async function downloadsPayload(): Promise<{ configured: boolean; inferno: FeedResult; ember: FeedResult }> {
+/** The full downloads payload for the portal: Inferno (node feed) + Ember + the pyrax CLI, each with a
+ *  version + presigned per-platform links. */
+export async function downloadsPayload(): Promise<{ configured: boolean; inferno: FeedResult; ember: FeedResult; cli: FeedResult }> {
   const configured = spacesConfigured();
   if (!configured) {
     const empty: FeedResult = { available: false, version: null, assets: [] };
-    return { configured, inferno: empty, ember: empty };
+    return { configured, inferno: empty, ember: empty, cli: empty };
   }
-  const [inferno, ember] = await Promise.all([infernoFeed(), emberFeed()]);
-  return { configured, inferno, ember };
+  const [inferno, ember, cli] = await Promise.all([infernoFeed(), emberFeed(), cliFeed()]);
+  return { configured, inferno, ember, cli };
 }

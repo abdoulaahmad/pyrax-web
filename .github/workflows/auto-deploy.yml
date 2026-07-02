@@ -53,6 +53,8 @@ jobs:
             [pyrax-explorer-app]=web-explorer-image.yml
             [pyrax-team-website]=team-website-image.yml
             [pyrax-website]=web-website-image.yml
+            [faucet]=faucet-image.yml
+            [pyrax-tunnel-relay]=tunnel-relay-image.yml
           )
 
           # Compute changed paths for the built commit (HEAD_SHA^..HEAD_SHA).

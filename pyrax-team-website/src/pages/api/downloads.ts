@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 //
-// Authenticated download resolver for the team portal. The team portal serves BOTH desktop apps —
-// Inferno (the public node app) to anyone with `downloads.view`, and the internal Ember app to users
-// who additionally hold `downloads.ember`. The CLI is not published this round, so it is not offered.
-// Each app is returned with a real version and short-lived PRESIGNED URLs from the private
-// DigitalOcean Spaces bucket.
+// Authenticated download resolver for the team portal. The team portal serves BOTH desktop apps and the
+// CLI — Inferno (the public node app) and the pyrax CLI (the headless node) to anyone with
+// `downloads.view`, plus the internal Ember app to users who additionally hold `downloads.ember`. Each
+// product is returned with a real version and short-lived PRESIGNED URLs from the private DigitalOcean
+// Spaces bucket.
 //
 // RBAC is enforced SERVER-SIDE: the Ember feed is listed + presigned only when can(subject,
 // "downloads.ember") is true, so a user without that permission never receives an Ember presigned URL
@@ -14,7 +14,7 @@ import { requireUser, subjectOf } from "../../server/guard";
 import { can } from "../../lib/permissions";
 import { json } from "../../server/http";
 import { spacesConfigured } from "../../server/spaces";
-import { resolveDesktopFeed, type Product } from "../../server/feeds";
+import { resolveDesktopFeed, resolveCliFeed, type Product } from "../../server/feeds";
 
 export const prerender = false;
 
@@ -33,11 +33,12 @@ export const GET: APIRoute = async ({ cookies }) => {
     return json({ ok: true, configured: false, canEmber, products: [] });
   }
 
-  // Resolve each permitted feed in parallel. Inferno (the public node app) is offered to everyone with
-  // downloads.view. Ember is included ONLY when the user holds downloads.ember — its presigned URLs are
-  // never even minted for anyone else. The CLI is intentionally NOT offered (not published this round).
+  // Resolve each permitted feed in parallel. Inferno (the public node app) + the pyrax CLI (the headless
+  // node for servers/power users) are offered to everyone with downloads.view. Ember is included ONLY
+  // when the user holds downloads.ember — its presigned URLs are never even minted for anyone else.
   const tasks: Promise<Product>[] = [
     resolveDesktopFeed("node", { id: "inferno", name: "Inferno Node App", note: "Public desktop node app — run, mine, and manage the network from a UI." }),
+    resolveCliFeed({ id: "cli", name: "PYRAX CLI", note: "Headless node + wallet for servers and power users — `pyrax <command>` runs and manages full nodes from the terminal." }),
   ];
   if (canEmber) {
     tasks.push(resolveDesktopFeed("ember", { id: "ember", name: "Ember (Internal Seed)", note: "Internal seed node app — restricted. Do not distribute outside the team.", restricted: true }));

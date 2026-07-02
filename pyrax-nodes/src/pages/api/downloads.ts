@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 //
-// Public download resolver for nodes.pyraxchain.com. Returns the CURRENT Inferno AND Ember installers
-// (Windows / macOS / Linux) with real versions and short-lived PRESIGNED download URLs pulled from
-// the private DigitalOcean Spaces bucket. NO CLI here — the CLI is not published this round.
+// Public download resolver for nodes.pyraxchain.com. Returns the CURRENT Inferno + Ember installers
+// (Windows / macOS / Linux) AND the pyrax CLI (per-OS archives) with real versions and short-lived
+// PRESIGNED download URLs pulled from the private DigitalOcean Spaces bucket.
 //
-// Flow: LIST each feed prefix (node/ , ember/) → find the current installer per platform → PRESIGN each.
+// Flow: LIST each feed prefix (node/ , ember/ , cli/) → find the current build per platform → PRESIGN each.
 // Same-origin gated (the site's own Downloads page) + rate-limited to deter presign-URL harvesting.
 // Honors the team's downloads kill-switch (downloadsOpen) so a closed page never mints links.
 import type { APIRoute } from "astro";
 import { sameOrigin } from "../../server/hmac";
 import { createRateLimiter } from "../../server/ratelimit";
 import { spacesConfigured } from "../../server/spaces";
-import { resolveDesktopFeed, type Product } from "../../server/feeds";
+import { resolveDesktopFeed, resolveCliFeed, type Product } from "../../server/feeds";
 import { getSiteSettings } from "../../server/settings";
 
 export const prerender = false;
@@ -43,6 +43,7 @@ export const GET: APIRoute = async ({ request, clientAddress }) => {
     products = await Promise.all([
       resolveDesktopFeed("node", "inferno", "Inferno Node App", "Desktop node — run, mine, and manage from a UI. Connects outbound, no port-forwarding."),
       resolveDesktopFeed("ember", "ember", "Ember Node App", "Desktop node — run, mine, and manage from a UI. Connects outbound, no port-forwarding."),
+      resolveCliFeed("cli", "PYRAX CLI", "Headless node + wallet for servers and power users — `pyrax <command>` runs and manages full nodes from the terminal."),
     ]);
   } catch {
     // Spaces reachable-but-erroring (e.g. transient list failure) — honest empty, not a broken link.

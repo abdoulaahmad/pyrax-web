@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 //
-// Signed download feed for the Downloads page. Returns the CURRENT Inferno (node feed) + Ember builds,
-// each with a version and a per-platform presigned (SigV4) URL to the PRIVATE Spaces bucket. The CLI is
-// not offered this round. Gated to signed-in testers (the whole portal is invite-only) and honors the
-// admin download gate (`downloadsOpen`) exactly like the team-side toggle — closed ⇒ no links emitted.
+// Signed download feed for the Downloads page. Returns the CURRENT Inferno (node feed) + Ember + pyrax
+// CLI builds, each with a version and a per-platform presigned (SigV4) URL to the PRIVATE Spaces bucket.
+// Gated to signed-in testers (the whole portal is invite-only) and honors the admin download gate
+// (`downloadsOpen`) exactly like the team-side toggle — closed ⇒ no links emitted.
 import type { APIRoute } from "astro";
 import { requireTester } from "../../server/guard";
 import { getDevnetSettings } from "../../server/db";
@@ -24,13 +24,14 @@ export const GET: APIRoute = async ({ cookies }) => {
       message: settings.downloadsClosedMessage || "Downloads are temporarily closed.",
       inferno: { available: false, version: null, assets: [] },
       ember: { available: false, version: null, assets: [] },
+      cli: { available: false, version: null, assets: [] },
     });
   }
 
   try {
-    // The CLI is not published this round — the devnet portal offers Inferno + Ember.
-    const { configured, inferno, ember } = await downloadsPayload();
-    return json({ ok: true, open: true, configured, inferno, ember });
+    // The devnet portal offers Inferno + Ember + the pyrax CLI.
+    const { configured, inferno, ember, cli } = await downloadsPayload();
+    return json({ ok: true, open: true, configured, inferno, ember, cli });
   } catch (e) {
     console.error("[downloads] feed resolve failed:", (e as Error)?.message || e);
     // Honest failure: report unavailable rather than a broken link.
@@ -41,6 +42,7 @@ export const GET: APIRoute = async ({ cookies }) => {
       error: "Could not reach the release storage. Please try again shortly.",
       inferno: { available: false, version: null, assets: [] },
       ember: { available: false, version: null, assets: [] },
+      cli: { available: false, version: null, assets: [] },
     });
   }
 };

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 //
-// Public downloads hub. Fetches the CURRENT Inferno + Ember installers (Windows / macOS / Linux) with
-// real versions and short-lived PRESIGNED download links from /api/downloads (which lists + presigns
-// the private Spaces bucket server-side). The CLI is not published this round, so it is not offered.
+// Public downloads hub. Fetches the CURRENT Inferno + Ember installers AND the pyrax CLI (Windows /
+// macOS / Linux) with real versions and short-lived PRESIGNED download links from /api/downloads (which
+// lists + presigns the private Spaces bucket server-side). This view renders whatever products the API
+// returns generically, so the CLI card appears automatically alongside the desktop apps.
 // Handles three honest states: closed (team kill-switch → notice + signup), no build published yet
 // (disabled buttons, no fake links), and live (working per-platform download buttons).
 import React, { useEffect, useState } from "react";

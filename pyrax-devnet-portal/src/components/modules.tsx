@@ -203,14 +203,14 @@ export function TosPage() {
 
 /* ============================================================== Downloads (real presigned feed) */
 const PLATFORM_LABEL: Record<string, string> = { win: "Windows", mac: "macOS", linux: "Linux" };
-const PRODUCT_NOTE: Record<string, string> = { inferno: "Desktop node app", ember: "Desktop node app" };
+const PRODUCT_NOTE: Record<string, string> = { inferno: "Desktop node app", ember: "Desktop node app", cli: "Headless node + wallet (terminal)" };
 function fmtSize(bytes: number): string {
   if (!bytes || bytes < 1024) return `${bytes || 0} B`;
   const mb = bytes / (1024 * 1024);
   return mb >= 1 ? `${mb.toFixed(mb >= 10 ? 0 : 1)} MB` : `${(bytes / 1024).toFixed(0)} KB`;
 }
 
-function DownloadCard({ name, product, feed }: { name: string; product: "inferno" | "ember"; feed: any }) {
+function DownloadCard({ name, product, feed }: { name: string; product: "inferno" | "ember" | "cli"; feed: any }) {
   const assets: any[] = feed?.assets || [];
   return (
     <Card className="p-5">
@@ -258,10 +258,10 @@ export function Downloads() {
     );
   }
 
-  const noBuilds = !d.inferno?.assets?.length && !d.ember?.assets?.length;
+  const noBuilds = !d.inferno?.assets?.length && !d.ember?.assets?.length && !d.cli?.assets?.length;
   return (
     <>
-      <PageHeader title="Downloads" subtitle="Get the Inferno or Ember node app, then connect it to your account." />
+      <PageHeader title="Downloads" subtitle="Get the Inferno or Ember node app, or the headless pyrax CLI, then connect it to your account." />
       {d.error && <Card className="mb-4 p-4 text-sm text-[color:var(--color-negative)]">{d.error}</Card>}
       {!d.error && noBuilds && (
         <Card className="mb-4 p-4 text-sm text-muted">No builds are published yet. Links appear here automatically the moment a build lands — and you'll get a release notification.</Card>
@@ -269,6 +269,7 @@ export function Downloads() {
       <div className="grid gap-4 sm:grid-cols-2">
         <DownloadCard name="Inferno" product="inferno" feed={d.inferno} />
         <DownloadCard name="Ember" product="ember" feed={d.ember} />
+        <DownloadCard name="PYRAX CLI" product="cli" feed={d.cli} />
       </div>
       <Card className="mt-4 p-5 text-sm text-muted">After installing, sign in to the app with this portal to link your node — uptime then tracks here automatically. Download links are private and expire after a short time; reload this page to refresh them.</Card>
     </>
