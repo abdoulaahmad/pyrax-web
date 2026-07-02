@@ -71,7 +71,7 @@ export function Dashboard({ onNavigate }: { onNavigate: (k: string) => void }) {
         </Card>
       ) : !d.online && (
         <Card className="mb-4 flex flex-col items-start gap-2 border-[color:rgba(245,134,34,0.3)] p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3"><Icon.activity className="h-6 w-6 text-gold" /><div><div className="font-bold">Bring a node online</div><div className="text-xs text-muted">Download Inferno or Ember and connect — the first 10 testers to connect earn a Founding Tester title.</div></div></div>
+          <div className="flex items-center gap-3"><Icon.activity className="h-6 w-6 text-gold" /><div><div className="font-bold">Bring a node online</div><div className="text-xs text-muted">Download Inferno or the pyrax CLI and connect — the first 10 testers to connect earn a Founding Tester title.</div></div></div>
           <Button variant="primary" onClick={() => onNavigate("downloads")}>Get the app</Button>
         </Card>
       )}
@@ -90,19 +90,19 @@ export function Dashboard({ onNavigate }: { onNavigate: (k: string) => void }) {
           <div className="flex items-center justify-between"><h3 className="text-base font-bold">Your nodes</h3><Button onClick={linkNode} disabled={pairBusy}>{pairBusy ? "…" : "+ Link a node"}</Button></div>
           {pair && (
             <div className="mt-3 rounded-xl border border-[color:rgba(245,134,34,0.4)] bg-[rgba(245,134,34,0.06)] p-4 text-center">
-              <div className="text-xs uppercase tracking-wider text-faint">Enter this code in Inferno or Ember to link your node</div>
+              <div className="text-xs uppercase tracking-wider text-faint">Enter this code in Inferno or the pyrax CLI to link your node</div>
               <div className="mt-1 font-mono text-3xl font-extrabold tracking-[0.3em] text-gold">{pair.code}</div>
               <div className="mt-1 text-xs text-faint">Expires in {Math.max(1, Math.floor(pair.expiresInSec / 60))} min</div>
             </div>
           )}
           {d.nodes.length === 0 ? (
-            <div className="mt-4 rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted">No nodes linked yet. Connect Inferno or Ember to your account to start tracking uptime.<div className="mt-3"><Button variant="primary" onClick={() => onNavigate("downloads")}>Download the app</Button></div></div>
+            <div className="mt-4 rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted">No nodes linked yet. Connect Inferno or the pyrax CLI to your account to start tracking uptime.<div className="mt-3"><Button variant="primary" onClick={() => onNavigate("downloads")}>Download the app</Button></div></div>
           ) : (
             <div className="mt-3 space-y-2">
               {rotated && (
                 <div className="rounded-xl border border-[color:rgba(245,134,34,0.4)] bg-[rgba(245,134,34,0.06)] p-3 text-sm">
                   <div className="font-semibold text-gold">New node token (shown once)</div>
-                  <p className="mt-1 text-xs text-muted">Paste this into the Inferno / Ember app for the node. The old token no longer works.</p>
+                  <p className="mt-1 text-xs text-muted">Paste this into the Inferno app or pyrax CLI for the node. The old token no longer works.</p>
                   <div className="mt-2 break-all rounded-lg border border-line bg-[rgba(5,6,9,0.5)] p-2 font-mono text-xs text-ink">{rotated.token}</div>
                   <div className="mt-2 flex gap-2"><Button onClick={() => navigator.clipboard?.writeText(rotated.token).catch(() => {})}>Copy</Button><Button onClick={() => setRotated(null)}>Done</Button></div>
                 </div>
@@ -204,14 +204,14 @@ export function TosPage() {
 
 /* ============================================================== Downloads (real presigned feed) */
 const PLATFORM_LABEL: Record<string, string> = { win: "Windows", mac: "macOS", linux: "Linux" };
-const PRODUCT_NOTE: Record<string, string> = { inferno: "Desktop node app", ember: "Desktop node app", cli: "Headless node + wallet (terminal)" };
+const PRODUCT_NOTE: Record<string, string> = { inferno: "Desktop node app", cli: "Headless node + wallet (terminal)" };
 function fmtSize(bytes: number): string {
   if (!bytes || bytes < 1024) return `${bytes || 0} B`;
   const mb = bytes / (1024 * 1024);
   return mb >= 1 ? `${mb.toFixed(mb >= 10 ? 0 : 1)} MB` : `${(bytes / 1024).toFixed(0)} KB`;
 }
 
-function DownloadCard({ name, product, feed }: { name: string; product: "inferno" | "ember" | "cli"; feed: any }) {
+function DownloadCard({ name, product, feed }: { name: string; product: "inferno" | "cli"; feed: any }) {
   const assets: any[] = feed?.assets || [];
   return (
     <Card className="p-5">
@@ -248,7 +248,7 @@ export function Downloads() {
   if (!d.open) {
     return (
       <>
-        <PageHeader title="Downloads" subtitle="Get the Inferno or Ember node app." />
+        <PageHeader title="Downloads" subtitle="Get the Inferno node app or the pyrax CLI." />
         <Card className="p-10 text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[rgba(215,84,39,0.12)] text-[color:var(--color-ember)]"><Icon.shield className="h-6 w-6" /></div>
           <p className="mt-4 text-lg font-bold">Downloads are closed</p>
@@ -259,10 +259,10 @@ export function Downloads() {
     );
   }
 
-  const noBuilds = !d.inferno?.assets?.length && !d.ember?.assets?.length && !d.cli?.assets?.length;
+  const noBuilds = !d.inferno?.assets?.length && !d.cli?.assets?.length;
   return (
     <>
-      <PageHeader title="Downloads" subtitle="Get the Inferno or Ember node app, or the headless pyrax CLI, then connect it to your account." />
+      <PageHeader title="Downloads" subtitle="Get the Inferno node app or the headless pyrax CLI, then connect it to your account." />
       <MacGatekeeperBanner />
       {d.error && <Card className="mb-4 p-4 text-sm text-[color:var(--color-negative)]">{d.error}</Card>}
       {!d.error && noBuilds && (
@@ -270,7 +270,6 @@ export function Downloads() {
       )}
       <div className="grid gap-4 sm:grid-cols-2">
         <DownloadCard name="Inferno" product="inferno" feed={d.inferno} />
-        <DownloadCard name="Ember" product="ember" feed={d.ember} />
         <DownloadCard name="PYRAX CLI" product="cli" feed={d.cli} />
       </div>
       <Card className="mt-4 p-5 text-sm text-muted">After installing, sign in to the app with this portal to link your node — uptime then tracks here automatically. Download links are private and expire after a short time; reload this page to refresh them.</Card>

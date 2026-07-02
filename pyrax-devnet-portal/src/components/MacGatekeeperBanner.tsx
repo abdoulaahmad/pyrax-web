@@ -13,18 +13,13 @@ interface AppTarget { id: string; label: string; cmd: string; hint: string }
 // The command clears the quarantine flag recursively. For the two desktop apps it targets the
 // installed .app bundle (productName from electron-builder: "Inferno Node" and "Ember"); for the
 // CLI it targets the folder you extracted the archive into (which holds pyrax + the miners).
+// Ember is NOT offered on the devnet portal (Team-portal exclusive), so it is intentionally absent here.
 const APPS: AppTarget[] = [
   {
     id: "inferno",
     label: "Inferno Node (.app)",
     cmd: 'xattr -cr "/Applications/Inferno Node.app"',
     hint: "Run after dragging Inferno Node into Applications.",
-  },
-  {
-    id: "ember",
-    label: "Ember (.app)",
-    cmd: 'xattr -cr "/Applications/Ember.app"',
-    hint: "Run after dragging Ember into Applications.",
   },
   {
     id: "cli",

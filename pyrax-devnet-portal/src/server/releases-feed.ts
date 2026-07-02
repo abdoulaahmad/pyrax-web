@@ -117,14 +117,16 @@ export async function cliFeed(): Promise<FeedResult> {
   return { available: assets.length > 0, version, assets };
 }
 
-/** The full downloads payload for the portal: Inferno (node feed) + Ember + the pyrax CLI, each with a
- *  version + presigned per-platform links. */
-export async function downloadsPayload(): Promise<{ configured: boolean; inferno: FeedResult; ember: FeedResult; cli: FeedResult }> {
+/** The full downloads payload for the DEVNET portal: Inferno (node feed) + the pyrax CLI only.
+ *  EMBER IS DELIBERATELY EXCLUDED — the internal Ember build is downloadable ONLY from the Team
+ *  portal (team.pyraxchain.com). `emberFeed()` is never called here, so devnet never lists Ember and
+ *  never mints a presigned Ember URL. Do NOT re-add ember to this payload or the API. */
+export async function downloadsPayload(): Promise<{ configured: boolean; inferno: FeedResult; cli: FeedResult }> {
   const configured = spacesConfigured();
   if (!configured) {
     const empty: FeedResult = { available: false, version: null, assets: [] };
-    return { configured, inferno: empty, ember: empty, cli: empty };
+    return { configured, inferno: empty, cli: empty };
   }
-  const [inferno, ember, cli] = await Promise.all([infernoFeed(), emberFeed(), cliFeed()]);
-  return { configured, inferno, ember, cli };
+  const [inferno, cli] = await Promise.all([infernoFeed(), cliFeed()]);
+  return { configured, inferno, cli };
 }
