@@ -506,6 +506,219 @@ export function ErrorReports() {
   );
 }
 
+/* ============================================================== Support Tickets */
+const TK_CATS = ["general", "node", "mining", "wallet", "account", "bug", "other"];
+const TK_PRIOS = ["low", "normal", "high", "urgent"];
+const TK_STATS = ["open", "pending", "resolved", "closed"];
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const prioColor = (p: string) => p === "urgent" ? { bg: "rgba(224,99,74,0.16)", c: "#e0634a" } : p === "high" ? { bg: "rgba(224,163,74,0.16)", c: "#e0a34a" } : p === "low" ? { bg: "rgba(255,255,255,0.06)", c: "rgba(255,255,255,0.5)" } : { bg: "rgba(90,166,224,0.14)", c: "#5aa6e0" };
+const statusBadge = (s: string) => s === "resolved" ? <Badge tone="positive">Resolved</Badge> : s === "closed" ? <Badge tone="water">Closed</Badge>
+  : s === "pending" ? <span className="rounded px-2 py-0.5 text-[0.7rem] font-semibold" style={{ background: "rgba(224,163,74,0.16)", color: "#e0a34a" }}>Pending</span>
+  : <span className="rounded px-2 py-0.5 text-[0.7rem] font-semibold" style={{ background: "rgba(224,99,74,0.16)", color: "#e0634a" }}>Open</span>;
+const tkWhen = (ms: number) => new Date(Number(ms)).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+
+export function SupportTickets({ subject: _subject }: { subject: AccessSubject }) {
+  const [d, setD] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [f, setF] = useState({ status: "", priority: "", category: "", assignee: "", q: "" });
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  async function load() {
+    const p = new URLSearchParams();
+    if (f.status) p.set("status", f.status); if (f.priority) p.set("priority", f.priority); if (f.category) p.set("category", f.category);
+    if (f.assignee) p.set("assignee", f.assignee); if (f.q.trim()) p.set("q", f.q.trim()); p.set("page", String(page));
+    try { setD(await (await fetch(`/api/support/tickets?${p}`)).json()); } catch { setD({ ok: false, tickets: [] }); }
+  }
+  useEffect(() => { load(); }, [f.status, f.priority, f.category, f.assignee, page]);
+  useEffect(() => { const t = setTimeout(() => { setPage(1); load(); }, 350); return () => clearTimeout(t); }, [f.q]);
+
+  const tickets: any[] = d?.tickets || [];
+  const s = d?.stats || { open: 0, pending: 0, urgent: 0, total: 0 };
+  return (
+    <>
+      <PageHeader title="Support Tickets" subtitle="Two-way support from the node apps, CLI, and web — reply, add internal notes, assign, and escalate to NEURAX Sentinel." />
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatTile label="Open" value={s.open} />
+        <StatTile label="Pending" value={s.pending} />
+        <StatTile label="Urgent" value={s.urgent} />
+        <StatTile label="Total" value={s.total} />
+      </div>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <input className="input w-auto py-1.5 text-sm" placeholder="Search #, subject, email…" value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} />
+        <select className="input w-auto py-1.5 text-sm" value={f.status} onChange={(e) => { setF({ ...f, status: e.target.value }); setPage(1); }}><option value="">All statuses</option>{TK_STATS.map((x) => <option key={x} value={x}>{cap(x)}</option>)}</select>
+        <select className="input w-auto py-1.5 text-sm" value={f.priority} onChange={(e) => { setF({ ...f, priority: e.target.value }); setPage(1); }}><option value="">All priorities</option>{TK_PRIOS.map((x) => <option key={x} value={x}>{cap(x)}</option>)}</select>
+        <select className="input w-auto py-1.5 text-sm" value={f.category} onChange={(e) => { setF({ ...f, category: e.target.value }); setPage(1); }}><option value="">All categories</option>{TK_CATS.map((x) => <option key={x} value={x}>{cap(x)}</option>)}</select>
+        <select className="input w-auto py-1.5 text-sm" value={f.assignee} onChange={(e) => { setF({ ...f, assignee: e.target.value }); setPage(1); }}><option value="">Any assignee</option>{(d?.assignees || []).map((a: any) => <option key={a.id} value={a.id}>{a.name}</option>)}</select>
+        <Button variant="primary" className="ml-auto" onClick={() => setCreating(true)}>New ticket</Button>
+      </div>
+      {!d ? <Card className="p-8 text-center text-sm text-muted">Loading…</Card> : !tickets.length ? <Card className="p-8 text-center text-sm text-muted">No tickets{f.status || f.priority || f.category || f.assignee || f.q ? " match the filter" : " yet"}.</Card> : (<>
+        <Card className="overflow-hidden p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b border-line text-left text-xs uppercase tracking-wider text-faint"><th className="px-3 py-2.5">#</th><th className="px-3 py-2.5">Subject</th><th className="px-3 py-2.5">Priority</th><th className="px-3 py-2.5">Status</th><th className="px-3 py-2.5">Assignee</th><th className="px-3 py-2.5">Updated</th></tr></thead>
+              <tbody>
+                {tickets.map((t) => { const pc = prioColor(t.priority); return (
+                  <tr key={t.id} className="cursor-pointer border-b border-line last:border-0 hover:bg-[rgba(255,255,255,0.02)]" onClick={() => setOpenId(t.id)}>
+                    <td className="px-3 py-2.5 font-mono text-muted">#{t.code}</td>
+                    <td className="px-3 py-2.5"><div className="flex items-center gap-2"><span className="truncate font-medium text-ink" style={{ maxWidth: 340 }}>{t.subject}</span>{t.msg_count > 1 && <span className="shrink-0 text-xs text-faint">💬 {t.msg_count}</span>}</div><div className="text-[0.7rem] text-faint">{t.category} · {t.source}{t.reporter_email ? ` · ${t.reporter_email}` : ""}</div></td>
+                    <td className="px-3 py-2.5"><span className="rounded px-1.5 py-0.5 text-[0.62rem] font-bold uppercase" style={{ background: pc.bg, color: pc.c }}>{t.priority}</span></td>
+                    <td className="px-3 py-2.5">{statusBadge(t.status)}</td>
+                    <td className="px-3 py-2.5 text-muted">{t.assignee_name || <span className="text-faint">—</span>}</td>
+                    <td className="px-3 py-2.5 text-xs text-muted">{tkWhen(t.updated_at)}</td>
+                  </tr>
+                ); })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+        <Pagination page={d.page || page} total={d.total || 0} pageSize={d.pageSize || 20} onPage={setPage} />
+      </>)}
+      {openId && <TicketDetail id={openId} me={d?.me} assignees={d?.assignees || []} onClose={() => setOpenId(null)} onChanged={load} />}
+      {creating && <NewTicket onClose={() => setCreating(false)} onCreated={(id) => { setCreating(false); load(); setOpenId(id); }} />}
+    </>
+  );
+}
+
+function tkEventLabel(e: any) {
+  const who = e.actor_name || "Someone"; const to = (e.detail || {}).to;
+  switch (e.kind) {
+    case "status": return `${who} set status → ${to}`;
+    case "reopen": return `${who} reopened → ${to}`;
+    case "priority": return `${who} set priority → ${to}`;
+    case "category": return `${who} set category → ${to}`;
+    case "assign": return to ? `${who} assigned → ${to}` : `${who} unassigned`;
+    case "escalate": return `${who} escalated to Sentinel`;
+    default: return e.kind;
+  }
+}
+
+function TicketDetail({ id, me, assignees, onClose, onChanged }: { id: string; me: any; assignees: any[]; onClose: () => void; onChanged: () => void }) {
+  const [t, setT] = useState<any>(null);
+  const [msgs, setMsgs] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [watchers, setWatchers] = useState<any[]>([]);
+  const [body, setBody] = useState("");
+  const [internal, setInternal] = useState(false);
+  const [atts, setAtts] = useState<any[]>([]);
+  const [busy, setBusy] = useState("");
+  const [err, setErr] = useState("");
+
+  async function load() {
+    try { const dd = await (await fetch(`/api/support/tickets/${id}`)).json(); if (dd.ok) { setT(dd.ticket); setMsgs(dd.messages || []); setEvents(dd.events || []); setWatchers(dd.watchers || []); } } catch { /* ignore */ }
+  }
+  useEffect(() => { load(); const iv = setInterval(load, 4000); return () => clearInterval(iv); }, [id]);
+
+  async function setField(patch: any) {
+    setBusy("field");
+    try { const dd = await (await fetch(`/api/support/tickets/${id}/update`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(patch) })).json(); if (dd.ok) { setT(dd.ticket); onChanged(); load(); } } catch { /* ignore */ }
+    setBusy("");
+  }
+  async function reply() {
+    const txt = body.trim(); if (!txt && !atts.length) return;
+    setBusy("send"); setErr("");
+    try { const dd = await (await fetch(`/api/support/tickets/${id}/message`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ body: txt, internal, attachments: atts }) })).json(); if (dd.ok) { setBody(""); setAtts([]); await load(); onChanged(); } else setErr(dd.error || "Couldn't send."); } catch { setErr("Couldn't send."); }
+    setBusy("");
+  }
+  async function escalate() {
+    setBusy("escalate"); setErr("");
+    try { const dd = await (await fetch(`/api/support/tickets/${id}/escalate`, { method: "POST" })).json(); if (dd.ok) await load(); else setErr(dd.error || "Escalation failed."); } catch { setErr("Escalation failed."); }
+    setBusy("");
+  }
+  async function upload(files: FileList | null) {
+    if (!files) return;
+    for (const file of Array.from(files).slice(0, 6)) {
+      try {
+        const pre = await (await fetch("/api/support/upload", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: file.name }) })).json();
+        if (!pre.ok) { setErr(pre.error || "Upload unavailable."); continue; }
+        const put = await fetch(pre.putUrl, { method: "PUT", body: file });
+        if (!put.ok) { setErr("Upload failed."); continue; }
+        setAtts((x) => [...x, { url: pre.url, name: pre.name, mime: file.type, size: file.size }]);
+      } catch { setErr("Upload failed."); }
+    }
+  }
+  const isWatching = watchers.some((w) => w.member_id === me?.id);
+  async function toggleWatch() { await fetch(`/api/support/tickets/${id}/watch`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ watch: !isWatching }) }).catch(() => {}); load(); }
+
+  const timeline = [
+    ...msgs.map((m) => ({ ts: Number(m.created_at), kind: "msg" as const, m })),
+    ...events.filter((e) => e.kind !== "created").map((e) => ({ ts: Number(e.created_at), kind: "event" as const, e })),
+  ].sort((a, b) => a.ts - b.ts);
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="flex h-full w-full max-w-2xl flex-col overflow-hidden border-l border-line bg-[rgba(10,12,19,0.98)]" onClick={(e) => e.stopPropagation()}>
+        {!t ? <div className="grid flex-1 place-items-center text-sm text-muted">Loading…</div> : (<>
+          <div className="border-b border-line p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0"><div className="text-xs text-faint">#{t.code} · {t.source} · {t.app_version || "?"} on {t.os || "?"}{t.reporter_email ? ` · ${t.reporter_email}` : ""}</div><h2 className="mt-0.5 break-words text-lg font-bold">{t.subject}</h2></div>
+              <button onClick={onClose} className="shrink-0 text-faint hover:text-ink">✕</button>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+              <select className="input w-auto py-1 text-xs" value={t.status} onChange={(e) => setField({ status: e.target.value })} disabled={busy === "field"}>{TK_STATS.map((x) => <option key={x} value={x}>{cap(x)}</option>)}</select>
+              <select className="input w-auto py-1 text-xs" value={t.priority} onChange={(e) => setField({ priority: e.target.value })} disabled={busy === "field"}>{TK_PRIOS.map((x) => <option key={x} value={x}>{cap(x)} priority</option>)}</select>
+              <select className="input w-auto py-1 text-xs" value={t.category} onChange={(e) => setField({ category: e.target.value })} disabled={busy === "field"}>{TK_CATS.map((x) => <option key={x} value={x}>{cap(x)}</option>)}</select>
+              <select className="input w-auto py-1 text-xs" value={t.assignee_id || ""} onChange={(e) => { const a = assignees.find((x) => x.id === e.target.value); setField({ assignee_id: e.target.value || null, assignee_name: a ? a.name : null }); }} disabled={busy === "field"}><option value="">Unassigned</option>{assignees.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select>
+              <button onClick={toggleWatch} className={`rounded-full border px-2.5 py-1 ${isWatching ? "border-[rgba(245,134,34,0.5)] text-gold" : "border-line text-muted hover:text-ink"}`}>{isWatching ? "★ Watching" : "☆ Watch"}</button>
+              <button onClick={escalate} disabled={busy === "escalate"} className="rounded-full border border-line px-2.5 py-1 text-muted transition hover:border-[rgba(252,208,61,0.5)] hover:text-gold">{busy === "escalate" ? "Escalating…" : "✦ Escalate to Sentinel"}</button>
+            </div>
+          </div>
+          <div className="flex-1 space-y-3 overflow-y-auto p-4">
+            {t.body && <div className="rounded-lg border border-line bg-[rgba(255,255,255,0.02)] p-3 text-sm"><div className="mb-1 text-xs text-faint">Original report · {tkWhen(t.created_at)}</div><div className="whitespace-pre-wrap break-words text-muted">{t.body}</div></div>}
+            {t.snapshot && <details className="rounded-lg border border-line p-2 text-xs"><summary className="cursor-pointer text-faint">Diagnostics snapshot</summary><pre className="mt-2 max-h-52 overflow-auto whitespace-pre-wrap break-words text-muted">{JSON.stringify(t.snapshot, null, 2)}</pre></details>}
+            {timeline.map((it, i) => it.kind === "event" ? (
+              <div key={"e" + i} className="flex items-center gap-2 text-[0.7rem] text-faint"><div className="h-px flex-1 bg-line" /><span>{tkEventLabel(it.e)} · {tkWhen(it.ts)}</span><div className="h-px flex-1 bg-line" /></div>
+            ) : (() => { const m = it.m; const sent = m.author_kind === "sentinel"; return (
+              <div key={m.id} className={`rounded-lg border p-3 ${m.internal ? "border-[rgba(224,163,74,0.35)] bg-[rgba(224,163,74,0.05)]" : sent ? "border-[rgba(252,208,61,0.35)] bg-[rgba(252,208,61,0.05)]" : "border-line bg-[rgba(255,255,255,0.02)]"}`}>
+                <div className="mb-1 flex flex-wrap items-center gap-2 text-xs"><span className={`font-semibold ${sent ? "text-gold" : "text-ink"}`}>{sent ? "✦ " + m.author_name : m.author_name}</span><span className="rounded px-1.5 py-0.5 text-[0.58rem] font-bold uppercase" style={{ background: m.author_kind === "reporter" ? "rgba(90,166,224,0.16)" : "rgba(255,255,255,0.06)", color: m.author_kind === "reporter" ? "#5aa6e0" : "rgba(255,255,255,0.6)" }}>{m.author_kind}</span>{m.internal && <span className="rounded px-1.5 py-0.5 text-[0.58rem] font-bold uppercase" style={{ background: "rgba(224,163,74,0.16)", color: "#e0a34a" }}>Internal note</span>}<span className="text-faint">{tkWhen(m.created_at)}</span></div>
+                {m.body && <div className="whitespace-pre-wrap break-words text-sm text-muted">{m.body}</div>}
+                {Array.isArray(m.attachments) && m.attachments.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{m.attachments.map((a: any, j: number) => /^image\//.test(a.mime || "") ? <a key={j} href={a.url} target="_blank" rel="noreferrer"><img src={a.url} className="max-h-32 rounded border border-line" /></a> : <a key={j} href={a.url} target="_blank" rel="noreferrer" className="rounded border border-line px-2 py-1 text-xs text-[#5aa6e0] hover:underline">📎 {a.name}</a>)}</div>}
+              </div>
+            ); })())}
+          </div>
+          <div className="border-t border-line p-3">
+            {err && <p className="mb-2 text-xs text-[color:var(--color-negative)]">{err}</p>}
+            {atts.length > 0 && <div className="mb-2 flex flex-wrap gap-1.5">{atts.map((a, i) => <span key={i} className="chip" onClick={() => setAtts(atts.filter((_, j) => j !== i))}>📎 {a.name} ✕</span>)}</div>}
+            <textarea className="input min-h-[64px] text-sm" placeholder={internal ? "Add an internal note (staff-only)…" : "Reply to the reporter…"} value={body} onChange={(e) => setBody(e.target.value)} />
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <label className="flex items-center gap-1.5 text-xs text-muted"><input type="checkbox" checked={internal} onChange={(e) => setInternal(e.target.checked)} /> Internal note</label>
+              <label className="cursor-pointer rounded-full border border-line px-2.5 py-1 text-xs text-muted hover:text-ink">📎 Attach<input type="file" multiple className="hidden" onChange={(e) => upload(e.target.files)} /></label>
+              <Button variant="primary" className="ml-auto" onClick={reply} disabled={busy === "send"}>{busy === "send" ? "Sending…" : internal ? "Add note" : "Send reply"}</Button>
+            </div>
+          </div>
+        </>)}
+      </div>
+    </div>
+  );
+}
+
+function NewTicket({ onClose, onCreated }: { onClose: () => void; onCreated: (id: string) => void }) {
+  const [v, setV] = useState<any>({ subject: "", category: "general", priority: "normal", body: "", reporter_email: "" });
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  async function create() {
+    if (!v.subject.trim()) { setErr("A subject is required."); return; }
+    setBusy(true); setErr("");
+    try { const d = await (await fetch("/api/support/tickets", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(v) })).json(); if (d.ok) onCreated(d.id); else { setErr(d.error || "Couldn't create."); setBusy(false); } } catch { setErr("Couldn't create."); setBusy(false); }
+  }
+  return (
+    <div className="fixed inset-0 z-[60] grid place-items-center bg-black/60 p-4" onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl border border-line bg-[rgba(10,12,19,0.98)] p-5" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-3 flex items-center justify-between"><h3 className="font-bold">New ticket</h3><button onClick={onClose} className="text-faint hover:text-ink">✕</button></div>
+        <input className="input mb-2" placeholder="Subject" value={v.subject} onChange={(e) => setV({ ...v, subject: e.target.value })} />
+        <div className="mb-2 flex gap-2">
+          <select className="input" value={v.category} onChange={(e) => setV({ ...v, category: e.target.value })}>{TK_CATS.map((x) => <option key={x} value={x}>{cap(x)}</option>)}</select>
+          <select className="input" value={v.priority} onChange={(e) => setV({ ...v, priority: e.target.value })}>{TK_PRIOS.map((x) => <option key={x} value={x}>{cap(x)} priority</option>)}</select>
+        </div>
+        <input className="input mb-2" placeholder="Reporter email (optional — enables email replies)" value={v.reporter_email} onChange={(e) => setV({ ...v, reporter_email: e.target.value })} />
+        <textarea className="input mb-2 min-h-[90px]" placeholder="Describe the issue…" value={v.body} onChange={(e) => setV({ ...v, body: e.target.value })} />
+        {err && <p className="mb-2 text-sm text-[color:var(--color-negative)]">{err}</p>}
+        <Button variant="primary" className="w-full justify-center" onClick={create} disabled={busy}>{busy ? "Creating…" : "Open ticket"}</Button>
+      </div>
+    </div>
+  );
+}
+
 /* ============================================================== Profile */
 export function Profile({ member, onSaved }: { member: Member; onSaved?: (u: any) => void }) {
   const [p, setP] = useState<MemberProfile>({ ...member });

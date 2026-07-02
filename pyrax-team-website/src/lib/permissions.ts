@@ -52,6 +52,7 @@ export const PERMISSIONS = {
   "network.manage": { group: "Network & App Management", label: "Manage the Nodes site", desc: "Open or close the public nodes site, and set the default network shown across all marketing sites.", elevated: true },
   "network.downloads": { group: "Network & App Management", label: "Edit node downloads", desc: "Edit the public node app + CLI download links shown on nodes.pyraxchain.com." },
   "network.broadcast": { group: "Network & App Management", label: "Broadcast notifications", desc: "Email + browser-push the notify list when the portal opens or an app updates.", elevated: true },
+  "support.manage": { group: "Network & App Management", label: "Support tickets", desc: "Triage support tickets from the apps, CLI + web: reply, add internal notes, assign, set priority/status, escalate to Sentinel, and open tickets manually.", elevated: true },
 
   // --- Operational ---
   "error_reports.view": { group: "Operations", label: "View error reports", desc: "Read inbound crash/error reports from nodes + apps." },
@@ -134,7 +135,7 @@ export const PRESETS: Record<string, { label: string; desc: string; permissions:
   network_management: {
     label: "Network & App Management",
     desc: "Run the public nodes site: open/close, default network, downloads, and notify broadcasts.",
-    permissions: ["dashboard.view", "network.manage", "network.downloads", "network.broadcast"],
+    permissions: ["dashboard.view", "network.manage", "network.downloads", "network.broadcast", "support.manage"],
   },
   sre: {
     label: "SRE (Neurax Sentinel)",

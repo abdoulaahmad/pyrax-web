@@ -3,10 +3,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo, Icon, Badge, BrandMark } from "./ui";
 import { can, type Permission, PRESETS } from "../lib/permissions";
-import { Dashboard, Faucet, Downloads, Team, NodeControl, ErrorReports, Profile, Signature, SignatureStudio, DevnetUsers, DevnetStatus, DevnetIssues, DevnetTestReviews, DevnetRewards, DevnetChat, DevnetLegal, NetworkManagement, Statistics } from "./modules";
+import { Dashboard, Faucet, Downloads, Team, NodeControl, ErrorReports, Profile, Signature, SignatureStudio, DevnetUsers, DevnetStatus, DevnetIssues, DevnetTestReviews, DevnetRewards, DevnetChat, DevnetLegal, NetworkManagement, Statistics, SupportTickets } from "./modules";
 import { SentinelConsole, SentinelIncidents } from "./sentinel";
 
-type ModuleKey = "dashboard" | "faucet" | "downloads" | "team" | "nodes" | "errors" | "profile" | "signature" | "signature_studio" | "devnet_users" | "devnet_status" | "devnet_issues" | "devnet_tests" | "devnet_rewards" | "devnet_chat" | "devnet_legal" | "network_mgmt" | "statistics" | "sentinel_console" | "sentinel_incidents";
+type ModuleKey = "dashboard" | "faucet" | "downloads" | "team" | "nodes" | "errors" | "profile" | "signature" | "signature_studio" | "devnet_users" | "devnet_status" | "devnet_issues" | "devnet_tests" | "devnet_rewards" | "devnet_chat" | "devnet_legal" | "network_mgmt" | "statistics" | "support" | "sentinel_console" | "sentinel_incidents";
 interface Me { id: string; email: string; displayName: string; position: string; phone: string | null; bookingUrl: string | null; socials: Record<string, string>; permissions: Permission[]; isSuperuser: boolean; status: string; }
 
 const NAV: { key: ModuleKey; label: string; perm: Permission | null; icon: keyof typeof Icon; group: string }[] = [
@@ -26,6 +26,7 @@ const NAV: { key: ModuleKey; label: string; perm: Permission | null; icon: keyof
   { key: "devnet_legal", label: "Legal Records", perm: "devnet.manage", icon: "shield", group: "Devnet" },
   { key: "network_mgmt", label: "Network & Apps", perm: "network.manage", icon: "activity", group: "Network & App Management" },
   { key: "statistics", label: "Statistics", perm: "network.manage", icon: "activity", group: "Network & App Management" },
+  { key: "support", label: "Support Tickets", perm: "support.manage", icon: "chat", group: "Network & App Management" },
   { key: "sentinel_console", label: "Sentinel Console", perm: "sentinel.view", icon: "shield", group: "NEURAX Sentinel" },
   { key: "sentinel_incidents", label: "Incidents", perm: "sentinel.incidents", icon: "alert", group: "NEURAX Sentinel" },
   { key: "signature", label: "My Signature", perm: null, icon: "mail", group: "Account" },
@@ -154,6 +155,7 @@ export default function Portal() {
               {cur === "devnet_legal" && <DevnetLegal subject={subject} />}
               {cur === "network_mgmt" && <NetworkManagement subject={subject} />}
               {cur === "statistics" && <Statistics subject={subject} />}
+              {cur === "support" && <SupportTickets subject={subject} />}
               {cur === "sentinel_console" && <SentinelConsole subject={subject} />}
               {cur === "sentinel_incidents" && <SentinelIncidents subject={subject} />}
               {cur === "signature" && <Signature onEditProfile={() => setActive("profile")} />}

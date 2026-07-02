@@ -161,6 +161,171 @@ export async function setErrorReportStatus(reportId: string, status: "new" | "ac
   return r.rowCount ?? 0;
 }
 
+// --- Support tickets ----------------------------------------------------------------------------
+// Tickets live in the shared devnet_tester DB (created by the devnet portal on first ingest). The
+// team portal owns triage: reply, internal notes, assignment, lifecycle, watchers, escalate. Ensure
+// the tables exist here too so the page works before the first app/CLI ticket lands.
+export const TK_STATUS = ["open", "pending", "resolved", "closed"];
+export const TK_PRIORITY = ["low", "normal", "high", "urgent"];
+export const TK_CATEGORY = ["general", "node", "mining", "wallet", "account", "bug", "other"];
+let tkEnsured = false;
+async function ensureTickets(): Promise<void> {
+  if (tkEnsured) return;
+  await db().query("CREATE TABLE IF NOT EXISTS ticket_counter ( id INT PRIMARY KEY, n INT NOT NULL )");
+  await db().query(`CREATE TABLE IF NOT EXISTS support_tickets (
+    id TEXT PRIMARY KEY, code INT NOT NULL, subject TEXT NOT NULL, body TEXT NOT NULL DEFAULT '',
+    category TEXT NOT NULL DEFAULT 'general', priority TEXT NOT NULL DEFAULT 'normal', status TEXT NOT NULL DEFAULT 'open',
+    source TEXT NOT NULL DEFAULT 'web', reporter_email TEXT, reporter_name TEXT, reporter_id TEXT,
+    assignee_id TEXT, assignee_name TEXT, app_version TEXT, os TEXT, snapshot JSONB,
+    last_actor TEXT NOT NULL DEFAULT 'reporter', created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL )`);
+  await db().query("CREATE UNIQUE INDEX IF NOT EXISTS idx_tickets_code ON support_tickets(code)");
+  await db().query("CREATE INDEX IF NOT EXISTS idx_tickets_status ON support_tickets(status, updated_at DESC)");
+  await db().query(`CREATE TABLE IF NOT EXISTS ticket_messages (
+    id TEXT PRIMARY KEY, ticket_id TEXT NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+    author_id TEXT, author_name TEXT NOT NULL DEFAULT '', author_kind TEXT NOT NULL DEFAULT 'staff',
+    body TEXT NOT NULL DEFAULT '', internal BOOLEAN NOT NULL DEFAULT FALSE, attachments JSONB, created_at BIGINT NOT NULL )`);
+  await db().query("CREATE INDEX IF NOT EXISTS idx_ticket_messages ON ticket_messages(ticket_id, created_at)");
+  await db().query(`CREATE TABLE IF NOT EXISTS ticket_events (
+    id TEXT PRIMARY KEY, ticket_id TEXT NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+    actor_id TEXT, actor_name TEXT, kind TEXT NOT NULL, detail JSONB, created_at BIGINT NOT NULL )`);
+  await db().query("CREATE INDEX IF NOT EXISTS idx_ticket_events ON ticket_events(ticket_id, created_at)");
+  await db().query(`CREATE TABLE IF NOT EXISTS ticket_watchers (
+    ticket_id TEXT NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+    member_id TEXT NOT NULL, member_name TEXT, created_at BIGINT NOT NULL, PRIMARY KEY (ticket_id, member_id) )`);
+  tkEnsured = true;
+}
+
+/** Paginated ticket queue with filters + per-status counts (open/pending float to the top). */
+export async function listTickets(opts: { status?: string; priority?: string; category?: string; assignee?: string; source?: string; q?: string; limit?: number; offset?: number } = {}): Promise<{ rows: any[]; total: number; counts: Record<string, number> }> {
+  await ensureTickets();
+  const where: string[] = [];
+  const params: any[] = [];
+  if (opts.status && TK_STATUS.includes(opts.status)) { params.push(opts.status); where.push(`status=$${params.length}`); }
+  if (opts.priority && TK_PRIORITY.includes(opts.priority)) { params.push(opts.priority); where.push(`priority=$${params.length}`); }
+  if (opts.category && TK_CATEGORY.includes(opts.category)) { params.push(opts.category); where.push(`category=$${params.length}`); }
+  if (opts.assignee) { params.push(opts.assignee); where.push(`assignee_id=$${params.length}`); }
+  if (opts.source) { params.push(opts.source); where.push(`source=$${params.length}`); }
+  if (opts.q && opts.q.trim()) { params.push(`%${opts.q.trim().toLowerCase()}%`); where.push(`(LOWER(subject) LIKE $${params.length} OR LOWER(body) LIKE $${params.length} OR LOWER(COALESCE(reporter_email,'')) LIKE $${params.length} OR CAST(code AS TEXT) LIKE $${params.length})`); }
+  const w = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const limit = Math.min(100, Math.max(1, opts.limit ?? 20));
+  const offset = Math.max(0, opts.offset ?? 0);
+  const total = await db().query(`SELECT COUNT(*)::int AS n FROM support_tickets ${w}`, params);
+  const rows = await db().query(
+    `SELECT t.*, (SELECT COUNT(*)::int FROM ticket_messages m WHERE m.ticket_id=t.id AND m.internal=FALSE) AS msg_count
+     FROM support_tickets t ${w} ORDER BY (t.status IN ('open','pending')) DESC, t.updated_at DESC LIMIT ${limit} OFFSET ${offset}`, params);
+  const cs = await db().query("SELECT status, COUNT(*)::int AS n FROM support_tickets GROUP BY status");
+  const counts: Record<string, number> = {};
+  for (const r of cs.rows) counts[r.status] = r.n;
+  return { rows: rows.rows, total: total.rows[0]?.n ?? 0, counts };
+}
+
+export async function getTicket(ticketId: string): Promise<any | null> {
+  await ensureTickets();
+  const r = await db().query("SELECT * FROM support_tickets WHERE id=$1", [ticketId]);
+  return r.rows[0] || null;
+}
+
+/** Full ticket thread: public + internal messages, the lifecycle event timeline, and watchers. */
+export async function getTicketThread(ticketId: string): Promise<{ messages: any[]; events: any[]; watchers: any[] }> {
+  await ensureTickets();
+  const [m, e, w] = await Promise.all([
+    db().query("SELECT * FROM ticket_messages WHERE ticket_id=$1 ORDER BY created_at ASC", [ticketId]),
+    db().query("SELECT * FROM ticket_events WHERE ticket_id=$1 ORDER BY created_at ASC", [ticketId]),
+    db().query("SELECT * FROM ticket_watchers WHERE ticket_id=$1 ORDER BY created_at ASC", [ticketId]),
+  ]);
+  return { messages: m.rows, events: e.rows, watchers: w.rows };
+}
+
+/** Append a message. A public staff/sentinel reply bumps activity + last_actor; internal notes don't. */
+export async function addTicketMessage(ticketId: string, msg: { authorId?: string; authorName: string; authorKind?: string; body: string; internal?: boolean; attachments?: any[] }): Promise<any> {
+  await ensureTickets();
+  const now = Date.now();
+  const mid = id("tm");
+  const atts = Array.isArray(msg.attachments) && msg.attachments.length ? JSON.stringify(msg.attachments.slice(0, 12)) : null;
+  await db().query(
+    `INSERT INTO ticket_messages (id,ticket_id,author_id,author_name,author_kind,body,internal,attachments,created_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+    [mid, ticketId, msg.authorId || null, msg.authorName, msg.authorKind || "staff", (msg.body || "").slice(0, 8000), !!msg.internal, atts, now]);
+  if (!msg.internal) {
+    const lastActor = msg.authorKind === "reporter" ? "reporter" : msg.authorKind === "sentinel" ? "sentinel" : "staff";
+    await db().query("UPDATE support_tickets SET updated_at=$2, last_actor=$3 WHERE id=$1", [ticketId, now, lastActor]);
+  }
+  return { id: mid, created_at: now };
+}
+
+export async function addTicketEvent(ticketId: string, ev: { actorId?: string; actorName?: string; kind: string; detail?: any }): Promise<void> {
+  await ensureTickets();
+  await db().query("INSERT INTO ticket_events (id,ticket_id,actor_id,actor_name,kind,detail,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)",
+    [id("te"), ticketId, ev.actorId || null, ev.actorName || null, ev.kind, ev.detail ? JSON.stringify(ev.detail) : null, Date.now()]);
+}
+
+/** Change status/priority/category/assignee; each real change records a lifecycle event. */
+export async function updateTicketFields(ticketId: string, fields: { status?: string; priority?: string; category?: string; assigneeId?: string | null; assigneeName?: string | null }, actor: { id?: string; name?: string }): Promise<any | null> {
+  await ensureTickets();
+  const cur = await getTicket(ticketId);
+  if (!cur) return null;
+  const sets: string[] = [];
+  const params: any[] = [];
+  const events: Array<{ kind: string; detail: any }> = [];
+  if (fields.status && TK_STATUS.includes(fields.status) && fields.status !== cur.status) { params.push(fields.status); sets.push(`status=$${params.length}`); events.push({ kind: (cur.status === "closed" || cur.status === "resolved") ? "reopen" : "status", detail: { from: cur.status, to: fields.status } }); }
+  if (fields.priority && TK_PRIORITY.includes(fields.priority) && fields.priority !== cur.priority) { params.push(fields.priority); sets.push(`priority=$${params.length}`); events.push({ kind: "priority", detail: { from: cur.priority, to: fields.priority } }); }
+  if (fields.category && TK_CATEGORY.includes(fields.category) && fields.category !== cur.category) { params.push(fields.category); sets.push(`category=$${params.length}`); events.push({ kind: "category", detail: { from: cur.category, to: fields.category } }); }
+  if (fields.assigneeId !== undefined && (fields.assigneeId || null) !== (cur.assignee_id || null)) {
+    params.push(fields.assigneeId || null); sets.push(`assignee_id=$${params.length}`);
+    params.push(fields.assigneeName || null); sets.push(`assignee_name=$${params.length}`);
+    events.push({ kind: "assign", detail: { to: fields.assigneeName || null } });
+  }
+  if (!sets.length) return cur;
+  const now = Date.now();
+  params.push(now); sets.push(`updated_at=$${params.length}`);
+  params.push(ticketId);
+  await db().query(`UPDATE support_tickets SET ${sets.join(", ")} WHERE id=$${params.length}`, params);
+  for (const e of events) await addTicketEvent(ticketId, { actorId: actor.id, actorName: actor.name, kind: e.kind, detail: e.detail });
+  return getTicket(ticketId);
+}
+
+export async function addTicketWatcher(ticketId: string, memberId: string, memberName?: string): Promise<void> {
+  await ensureTickets();
+  await db().query("INSERT INTO ticket_watchers (ticket_id,member_id,member_name,created_at) VALUES ($1,$2,$3,$4) ON CONFLICT (ticket_id,member_id) DO NOTHING",
+    [ticketId, memberId, memberName || null, Date.now()]);
+}
+export async function removeTicketWatcher(ticketId: string, memberId: string): Promise<void> {
+  await ensureTickets();
+  await db().query("DELETE FROM ticket_watchers WHERE ticket_id=$1 AND member_id=$2", [ticketId, memberId]);
+}
+
+/** Staff-opened ticket (manual intake from the team portal). */
+export async function openTicket(t: { subject: string; body?: string; category?: string; priority?: string; source?: string; reporterEmail?: string; reporterName?: string; assigneeId?: string; assigneeName?: string; actorId?: string; actorName?: string }): Promise<{ id: string; code: number }> {
+  await ensureTickets();
+  const now = Date.now();
+  const c = await db().query("INSERT INTO ticket_counter (id, n) VALUES (1, 1001) ON CONFLICT (id) DO UPDATE SET n = ticket_counter.n + 1 RETURNING n");
+  const code = c.rows[0].n as number;
+  const tid = id("tkt");
+  const body = (t.body || "").slice(0, 8000);
+  await db().query(
+    `INSERT INTO support_tickets (id,code,subject,body,category,priority,status,source,reporter_email,reporter_name,assignee_id,assignee_name,last_actor,created_at,updated_at)
+     VALUES ($1,$2,$3,$4,$5,$6,'open',$7,$8,$9,$10,$11,'staff',$12,$12)`,
+    [tid, code, t.subject.slice(0, 200), body, t.category || "general", t.priority || "normal", t.source || "manual",
+     t.reporterEmail || null, t.reporterName || null, t.assigneeId || null, t.assigneeName || null, now]);
+  if (body) await db().query(
+    "INSERT INTO ticket_messages (id,ticket_id,author_id,author_name,author_kind,body,internal,created_at) VALUES ($1,$2,$3,$4,'staff',$5,FALSE,$6)",
+    [id("tm"), tid, t.actorId || null, t.actorName || "Staff", body, now]);
+  await addTicketEvent(tid, { actorId: t.actorId, actorName: t.actorName, kind: "created", detail: { source: t.source || "manual" } });
+  return { id: tid, code };
+}
+
+export async function ticketStats(): Promise<{ open: number; pending: number; resolved: number; closed: number; total: number; urgent: number }> {
+  await ensureTickets();
+  const r = await db().query("SELECT status, priority, COUNT(*)::int AS n FROM support_tickets GROUP BY status, priority");
+  const out = { open: 0, pending: 0, resolved: 0, closed: 0, total: 0, urgent: 0 };
+  for (const row of r.rows) {
+    out.total += row.n;
+    if (row.status in out) (out as any)[row.status] += row.n;
+    if (row.priority === "urgent" && (row.status === "open" || row.status === "pending")) out.urgent += row.n;
+  }
+  return out;
+}
+
 export async function getDevnetSettings(): Promise<Record<string, any>> {
   const r = await db().query("SELECT data FROM app_settings WHERE id=1");
   return { ...DEFAULT_SETTINGS, ...(r.rows[0]?.data || {}) };

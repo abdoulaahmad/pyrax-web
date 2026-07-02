@@ -109,6 +109,48 @@ export function init(): Promise<void> {
       );
       CREATE INDEX IF NOT EXISTS idx_error_reports_last ON error_reports(last_ts);
       CREATE INDEX IF NOT EXISTS idx_error_reports_sig ON error_reports(sig);
+      -- Support tickets (opened from the apps, CLI, or by staff). The 2-way thread lives in
+      -- ticket_messages (internal notes flagged staff-only); lifecycle + assignment history in
+      -- ticket_events; participants in ticket_watchers. The team portal manages these via its
+      -- devnet-db; the devnet portal only ingests new tickets from the apps/CLI.
+      CREATE TABLE IF NOT EXISTS ticket_counter ( id INT PRIMARY KEY, n INT NOT NULL );
+      CREATE TABLE IF NOT EXISTS support_tickets (
+        id TEXT PRIMARY KEY,
+        code INT NOT NULL,
+        subject TEXT NOT NULL,
+        body TEXT NOT NULL DEFAULT '',
+        category TEXT NOT NULL DEFAULT 'general',
+        priority TEXT NOT NULL DEFAULT 'normal',
+        status TEXT NOT NULL DEFAULT 'open',
+        source TEXT NOT NULL DEFAULT 'web',
+        reporter_email TEXT, reporter_name TEXT, reporter_id TEXT,
+        assignee_id TEXT, assignee_name TEXT,
+        app_version TEXT, os TEXT, snapshot JSONB,
+        last_actor TEXT NOT NULL DEFAULT 'reporter',
+        created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_tickets_code ON support_tickets(code);
+      CREATE INDEX IF NOT EXISTS idx_tickets_status ON support_tickets(status, updated_at DESC);
+      CREATE TABLE IF NOT EXISTS ticket_messages (
+        id TEXT PRIMARY KEY,
+        ticket_id TEXT NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+        author_id TEXT, author_name TEXT NOT NULL DEFAULT '',
+        author_kind TEXT NOT NULL DEFAULT 'staff',
+        body TEXT NOT NULL DEFAULT '', internal BOOLEAN NOT NULL DEFAULT FALSE,
+        attachments JSONB, created_at BIGINT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_ticket_messages ON ticket_messages(ticket_id, created_at);
+      CREATE TABLE IF NOT EXISTS ticket_events (
+        id TEXT PRIMARY KEY,
+        ticket_id TEXT NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+        actor_id TEXT, actor_name TEXT, kind TEXT NOT NULL, detail JSONB, created_at BIGINT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_ticket_events ON ticket_events(ticket_id, created_at);
+      CREATE TABLE IF NOT EXISTS ticket_watchers (
+        ticket_id TEXT NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+        member_id TEXT NOT NULL, member_name TEXT, created_at BIGINT NOT NULL,
+        PRIMARY KEY (ticket_id, member_id)
+      );
       CREATE TABLE IF NOT EXISTS earnings_ledger (
         id TEXT PRIMARY KEY, tester_id TEXT NOT NULL REFERENCES testers(id) ON DELETE CASCADE,
         reason TEXT NOT NULL, pyrx BIGINT NOT NULL, note TEXT, ref TEXT, created_at BIGINT NOT NULL
@@ -451,6 +493,45 @@ export async function setErrorReportStatus(reportId: string, status: "new" | "ac
   await init();
   const r = await db().query("UPDATE error_reports SET status=$2 WHERE id=$1", [reportId, status]);
   return r.rowCount ?? 0;
+}
+
+/** Open a support ticket (from the apps, CLI, or web intake). Allocates a human #code, seeds the
+ *  thread with the reporter's opening message + any attachments, and records the 'created' event.
+ *  The team portal takes it from here (reply, assign, resolve). Returns the id + code. */
+export async function createTicket(t: {
+  subject: string; body?: string; category?: string; priority?: string; source?: string;
+  reporterEmail?: string; reporterName?: string; reporterId?: string;
+  appVersion?: string; os?: string; snapshot?: unknown; attachments?: unknown[];
+}): Promise<{ id: string; code: number }> {
+  await init();
+  const now = Date.now();
+  const c = await db().query(
+    "INSERT INTO ticket_counter (id, n) VALUES (1, 1001) ON CONFLICT (id) DO UPDATE SET n = ticket_counter.n + 1 RETURNING n",
+  );
+  const code = c.rows[0].n as number;
+  const tid = id("tkt");
+  const subject = t.subject.slice(0, 200);
+  const body = (t.body || "").slice(0, 8000);
+  const atts = Array.isArray(t.attachments) && t.attachments.length ? JSON.stringify(t.attachments.slice(0, 12)) : null;
+  await db().query(
+    `INSERT INTO support_tickets (id,code,subject,body,category,priority,status,source,reporter_email,reporter_name,reporter_id,app_version,os,snapshot,last_actor,created_at,updated_at)
+     VALUES ($1,$2,$3,$4,$5,$6,'open',$7,$8,$9,$10,$11,$12,$13,'reporter',$14,$14)`,
+    [tid, code, subject, body, t.category || "general", t.priority || "normal", t.source || "web",
+     t.reporterEmail || null, t.reporterName || null, t.reporterId || null, t.appVersion || null, t.os || null,
+     t.snapshot ? JSON.stringify(t.snapshot) : null, now],
+  );
+  if (body || atts) {
+    await db().query(
+      `INSERT INTO ticket_messages (id,ticket_id,author_id,author_name,author_kind,body,internal,attachments,created_at)
+       VALUES ($1,$2,$3,$4,'reporter',$5,FALSE,$6,$7)`,
+      [id("tm"), tid, t.reporterId || null, t.reporterName || t.reporterEmail || "Reporter", body, atts, now],
+    );
+  }
+  await db().query(
+    "INSERT INTO ticket_events (id,ticket_id,actor_name,kind,detail,created_at) VALUES ($1,$2,$3,'created',$4,$5)",
+    [id("te"), tid, t.reporterName || t.reporterEmail || "Reporter", JSON.stringify({ source: t.source || "web" }), now],
+  );
+  return { id: tid, code };
 }
 export async function listNodesFor(testerId: string): Promise<any[]> {
   await init();

@@ -82,6 +82,37 @@ export function presignGet(key: string, expiresSec = 900): string {
   return `https://${HOST}${canonicalUri}?${canonicalQuery}&X-Amz-Signature=${signature}`;
 }
 
+/**
+ * Presigned PUT URL for uploading `key` as a PUBLIC-READ object, valid for `expiresSec`. The browser
+ * PUTs the file bytes directly to Spaces (`x-amz-acl: public-read` is baked into the signed query, so
+ * no extra header is needed); the object is then readable at `publicUrl(key)`. Used for support-ticket
+ * attachments. Returns "" if creds aren't configured.
+ */
+export function presignPut(key: string, expiresSec = 300): string {
+  if (!spacesConfigured()) return "";
+  const { amzdate, datestamp } = amzNow();
+  const scope = `${datestamp}/${REGION}/s3/aws4_request`;
+  const signedHeaders = "host";
+  const q = new Map<string, string>([
+    ["X-Amz-Algorithm", "AWS4-HMAC-SHA256"],
+    ["X-Amz-Credential", `${ACCESS}/${scope}`],
+    ["X-Amz-Date", amzdate],
+    ["X-Amz-Expires", String(expiresSec)],
+    ["X-Amz-SignedHeaders", signedHeaders],
+    ["x-amz-acl", "public-read"],
+  ]);
+  const canonicalQuery = [...q.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([k, v]) => `${enc(k)}=${enc(v)}`).join("&");
+  const canonicalUri = "/" + encKey(key);
+  const canonicalHeaders = `host:${HOST}\n`;
+  const canonicalRequest = ["PUT", canonicalUri, canonicalQuery, canonicalHeaders, signedHeaders, "UNSIGNED-PAYLOAD"].join("\n");
+  const stringToSign = ["AWS4-HMAC-SHA256", amzdate, scope, sha256hex(canonicalRequest)].join("\n");
+  const signature = crypto.createHmac("sha256", signingKey(datestamp)).update(stringToSign).digest("hex");
+  return `https://${HOST}${canonicalUri}?${canonicalQuery}&X-Amz-Signature=${signature}`;
+}
+
+/** Stable public URL for a public-read object key (matches the presignPut origin, in the img-src CSP). */
+export function publicUrl(key: string): string { return `https://${HOST}/${encKey(key)}`; }
+
 /** Result of parsing one ListObjectsV2 XML page: keys on the page + the next continuation token. */
 export interface ListKeysPage { keys: string[]; nextToken?: string }
 
