@@ -136,6 +136,11 @@ export const PRESETS: Record<string, { label: string; desc: string; permissions:
     desc: "Run the public nodes site: open/close, default network, downloads, and notify broadcasts.",
     permissions: ["dashboard.view", "network.manage", "network.downloads", "network.broadcast"],
   },
+  sre: {
+    label: "SRE (Neurax Sentinel)",
+    desc: "Full NEURAX Sentinel operations: the console + brain/fleet health + live Mind stream, ask the on-GPU brain, approve Sentinel's proposed actions, arm/disarm autonomy + the kill-switch, and manage incidents.",
+    permissions: ["dashboard.view", "sentinel.view", "sentinel.ask", "sentinel.approve", "sentinel.control", "sentinel.incidents"],
+  },
   full_admin: {
     label: "Full Admin",
     desc: "Everything except the superuser-only node kill-switch.",
