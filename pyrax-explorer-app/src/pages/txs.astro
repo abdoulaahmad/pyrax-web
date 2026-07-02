@@ -2,46 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Shell from "../layouts/Shell.astro";
 import { selectedChainId, netFor, getTxs } from "../server/chain";
-import { TX_TYPE_LABEL } from "../server/sample";
-import { shortHash, shortAddr, fmtNum, timeAgo, TX_TYPE_TONE } from "../lib/format";
+import LiveTxs from "../components/LiveTxs.tsx";
 const net = netFor(selectedChainId(Astro.request.headers.get("cookie")));
 const PAGE = 25;
 const offset = Math.max(0, Number(Astro.url.searchParams.get("offset")) || 0);
+// SSR seed for the island (client:load server-renders it), then it polls /api/txs every ~5s to keep the
+// table live without a full page reload. The ?offset= cursor is passed through so a paged view keeps
+// polling its own page.
 const { source, txs } = await getTxs(net, { limit: PAGE, offset });
-const sample = source === "sample";
 ---
 <Shell title="Transactions">
-  <div class="flex items-center gap-2">
-    <h1 class="text-2xl font-extrabold sm:text-3xl">Transactions</h1>
-    {sample && <span class="rounded-full border border-[color:rgba(252,208,61,0.4)] bg-[rgba(252,208,61,0.08)] px-2 py-0.5 text-[0.66rem] font-semibold uppercase tracking-wider text-[color:var(--color-gold)]">sample</span>}
-  </div>
-  <p class="mt-1 text-sm text-muted">PYRAX carries six transaction kinds — transparent, Ethereum, shielded, escrow, stake and governance.</p>
-  <div class="card mt-5 overflow-hidden p-0">
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead><tr class="border-b border-line text-left text-xs uppercase tracking-wider text-faint">
-          <th class="px-4 py-3 font-semibold">Type</th><th class="px-4 py-3 font-semibold">Hash</th><th class="px-4 py-3 font-semibold">Block</th><th class="px-4 py-3 font-semibold">Age</th><th class="px-4 py-3 font-semibold">From → To</th><th class="px-4 py-3 text-right font-semibold">Value</th>
-        </tr></thead>
-        <tbody>
-          {txs.map((t: any) => (
-            <tr class="border-b border-line-soft last:border-0 hover:bg-[rgba(255,255,255,0.02)]">
-              <td class="px-4 py-3"><span class="rounded-md px-1.5 py-0.5 text-[0.62rem] font-bold" style={`color:${TX_TYPE_TONE[t.type]};background:${TX_TYPE_TONE[t.type]}1a`}>{TX_TYPE_LABEL[t.type]}</span></td>
-              <td class="px-4 py-3"><a href={`/tx/${t.hash}`} class="font-mono text-[color:var(--color-brand)]">{shortHash(t.hash)}</a></td>
-              <td class="px-4 py-3"><a href={`/block/${t.block}`} class="font-mono text-muted hover:text-ink">{fmtNum(t.block)}</a></td>
-              <td class="px-4 py-3 text-muted">{timeAgo(t.timestamp)}</td>
-              <td class="px-4 py-3 font-mono text-xs text-muted">{t.type === "shielded" ? <span class="text-[color:#7c5cff]">private ⇄ private</span> : <>{shortAddr(t.from)} → {t.to ? shortAddr(t.to) : "create"}</>}</td>
-              <td class="px-4 py-3 text-right font-mono">{t.value !== null ? `${t.value}` : t.valueBalance ?? "—"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <div class="mt-4 flex items-center justify-between">
-    <div class="text-xs text-faint">{offset > 0 ? `from #${fmtNum(offset + 1)}` : ""}</div>
-    <div class="flex gap-2">
-      {offset > 0 && <a class="btn btn-ghost" href={`/txs?offset=${Math.max(0, offset - PAGE)}`}>← Newer</a>}
-      {!sample && txs.length === PAGE && <a class="btn btn-ghost" href={`/txs?offset=${offset + PAGE}`}>Older →</a>}
-    </div>
-  </div>
+  <LiveTxs client:load initial={txs} initialSource={source} offset={offset} />
 </Shell>
