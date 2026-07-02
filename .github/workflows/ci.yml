@@ -27,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { dir: pyrax-website, pm: pnpm }
+          - { dir: pyrax-website, pm: npm }
           - { dir: pyrax-nodes, pm: npm }
           - { dir: pyrax-devnet-portal, pm: npm }
           - { dir: pyrax-explorer-app, pm: npm }
