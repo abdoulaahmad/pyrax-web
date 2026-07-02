@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 // Geo-IP enrichment for the globe (lat/lon/country/city), cached per IP. Runs server-side from this
-// host. Disable with PYRAX_GEO_DISABLE=1; override the provider with PYRAX_GEO_URL (use HTTPS).
+// host. Disable with PYRAX_GEO_DISABLE=1. Default provider is ip-api.com over HTTP: its FREE tier is
+// HTTP-only — an HTTPS request returns {"status":"fail"}, which silently yields NO geo (every peer
+// then lacks lat/lon and the globe drops it). This is a server-to-server call (no browser, so no
+// mixed-content concern). Override with PYRAX_GEO_URL for a paid/HTTPS endpoint that returns the same
+// {status,country,city,lat,lon} schema.
 import { isValidIp, normalizeIp } from "./ip";
 
 const cache = new Map<string, { v: GeoResult | null; exp: number }>();
@@ -56,7 +60,7 @@ export async function geoLookup(rawIp: string | undefined): Promise<GeoResult | 
   sweepCache(Date.now());
   const hit = cache.get(ip);
   if (hit && hit.exp > Date.now()) return hit.v;
-  const base = process.env.PYRAX_GEO_URL || "https://ip-api.com/json";
+  const base = process.env.PYRAX_GEO_URL || "http://ip-api.com/json";
   try {
     const ctl = new AbortController();
     const t = setTimeout(() => ctl.abort(), 4000);
