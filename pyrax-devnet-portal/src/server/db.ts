@@ -91,6 +91,15 @@ export function init(): Promise<void> {
         node_pk TEXT NOT NULL, tester_id TEXT NOT NULL, ts BIGINT NOT NULL
       );
       CREATE INDEX IF NOT EXISTS idx_hb_tester_ts ON node_heartbeats(tester_id, ts);
+      -- Anonymous, OPT-IN app telemetry — NOT tied to a tester or node token: a random per-install id
+      -- plus a periodic snapshot of usage / performance / node metrics. Country is derived server-side
+      -- from the request (never sent by the client). Feeds the team Statistics page.
+      CREATE TABLE IF NOT EXISTS telemetry (
+        id TEXT PRIMARY KEY, install_id TEXT NOT NULL, ts BIGINT NOT NULL,
+        app TEXT, app_version TEXT, os TEXT, country TEXT, data JSONB NOT NULL DEFAULT '{}'::jsonb
+      );
+      CREATE INDEX IF NOT EXISTS idx_telemetry_install_ts ON telemetry(install_id, ts);
+      CREATE INDEX IF NOT EXISTS idx_telemetry_ts ON telemetry(ts);
       CREATE TABLE IF NOT EXISTS earnings_ledger (
         id TEXT PRIMARY KEY, tester_id TEXT NOT NULL REFERENCES testers(id) ON DELETE CASCADE,
         reason TEXT NOT NULL, pyrx BIGINT NOT NULL, note TEXT, ref TEXT, created_at BIGINT NOT NULL
@@ -376,6 +385,16 @@ export async function recordHeartbeat(testerId: string, nodePk: string, info: { 
   );
   await db().query("INSERT INTO node_heartbeats (node_pk,tester_id,ts) VALUES ($1,$2,$3)", [nodePk, testerId, now]);
   maybePruneHeartbeats();
+}
+
+/** Store one anonymous telemetry snapshot. `installId` is a random per-install id (NOT a tester/node
+ *  token); `country` is derived server-side from the request. `data` is the opt-in metric bundle. */
+export async function recordTelemetry(installId: string, info: { app?: string; appVersion?: string; os?: string; country?: string; data?: unknown }): Promise<void> {
+  await init();
+  await db().query(
+    "INSERT INTO telemetry (id,install_id,ts,app,app_version,os,country,data) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb)",
+    [id("tm"), String(installId).slice(0, 64), Date.now(), info.app ?? null, info.appVersion ?? null, info.os ?? null, info.country ?? null, JSON.stringify(info.data ?? {})],
+  );
 }
 export async function listNodesFor(testerId: string): Promise<any[]> {
   await init();
