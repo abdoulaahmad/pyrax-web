@@ -1403,6 +1403,46 @@ function Drawer({ title, children, onClose, onSave, saveLabel = "Save", busy, ex
 }
 
 /* ============================================================== Network & App Management (nodes site) */
+export function Statistics({ subject }: { subject: AccessSubject }) {
+  if (!can(subject, "network.manage")) return <Locked what="statistics" />;
+  const [days, setDays] = useState(7);
+  const [d, setD] = useState<any>(null);
+  useEffect(() => { setD(null); fetch(`/api/telemetry/stats?days=${days}`).then((r) => r.json()).then((x) => setD(x.ok ? x : { error: x.error || "Couldn't load." })).catch(() => setD({ error: "Network error." })); }, [days]);
+  const Bar = ({ label, value, max }: { label: string; value: number; max: number }) => (
+    <div className="mb-1.5">
+      <div className="flex items-center justify-between text-xs"><span className="truncate text-muted">{label}</span><span className="ml-2 font-mono text-faint">{value.toLocaleString()}</span></div>
+      <div className="mt-0.5 h-1.5 w-full overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-[color:var(--color-brand)]" style={{ width: `${max ? Math.round((value / max) * 100) : 0}%` }} /></div>
+    </div>
+  );
+  const bars = (rows: any[], key: string, valueKey = "installs") => { const max = Math.max(1, ...rows.map((r) => Number(r[valueKey]) || 0)); return rows.map((r, i) => <Bar key={i} label={String(r[key] ?? "?")} value={Number(r[valueKey]) || 0} max={max} />); };
+  return (
+    <>
+      <PageHeader title="Statistics" subtitle="Anonymous, opt-in app usage + performance. A random install id and country only — never a wallet, keys, or identity." />
+      <div className="mb-4 flex flex-wrap gap-2">
+        {[7, 30, 90].map((n) => <button key={n} onClick={() => setDays(n)} className={`chip ${days === n ? "chip-brand" : ""}`}>{n} days</button>)}
+      </div>
+      {!d ? <Card className="p-8 text-center text-sm text-muted">Loading…</Card> : d.error ? <Card className="p-8 text-center text-sm text-[color:var(--color-negative)]">{d.error}</Card> : (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatTile label="Active installs" value={Number(d.activeInstalls || 0).toLocaleString()} sub={`${Number(d.totalSnapshots || 0).toLocaleString()} snapshots`} icon={<Icon.users className="h-5 w-5 text-gold" />} delay={0} />
+            <StatTile label="Nodes" value={Number(d.fleet?.nodes || 0).toLocaleString()} sub={`${Number(d.fleet?.running || 0)} running`} accent="positive" icon={<Icon.power className="h-5 w-5 text-positive" />} delay={0.05} />
+            <StatTile label="Avg peers" value={Number(d.fleet?.avg_peers || 0)} sub="per reporting node" accent="water" icon={<Icon.activity className="h-5 w-5 text-bolt-bright" />} delay={0.1} />
+            <StatTile label="Countries" value={Number(d.byCountry?.length || 0)} sub="represented" icon={<Icon.activity className="h-5 w-5 text-gold" />} delay={0.15} />
+          </div>
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            <Card className="p-5"><div className="mb-3 text-sm font-bold">By app</div>{d.byApp?.length ? bars(d.byApp, "app") : <p className="text-sm text-muted">No data yet.</p>}</Card>
+            <Card className="p-5"><div className="mb-3 text-sm font-bold">By version</div>{d.byVersion?.length ? bars(d.byVersion, "version") : <p className="text-sm text-muted">No data yet.</p>}</Card>
+            <Card className="p-5"><div className="mb-3 text-sm font-bold">By OS</div>{d.byOs?.length ? bars(d.byOs, "os") : <p className="text-sm text-muted">No data yet.</p>}</Card>
+            <Card className="p-5"><div className="mb-3 text-sm font-bold">By country</div>{d.byCountry?.length ? bars(d.byCountry, "country") : <p className="text-sm text-muted">No data yet.</p>}</Card>
+            <Card className="p-5 lg:col-span-2"><div className="mb-3 text-sm font-bold">Top features used</div>{d.topFeatures?.length ? bars(d.topFeatures, "name", "count") : <p className="text-sm text-muted">No feature-usage events yet (opt-in installs report these).</p>}</Card>
+          </div>
+          <p className="mt-3 text-center text-xs text-faint">Every row is anonymous + opt-in — a random install id and a country only. Node uptime is shown even for installs that decline detailed stats.</p>
+        </>
+      )}
+    </>
+  );
+}
+
 export function NetworkManagement({ subject }: { subject: AccessSubject }) {
   const canManage = can(subject, "network.manage");
   const canDl = can(subject, "network.downloads");

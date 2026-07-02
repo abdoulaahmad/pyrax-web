@@ -83,6 +83,42 @@ export async function setDevnetTesterStatus(email: string, status: "active" | "s
   return r.rowCount ?? 0;
 }
 
+/** Aggregate the anonymous app-telemetry table into the team Statistics dashboard. Read-only; every
+ *  row is anonymous (a random install id + server-derived country) — no tester/node identity. */
+export async function telemetryStats(windowMs = 7 * 864e5): Promise<any> {
+  const since = Date.now() - windowMs;
+  const q = (sql: string) => db().query(sql, [since]);
+  const [active, byApp, byVersion, byOs, byCountry, daily, fleet, features] = await Promise.all([
+    q("SELECT COUNT(DISTINCT install_id)::int AS installs, COUNT(*)::int AS snapshots FROM telemetry WHERE ts >= $1"),
+    q("SELECT COALESCE(app,'unknown') AS app, COUNT(DISTINCT install_id)::int AS installs FROM telemetry WHERE ts >= $1 GROUP BY app ORDER BY installs DESC"),
+    q("SELECT COALESCE(app_version,'?') AS version, COUNT(DISTINCT install_id)::int AS installs FROM telemetry WHERE ts >= $1 GROUP BY app_version ORDER BY installs DESC LIMIT 12"),
+    q("SELECT COALESCE(os,'?') AS os, COUNT(DISTINCT install_id)::int AS installs FROM telemetry WHERE ts >= $1 GROUP BY os ORDER BY installs DESC"),
+    q("SELECT COALESCE(country,'?') AS country, COUNT(DISTINCT install_id)::int AS installs FROM telemetry WHERE ts >= $1 GROUP BY country ORDER BY installs DESC LIMIT 20"),
+    q("SELECT (ts/86400000)*86400000 AS day, COUNT(DISTINCT install_id)::int AS installs FROM telemetry WHERE ts >= $1 GROUP BY day ORDER BY day"),
+    q(`WITH latest AS (SELECT DISTINCT ON (install_id) install_id, data FROM telemetry WHERE ts >= $1 ORDER BY install_id, ts DESC)
+       SELECT COALESCE(SUM((data->'node'->>'total')::int),0)::int AS nodes,
+              COALESCE(SUM((data->'node'->>'running')::int),0)::int AS running,
+              COALESCE(ROUND(AVG(NULLIF((data->'node'->>'peers')::int,0))),0)::int AS avg_peers
+       FROM latest WHERE jsonb_typeof(data->'node') = 'object'`),
+    q(`WITH latest AS (SELECT DISTINCT ON (install_id) install_id, data FROM telemetry WHERE ts >= $1 ORDER BY install_id, ts DESC)
+       SELECT e.key AS name, SUM((e.value)::int)::int AS count
+       FROM latest, jsonb_each_text(COALESCE(data->'usage'->'events','{}'::jsonb)) AS e
+       WHERE e.value ~ '^[0-9]+$' GROUP BY e.key ORDER BY count DESC LIMIT 15`),
+  ]);
+  return {
+    windowDays: Math.round(windowMs / 864e5),
+    activeInstalls: active.rows[0]?.installs ?? 0,
+    totalSnapshots: active.rows[0]?.snapshots ?? 0,
+    byApp: byApp.rows,
+    byVersion: byVersion.rows,
+    byOs: byOs.rows,
+    byCountry: byCountry.rows,
+    daily: daily.rows.map((r: any) => ({ day: Number(r.day), installs: r.installs })),
+    fleet: fleet.rows[0] ?? { nodes: 0, running: 0, avg_peers: 0 },
+    topFeatures: features.rows,
+  };
+}
+
 export async function getDevnetSettings(): Promise<Record<string, any>> {
   const r = await db().query("SELECT data FROM app_settings WHERE id=1");
   return { ...DEFAULT_SETTINGS, ...(r.rows[0]?.data || {}) };
