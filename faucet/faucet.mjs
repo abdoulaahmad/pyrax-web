@@ -477,17 +477,24 @@ const server = http.createServer((req, res) => {
       if (body.length > 4096) req.destroy();
     });
     req.on("end", () => {
-      let address, chainId, pow;
+      let address, chainId, pow, reqKind;
       try {
         const j = JSON.parse(body);
         address = j.address;
         chainId = Number(j.chainId) || DEFAULT_CHAIN;
         pow = j.pow;
+        // Optional explicit choice from the web UI toggle ("transparent" | "shielded"). The
+        // apps/CLI omit it and rely on auto-detection; when present we ENFORCE it so a user who
+        // picked "Shielded" but pasted a transparent address is told, not silently sent transparent.
+        reqKind = typeof j.kind === "string" ? j.kind : undefined;
       } catch {
         return send(res, 400, { error: "bad request" });
       }
       const kind = addrKind(address);
       if (!kind) return send(res, 400, { error: "enter a valid 0x… address (transparent or shielded)" });
+      if ((reqKind === "transparent" || reqKind === "shielded") && reqKind !== kind) {
+        return send(res, 400, { error: `that's a ${kind} address — switch the toggle to "${kind}" or paste your ${reqKind} address` });
+      }
       address = address.trim();
       const net = NETWORKS[chainId];
       if (!net) return send(res, 404, { error: "unknown network" });
@@ -687,27 +694,46 @@ h1{margin:0 0 4px;font-size:22px}p{color:var(--muted);margin:.2em 0 1.2em}
 input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:#090b11;color:var(--ink);font:inherit;font-family:ui-monospace,monospace}
 button{width:100%;margin-top:12px;padding:12px;border:0;border-radius:10px;background:var(--brand);color:#fff;font:inherit;font-weight:700;cursor:pointer}
 button:disabled{opacity:.6;cursor:default}#msg{margin-top:14px;font-size:14px;word-break:break-all}a{color:var(--brand)}
+.seg{display:flex;gap:6px;background:#090b11;border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:10px}
+.seg button{flex:1;width:auto;margin:0;padding:9px;border-radius:7px;background:transparent;color:var(--muted);font-weight:600;font-size:14px;transition:background .15s,color .15s}
+.seg button.on{background:var(--brand);color:#fff}
+.hint{color:var(--muted);font-size:12.5px;margin:8px 2px 0;min-height:1.3em}
 </style></head><body><div class="card">
 <h1>PYRAX Faucet</h1><p id="sub">Free test PYRX for development.</p>
-<input id="addr" placeholder="0x your address" autocomplete="off"/>
+<div class="seg" id="seg">
+  <button type="button" class="on" data-kind="transparent">Transparent</button>
+  <button type="button" data-kind="shielded">Shielded</button>
+</div>
+<input id="addr" placeholder="0x… your transparent address" autocomplete="off"/>
+<div id="hint" class="hint">Public balance, visible on-chain — paste your transparent 0x… address.</div>
 <button id="go">Send test PYRX</button>
 <div id="msg"></div>
 </div><script>
-var b=document.getElementById('go'),a=document.getElementById('addr'),m=document.getElementById('msg');
+var b=document.getElementById('go'),a=document.getElementById('addr'),m=document.getElementById('msg'),seg=document.getElementById('seg'),hint=document.getElementById('hint'),kind='transparent';
 fetch('/health').then(r=>r.json()).then(h=>{document.getElementById('sub').textContent=h.drip+' PYRX per request on '+h.network+' · one per address every few hours.'}).catch(()=>{});
+// Transparent / Shielded toggle: guides which of your two addresses to paste + tells the faucet which
+// send to use. Transparent = public 0x…40-hex; shielded = private 0x…128-hex (both shown in your wallet).
+var HINTS={transparent:'Public balance, visible on-chain — paste your transparent 0x… address.',shielded:'Private send, sender & recipient hidden — paste your shielded 0x… address (shown in your wallet).'};
+var PH={transparent:'0x… your transparent address',shielded:'0x… your shielded address'};
+seg.addEventListener('click',function(e){var t=e.target.closest('button[data-kind]');if(!t)return;kind=t.getAttribute('data-kind');for(var i=0;i<seg.children.length;i++)seg.children[i].classList.toggle('on',seg.children[i]===t);a.placeholder=PH[kind];hint.textContent=HINTS[kind];m.textContent='';});
+function kindOf(s){s=(s||'').trim();if(/^0x[0-9a-fA-F]{40}$/.test(s))return 'transparent';if(/^0x[0-9a-fA-F]{128}$/.test(s))return 'shielded';return null;}
 // Leading-zero-bit count of a byte array (mirrors the server's difficulty check).
 function lz(bytes){var n=0;for(var i=0;i<bytes.length;i++){var x=bytes[i];if(x===0){n+=8;continue;}n+=Math.clz32(x)-24;break;}return n;}
 async function sha256Hex(s){var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return new Uint8Array(buf);}
 // Solve a hashcash challenge: find a nonce so sha256(challenge:nonce) has >= bits leading zeros.
 async function solvePow(challenge,bits){for(var n=0;;n++){var d=await sha256Hex(challenge+':'+n);if(lz(d)>=bits)return String(n);}}
-b.onclick=async function(){m.textContent='';m.style.color='var(--muted)';b.disabled=true;b.textContent='Sending…';
+b.onclick=async function(){m.textContent='';m.style.color='var(--muted)';
+  var k=kindOf(a.value);
+  if(!k){m.style.color='var(--bad)';m.textContent='Enter a valid 0x… address.';return;}
+  if(k!==kind){m.style.color='var(--bad)';m.textContent='That looks like a '+k+' address — switch the toggle to "'+k+'", or paste your '+kind+' address.';return;}
+  b.disabled=true;b.textContent='Sending…';
 try{
   var pow=null;
   // Fetch a challenge; solve it only if the server has PoW enabled.
   try{var ch=await (await fetch('/drip/challenge',{cache:'no-store'})).json();
     if(ch&&ch.enabled&&ch.bits>0){b.textContent='Verifying…';var nonce=await solvePow(ch.challenge,ch.bits);pow={challenge:ch.challenge,nonce:nonce};b.textContent='Sending…';}
   }catch(e){/* challenge unavailable — try the drip anyway (PoW may be disabled) */}
-  var j=await (await fetch('/drip',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({address:a.value,pow:pow})})).json();
+  var j=await (await fetch('/drip',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({address:a.value,kind:kind,pow:pow})})).json();
   if(j.ok){m.style.color='var(--ok)';m.innerHTML='Sent '+j.amount+' PYRX ✓<br>tx: '+j.hash}else{m.style.color='var(--bad)';m.textContent=j.error||'failed'}
 }catch(e){m.style.color='var(--bad)';m.textContent='network error'}
 finally{b.disabled=false;b.textContent='Send test PYRX'}};
