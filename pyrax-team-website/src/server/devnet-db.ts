@@ -119,8 +119,25 @@ export async function telemetryStats(windowMs = 7 * 864e5): Promise<any> {
   };
 }
 
+// The error_reports table is owned by the devnet portal (created on first ingest). The team portal
+// reads the same shared DB, so ensure it exists here too — otherwise the page 500s before the first
+// report ever lands. Idempotent + cached so it costs nothing after the first call.
+let erEnsured = false;
+async function ensureErrorReports(): Promise<void> {
+  if (erEnsured) return;
+  await db().query(
+    `CREATE TABLE IF NOT EXISTS error_reports (
+       id TEXT PRIMARY KEY, source TEXT, app TEXT, app_version TEXT, os TEXT, level TEXT,
+       title TEXT NOT NULL, detail TEXT, count INT NOT NULL DEFAULT 1, status TEXT NOT NULL DEFAULT 'new',
+       first_ts BIGINT NOT NULL, last_ts BIGINT NOT NULL, sig TEXT
+     )`,
+  );
+  erEnsured = true;
+}
+
 /** Paginated crash/error reports (from the apps + CLI) for the team Error Reports page. */
 export async function listErrorReports(opts: { status?: string; level?: string; app?: string; limit?: number; offset?: number } = {}): Promise<{ rows: any[]; total: number }> {
+  await ensureErrorReports();
   const where: string[] = [];
   const params: any[] = [];
   if (opts.status && ["new", "ack", "resolved"].includes(opts.status)) { params.push(opts.status); where.push(`status=$${params.length}`); }
@@ -139,6 +156,7 @@ export async function listErrorReports(opts: { status?: string; level?: string; 
 
 /** Set a report's triage status (new | ack | resolved). Returns rows affected. */
 export async function setErrorReportStatus(reportId: string, status: "new" | "ack" | "resolved"): Promise<number> {
+  await ensureErrorReports();
   const r = await db().query("UPDATE error_reports SET status=$2 WHERE id=$1", [reportId, status]);
   return r.rowCount ?? 0;
 }
