@@ -5,6 +5,7 @@ import type { APIRoute } from "astro";
 import { pairNode, claimFounding } from "../../../server/db";
 import { json } from "../../../server/http";
 import { REWARDS } from "../../../lib/rewards";
+import { transitionState } from "../../../server/onboarding";
 
 export const prerender = false;
 
@@ -23,6 +24,7 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ ok: false, error: msg }, 400);
   }
   const founding = await claimFounding(r.testerId, REWARDS.foundingTester.bonus, REWARDS.foundingTester.count);
+  await transitionState(r.testerId, "NODE_PAIRED").catch(e => console.error(e));
   // The app/CLI stores nodeToken and either (a) opens the live status WS at statusWsUrl?token=<token>,
   // or (b) falls back to POST /api/node/heartbeat with `Authorization: Bearer <token>`.
   return json({ ok: true, nodePk: r.nodePk, nodeToken: r.nodeToken, heartbeatEverySec: 30, statusWsUrl: STATUS_WS_URL, foundingRank: founding });

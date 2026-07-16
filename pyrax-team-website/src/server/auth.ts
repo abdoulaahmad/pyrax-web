@@ -53,6 +53,9 @@ export async function requestLoginCode(email: string, ip = ""): Promise<{ ok: tr
        ON CONFLICT (code_hash) DO NOTHING`,
       [hmac(`${e}:${code}`), e, now, expiresAt, rid],
     );
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`[local-dev] OTP for ${e}: ${code}`);
+    }
     void sendOtp(e, code, expiresAt); // fire-and-forget; a slow mailer must not delay the response
   }
   return { ok: true, ttl: OTP_TTL_S, rid };

@@ -15,7 +15,7 @@ let pool: pg.Pool | null = null;
 function db(): pg.Pool {
   if (!pool) {
     if (!connectionString) throw new Error("DATABASE_URL_DEVNET is not configured.");
-    pool = new pg.Pool({ connectionString, ssl: { rejectUnauthorized: false }, max: 4, idleTimeoutMillis: 30_000 });
+    pool = new pg.Pool({ connectionString, ssl: connectionString.includes('localhost') ? false : { rejectUnauthorized: false }, max: 4, idleTimeoutMillis: 30_000 });
   }
   return pool;
 }
@@ -35,6 +35,7 @@ const DEFAULT_SETTINGS = {
     { name: "Inferno", platform: "Linux", url: "https://updates.pyraxchain.com/inferno/latest/linux", note: "Desktop node app" },
     { name: "PYRAX CLI", platform: "All platforms", url: "https://updates.pyraxchain.com/cli/latest", note: "Command-line node tool" },
   ],
+  legalRequired: true,
 };
 
 /** Whitelist a tester: create an invite carrying their Telegram @handle (their future chat name). */
@@ -788,4 +789,44 @@ export async function listDevnetLegalAcceptances(): Promise<any[]> {
 export async function devnetChatRoster(): Promise<any[]> {
   const r = await db().query("SELECT id, handle AS user, display_name AS name, is_staff, permissions FROM testers WHERE status='active' AND handle<>'' ORDER BY is_staff DESC, lower(handle) ASC LIMIT 300");
   return r.rows.map((x: any) => ({ id: x.id, user: x.user, name: x.name, admin: !!x.is_staff, role: x.is_staff ? "admin" : ((x.permissions || []).includes("community.support") ? "support" : "tester") }));
+}
+
+// ---- Training & Quiz Management ----------------------------------------------------------------
+
+export async function listDevnetTrainingLessons(): Promise<any[]> {
+  const r = await db().query("SELECT * FROM training_lessons ORDER BY lesson_order ASC");
+  return r.rows;
+}
+
+export async function saveDevnetTrainingLesson(lesson: any): Promise<void> {
+  const lid = lesson.id || id("tl");
+  await db().query(
+    `INSERT INTO training_lessons (id, title, content, lesson_order, required_for_cert, created_at)
+     VALUES ($1, $2, $3::jsonb, $4, $5, $6)
+     ON CONFLICT (id) DO UPDATE SET title=$2, content=$3::jsonb, lesson_order=$4, required_for_cert=$5`,
+    [lid, lesson.title || "New Lesson", JSON.stringify(lesson.content || {}), Number(lesson.lesson_order) || 0, typeof lesson.required_for_cert === "boolean" ? lesson.required_for_cert : true, Date.now()]
+  );
+}
+
+export async function deleteDevnetTrainingLesson(idToRemove: string): Promise<void> {
+  await db().query("DELETE FROM training_lessons WHERE id=$1", [idToRemove]);
+}
+
+export async function listDevnetQuizQuestions(): Promise<any[]> {
+  const r = await db().query("SELECT * FROM quiz_questions");
+  return r.rows;
+}
+
+export async function saveDevnetQuizQuestion(q: any): Promise<void> {
+  const qid = q.id || id("qq");
+  await db().query(
+    `INSERT INTO quiz_questions (id, question, options, correct_answer, explanation, created_at)
+     VALUES ($1, $2, $3::jsonb, $4, $5, $6)
+     ON CONFLICT (id) DO UPDATE SET question=$2, options=$3::jsonb, correct_answer=$4, explanation=$5`,
+    [qid, q.question || "New Question", JSON.stringify(q.options || []), Number(q.correct_answer) || 0, q.explanation || "", Date.now()]
+  );
+}
+
+export async function deleteDevnetQuizQuestion(idToRemove: string): Promise<void> {
+  await db().query("DELETE FROM quiz_questions WHERE id=$1", [idToRemove]);
 }

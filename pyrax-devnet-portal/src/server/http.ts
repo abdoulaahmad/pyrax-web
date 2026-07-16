@@ -22,6 +22,7 @@ export function publicTester(t: TesterRow) {
     payoutWallet: t.payout_wallet, rewardEligible: t.reward_eligible, isStaff: t.is_staff,
     permissions: t.permissions, isSuperuser: t.is_superuser, status: t.status,
     sessionMaxDays: t.session_max_days, foundingRank: t.founding_rank,
+    onboardingStatus: t.onboarding_status, currentMission: t.current_mission, certificationId: t.certification_id,
   };
 }
 export type PublicTester = ReturnType<typeof publicTester>;

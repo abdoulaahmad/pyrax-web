@@ -29,13 +29,21 @@ export interface TesterRow {
   permissions: Permission[]; is_superuser: boolean; status: "invited" | "active" | "suspended";
   session_max_days: number; founding_rank: number | null;
   created_at: number; joined_at: number | null; last_login: number | null;
+  onboarding_status: string; training_completed: boolean; training_progress: number;
+  quiz_passed: boolean; quiz_score: number; quiz_attempts: number;
+  certification_id: string | null; certification_issued_at: number | null;
+  node_downloaded: boolean; node_paired: boolean;
+  current_mission: number; current_testing_phase: string | null;
 }
 
 function getPool(): pg.Pool {
   if (!pool) {
     if (!connectionString) throw new Error("DATABASE_URL_DEVNET is not configured.");
+    const isLocal = connectionString.includes("localhost") || connectionString.includes("127.0.0.1");
     pool = new pg.Pool({
-      connectionString, ssl: { rejectUnauthorized: false }, max: 6, idleTimeoutMillis: 30_000,
+      connectionString,
+      ...(isLocal ? {} : { ssl: { rejectUnauthorized: false } }),
+      max: 6, idleTimeoutMillis: 30_000,
       // Bound EVERY DB operation so a stalled connect or query can never hang a request forever.
       // The login path awaits init(), so an UNBOUNDED connect meant one stuck connection wedged the
       // whole portal ("send code just hangs"). connect ≤10s; a query ≤20s → fail fast, never hang.
@@ -56,10 +64,33 @@ export function init(): Promise<void> {
         reward_eligible BOOLEAN NOT NULL DEFAULT TRUE, is_staff BOOLEAN NOT NULL DEFAULT FALSE,
         permissions JSONB NOT NULL DEFAULT '[]'::jsonb, is_superuser BOOLEAN NOT NULL DEFAULT FALSE,
         status TEXT NOT NULL DEFAULT 'invited', session_max_days INT NOT NULL DEFAULT 7,
-        founding_rank INT, created_at BIGINT NOT NULL, joined_at BIGINT, last_login BIGINT
+        founding_rank INT, created_at BIGINT NOT NULL, joined_at BIGINT, last_login BIGINT,
+        onboarding_status TEXT NOT NULL DEFAULT 'REGISTERED', training_completed BOOLEAN NOT NULL DEFAULT FALSE,
+        training_progress INT NOT NULL DEFAULT 0, quiz_passed BOOLEAN NOT NULL DEFAULT FALSE,
+        quiz_score INT NOT NULL DEFAULT 0, quiz_attempts INT NOT NULL DEFAULT 0,
+        certification_id TEXT UNIQUE, certification_issued_at BIGINT,
+        node_downloaded BOOLEAN NOT NULL DEFAULT FALSE, node_paired BOOLEAN NOT NULL DEFAULT FALSE,
+        current_mission INT NOT NULL DEFAULT 1, current_testing_phase TEXT
       );
       CREATE UNIQUE INDEX IF NOT EXISTS idx_testers_email_lower ON testers (lower(email));
       CREATE UNIQUE INDEX IF NOT EXISTS idx_testers_handle_lower ON testers (lower(handle)) WHERE handle <> '';
+      
+      -- Phase 6 migrations: add new columns to existing testers table if they don't exist
+      ALTER TABLE testers ADD COLUMN IF NOT EXISTS onboarding_status TEXT NOT NULL DEFAULT 'REGISTERED';
+      ALTER TABLE testers ADD COLUMN IF NOT EXISTS training_completed BOOLEAN NOT NULL DEFAULT FALSE;
+      ALTER TABLE testers ADD COLUMN IF NOT EXISTS training_progress INT NOT NULL DEFAULT 0;
+      ALTER TABLE testers ADD COLUMN IF NOT EXISTS quiz_passed BOOLEAN NOT NULL DEFAULT FALSE;
+      ALTER TABLE testers ADD COLUMN IF NOT EXISTS quiz_score INT NOT NULL DEFAULT 0;
+      ALTER TABLE testers ADD COLUMN IF NOT EXISTS quiz_attempts INT NOT NULL DEFAULT 0;
+      ALTER TABLE testers ADD COLUMN IF NOT EXISTS certification_id TEXT UNIQUE;
+      ALTER TABLE testers ADD COLUMN IF NOT EXISTS certification_issued_at BIGINT;
+      ALTER TABLE testers ADD COLUMN IF NOT EXISTS node_downloaded BOOLEAN NOT NULL DEFAULT FALSE;
+      ALTER TABLE testers ADD COLUMN IF NOT EXISTS node_paired BOOLEAN NOT NULL DEFAULT FALSE;
+      ALTER TABLE testers ADD COLUMN IF NOT EXISTS current_mission INT NOT NULL DEFAULT 1;
+      ALTER TABLE testers ADD COLUMN IF NOT EXISTS current_testing_phase TEXT;
+      
+      CREATE INDEX IF NOT EXISTS idx_testers_onboarding_status ON testers(onboarding_status);
+      CREATE INDEX IF NOT EXISTS idx_testers_certification_id ON testers(certification_id);
       CREATE TABLE IF NOT EXISTS invites (
         token TEXT PRIMARY KEY, email TEXT NOT NULL, telegram_handle TEXT NOT NULL DEFAULT '',
         created_at BIGINT NOT NULL, expires_at BIGINT NOT NULL, accepted_at BIGINT, invited_by TEXT
@@ -271,6 +302,95 @@ export function init(): Promise<void> {
         keys JSONB NOT NULL, created_at BIGINT NOT NULL
       );
       CREATE TABLE IF NOT EXISTS app_settings ( id INT PRIMARY KEY DEFAULT 1, data JSONB NOT NULL, updated_at BIGINT NOT NULL, CONSTRAINT app_settings_one CHECK (id = 1) );
+      -- Onboarding system: centralized state management for participant progression
+      CREATE TABLE IF NOT EXISTS onboarding (
+        id TEXT PRIMARY KEY, tester_id TEXT NOT NULL UNIQUE REFERENCES testers(id) ON DELETE CASCADE,
+        status TEXT NOT NULL DEFAULT 'REGISTERED', created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_onboarding_tester ON onboarding(tester_id);
+      CREATE INDEX IF NOT EXISTS idx_onboarding_status ON onboarding(status);
+      -- Training system: modular lessons for participant education
+      CREATE TABLE IF NOT EXISTS training_lessons (
+        id TEXT PRIMARY KEY, title TEXT NOT NULL, content JSONB NOT NULL DEFAULT '{}',
+        lesson_order INT NOT NULL, required_for_cert BOOLEAN NOT NULL DEFAULT TRUE, created_at BIGINT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_training_lessons_order ON training_lessons(lesson_order);
+      -- Training progress tracking per tester
+      CREATE TABLE IF NOT EXISTS training_progress (
+        id TEXT PRIMARY KEY, tester_id TEXT NOT NULL, lesson_id TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'not_started', completed_at BIGINT, created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL,
+        UNIQUE (tester_id, lesson_id),
+        FOREIGN KEY (tester_id) REFERENCES testers(id) ON DELETE CASCADE,
+        FOREIGN KEY (lesson_id) REFERENCES training_lessons(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_training_progress_tester ON training_progress(tester_id);
+      -- Quiz certification system: questions and grading
+      CREATE TABLE IF NOT EXISTS quiz_questions (
+        id TEXT PRIMARY KEY, question TEXT NOT NULL, options JSONB NOT NULL DEFAULT '[]',
+        correct_answer INT NOT NULL, explanation TEXT NOT NULL DEFAULT '', created_at BIGINT NOT NULL
+      );
+      -- Quiz attempts and scoring
+      CREATE TABLE IF NOT EXISTS quiz_attempts (
+        id TEXT PRIMARY KEY, tester_id TEXT NOT NULL, score INT NOT NULL, answers JSONB NOT NULL DEFAULT '{}',
+        passed BOOLEAN NOT NULL, created_at BIGINT NOT NULL,
+        FOREIGN KEY (tester_id) REFERENCES testers(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_quiz_attempts_tester ON quiz_attempts(tester_id, created_at);
+      CREATE INDEX IF NOT EXISTS idx_quiz_attempts_passed ON quiz_attempts(tester_id, passed);
+      -- Certifications: soulbound, non-transferable participant credentials
+      CREATE TABLE IF NOT EXISTS certifications (
+        id TEXT PRIMARY KEY, tester_id TEXT NOT NULL UNIQUE REFERENCES testers(id) ON DELETE CASCADE,
+        cert_number TEXT NOT NULL UNIQUE, issued_at BIGINT NOT NULL, expires_at BIGINT,
+        status TEXT NOT NULL DEFAULT 'active', revoked_at BIGINT, revoked_by TEXT
+      );
+      CREATE INDEX IF NOT EXISTS idx_certifications_tester ON certifications(tester_id);
+      CREATE INDEX IF NOT EXISTS idx_certifications_status ON certifications(status);
+      -- Missions: structured progression framework for participants
+      CREATE TABLE IF NOT EXISTS missions (
+        id TEXT PRIMARY KEY, mission_number INT NOT NULL UNIQUE, title TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '', prerequisites JSONB NOT NULL DEFAULT '[]',
+        completion_criteria JSONB NOT NULL DEFAULT '{}', unlock_conditions JSONB NOT NULL DEFAULT '{}',
+        created_at BIGINT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_missions_number ON missions(mission_number);
+      -- Mission progress per tester
+      CREATE TABLE IF NOT EXISTS mission_progress (
+        id TEXT PRIMARY KEY, tester_id TEXT NOT NULL, mission_id TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'not_started', progress_data JSONB NOT NULL DEFAULT '{}',
+        completed_at BIGINT, created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL,
+        UNIQUE (tester_id, mission_id),
+        FOREIGN KEY (tester_id) REFERENCES testers(id) ON DELETE CASCADE,
+        FOREIGN KEY (mission_id) REFERENCES missions(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_mission_progress_tester ON mission_progress(tester_id);
+      CREATE INDEX IF NOT EXISTS idx_mission_progress_status ON mission_progress(status);
+      -- Feature flags: dynamic feature gating per user, cohort, or globally
+      CREATE TABLE IF NOT EXISTS feature_flags (
+        id TEXT PRIMARY KEY, flag_name TEXT NOT NULL UNIQUE, global_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL
+      );
+      -- Per-user feature flag overrides
+      CREATE TABLE IF NOT EXISTS feature_flag_users (
+        id TEXT PRIMARY KEY, flag_id TEXT NOT NULL, tester_id TEXT NOT NULL, enabled BOOLEAN NOT NULL,
+        UNIQUE (flag_id, tester_id),
+        FOREIGN KEY (flag_id) REFERENCES feature_flags(id) ON DELETE CASCADE,
+        FOREIGN KEY (tester_id) REFERENCES testers(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_feature_flag_users_tester ON feature_flag_users(tester_id);
+      -- Per-cohort feature flag overrides
+      CREATE TABLE IF NOT EXISTS feature_flag_cohorts (
+        id TEXT PRIMARY KEY, flag_id TEXT NOT NULL, cohort_name TEXT NOT NULL, enabled BOOLEAN NOT NULL,
+        UNIQUE (flag_id, cohort_name),
+        FOREIGN KEY (flag_id) REFERENCES feature_flags(id) ON DELETE CASCADE
+      );
+      -- Testing phases: track network testing periods and participant progress
+      CREATE TABLE IF NOT EXISTS testing_phases (
+        id TEXT PRIMARY KEY, phase_name TEXT NOT NULL, phase_order INT NOT NULL,
+        objectives JSONB NOT NULL DEFAULT '[]', start_date BIGINT NOT NULL, end_date BIGINT,
+        created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_testing_phases_order ON testing_phases(phase_order);
+      CREATE INDEX IF NOT EXISTS idx_testing_phases_active ON testing_phases(start_date, end_date);
       -- Signed legal agreements (NDA + Alpha T&C). One row per acceptance; the latest row per
       -- (tester, doc_type) at the CURRENT version gates portal access. IP + UA captured at signing.
       CREATE TABLE IF NOT EXISTS legal_acceptances (
@@ -294,6 +414,9 @@ export function init(): Promise<void> {
     // (or be blocked by) the content seed. Best-effort; on failure the catalog is just empty until the
     // next boot. This keeps init() (and therefore sign-in) fast + resilient no matter the seed's state.
     void seedTests().catch((e) => console.error("[db] test seed failed:", (e as { message?: string })?.message || e));
+    void import('./training.js').then(m => m.seedTrainingLessons()).catch(e => console.error("[db] training seed failed:", e));
+    void import('./missions.js').then(m => m.seedMissions()).catch(e => console.error("[db] missions seed failed:", e));
+    void import('./certification.js').then(m => m.seedQuizQuestions()).catch(e => console.error("[db] quiz seed failed:", e));
     // Boot-time + periodic retention sweep for raw heartbeats (in addition to the write-path prune),
     // so an idle portal still trims the table. Unref'd so it never holds the process open.
     void pruneHeartbeats().catch(() => {});
@@ -391,6 +514,7 @@ const DEFAULT_SETTINGS = {
     { name: "Inferno", platform: "Linux", url: "https://updates.pyraxchain.com/inferno/latest/linux", note: "Desktop node app" },
     { name: "PYRAX CLI", platform: "All platforms", url: "https://updates.pyraxchain.com/cli/latest", note: "Command-line node tool" },
   ],
+  legalRequired: true,
 };
 export async function getDevnetSettings(): Promise<Record<string, any>> {
   await init(); const r = await db().query("SELECT data FROM app_settings WHERE id=1"); return { ...DEFAULT_SETTINGS, ...(r.rows[0]?.data || {}) };
@@ -1564,4 +1688,125 @@ export async function pendingSubmissionContexts(limit = 25): Promise<PendingSubm
     });
   }
   return out;
+}
+
+// ---- Phase 3: Database Access Layer (Onboarding & Feature Flags) ----
+
+export async function getOnboardingRecord(tester_id: string): Promise<any> {
+  await init();
+  const r = await db().query("SELECT * FROM onboarding WHERE tester_id=$1", [tester_id]);
+  return r.rows[0] || null;
+}
+
+export async function updateOnboardingStatus(tester_id: string, newStatus: string): Promise<void> {
+  await init();
+  const now = Date.now();
+  await db().query("UPDATE testers SET onboarding_status=$1 WHERE id=$2", [newStatus, tester_id]);
+  const ob = await db().query("SELECT id FROM onboarding WHERE tester_id=$1", [tester_id]);
+  if (ob.rows[0]) {
+    await db().query("UPDATE onboarding SET status=$1, updated_at=$2 WHERE tester_id=$3", [newStatus, now, tester_id]);
+  } else {
+    await db().query("INSERT INTO onboarding (id, tester_id, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)", [id("ob"), tester_id, newStatus, now, now]);
+  }
+}
+
+export async function updateTrainingProgress(tester_id: string, progress: number): Promise<void> {
+  await init();
+  await db().query("UPDATE testers SET training_progress=$1 WHERE id=$2", [progress, tester_id]);
+}
+
+export async function recordTrainingCompletion(tester_id: string): Promise<void> {
+  await init();
+  await db().query("UPDATE testers SET training_completed=TRUE WHERE id=$1", [tester_id]);
+}
+
+export async function recordQuizAttempt(tester_id: string, score: number, answers: any, passed: boolean): Promise<void> {
+  await init();
+  const now = Date.now();
+  await db().query("INSERT INTO quiz_attempts (id, tester_id, score, answers, passed, created_at) VALUES ($1, $2, $3, $4::jsonb, $5, $6)", [id("qa"), tester_id, score, JSON.stringify(answers), passed, now]);
+  await db().query("UPDATE testers SET quiz_attempts = quiz_attempts + 1 WHERE id=$1", [tester_id]);
+  if (passed) {
+    await db().query("UPDATE testers SET quiz_passed=TRUE, quiz_score=$1 WHERE id=$2", [score, tester_id]);
+  }
+}
+
+export async function issueCertification(tester_id: string): Promise<string> {
+  await init();
+  const now = Date.now();
+  const certNumber = "CERT-" + crypto.randomBytes(4).toString("hex").toUpperCase();
+  const certId = id("cert");
+  await db().query("INSERT INTO certifications (id, tester_id, cert_number, issued_at, status) VALUES ($1, $2, $3, $4, 'active')", [certId, tester_id, certNumber, now]);
+  await db().query("UPDATE testers SET certification_id=$1, certification_issued_at=$2 WHERE id=$3", [certId, now, tester_id]);
+  return certId;
+}
+
+export async function recordMissionCompletion(tester_id: string, mission_id: string): Promise<void> {
+  await init();
+  const now = Date.now();
+  await db().query(
+    "INSERT INTO mission_progress (id, tester_id, mission_id, status, completed_at, created_at, updated_at) VALUES ($1, $2, $3, 'completed', $4, $5, $5) ON CONFLICT (tester_id, mission_id) DO UPDATE SET status='completed', completed_at=$4, updated_at=$4",
+    [id("mp"), tester_id, mission_id, now, now]
+  );
+}
+
+export async function getCurrentMissionNumber(tester_id: string): Promise<number> {
+  await init();
+  const r = await db().query("SELECT current_mission FROM testers WHERE id=$1", [tester_id]);
+  return r.rows[0]?.current_mission || 1;
+}
+
+export async function getFeatureFlagStatus(flagName: string): Promise<boolean> {
+  await init();
+  const r = await db().query("SELECT global_enabled FROM feature_flags WHERE flag_name=$1", [flagName]);
+  return r.rows[0]?.global_enabled ?? true;
+}
+
+export async function getUserFeatureFlagOverride(tester_id: string, flagName: string): Promise<boolean | null> {
+  await init();
+  const r = await db().query("SELECT ffu.enabled FROM feature_flag_users ffu JOIN feature_flags f ON f.id=ffu.flag_id WHERE ffu.tester_id=$1 AND f.flag_name=$2", [tester_id, flagName]);
+  return r.rows[0] ? r.rows[0].enabled : null;
+}
+
+export async function getCohortFeatureFlagOverride(cohortName: string, flagName: string): Promise<boolean | null> {
+  await init();
+  const r = await db().query("SELECT ffc.enabled FROM feature_flag_cohorts ffc JOIN feature_flags f ON f.id=ffc.flag_id WHERE ffc.cohort_name=$1 AND f.flag_name=$2", [cohortName, flagName]);
+  return r.rows[0] ? r.rows[0].enabled : null;
+}
+
+export async function setUserFeatureFlag(tester_id: string, flagName: string, enabled: boolean): Promise<void> {
+  await init();
+  const f = await db().query("SELECT id FROM feature_flags WHERE flag_name=$1", [flagName]);
+  if (!f.rows[0]) return;
+  const flag_id = f.rows[0].id;
+  await db().query(
+    "INSERT INTO feature_flag_users (id, flag_id, tester_id, enabled) VALUES ($1, $2, $3, $4) ON CONFLICT (flag_id, tester_id) DO UPDATE SET enabled=$4",
+    [id("ffu"), flag_id, tester_id, enabled]
+  );
+}
+
+export async function setCohortFeatureFlag(cohortName: string, flagName: string, enabled: boolean): Promise<void> {
+  await init();
+  const f = await db().query("SELECT id FROM feature_flags WHERE flag_name=$1", [flagName]);
+  if (!f.rows[0]) return;
+  const flag_id = f.rows[0].id;
+  await db().query(
+    "INSERT INTO feature_flag_cohorts (id, flag_id, cohort_name, enabled) VALUES ($1, $2, $3, $4) ON CONFLICT (flag_id, cohort_name) DO UPDATE SET enabled=$4",
+    [id("ffc"), flag_id, cohortName, enabled]
+  );
+}
+
+export async function setGlobalFeatureFlag(flagName: string, enabled: boolean): Promise<void> {
+  await init();
+  const now = Date.now();
+  await db().query(
+    "INSERT INTO feature_flags (id, flag_name, global_enabled, created_at, updated_at) VALUES ($1, $2, $3, $4, $4) ON CONFLICT (flag_name) DO UPDATE SET global_enabled=$3, updated_at=$4",
+    [id("ff"), flagName, enabled, now]
+  );
+}
+
+export async function initializeDefaultFlags(): Promise<void> {
+  const flags = ['training', 'quiz', 'download', 'mining', 'consensus_tools', 'advanced_logs', 'stress_testing'];
+  for (const flag of flags) {
+    await setGlobalFeatureFlag(flag, true);
+  }
 }

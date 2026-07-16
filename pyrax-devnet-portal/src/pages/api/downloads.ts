@@ -7,7 +7,7 @@
 // Gated to signed-in testers (the whole portal is invite-only) and honors the admin download gate
 // (`downloadsOpen`) exactly like the team-side toggle — closed ⇒ no links emitted.
 import type { APIRoute } from "astro";
-import { requireTester } from "../../server/guard";
+import { requireCertification } from "../../server/onboarding-guard";
 import { getDevnetSettings } from "../../server/db";
 import { downloadsPayload } from "../../server/releases-feed";
 import { json } from "../../server/http";
@@ -15,8 +15,8 @@ import { json } from "../../server/http";
 export const prerender = false;
 
 export const GET: APIRoute = async ({ cookies }) => {
-  const me = await requireTester(cookies);
-  if (!me) return json({ ok: false, error: "Not signed in." }, 401);
+  const me = await requireCertification(cookies);
+  if (!me) return json({ ok: false, error: "Unauthorized or not certified." }, 403);
 
   const settings = await getDevnetSettings();
   if (!settings.downloadsOpen) {

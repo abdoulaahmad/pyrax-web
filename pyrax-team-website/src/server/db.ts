@@ -40,7 +40,7 @@ export interface UserRow {
 function getPool(): pg.Pool {
   if (!pool) {
     if (!connectionString) throw new Error("DATABASE_URL is not configured for the team portal.");
-    pool = new pg.Pool({ connectionString, ssl: { rejectUnauthorized: false }, max: 6, idleTimeoutMillis: 30_000 });
+    pool = new pg.Pool({ connectionString, ssl: connectionString.includes('localhost') ? false : { rejectUnauthorized: false }, max: 6, idleTimeoutMillis: 30_000 });
   }
   return pool;
 }

@@ -3,10 +3,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo, Icon, Badge, BrandMark } from "./ui";
 import { can, type Permission, PRESETS } from "../lib/permissions";
-import { Dashboard, Faucet, Downloads, Team, NodeControl, ErrorReports, Profile, Signature, SignatureStudio, DevnetUsers, DevnetStatus, DevnetIssues, DevnetTestReviews, DevnetRewards, DevnetChat, DevnetLegal, NetworkManagement, Statistics, SupportTickets } from "./modules";
+import { Dashboard, Faucet, Downloads, Team, NodeControl, ErrorReports, Profile, Signature, SignatureStudio, DevnetUsers, DevnetStatus, DevnetIssues, DevnetTestReviews, DevnetRewards, DevnetChat, DevnetLegal, DevnetTraining, NetworkManagement, Statistics, SupportTickets } from "./modules";
 import { SentinelConsole, SentinelIncidents } from "./sentinel";
 
-type ModuleKey = "dashboard" | "faucet" | "downloads" | "team" | "nodes" | "errors" | "profile" | "signature" | "signature_studio" | "devnet_users" | "devnet_status" | "devnet_issues" | "devnet_tests" | "devnet_rewards" | "devnet_chat" | "devnet_legal" | "network_mgmt" | "statistics" | "support" | "sentinel_console" | "sentinel_incidents";
+type ModuleKey = "dashboard" | "faucet" | "downloads" | "team" | "nodes" | "errors" | "profile" | "signature" | "signature_studio" | "devnet_users" | "devnet_status" | "devnet_issues" | "devnet_tests" | "devnet_rewards" | "devnet_chat" | "devnet_legal" | "devnet_training" | "network_mgmt" | "statistics" | "support" | "sentinel_console" | "sentinel_incidents";
 interface Me { id: string; email: string; displayName: string; position: string; phone: string | null; bookingUrl: string | null; socials: Record<string, string>; permissions: Permission[]; isSuperuser: boolean; status: string; }
 
 const NAV: { key: ModuleKey; label: string; perm: Permission | null; icon: keyof typeof Icon; group: string }[] = [
@@ -24,6 +24,7 @@ const NAV: { key: ModuleKey; label: string; perm: Permission | null; icon: keyof
   { key: "devnet_status", label: "Devnet Status", perm: "devnet.manage", icon: "activity", group: "Devnet" },
   { key: "devnet_chat", label: "Devnet Chat", perm: "devnet.chat", icon: "chat", group: "Devnet" },
   { key: "devnet_legal", label: "Legal Records", perm: "devnet.manage", icon: "shield", group: "Devnet" },
+  { key: "devnet_training", label: "Training & Quiz", perm: "devnet.manage", icon: "activity", group: "Devnet" },
   { key: "network_mgmt", label: "Network & Apps", perm: "network.manage", icon: "activity", group: "Network & App Management" },
   { key: "statistics", label: "Statistics", perm: "network.manage", icon: "activity", group: "Network & App Management" },
   { key: "support", label: "Support Tickets", perm: "support.manage", icon: "chat", group: "Network & App Management" },
@@ -148,6 +149,7 @@ export default function Portal() {
               {cur === "signature_studio" && <SignatureStudio subject={subject} />}
               {cur === "devnet_users" && <DevnetUsers subject={subject} />}
               {cur === "devnet_issues" && <DevnetIssues subject={subject} />}
+              {cur === "devnet_training" && <DevnetTraining subject={subject} />}
               {cur === "devnet_tests" && <DevnetTestReviews subject={subject} />}
               {cur === "devnet_rewards" && <DevnetRewards subject={subject} />}
               {cur === "devnet_status" && <DevnetStatus subject={subject} />}

@@ -35,6 +35,7 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
     downloadsOpen: typeof b.downloadsOpen === "boolean" ? b.downloadsOpen : cur.downloadsOpen,
     downloadsClosedMessage: str(b.downloadsClosedMessage, 400, cur.downloadsClosedMessage),
     downloads,
+    legalRequired: typeof b.legalRequired === "boolean" ? b.legalRequired : (cur.legalRequired ?? true),
   };
   await setDevnetSettings(next);
   await audit({ actorId: me.id, actorEmail: me.email, action: "devnet.settings", detail: { version: next.version, downloadsOpen: next.downloadsOpen } });

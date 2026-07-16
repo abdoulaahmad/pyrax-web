@@ -1106,6 +1106,11 @@ export function DevnetStatus({ subject }: { subject: AccessSubject }) {
         </div>
         <div className="mt-2"><Badge tone={s.downloadsOpen ? "positive" : "warning"}>{s.downloadsOpen ? "Open" : "Closed"}</Badge></div>
         {!s.downloadsOpen && <div className="mt-3"><label className="label">Closed message</label><textarea className="input" rows={2} value={s.downloadsClosedMessage} onChange={(e) => set("downloadsClosedMessage", e.target.value)} /></div>}
+        <div className="mt-6 flex items-center justify-between gap-3 pt-6 border-t border-line">
+          <div><div className="text-sm font-semibold">Legal Gate</div><div className="text-xs text-faint">When on, new testers must sign the NDA and Alpha T&C before accessing the portal.</div></div>
+          <button onClick={() => set("legalRequired", !s.legalRequired)} className={`relative h-7 w-12 shrink-0 rounded-full transition ${s.legalRequired ? "bg-[color:var(--color-positive)]" : "bg-line"}`}><span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-all ${s.legalRequired ? "left-6" : "left-1"}`} /></button>
+        </div>
+        <div className="mt-2"><Badge tone={s.legalRequired ? "brand" : "muted"}>{s.legalRequired ? "Required" : "Optional"}</Badge></div>
       </Card>
       <Card className="p-5">
         <div className="text-sm font-semibold">Network under test</div>
@@ -1824,6 +1829,153 @@ export function NetworkManagement({ subject }: { subject: AccessSubject }) {
           </div>
         </Card>
       )}
+    </>
+  );
+}
+
+// ============================================================== Devnet Training & Quiz
+
+export function DevnetTraining({ subject }: { subject: AccessSubject }) {
+  if (!can(subject, "devnet.manage")) return <Locked what="training management" />;
+  const [lessons, setLessons] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function load() {
+    setLoading(true);
+    const [lRes, qRes] = await Promise.all([
+      fetch("/api/devnet/training").then((r) => r.json()),
+      fetch("/api/devnet/quiz").then((r) => r.json())
+    ]);
+    if (lRes.ok) setLessons(lRes.lessons || []);
+    if (qRes.ok) setQuestions(qRes.questions || []);
+    setLoading(false);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function saveLesson(lesson: any) {
+    let parsedContent = lesson.content;
+    if (typeof lesson.content === "string") {
+      try { parsedContent = JSON.parse(lesson.content); } catch (e) { alert("Invalid JSON in content"); return; }
+    }
+    await fetch("/api/devnet/training", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "save", lesson: { ...lesson, content: parsedContent } }) });
+    load();
+  }
+  async function deleteLesson(id: string) {
+    if (!confirm("Are you sure?")) return;
+    await fetch("/api/devnet/training", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "delete", id }) });
+    load();
+  }
+
+  async function saveQuestion(question: any) {
+    await fetch("/api/devnet/quiz", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "save", question }) });
+    load();
+  }
+  async function deleteQuestion(id: string) {
+    if (!confirm("Are you sure?")) return;
+    await fetch("/api/devnet/quiz", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "delete", id }) });
+    load();
+  }
+
+  if (loading) return <div className="p-10 text-center text-muted">Loading...</div>;
+
+  return (
+    <>
+      <PageHeader title="Training & Quiz" subtitle="Manage devnet training lessons and quiz questions." />
+      <div className="grid gap-6">
+        <Card className="p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-bold">Training Lessons</h3>
+            <Button variant="primary" onClick={() => saveLesson({ title: "New Lesson", content: { intro: "", sections: [] }, lesson_order: lessons.length + 1 })}>Add Lesson</Button>
+          </div>
+          <div className="grid gap-3">
+            {lessons.map(l => (
+              <div key={l.id} className="border border-line rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <input className="input py-1 text-sm font-semibold w-1/2" value={l.title} onChange={e => {
+                    const nl = [...lessons];
+                    const idx = nl.findIndex(x => x.id === l.id);
+                    nl[idx].title = e.target.value;
+                    setLessons(nl);
+                  }} onBlur={() => saveLesson(l)} />
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-muted flex items-center gap-1">Order <input className="input py-1 px-2 w-16 text-center" type="number" value={l.lesson_order} onChange={e => {
+                      const nl = [...lessons];
+                      const idx = nl.findIndex(x => x.id === l.id);
+                      nl[idx].lesson_order = parseInt(e.target.value) || 0;
+                      setLessons(nl);
+                    }} onBlur={() => saveLesson(l)} /></label>
+                    <button className="text-[color:var(--color-negative)] hover:underline text-xs" onClick={() => deleteLesson(l.id)}>Delete</button>
+                  </div>
+                </div>
+                <textarea className="input text-sm font-mono h-32" value={typeof l.content === 'string' ? l.content : JSON.stringify(l.content, null, 2)} onChange={e => {
+                  const nl = [...lessons];
+                  const idx = nl.findIndex(x => x.id === l.id);
+                  nl[idx].content = e.target.value;
+                  setLessons(nl);
+                }} onBlur={() => saveLesson(l)} />
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-bold">Quiz Questions</h3>
+            <Button variant="primary" onClick={() => saveQuestion({ question: "New Question", options: ["Option A", "Option B"], correct_answer: 0, explanation: "" })}>Add Question</Button>
+          </div>
+          <div className="grid gap-4">
+            {questions.map(q => (
+              <div key={q.id} className="border border-line rounded-lg p-4">
+                <div className="flex justify-between mb-2">
+                  <input className="input text-sm font-semibold w-2/3" value={q.question} onChange={e => {
+                    const nq = [...questions];
+                    const idx = nq.findIndex(x => x.id === q.id);
+                    nq[idx].question = e.target.value;
+                    setQuestions(nq);
+                  }} onBlur={() => saveQuestion(q)} />
+                  <button className="text-[color:var(--color-negative)] hover:underline text-xs" onClick={() => deleteQuestion(q.id)}>Delete</button>
+                </div>
+                
+                <div className="pl-4 grid gap-2 my-3">
+                  {(q.options || []).map((opt: string, i: number) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <input type="radio" name={`correct-${q.id}`} checked={q.correct_answer === i} onChange={() => {
+                        const nq = [...questions];
+                        const idx = nq.findIndex(x => x.id === q.id);
+                        nq[idx].correct_answer = i;
+                        setQuestions(nq);
+                        saveQuestion(nq[idx]);
+                      }} />
+                      <input className={`input py-1 text-sm ${q.correct_answer === i ? "border-[color:var(--color-positive)]" : ""}`} value={opt} onChange={e => {
+                        const nq = [...questions];
+                        const idx = nq.findIndex(x => x.id === q.id);
+                        nq[idx].options[i] = e.target.value;
+                        setQuestions(nq);
+                      }} onBlur={() => saveQuestion(q)} />
+                    </div>
+                  ))}
+                  <button className="text-xs text-brand text-left hover:underline" onClick={() => {
+                    const nq = [...questions];
+                    const idx = nq.findIndex(x => x.id === q.id);
+                    nq[idx].options.push("New Option");
+                    setQuestions(nq);
+                    saveQuestion(nq[idx]);
+                  }}>+ Add Option</button>
+                </div>
+
+                <textarea className="input text-xs h-16" placeholder="Explanation (optional)" value={q.explanation || ""} onChange={e => {
+                  const nq = [...questions];
+                  const idx = nq.findIndex(x => x.id === q.id);
+                  nq[idx].explanation = e.target.value;
+                  setQuestions(nq);
+                }} onBlur={() => saveQuestion(q)} />
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
     </>
   );
 }

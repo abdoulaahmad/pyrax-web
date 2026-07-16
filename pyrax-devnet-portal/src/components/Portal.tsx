@@ -3,15 +3,24 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo, Icon, Badge, BrandMark } from "./ui";
 import { can, type Permission } from "../lib/permissions";
-import { Dashboard, Downloads, IssueCouncil, Leaderboard, Chat, Releases, Settings, Triage, Testers, NdaPage, TosPage } from "./modules";
+import { Downloads, IssueCouncil, Leaderboard, Chat, Releases, Settings, Triage, Testers, NdaPage, TosPage } from "./modules";
+import Dashboard from "./Dashboard";
+import Training from "./Training";
+import Quiz from "./Quiz";
+import Missions from "./Missions";
+import Certification from "./Certification";
 import { Tests } from "./Tests";
 import { LegalGate, type LegalStatus } from "./Legal";
 
-type ModuleKey = "dashboard" | "downloads" | "releases" | "tests" | "issues" | "leaderboard" | "chat" | "settings" | "triage" | "testers" | "nda" | "tos";
+type ModuleKey = "dashboard" | "downloads" | "releases" | "tests" | "issues" | "leaderboard" | "chat" | "settings" | "triage" | "testers" | "nda" | "tos" | "training" | "quiz" | "missions" | "certification";
 export interface Me { id: string; email: string; displayName: string; handle: string; payoutWallet: string | null; rewardEligible: boolean; isStaff: boolean; permissions: Permission[]; isSuperuser: boolean; status: string; sessionMaxDays: number; foundingRank: number | null; }
 
 const NAV: { key: ModuleKey; label: string; perm: Permission | null; icon: keyof typeof Icon; group: string }[] = [
-  { key: "dashboard", label: "Dashboard", perm: "dashboard.view", icon: "grid", group: "Workspace" },
+  { key: "dashboard", label: "Dashboard", perm: null, icon: "grid", group: "Workspace" },
+  { key: "missions", label: "Missions", perm: null, icon: "shield", group: "Onboarding" },
+  { key: "training", label: "Training", perm: null, icon: "activity", group: "Onboarding" },
+  { key: "quiz", label: "Quiz", perm: null, icon: "check", group: "Onboarding" },
+  { key: "certification", label: "Certificate", perm: null, icon: "trophy", group: "Onboarding" },
   { key: "downloads", label: "Downloads", perm: null, icon: "download", group: "Workspace" },
   { key: "releases", label: "Releases", perm: null, icon: "activity", group: "Workspace" },
   { key: "tests", label: "Tests", perm: "campaigns.view", icon: "check", group: "Testing" },
@@ -29,9 +38,9 @@ function Bell() {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<any[]>([]);
   const [unread, setUnread] = useState(0);
-  async function load() { try { const d = await (await fetch("/api/notifications")).json(); if (d.ok) { setItems(d.notifications); setUnread(d.unread); } } catch {} }
+  async function load() { try { const d = await (await fetch("/api/notifications")).json(); if (d.ok) { setItems(d.notifications); setUnread(d.unread); } } catch { } }
   useEffect(() => { load(); const i = window.setInterval(load, 30000); return () => window.clearInterval(i); }, []);
-  async function toggle() { const n = !open; setOpen(n); if (n && unread) { await fetch("/api/notifications", { method: "POST" }).catch(() => {}); setUnread(0); } }
+  async function toggle() { const n = !open; setOpen(n); if (n && unread) { await fetch("/api/notifications", { method: "POST" }).catch(() => { }); setUnread(0); } }
   return (
     <div className="relative">
       <button onClick={toggle} className="relative grid h-9 w-9 place-items-center rounded-lg border border-line text-muted hover:text-ink" aria-label="Notifications">
@@ -83,8 +92,19 @@ export default function Portal() {
   if (loading || !me) return <div className="grid min-h-screen place-items-center"><div className="flex items-center gap-3 text-sm text-muted"><span className="h-4 w-4 animate-spin-slow rounded-full border-2 border-line border-t-[color:var(--color-brand)]" /> Loading…</div></div>;
 
   const meUser = me;
-  const visible = NAV.filter((n) => n.perm === null || can(subject, n.perm));
-  const cur = visible.find((n) => n.key === active) ? active : (visible[0]?.key ?? "dashboard");
+  const isCertified = !!(meUser as any).certificationId ||
+    ['CERTIFIED', 'NODE_DOWNLOAD', 'NODE_PAIRED', 'TESTING', 'COMPLETED'].includes((meUser as any).onboardingStatus || '') ||
+    ((meUser as any).currentMission || 1) > 3;
+
+  const visible = NAV.filter((n) => {
+    // If not certified, restrict access to only Onboarding, Legal, and Settings modules
+    if (!isCertified && !['missions', 'training', 'quiz', 'certification', 'settings', 'nda', 'tos'].includes(n.key)) {
+      return false;
+    }
+    return n.perm === null || can(subject, n.perm);
+  });
+
+  const cur = visible.find((n) => n.key === active) ? active : (isCertified ? "dashboard" : "missions");
   const groups = Array.from(new Set(visible.map((n) => n.group)));
   const initials = (meUser.displayName || meUser.email).split(/[\s@.]/).filter(Boolean).map((s) => s[0]).join("").slice(0, 2).toUpperCase();
 
@@ -105,7 +125,7 @@ export default function Portal() {
       </div>
     ))}</>;
   }
-  async function signOut() { await fetch("/api/auth/logout", { method: "POST" }).catch(() => {}); window.location.href = "/"; }
+  async function signOut() { await fetch("/api/auth/logout", { method: "POST" }).catch(() => { }); window.location.href = "/"; }
   const UserFooter = () => (
     <div className="rounded-xl border border-line bg-[rgba(5,6,9,0.5)] p-3">
       <div className="flex items-center gap-2">
@@ -119,6 +139,10 @@ export default function Portal() {
   function render() {
     switch (cur) {
       case "dashboard": return <Dashboard onNavigate={(k) => setActive(k as ModuleKey)} />;
+      case "training": return <Training />;
+      case "quiz": return <Quiz />;
+      case "missions": return <Missions onNavigate={(k) => setActive(k as ModuleKey)} />;
+      case "certification": return <Certification />;
       case "downloads": return <Downloads />;
       case "releases": return <Releases subject={subject} />;
       case "tests": return <Tests me={meUser} />;

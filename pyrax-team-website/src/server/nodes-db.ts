@@ -24,7 +24,7 @@ const URL_RAW = process.env.DATABASE_URL_NODES
 const connectionString = URL_RAW.replace(/[?&]sslmode=[^&]*/, "");
 let pool: pg.Pool | null = null;
 let ready: Promise<void> | null = null;
-function db(): pg.Pool { if (!pool) pool = new pg.Pool({ connectionString, ssl: { rejectUnauthorized: false }, max: 3, idleTimeoutMillis: 30_000 }); return pool; }
+function db(): pg.Pool { if (!pool) pool = new pg.Pool({ connectionString, ssl: connectionString.includes('localhost') ? false : { rejectUnauthorized: false }, max: 3, idleTimeoutMillis: 30_000 }); return pool; }
 function init(): Promise<void> {
   if (!ready) ready = (async () => {
     await db().query(`CREATE TABLE IF NOT EXISTS site_settings ( id INT PRIMARY KEY DEFAULT 1, data JSONB NOT NULL, updated_at BIGINT NOT NULL, updated_by TEXT, CONSTRAINT site_settings_one CHECK (id = 1) );`);
