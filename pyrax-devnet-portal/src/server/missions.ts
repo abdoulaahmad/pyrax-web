@@ -7,7 +7,7 @@ import crypto from 'node:crypto';
 import { db, init } from './db';
 import { MISSIONS_SEED } from '../lib/onboarding';
 import type { Mission, MissionProgress } from '../types/onboarding';
-import { testerById } from './db';
+import { testerById, recordErrorReport } from './db';
 
 /**
  * Get all missions with progress for a tester.
@@ -46,8 +46,9 @@ export async function getMissions(tester_id: string): Promise<(Mission & { progr
         updated_at: Number(row.updated_at),
       } : null,
     }));
-  } catch (err) {
+  } catch (err: any) {
     console.error('[missions] getMissions failed:', err);
+    void recordErrorReport({ source: 'missions.ts', title: 'getMissions failed', detail: err?.stack || String(err), level: 'error' });
     throw err;
   }
 }
@@ -92,8 +93,9 @@ export async function getMissionStatus(tester_id: string, mission_id: string): P
         updated_at: Number(row.updated_at),
       } : null,
     };
-  } catch (err) {
+  } catch (err: any) {
     console.error('[missions] getMissionStatus failed:', err);
+    void recordErrorReport({ source: 'missions.ts', title: 'getMissionStatus failed', detail: err?.stack || String(err), level: 'error' });
     throw err;
   }
 }
@@ -133,8 +135,9 @@ export async function isMissionUnlocked(tester_id: string, mission_number: numbe
 
     const completedCount = parseInt(completedResult.rows[0].completed, 10);
     return completedCount === prequisiteNumbers.length;
-  } catch (err) {
+  } catch (err: any) {
     console.error('[missions] isMissionUnlocked failed:', err);
+    void recordErrorReport({ source: 'missions.ts', title: 'isMissionUnlocked failed', detail: err?.stack || String(err), level: 'error' });
     return false;
   }
 }
@@ -215,8 +218,9 @@ export async function completeMission(
     }
 
     return { ok: true, next_mission_number };
-  } catch (err) {
+  } catch (err: any) {
     console.error('[missions] completeMission failed:', err);
+    void recordErrorReport({ source: 'missions.ts', title: 'completeMission failed', detail: err?.stack || String(err), level: 'error' });
     throw err;
   }
 }
@@ -266,8 +270,9 @@ export async function getCurrentMissionTarget(tester_id: string): Promise<(Missi
         updated_at: Number(row.updated_at),
       } : null,
     };
-  } catch (err) {
+  } catch (err: any) {
     console.error('[missions] getCurrentMissionTarget failed:', err);
+    void recordErrorReport({ source: 'missions.ts', title: 'getCurrentMissionTarget failed', detail: err?.stack || String(err), level: 'error' });
     return null;
   }
 }
@@ -286,8 +291,9 @@ export async function getCompletedMissionCount(tester_id: string): Promise<numbe
     );
 
     return parseInt(result.rows[0].count, 10);
-  } catch (err) {
+  } catch (err: any) {
     console.error('[missions] getCompletedMissionCount failed:', err);
+    void recordErrorReport({ source: 'missions.ts', title: 'getCompletedMissionCount failed', detail: err?.stack || String(err), level: 'error' });
     return 0;
   }
 }
@@ -328,8 +334,9 @@ export async function seedMissions(): Promise<void> {
     }
 
     console.log('[missions] Seeded missions');
-  } catch (err) {
+  } catch (err: any) {
     console.error('[missions] seedMissions failed:', err);
+    void recordErrorReport({ source: 'missions.ts', title: 'seedMissions failed', detail: err?.stack || String(err), level: 'error' });
     throw err;
   }
 }

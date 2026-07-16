@@ -3,7 +3,8 @@
 // Feature flag system: dynamic feature gating with user/cohort/global levels.
 // Handles feature availability control for gradual rollouts and A/B testing.
 
-import { db, init } from './db';
+import crypto from 'node:crypto';
+import { db, init, recordErrorReport } from './db';
 import { DEFAULT_FEATURE_FLAGS, type FeatureFlagName } from '../lib/onboarding';
 import type { FeatureFlag } from '../types/onboarding';
 
@@ -43,8 +44,9 @@ export async function isFeatureEnabled(tester_id: string, flagName: FeatureFlagN
 
     // Global setting fallback
     return row.global_enabled;
-  } catch (err) {
+  } catch (err: any) {
     console.error('[feature-flags] isFeatureEnabled failed:', err);
+    void recordErrorReport({ source: 'feature-flags.ts', title: 'isFeatureEnabled failed', detail: err?.stack || String(err), level: 'error' });
     return false;
   }
 }
@@ -67,8 +69,9 @@ export async function getEnabledFeatures(tester_id: string): Promise<string[]> {
     `, [tester_id]);
 
     return result.rows.map((row) => row.flag_name);
-  } catch (err) {
+  } catch (err: any) {
     console.error('[feature-flags] getEnabledFeatures failed:', err);
+    void recordErrorReport({ source: 'feature-flags.ts', title: 'getEnabledFeatures failed', detail: err?.stack || String(err), level: 'error' });
     return [];
   }
 }
@@ -113,8 +116,9 @@ export async function setFeatureForUser(
     `, [userFlagId, flagId, tester_id, enabled]);
 
     return { ok: true };
-  } catch (err) {
+  } catch (err: any) {
     console.error('[feature-flags] setFeatureForUser failed:', err);
+    void recordErrorReport({ source: 'feature-flags.ts', title: 'setFeatureForUser failed', detail: err?.stack || String(err), level: 'error' });
     throw err;
   }
 }
@@ -159,8 +163,9 @@ export async function setFeatureForCohort(
     `, [cohortFlagId, flagId, cohortName, enabled]);
 
     return { ok: true };
-  } catch (err) {
+  } catch (err: any) {
     console.error('[feature-flags] setFeatureForCohort failed:', err);
+    void recordErrorReport({ source: 'feature-flags.ts', title: 'setFeatureForCohort failed', detail: err?.stack || String(err), level: 'error' });
     throw err;
   }
 }
@@ -187,8 +192,9 @@ export async function setFeatureGlobal(
     `, [flagId, flagName, enabled, now, now]);
 
     return { ok: true };
-  } catch (err) {
+  } catch (err: any) {
     console.error('[feature-flags] setFeatureGlobal failed:', err);
+    void recordErrorReport({ source: 'feature-flags.ts', title: 'setFeatureGlobal failed', detail: err?.stack || String(err), level: 'error' });
     throw err;
   }
 }
@@ -212,8 +218,9 @@ export async function getAllFeatureFlags(): Promise<FeatureFlag[]> {
       created_at: row.created_at,
       updated_at: row.updated_at,
     }));
-  } catch (err) {
+  } catch (err: any) {
     console.error('[feature-flags] getAllFeatureFlags failed:', err);
+    void recordErrorReport({ source: 'feature-flags.ts', title: 'getAllFeatureFlags failed', detail: err?.stack || String(err), level: 'error' });
     return [];
   }
 }
@@ -252,8 +259,9 @@ export async function getFeatureFlagStatusForUser(
     }
 
     return { enabled: row.global_enabled, source: 'global' };
-  } catch (err) {
+  } catch (err: any) {
     console.error('[feature-flags] getFeatureFlagStatusForUser failed:', err);
+    void recordErrorReport({ source: 'feature-flags.ts', title: 'getFeatureFlagStatusForUser failed', detail: err?.stack || String(err), level: 'error' });
     return null;
   }
 }
@@ -284,8 +292,9 @@ export async function seedDefaultFeatureFlags(): Promise<void> {
     }
 
     console.log('[feature-flags] Seeded default feature flags');
-  } catch (err) {
+  } catch (err: any) {
     console.error('[feature-flags] seedDefaultFeatureFlags failed:', err);
+    void recordErrorReport({ source: 'feature-flags.ts', title: 'seedDefaultFeatureFlags failed', detail: err?.stack || String(err), level: 'error' });
     throw err;
   }
 }
@@ -313,8 +322,9 @@ export async function clearUserFeatureOverride(tester_id: string, flagName: Feat
     );
 
     return { ok: true };
-  } catch (err) {
+  } catch (err: any) {
     console.error('[feature-flags] clearUserFeatureOverride failed:', err);
+    void recordErrorReport({ source: 'feature-flags.ts', title: 'clearUserFeatureOverride failed', detail: err?.stack || String(err), level: 'error' });
     throw err;
   }
 }

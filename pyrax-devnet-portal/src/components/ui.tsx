@@ -89,9 +89,9 @@ export function StatTile({ label, value, sub, accent = "brand", icon, delay = 0 
   );
 }
 
-export function Badge({ children, tone = "muted" }: { children: React.ReactNode; tone?: "brand" | "water" | "positive" | "muted" | "warning" | "danger" }) {
+export function Badge({ children, tone = "muted", className = "" }: { children: React.ReactNode; tone?: "brand" | "water" | "positive" | "muted" | "warning" | "danger", className?: string }) {
   const cls = tone === "brand" ? "chip-brand" : tone === "water" ? "chip-water" : tone === "positive" ? "chip-positive" : "chip-muted";
-  return <span className={`chip ${cls}`}>{children}</span>;
+  return <span className={`chip ${cls} ${className}`.trim()}>{children}</span>;
 }
 
 export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: React.ReactNode }) {

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import type { APIRoute } from "astro";
-import { requireTester } from "../../../../../../server/guard";
-import { json } from "../../../../../../server/http";
-import { getEnabledFeatures } from "../../../../../../server/feature-flags";
+import { requireTester } from "../../../../../server/guard";
+import { json } from "../../../../../server/http";
+import { getEnabledFeatures } from "../../../../../server/feature-flags";
 
 export const prerender = false;
 

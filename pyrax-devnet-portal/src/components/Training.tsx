@@ -93,10 +93,26 @@ function LessonCard({ lesson, onClick }: { lesson: TrainingLesson; onClick: () =
 }
 
 function LessonView({ lesson, onBack, onComplete }: { lesson: TrainingLesson; onBack: () => void; onComplete: () => void }) {
-  // If content has a body property, render that, otherwise stringify the content
-  const contentBody = typeof lesson.content?.body === 'string' 
-    ? lesson.content.body 
-    : JSON.stringify(lesson.content, null, 2);
+  const content = lesson.content;
+  let renderContent;
+
+  if (typeof content === 'string') {
+    renderContent = <div className="whitespace-pre-wrap leading-relaxed">{content}</div>;
+  } else if (content?.intro || content?.sections) {
+    renderContent = (
+      <div>
+        {content.intro && <p className="mb-6 text-lg">{content.intro}</p>}
+        {content.sections?.map((s: any, i: number) => (
+          <div key={i} className="mb-6">
+            <h3 className="text-xl font-bold mb-2 text-[color:var(--color-ink)]">{s.title}</h3>
+            <p className="whitespace-pre-wrap leading-relaxed">{s.content}</p>
+          </div>
+        ))}
+      </div>
+    );
+  } else {
+    renderContent = <pre className="whitespace-pre-wrap leading-relaxed text-xs p-4 bg-[rgba(0,0,0,0.2)] rounded-lg">{JSON.stringify(content, null, 2)}</pre>;
+  }
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -110,7 +126,7 @@ function LessonView({ lesson, onBack, onComplete }: { lesson: TrainingLesson; on
           </div>
           
           <div className="prose prose-invert max-w-none text-muted mb-8">
-            <div className="whitespace-pre-wrap leading-relaxed">{contentBody}</div>
+            {renderContent}
           </div>
 
           <div className="mt-10 pt-6 border-t border-line flex justify-end">

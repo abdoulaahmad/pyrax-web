@@ -202,38 +202,6 @@ export const MISSIONS_SEED: Omit<Mission, 'id' | 'created_at'>[] = [
     completion_criteria: { node_downloaded: true },
     unlock_conditions: { node_downloaded: true },
   },
-  {
-    mission_number: 5,
-    title: 'Pair Your Node',
-    description: 'Generate a pairing code in the portal and use it to pair your node with your account.',
-    prerequisites: [4],
-    completion_criteria: { node_paired: true },
-    unlock_conditions: { node_paired: true },
-  },
-  {
-    mission_number: 6,
-    title: 'Synchronize Your Node',
-    description: 'Keep your node running and synchronized with the DevNet. Maintain network connectivity for the current testing phase.',
-    prerequisites: [5],
-    completion_criteria: { node_synced: true, heartbeat_recent: true },
-    unlock_conditions: { node_synced: true },
-  },
-  {
-    mission_number: 7,
-    title: 'Participate in Testing Phase',
-    description: 'Execute the assigned testing objectives for the current testing phase.',
-    prerequisites: [6],
-    completion_criteria: { phase_objectives_met: true },
-    unlock_conditions: { testing_active: true },
-  },
-  {
-    mission_number: 8,
-    title: 'Submit Feedback',
-    description: 'Complete the onboarding process by submitting feedback about your experience.',
-    prerequisites: [7],
-    completion_criteria: { feedback_submitted: true },
-    unlock_conditions: { completed: true },
-  },
 ];
 
 // ---- Testing Phases ----
