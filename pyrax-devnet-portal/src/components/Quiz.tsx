@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import React, { useState, useEffect } from "react";
 import { Card, Button, Badge, Icon, PageHeader } from "./ui";
+import { QUIZ_MAX_RETRIES } from "../lib/onboarding";
 import type { QuizQuestion, QuizAttempt } from "../types/onboarding";
 import { motion } from "framer-motion";
 
@@ -73,6 +74,10 @@ export default function Quiz() {
   }
 
   if (state === 'intro') {
+    const attemptsRemaining = QUIZ_MAX_RETRIES > 0 ? QUIZ_MAX_RETRIES - history.length : 'Unlimited';
+    const canAttempt = QUIZ_MAX_RETRIES === 0 || history.length < QUIZ_MAX_RETRIES;
+    const hasPassed = history.some(h => h.passed);
+
     return (
       <div className="max-w-4xl mx-auto">
         <PageHeader title="Certification Quiz" subtitle="Pass the quiz to become a certified node operator." />
@@ -82,14 +87,24 @@ export default function Quiz() {
                <Icon.shield className="h-8 w-8" />
             </div>
             <h2 className="text-2xl font-bold mb-2">Ready to test your knowledge?</h2>
-            <p className="text-muted max-w-lg mb-8">
+            <p className="text-muted max-w-lg mb-6">
               The quiz consists of randomized questions based on the training modules. 
               You need a score of 80% or higher to pass and receive your certification.
             </p>
+            {QUIZ_MAX_RETRIES > 0 && !hasPassed && (
+              <div className="mb-8 font-medium bg-[rgba(255,255,255,0.05)] py-2 px-6 rounded-full border border-line">
+                 Attempts Remaining: <span className={`font-bold ${attemptsRemaining === 0 ? "text-[color:var(--color-danger)]" : "text-white"}`}>{attemptsRemaining}</span> of {QUIZ_MAX_RETRIES}
+              </div>
+            )}
             {error && <div className="mb-4 text-[color:var(--color-danger)]">{error}</div>}
-            <Button onClick={startQuiz} disabled={loading} className="bg-[color:var(--color-brand)] text-black px-8 py-3 rounded-lg font-bold hover:bg-orange-400 transition text-lg">
-              {loading ? "Starting..." : "Start Quiz"}
-            </Button>
+            
+            {hasPassed ? (
+               <Badge tone="positive" className="text-lg py-3 px-6">Certification Passed!</Badge>
+            ) : (
+               <Button onClick={startQuiz} disabled={loading || !canAttempt} className="bg-[color:var(--color-brand)] text-black px-8 py-3 rounded-lg font-bold hover:bg-orange-400 transition text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                 {loading ? "Starting..." : (canAttempt ? "Start Quiz" : "No attempts remaining")}
+               </Button>
+            )}
           </div>
         </Card>
         

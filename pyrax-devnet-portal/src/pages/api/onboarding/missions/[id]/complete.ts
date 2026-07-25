@@ -2,7 +2,7 @@
 import type { APIRoute } from "astro";
 import { requireTester } from "../../../../../server/guard";
 import { json } from "../../../../../server/http";
-import { advanceMission } from "../../../../../server/onboarding";
+import { advanceMission, transitionState } from "../../../../../server/onboarding";
 import { recordMissionCompletion, db, init } from "../../../../../server/db";
 
 export const prerender = false;
@@ -41,6 +41,16 @@ export const POST: APIRoute = async ({ params, cookies }) => {
   // Mark mission as complete in DB
   await recordMissionCompletion(me.id, missionId);
   
+  // Transition state based on the mission completed
+  if (mNum === 1) {
+    await transitionState(me.id, 'PROFILE_COMPLETE');
+    await transitionState(me.id, 'TRAINING');
+  } else if (mNum === 2) {
+    await transitionState(me.id, 'QUIZ');
+  } else if (mNum === 3) {
+    await transitionState(me.id, 'CERTIFIED');
+  }
+
   // Advance to next mission
   const advanceResult = await advanceMission(me.id);
   

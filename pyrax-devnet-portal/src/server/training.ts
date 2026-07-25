@@ -147,8 +147,12 @@ export async function completeLesson(tester_id: string, lesson_id: string): Prom
     `, [tester_id]);
 
     const completedCount = parseInt(completedResult.rows[0].completed, 10);
-    const totalLessons = TRAINING_MODULES.length;
-    const progressPercentage = Math.min(Math.round((completedCount / totalLessons) * 100), 100);
+    
+    // Use dynamic count of lessons from DB instead of hardcoded length
+    const totalResult = await pool.query('SELECT COUNT(*) as count FROM training_lessons');
+    const totalLessons = parseInt(totalResult.rows[0].count, 10);
+    
+    const progressPercentage = totalLessons > 0 ? Math.min(Math.round((completedCount / totalLessons) * 100), 100) : 100;
 
     // Update tester training progress
     await pool.query(

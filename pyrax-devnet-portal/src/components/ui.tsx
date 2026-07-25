@@ -31,6 +31,7 @@ export const Icon: Record<string, (p: { className?: string }) => React.ReactNode
   alert: (p) => (<svg viewBox="0 0 24 24" className={p.className} {...P}><path d="M12 3 2 20h20L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg>),
   logout: (p) => (<svg viewBox="0 0 24 24" className={p.className} {...P}><path d="M15 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3"/><path d="M10 12H3m0 0 3.5-3.5M3 12l3.5 3.5"/></svg>),
   check: (p) => (<svg viewBox="0 0 24 24" className={p.className} {...P}><path d="m5 12 4.5 4.5L19 7"/></svg>),
+  clock: (p) => (<svg viewBox="0 0 24 24" className={p.className} {...P}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>),
   mail: (p) => (<svg viewBox="0 0 24 24" className={p.className} {...P}><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>),
   plus: (p) => (<svg viewBox="0 0 24 24" className={p.className} {...P}><path d="M12 5v14M5 12h14"/></svg>),
   windows: (p) => (<svg viewBox="0 0 24 24" className={p.className} fill="currentColor"><path d="M3 5.5 10.5 4.4v7.1H3V5.5Zm0 13L10.5 19.6v-7H3v6Zm8.5 1.3L21 21V12.5h-9.5v7.3Zm0-15.6V11.5H21V3l-9.5 1.2Z"/></svg>),

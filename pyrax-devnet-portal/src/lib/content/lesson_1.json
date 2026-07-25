@@ -1,0 +1,82 @@
+{
+  "intro": "Welcome to Module 1: DevNet Introduction & Economics. This is the single most important module in the entire training programme. Every decision you make as a tester flows from the fundamentals covered here. By the time you reach the Knowledge Check, you should be able to explain PYRAX's architecture, recite the reward structure, and articulate what is allowed on DevNet. Read every section carefully.",
+  "sections": [
+    {
+      "title": "What is the PYRAX Network?",
+      "content": "PYRAX is a next-generation Layer 1 blockchain built on a Directed Acyclic Graph (DAG) architecture, known as BlockDAG. Unlike traditional linear blockchains, BlockDAG allows multiple blocks to be produced and confirmed in parallel, scaling network capacity with active participants and achieving over 500,000 TPS at the Layer 3 ZK rollup level.\n\nTHE TRISTREAM CONSENSUS\nPYRAX solves the blockchain trilemma through the TriStream Consensus, running three independent streams that share exactly 33.3% of block rewards:\nStream A (ASIC Mining): Uses BLAKE3 and SHA-256 for raw hash-rate security.\nStream B (CPU/GPU Mining): Uses KAWPOW and RandomX for accessibility. Idle GPU compute can join the AI Processing Pool to earn PYRX for inference tasks.\nStream C (PoS Validation): Validators stake PYRX to confirm blocks. Malicious behaviour results in slashed tokens.\n\nTHE NETWORK LAYERS\nLayer 1 (TriStream Blockchain): The base settlement layer with ~60s block times, using a self-healing Dynamic Intelligent Mesh Network.\nLayer 2 (EVM Sidechain): Supports EVM, WASM (Rust/AssemblyScript), and Cairo (ZK-STARK) contract runtimes simultaneously.\nLayer 3 (ZK Rollup): Handles high-throughput transactions and AI job processing.\n\nNODE TYPES\nFull Node: Validates the complete blockchain (100+ GB storage, 8+ GB RAM). The standard for testers.\nArchive Node: Stores all historical state.\nLight Node: Basic validation only (1 GB storage, 2 GB RAM).\nMining Node: Participates in block production."
+    },
+    {
+      "title": "What is DevNet and Why Does It Exist?",
+      "content": "DevNet is a gated, isolated testing environment for the PYRAX protocol. Activity uses test PYRX with zero real-world value.\n\nPROTOCOL HARDENING\nBefore launching on mainnet, every system component must be stress-tested. The node daemon, consensus engine, P2P mesh, reward accounting, and VM runtimes require validation under adversarial conditions. Real-world conditions require diverse hardware and networks—which is what DevNet provides.\n\nFOUNDATIONAL COMMUNITY\nDevNet testers are the first community members developing deep protocol understanding. The first 150 approved testers become Foundational Pioneers, and the first 10 to pair a node earn a Founding Tester title and a 50,000 PYRX bonus.\n\nON RESETS\nDevNet will be reset periodically without notice, wiping all on-chain data and pairing records. However, your PYRX allocation tracking survives all resets. When a reset occurs, simply restart your node and let it re-sync from block zero."
+    },
+    {
+      "title": "Your Role & Responsibilities as a Tester",
+      "content": "As an approved DevNet tester, you are an active contributor to a production protocol.\n\nNODE UPTIME: Your most fundamental contribution. Keep your best-performing node online and synchronised as much as possible. Use a dedicated machine (not your primary workstation) with a stable connection to maximise uptime.\nSTRESS TEST PARTICIPATION: Participate in announced campaigns (e.g., transaction flooding). Quality submissions with clear steps and logs are rewarded; poor ones are rejected.\nINCIDENT REPORTING: Document crashes, sync failures, or anomalies via the Issue Council. Include node version, logs, and reproduction steps.\nUPDATE COMPLIANCE: Update your node within 72 hours of a new release to earn the On-Time Update bonus and maintain network consensus.\nCONSISTENCY: Sustained, accurate participation is rewarded. A qualifying week requires 3+ accepted test submissions or 2+ issue reports with a 60%+ acceptance rate.\nCONDUCT AND INTEGRITY: Sharing credentials, running multiple accounts, or submitting fabricated reports will result in immediate removal and forfeiture of all accrued PYRX."
+    },
+    {
+      "title": "PYRX Reward Economics",
+      "content": "Nothing is paid during DevNet. All earned PYRX is an allocation for the mainnet airdrop. Only one node per account earns rewards.\n\nNODE UPTIME (Calculated Monthly):\n98%+ uptime: 24,000 PYRX\n90-97.99%: 16,000 PYRX\n75-89.99%: 10,000 PYRX\n50-74.99%: 4,000 PYRX\nBelow 50%: 0 PYRX\nConsistency Multiplier: 95%+ uptime, all updates on time, and 1+ accepted report multiplies uptime reward by 1.2x.\n\nON-TIME UPDATES: 3,000 PYRX for updating within 72 hours of a release.\n\nTEST REPORT ACCEPTANCE: 1,600 PYRX base + 800 PYRX on-time bonus during campaigns.\n\nBUG BOUNTIES:\nCritical (consensus bypass): 48,000 PYRX base\nHigh (node crash): 20,000 PYRX base\nMedium (DoS vectors): 8,000 PYRX base\nLow (minor issues): 2,400 PYRX base\nExceptional reproduction steps add a +25% bonus.\n\nCONSISTENCY BONUS: Meeting the weekly bar for 3+ consecutive weeks earns 12,000 PYRX multiplied by your acceptance rate.\n\nCONTRIBUTION TIERS: Bronze (0+), Silver (50k+), Gold (200k+), Diamond (750k+). Check your earnings ledger in the portal for details."
+    },
+    {
+      "title": "What DevNet is NOT: Critical Boundaries",
+      "content": "DEVNET IS NOT THE MAINNET: No activity affects mainnet state. Do not use DevNet as a staging environment for production apps.\nDEVNET PYRX HAS NO MONETARY VALUE: It is a server-side allocation for a future airdrop. The $0.0025 reference price is purely illustrative.\nDEVNET IS NOT PASSIVE INCOME: Active engagement is required. Passive nodes may be removed for more active testers.\nDEVNET IS NOT PUBLIC: Access is by approval only. Do not share accounts or run multiples.\nDEVNET IS NOT PERMANENT: Resets wipe everything on-chain, though server-side PYRX allocations survive.\nDEVNET PYRX IS NOT TRANSFERABLE: Allocations are bound to your identity and cannot be moved or sold.\n\nBy pressing Complete Lesson, you accept that your participation is conditional on adhering to these boundaries."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Which of the following best describes the PYRAX TriStream Consensus mechanism?",
+      "options": [
+        "A single Proof-of-Work stream that all miners compete in equally",
+        "Three independent streams: ASIC mining, CPU/GPU mining, and PoS validation, each receiving 33.3% of block rewards",
+        "A pure Proof-of-Stake system where validators vote on blocks by staking tokens",
+        "A delegated system where the PYRAX team selects which nodes produce blocks"
+      ],
+      "correct_answer": 1,
+      "explanation": "TriStream runs three independent streams simultaneously: Stream A (ASIC mining with BLAKE3 and SHA-256), Stream B (CPU/GPU mining with KAWPOW and RandomX plus an AI processing pool), and Stream C (PoS validation). Each stream receives exactly 33.3% of block rewards, preventing any single group from dominating the network."
+    },
+    {
+      "question": "A tester's node achieves 92% uptime for the month. How much PYRX do they earn from the uptime reward alone?",
+      "options": [
+        "24,000 PYRX — they are above 90% so they qualify for the highest tier",
+        "0 PYRX — they did not hit the 98% threshold required for any reward",
+        "16,000 PYRX — they fall in the 90-97.99% uptime tier",
+        "10,000 PYRX — the system rounds down to the nearest tier boundary"
+      ],
+      "correct_answer": 2,
+      "explanation": "The uptime reward is tiered. 90-97.99% uptime earns 16,000 PYRX per month. The 24,000 PYRX tier requires 98% or above. The 10,000 PYRX tier applies to 75-89.99% uptime. Only the best single node per account is counted."
+    },
+    {
+      "question": "A tester discovers a critical consensus vulnerability and submits an exceptionally well-documented report with step-by-step reproduction instructions. What is their total bug bounty?",
+      "options": [
+        "48,000 PYRX — the base critical severity bounty only",
+        "60,000 PYRX — 48,000 base plus the 25% reproduction quality bonus",
+        "20,000 PYRX — critical bugs are capped at the high severity rate for external testers",
+        "8,000 PYRX — all bug bounties pay the same base rate regardless of severity"
+      ],
+      "correct_answer": 1,
+      "explanation": "Critical severity = 48,000 PYRX base. Excellent reproduction steps earn a +25% reproduction quality bonus, adding 12,000 PYRX. Total: 60,000 PYRX. The reproduction bonus applies across all severity levels."
+    },
+    {
+      "question": "What happens to the DevNet PYRX a tester earns throughout the testing programme?",
+      "options": [
+        "It is deposited immediately to the mainnet wallet address provided during registration",
+        "It accumulates as a server-side allocation and is delivered via the mainnet airdrop when PYRAX launches",
+        "It can be withdrawn monthly once a tester reaches Silver contribution tier",
+        "It expires if not claimed within 90 days of each reward calculation period"
+      ],
+      "correct_answer": 1,
+      "explanation": "DevNet PYRX is never paid out during DevNet. It accumulates as a tracked server-side allocation and is delivered via the mainnet airdrop at launch. The allocation survives DevNet resets. Nothing is paid until mainnet and there is no early withdrawal mechanism."
+    },
+    {
+      "question": "Which of the following actions would directly violate the DevNet tester agreement?",
+      "options": [
+        "Submitting a node crash report through the Issue Council with the full node log and version number attached",
+        "Running the node on a dedicated home server with auto-restart configured via systemd",
+        "Sharing your portal login credentials with a friend so they can run a node under your account",
+        "Updating your node to the latest version within the 72-hour on-time window after a new release"
+      ],
+      "correct_answer": 2,
+      "explanation": "DevNet access is bound to your individual approved tester identity. Sharing credentials allows another person to participate without approval, violating the tester agreement and risking both accounts being banned with all PYRX allocations forfeited. All three of the other options are correct and encouraged behaviour."
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Card, Button, StatTile, Badge, PageHeader, Icon, Pagination } from "./ui";
 import MacGatekeeperBanner from "./MacGatekeeperBanner";
 import { can, canGrant, type AccessSubject, type Permission, PERMISSIONS, permissionGroups, PRESETS, isSuperuserOnly } from "../lib/permissions";
@@ -1835,6 +1835,108 @@ export function NetworkManagement({ subject }: { subject: AccessSubject }) {
 
 // ============================================================== Devnet Training & Quiz
 
+function LessonEditorRow({ lesson, onSave, onDelete }: { lesson: any; onSave: (l: any) => void; onDelete: () => void }) {
+  const content = typeof lesson.content === 'string' ? { intro: lesson.content, sections: [], quiz: [] } : (lesson.content || { intro: "", sections: [], quiz: [] });
+
+  const updateContent = (partial: any) => {
+    onSave({ ...lesson, content: { ...content, ...partial } });
+  };
+
+  return (
+    <div className="border border-line rounded-lg p-5 mb-4 bg-[rgba(0,0,0,0.1)]">
+      <div className="flex items-center justify-between mb-4 border-b border-line pb-4">
+        <input className="input py-2 text-base font-bold w-1/2" value={lesson.title} onChange={e => onSave({ ...lesson, title: e.target.value })} placeholder="Lesson Title" />
+        <div className="flex items-center gap-4">
+           <label className="text-sm flex items-center gap-2 cursor-pointer">
+             <input type="checkbox" checked={lesson.required_for_cert} onChange={e => onSave({ ...lesson, required_for_cert: e.target.checked })} className="text-brand rounded" />
+             Required for Cert
+           </label>
+           <label className="text-sm text-muted flex items-center gap-2">Order <input className="input py-1 px-2 w-16 text-center" type="number" value={lesson.lesson_order} onChange={e => onSave({ ...lesson, lesson_order: parseInt(e.target.value) || 0 })} /></label>
+           <button className="text-[color:var(--color-negative)] hover:underline text-sm font-semibold ml-2" onClick={onDelete}>Delete Lesson</button>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <div>
+          <label className="text-sm font-semibold mb-2 block">Introduction</label>
+          <textarea className="input text-sm h-16" value={content.intro || ""} onChange={e => updateContent({ intro: e.target.value })} placeholder="Lesson introduction..." />
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold">Sections</label>
+            <button className="text-sm text-brand hover:underline font-semibold" onClick={() => updateContent({ sections: [...(content.sections || []), { title: "New Section", content: "" }] })}>+ Add Section</button>
+          </div>
+          <div className="space-y-3">
+            {(content.sections || []).map((s: any, i: number) => (
+              <div key={i} className="border border-line rounded p-3 flex flex-col gap-3 bg-[rgba(255,255,255,0.02)]">
+                <div className="flex justify-between">
+                  <input className="input text-sm font-semibold w-full" value={s.title} onChange={e => {
+                    const ns = [...content.sections]; ns[i].title = e.target.value; updateContent({ sections: ns });
+                  }} placeholder="Section Title" />
+                  <button className="ml-4 text-[color:var(--color-negative)] hover:underline text-xs shrink-0" onClick={() => {
+                    const ns = [...content.sections]; ns.splice(i, 1); updateContent({ sections: ns });
+                  }}>Remove</button>
+                </div>
+                <textarea className="input text-sm h-24" value={s.content} onChange={e => {
+                  const ns = [...content.sections]; ns[i].content = e.target.value; updateContent({ sections: ns });
+                }} placeholder="Section content..." />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="pt-4 border-t border-line">
+          <div className="flex justify-between items-center mb-3">
+            <label className="text-sm font-semibold text-[color:var(--color-brand)]">Teaser Quiz Questions (Appears at bottom of lesson)</label>
+            <button className="text-sm text-brand hover:underline font-semibold" onClick={() => updateContent({ quiz: [...(content.quiz || []), { question: "New Question", options: ["Option A", "Option B"], correct_answer: 0, explanation: "" }] })}>+ Add Question</button>
+          </div>
+          <div className="space-y-3">
+            {(content.quiz || []).map((q: any, i: number) => (
+              <div key={i} className="border border-[color:var(--color-brand)] border-opacity-30 rounded p-4 bg-[rgba(245,134,34,0.03)]">
+                <div className="flex justify-between mb-3">
+                   <input className="input text-sm font-semibold w-full" value={q.question} onChange={e => {
+                     const nq = [...content.quiz]; nq[i].question = e.target.value; updateContent({ quiz: nq });
+                   }} placeholder="Question text..." />
+                   <button className="ml-4 text-[color:var(--color-negative)] hover:underline text-xs shrink-0" onClick={() => {
+                     const nq = [...content.quiz]; nq.splice(i, 1); updateContent({ quiz: nq });
+                   }}>Remove</button>
+                </div>
+                <div className="grid gap-2 pl-2">
+                  {q.options.map((opt: string, optIdx: number) => (
+                    <div key={optIdx} className="flex items-center gap-3">
+                      <input type="radio" name={`quiz-${lesson.id}-${i}`} checked={q.correct_answer === optIdx} onChange={() => {
+                         const nq = [...content.quiz]; nq[i].correct_answer = optIdx; updateContent({ quiz: nq });
+                      }} className="text-brand focus:ring-brand" />
+                      <input className={`input text-sm py-1.5 ${q.correct_answer === optIdx ? "border-[color:var(--color-positive)]" : ""}`} value={opt} onChange={e => {
+                         const nq = [...content.quiz]; nq[i].options[optIdx] = e.target.value; updateContent({ quiz: nq });
+                      }} placeholder={`Option ${optIdx + 1}`} />
+                      <button className="text-[color:var(--color-negative)] text-xs hover:bg-[rgba(239,68,68,0.1)] p-1 rounded" onClick={() => {
+                         const nq = [...content.quiz]; nq[i].options.splice(optIdx, 1);
+                         if (nq[i].correct_answer >= nq[i].options.length) nq[i].correct_answer = 0;
+                         updateContent({ quiz: nq });
+                      }}>✕</button>
+                    </div>
+                  ))}
+                  <button className="text-xs text-brand text-left mt-1 hover:underline" onClick={() => {
+                     const nq = [...content.quiz]; nq[i].options.push("New Option"); updateContent({ quiz: nq });
+                  }}>+ Add Option</button>
+                </div>
+                <div className="mt-4 pt-3 border-t border-line border-opacity-50">
+                  <input className="input text-xs w-full py-1.5" placeholder="Explanation (shown after answering)" value={q.explanation || ""} onChange={e => {
+                     const nq = [...content.quiz]; nq[i].explanation = e.target.value; updateContent({ quiz: nq });
+                  }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 export function DevnetTraining({ subject }: { subject: AccessSubject }) {
   if (!can(subject, "devnet.manage")) return <Locked what="training management" />;
   const [lessons, setLessons] = useState<any[]>([]);
@@ -1855,11 +1957,7 @@ export function DevnetTraining({ subject }: { subject: AccessSubject }) {
   useEffect(() => { load(); }, []);
 
   async function saveLesson(lesson: any) {
-    let parsedContent = lesson.content;
-    if (typeof lesson.content === "string") {
-      try { parsedContent = JSON.parse(lesson.content); } catch (e) { alert("Invalid JSON in content"); return; }
-    }
-    await fetch("/api/devnet/training", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "save", lesson: { ...lesson, content: parsedContent } }) });
+    await fetch("/api/devnet/training", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "save", lesson }) });
     load();
   }
   async function deleteLesson(id: string) {
@@ -1878,44 +1976,94 @@ export function DevnetTraining({ subject }: { subject: AccessSubject }) {
     load();
   }
 
+  const [importStatus, setImportStatus] = useState<{ ok: boolean; msg: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleJsonImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!fileInputRef.current) return;
+    fileInputRef.current.value = ''; // reset so same file can be re-selected
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      try {
+        const raw = ev.target?.result as string;
+        const data = JSON.parse(raw);
+
+        // Basic structure validation
+        if (!data || typeof data !== 'object') throw new Error('File is not a valid JSON object.');
+        if (!data.intro && !data.sections) throw new Error('JSON must have an "intro" or "sections" field.');
+        if (data.sections !== undefined && !Array.isArray(data.sections)) throw new Error('"sections" must be an array.');
+        if (data.quiz !== undefined && !Array.isArray(data.quiz)) throw new Error('"quiz" must be an array.');
+
+        // Derive title from filename (strip .json, capitalise)
+        const titleFromFile = file.name.replace(/\.json$/i, '').replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const title = data.title || titleFromFile;
+
+        // If JSON contains an id, upsert that existing lesson; otherwise create new
+        const existingLesson = data.id ? lessons.find((l: any) => l.id === data.id) : null;
+        const isUpdate = !!existingLesson;
+
+        const newLesson = {
+          ...(data.id ? { id: data.id } : {}),                         // pass id → triggers ON CONFLICT UPDATE
+          title,
+          content: { intro: data.intro || '', sections: data.sections || [], quiz: data.quiz || [] },
+          lesson_order: existingLesson?.lesson_order ?? data.lesson_order ?? (lessons.length + 1),
+          required_for_cert: data.required_for_cert ?? true,
+        };
+
+        await saveLesson(newLesson);
+        const action = isUpdate ? `Module "${title}" updated` : `"${title}" created as a new module`;
+        setImportStatus({ ok: true, msg: `${action} — ${(data.sections || []).length} sections, ${(data.quiz || []).length} quiz questions.` });
+      } catch (err: any) {
+        setImportStatus({ ok: false, msg: err.message || 'Failed to parse JSON file.' });
+      }
+      setTimeout(() => setImportStatus(null), 6000);
+    };
+    reader.readAsText(file);
+  }
+
   if (loading) return <div className="p-10 text-center text-muted">Loading...</div>;
 
   return (
     <>
       <PageHeader title="Training & Quiz" subtitle="Manage devnet training lessons and quiz questions." />
       <div className="grid gap-6">
-        <Card className="p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-bold">Training Lessons</h3>
-            <Button variant="primary" onClick={() => saveLesson({ title: "New Lesson", content: { intro: "", sections: [] }, lesson_order: lessons.length + 1 })}>Add Lesson</Button>
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-6 border-b border-line pb-4">
+            <div>
+              <h3 className="text-lg font-bold">Training Lessons</h3>
+              <p className="text-sm text-muted">Manage the curriculum and the per-module teaser quizzes.</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json,application/json"
+                className="hidden"
+                onChange={handleJsonImport}
+              />
+              <Button variant="ghost" onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2">
+                <Icon.download className="h-4 w-4" />
+                Import JSON
+              </Button>
+              <Button variant="primary" onClick={() => saveLesson({ title: "New Lesson", content: { intro: "", sections: [], quiz: [] }, lesson_order: lessons.length + 1, required_for_cert: true })}>Add Lesson</Button>
+            </div>
           </div>
+          {importStatus && (
+            <div className={`mb-4 p-3 rounded-lg text-sm font-medium flex items-center gap-2 ${
+              importStatus.ok
+                ? 'bg-[rgba(52,211,153,0.1)] border border-[color:var(--color-positive)] text-[color:var(--color-positive)]'
+                : 'bg-[rgba(239,68,68,0.1)] border border-[#ef4444] text-[#ef4444]'
+            }`}>
+              {importStatus.ok ? <Icon.check className="h-4 w-4 shrink-0" /> : <Icon.alert className="h-4 w-4 shrink-0" />}
+              {importStatus.msg}
+            </div>
+          )}
           <div className="grid gap-3">
             {lessons.map(l => (
-              <div key={l.id} className="border border-line rounded-lg p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <input className="input py-1 text-sm font-semibold w-1/2" value={l.title} onChange={e => {
-                    const nl = [...lessons];
-                    const idx = nl.findIndex(x => x.id === l.id);
-                    nl[idx].title = e.target.value;
-                    setLessons(nl);
-                  }} onBlur={() => saveLesson(l)} />
-                  <div className="flex items-center gap-2">
-                    <label className="text-xs text-muted flex items-center gap-1">Order <input className="input py-1 px-2 w-16 text-center" type="number" value={l.lesson_order} onChange={e => {
-                      const nl = [...lessons];
-                      const idx = nl.findIndex(x => x.id === l.id);
-                      nl[idx].lesson_order = parseInt(e.target.value) || 0;
-                      setLessons(nl);
-                    }} onBlur={() => saveLesson(l)} /></label>
-                    <button className="text-[color:var(--color-negative)] hover:underline text-xs" onClick={() => deleteLesson(l.id)}>Delete</button>
-                  </div>
-                </div>
-                <textarea className="input text-sm font-mono h-32" value={typeof l.content === 'string' ? l.content : JSON.stringify(l.content, null, 2)} onChange={e => {
-                  const nl = [...lessons];
-                  const idx = nl.findIndex(x => x.id === l.id);
-                  nl[idx].content = e.target.value;
-                  setLessons(nl);
-                }} onBlur={() => saveLesson(l)} />
-              </div>
+              <LessonEditorRow key={l.id} lesson={l} onSave={saveLesson} onDelete={() => deleteLesson(l.id)} />
             ))}
           </div>
         </Card>
