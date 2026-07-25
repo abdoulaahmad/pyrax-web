@@ -174,7 +174,7 @@ export default function Quiz() {
             <p className="text-sm text-faint">{result.explanation || (result.passed ? "You have successfully passed the certification quiz. You can now proceed to download the node software." : "You did not reach the 80% passing score. Please review the training materials and try again.")}</p>
           </Card>
 
-          <Button onClick={() => setState('intro')} className="bg-[rgba(255,255,255,0.1)] px-6 py-2 rounded-lg hover:bg-[rgba(255,255,255,0.15)] transition">
+          <Button onClick={() => result.passed ? window.location.reload() : setState('intro')} className="bg-[rgba(255,255,255,0.1)] px-6 py-2 rounded-lg hover:bg-[rgba(255,255,255,0.15)] transition">
             {result.passed ? "Continue to Next Steps" : "Return to Quiz Dashboard"}
           </Button>
         </motion.div>
