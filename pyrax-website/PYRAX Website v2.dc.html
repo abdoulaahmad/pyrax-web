@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;600;700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050609; --bg2:#07090e; --panel:rgba(255,255,255,.025); --panel2:rgba(255,255,255,.045); --elev:#12151d;
+  --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.14); --hair:rgba(255,255,255,.035);
+  --tx:#f2f4f8; --tx2:#9aa3b2; --tx3:#565e6d;
+  --orange:#f68a24; --orange-deep:#da5427; --gold:#fed23c;
+  --blue:#3983c3; --blue-deep:#1963a9; --cyan:#5cbace;
+  --live:#3ddc84; --off:#5b6270;
+  --disp:'Unbounded',sans-serif; --body:'Instrument Sans',sans-serif; --mono:'JetBrains Mono',monospace;
+  --grad:linear-gradient(110deg,#da5427,#f68a24 55%,#fed23c);
+  --grad-b:linear-gradient(110deg,#1963a9,#3983c3 60%,#5cbace);
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#07080c;color:var(--tx);font-family:var(--body);-webkit-font-smoothing:antialiased}
+a{color:var(--cyan);text-decoration:none}
+a:hover{color:var(--gold)}
+::selection{background:var(--orange);color:#140803}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:#07080c}
+::-webkit-scrollbar-thumb{background:#1e222c;border-radius:6px;border:2px solid #07080c}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes rise{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+@keyframes riseS{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes orbit{to{transform:rotate(360deg)}}
+.rise{animation:rise linear both;animation-timeline:view();animation-range:entry 0% cover 24%}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;animation-timeline:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:var(--noise),radial-gradient(1400px 800px at 15% -8%,rgba(25,99,169,.12),transparent 55%),radial-gradient(1100px 640px at 92% 4%,rgba(218,84,39,.09),transparent 55%),#07080c">
+
+<!-- ====== DOC HEADER ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:44px 44px 8px">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:22px;border-bottom:1px solid var(--line);padding-bottom:30px">
+    <div>
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX Network" style="height:38px;display:block;margin-bottom:20px">
+      <div style="font-family:var(--disp);font-weight:500;font-size:30px;letter-spacing:-.01em;line-height:1.12">Redesign V2 — 2026 standard</div>
+      <div style="color:var(--tx2);font-size:14.5px;margin-top:12px;max-width:660px;line-height:1.55">Full hi-fi rework of pyraxchain.com using the official brand assets. All copy and figures are verbatim from the live site — presentation upgraded, substance untouched.</div>
+    </div>
+    <div style="display:flex;gap:22px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--tx2)">
+      <div><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--live);margin-right:7px;vertical-align:middle;animation:blink 2s infinite"></span>Live state</div>
+      <div><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--off);margin-right:7px;vertical-align:middle"></span>Offline / em-dash</div>
+      <div><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--grad);margin-right:7px;vertical-align:middle"></span>Interactive</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== GLOBAL COMPONENTS ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:46px 44px 0">{{ tagGlobal }}</div>
+
+<!-- navbar desktop -->
+<div style="max-width:1620px;margin:0 auto;padding:22px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">GLOBAL / NAVBAR — DESKTOP · interactive</div>
+  <div style="border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg)">
+    <nav style="display:flex;align-items:center;gap:30px;padding:0 28px;height:70px;background:rgba(5,6,9,.82);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:28px;display:block;cursor:pointer">
+      <div style="display:flex;gap:2px;margin-left:16px">
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx);cursor:pointer;padding:9px 13px;border-radius:9px;background:var(--panel2)">Technology</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px" style-hover="color:var(--tx);background:var(--panel)">Network</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px" style-hover="color:var(--tx);background:var(--panel)">Token</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px" style-hover="color:var(--tx);background:var(--panel)">Industries</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px" style-hover="color:var(--tx);background:var(--panel)">Developers</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px" style-hover="color:var(--tx);background:var(--panel)">Company</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+        <button onClick="{{ openSwitcher }}" style="display:flex;align-items:center;gap:9px;background:transparent;border:1px solid var(--line2);color:var(--tx);padding:9px 14px;border-radius:100px;cursor:pointer;font-family:var(--mono);font-size:12px" style-hover="border-color:var(--orange)"><span style="width:7px;height:7px;border-radius:50%;background:var(--live);box-shadow:0 0 9px var(--live);animation:blink 2s infinite"></span>{{ selName }}<span style="color:var(--tx3);font-size:9px">▼</span></button>
+        <a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:10px 19px;border-radius:100px;font-weight:700;font-size:13.5px;font-family:var(--body);letter-spacing:.01em;box-shadow:0 8px 26px rgba(218,84,39,.35)" style-hover="filter:brightness(1.08)">Launch App ↗</a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<!-- navbar mobile + drawer -->
+<div style="max-width:1620px;margin:0 auto;padding:28px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">GLOBAL / NAVBAR — MOBILE · closed + drawer</div>
+  <div style="display:flex;gap:28px;flex-wrap:wrap">
+    <div style="width:300px;flex:none;border:1px solid var(--line);border-radius:28px;overflow:hidden;background:var(--bg)">
+      <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(5,6,9,.9)">
+        <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:22px;display:block">
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <span style="font-family:var(--mono);font-size:9px;border:1px solid var(--line2);padding:5px 8px;border-radius:100px;display:flex;align-items:center;gap:5px"><span style="width:6px;height:6px;border-radius:50%;background:var(--live)"></span>Seed</span>
+          <div style="display:flex;flex-direction:column;gap:4.5px;padding:9px 7px;cursor:pointer"><span style="width:20px;height:1.5px;background:var(--tx)"></span><span style="width:20px;height:1.5px;background:var(--tx)"></span></div>
+        </div>
+      </div>
+      <div style="padding:28px 16px;text-align:center;color:var(--tx3);font-family:var(--mono);font-size:10px">page content ↓</div>
+    </div>
+    <div style="width:300px;flex:none;border:1px solid var(--line);border-radius:28px;overflow:hidden;background:var(--bg)">
+      <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)">
+        <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:22px;display:block">
+        <div style="margin-left:auto;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--orange);font-size:15px;cursor:pointer;border:1px solid var(--line2);border-radius:100px">✕</div>
+      </div>
+      <div style="padding:6px 16px 22px;background:linear-gradient(180deg,rgba(218,84,39,.06),transparent 50%)">
+        <sc-for list="{{ navItems }}" as="it" hint-placeholder-count="6">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;padding:15px 4px;border-bottom:1px solid var(--hair)"><span style="font-family:var(--disp);font-weight:400;font-size:17px">{{ it }}</span><span style="font-family:var(--mono);font-size:9px;color:var(--tx3)">0{{ $index }}</span></div>
+        </sc-for>
+        <div style="display:flex;align-items:center;gap:8px;margin:18px 2px 12px;padding:12px 14px;border:1px solid var(--line2);border-radius:100px;font-family:var(--mono);font-size:11px"><span style="width:7px;height:7px;border-radius:50%;background:var(--live)"></span>PYRAX Seed · 881109<span style="margin-left:auto;color:var(--tx3)">▼</span></div>
+        <a href="https://explorer.pyraxchain.com" style="display:block;background:var(--grad);color:#140803;text-align:center;padding:14px;border-radius:100px;font-weight:700;margin:0 2px">Launch App ↗</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- switcher modal demo -->
+<div style="max-width:1620px;margin:0 auto;padding:32px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">GLOBAL / NETWORK SWITCHER — modal · interactive (click any navbar pill)</div>
+  <div style="border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative;background:var(--bg);min-height:380px;display:flex;align-items:center;justify-content:center">
+    <div style="position:absolute;inset:0;background:rgba(2,3,5,.7);backdrop-filter:blur(5px)"></div>
+    <div style="position:relative;width:460px;max-width:calc(100% - 44px)">{{ switcherCard }}</div>
+  </div>
+</div>
+
+<!-- live widget -->
+<div style="max-width:1620px;margin:0 auto;padding:32px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">GLOBAL / LIVE RPC TELEMETRY — live + offline honest state</div>
+  <div style="display:flex;gap:26px;flex-wrap:wrap">
+    <div style="width:440px;max-width:100%;flex:none">{{ liveWidget }}</div>
+    <div style="width:440px;max-width:100%;flex:none">{{ offlineWidget }}</div>
+  </div>
+</div>
+
+<!-- footer -->
+<div style="max-width:1620px;margin:0 auto;padding:32px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">GLOBAL / FOOTER</div>
+  <div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">{{ footer }}</div>
+</div>
+
+<!-- ====== HOME ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:64px 44px 0">{{ tagHome }}</div>
+
+<div style="max-width:1620px;margin:0 auto;padding:20px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">HOME — DESKTOP · route /</div>
+  <div data-screen-label="V2 Home · Desktop" style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg);box-shadow:0 60px 160px -50px rgba(0,0,0,.9)">
+
+    <nav style="display:flex;align-items:center;gap:30px;padding:0 32px;height:70px;background:rgba(5,6,9,.82);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:6">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:28px;display:block">
+      <div style="display:flex;gap:2px;margin-left:16px">
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px" style-hover="color:var(--tx);background:var(--panel)">Technology</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px" style-hover="color:var(--tx);background:var(--panel)">Network</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px" style-hover="color:var(--tx);background:var(--panel)">Token</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px" style-hover="color:var(--tx);background:var(--panel)">Industries</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px" style-hover="color:var(--tx);background:var(--panel)">Developers</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px" style-hover="color:var(--tx);background:var(--panel)">Company</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+        <button onClick="{{ openSwitcher }}" style="display:flex;align-items:center;gap:9px;background:transparent;border:1px solid var(--line2);color:var(--tx);padding:9px 14px;border-radius:100px;cursor:pointer;font-family:var(--mono);font-size:12px" style-hover="border-color:var(--orange)"><span style="width:7px;height:7px;border-radius:50%;background:var(--live);box-shadow:0 0 9px var(--live);animation:blink 2s infinite"></span>{{ selName }}<span style="color:var(--tx3);font-size:9px">▼</span></button>
+        <a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:10px 19px;border-radius:100px;font-weight:700;font-size:13.5px;box-shadow:0 8px 26px rgba(218,84,39,.35)">Launch App ↗</a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--line)">
+      <canvas id="v2dag" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,6,9,.3),rgba(5,6,9,.72) 78%,var(--bg));pointer-events:none"></div>
+      <div style="position:absolute;inset:0;background:radial-gradient(1100px 600px at 74% 14%,rgba(218,84,39,.17),transparent 60%);pointer-events:none"></div>
+      <div style="position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(25% - 1px),rgba(255,255,255,.035) calc(25% - 1px),rgba(255,255,255,.035) 25%)"></div>
+      <!-- vertical rails -->
+      <div style="position:absolute;left:0;top:0;bottom:0;width:56px;border-right:1px solid var(--line);display:flex;align-items:center;justify-content:center;pointer-events:none">
+        <span style="font-family:var(--mono);font-size:10px;letter-spacing:.42em;color:var(--tx3);writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap">THE PRIVATE, PARALLEL LAYER-1 — PYRAXCHAIN.COM</span>
+      </div>
+      <div style="position:absolute;right:0;top:0;bottom:0;width:56px;border-left:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:22px 0;pointer-events:none">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--tx3);writing-mode:vertical-rl">/ 001</span>
+        <span style="display:inline-flex;gap:3px;align-items:flex-end;height:20px"><span style="display:block;width:4px;height:11px;border-radius:1px;background:var(--blue);transform:skewX(-12deg)"></span><span style="display:block;width:4px;height:15px;border-radius:1px;background:var(--orange);transform:skewX(-12deg)"></span><span style="display:block;width:4px;height:20px;border-radius:1px;background:var(--gold);transform:skewX(-12deg)"></span></span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--tx3);writing-mode:vertical-rl">EST. 2026</span>
+      </div>
+      <div style="position:relative;padding:110px 100px 0;animation:rise .8s ease both">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:34px">
+          <span style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--orange);border:1px solid rgba(246,138,36,.4);padding:8px 16px;border-radius:100px">The private, parallel Layer-1</span>
+          <span style="font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--tx3)">GHOSTDAG · SHIELDED · MIXNET</span>
+        </div>
+        <h1 style="font-family:var(--disp);font-weight:600;font-size:clamp(44px,6.2vw,88px);line-height:.98;letter-spacing:-.02em;margin:0;text-transform:uppercase">
+          The blockchain<br>
+          <span style="color:transparent;-webkit-text-stroke:1.5px rgba(242,244,248,.55)">built like the</span><br>
+          <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">future demands<span style="-webkit-text-stroke:0">.</span></span>
+        </h1>
+      </div>
+      <div style="position:relative;padding:54px 100px 90px;display:grid;grid-template-columns:1.05fr .95fr;gap:70px;align-items:end">
+        <div style="animation:rise .8s ease .1s both">
+          <p style="color:var(--tx2);font-size:16.5px;line-height:1.7;max-width:560px;margin:0 0 34px;border-left:1px solid var(--line2);padding-left:22px">PYRAX replaces the single chain with a GhostDAG web of blocks — private by default, fully decentralized, ISP-resistant, and engineered for <span style="color:var(--tx);font-weight:600">500,000+ transactions per second</span>. Idle mining hardware becomes a verifiable AI compute marketplace.</p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+            <a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:16px 30px;border-radius:100px;font-weight:700;font-size:15px;box-shadow:0 14px 44px rgba(218,84,39,.4)">Explore the network</a>
+            <a href="#" style="color:var(--tx);padding:16px 28px;border-radius:100px;font-weight:600;font-size:15px;border:1px solid var(--line2)" style-hover="border-color:var(--cyan);color:var(--cyan)">Read the whitepaper →</a>
+          </div>
+        </div>
+        <div style="animation:rise .8s ease .18s both">{{ liveWidget }}</div>
+      </div>
+    </section>
+
+    <!-- STAT TICKER -->
+    <div style="border-bottom:1px solid var(--line);overflow:hidden;background:var(--bg2)">
+      <div style="display:flex;width:max-content;animation:tick 36s linear infinite;padding:15px 0">
+        <sc-for list="{{ tickerItems }}" as="t" hint-placeholder-count="14">
+          <span style="display:inline-flex;align-items:center;gap:12px;padding:0 34px;font-family:var(--mono);font-size:12.5px;color:var(--tx2);white-space:nowrap;border-right:1px solid var(--hair)"><b style="color:var(--gold);font-weight:600">{{ t.k }}</b>{{ t.v }}</span>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- FOUR INVARIANTS -->
+    <section style="padding:110px 56px 90px;border-bottom:1px solid var(--line);position:relative;overflow:hidden">
+      <div style="position:absolute;top:34px;right:40px;font-family:var(--disp);font-weight:700;font-size:200px;line-height:.8;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.07);pointer-events:none;user-select:none">01</div>
+      <div style="position:relative;max-width:1280px;margin:0 auto">
+        <div class="rise" style="margin-bottom:64px">
+          <div style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--orange);margin-bottom:16px">01 / Invariants</div>
+          <h2 style="font-family:var(--disp);font-weight:600;font-size:clamp(34px,4vw,56px);letter-spacing:-.02em;line-height:1.02;margin:0;text-transform:uppercase;max-width:820px">Four invariants,<br><span style="color:transparent;-webkit-text-stroke:1.2px rgba(242,244,248,.8)">not features.</span></h2>
+          <p style="color:var(--tx2);font-size:15px;max-width:400px;line-height:1.65;margin:26px 0 0">Most networks bolt these on. PYRAX enforces them in its lowest-level types.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+          <sc-for list="{{ invariants }}" as="c" hint-placeholder-count="4">
+            <div class="rise" style="display:grid;grid-template-columns:130px 200px 260px 1fr;gap:34px;align-items:center;padding:36px 8px;border-bottom:1px solid var(--line);position:relative" style-hover="background:var(--panel);padding-left:22px">
+              <span style="font-family:var(--disp);font-weight:700;font-size:56px;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.22)">{{ c.idx }}</span>
+              <div><div style="font-family:var(--disp);font-weight:600;font-size:25px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1;letter-spacing:-.01em">{{ c.stat }}</div><div style="font-family:var(--mono);font-size:10px;color:var(--tx3);letter-spacing:.12em;margin-top:8px">{{ c.statLabel }}</div></div>
+              <div style="font-family:var(--disp);font-weight:500;font-size:19px;letter-spacing:-.01em;text-transform:uppercase">{{ c.title }}</div>
+              <div style="color:var(--tx2);font-size:13.5px;line-height:1.62">{{ c.desc }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <!-- BUILT NOT PLANNED -->
+    <section style="padding:96px 56px;border-bottom:1px solid var(--line);position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background:radial-gradient(900px 500px at 8% 20%,rgba(25,99,169,.1),transparent 60%)"></div>
+      <div style="position:relative;max-width:1280px;margin:0 auto">
+        <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:50px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--cyan);margin-bottom:16px">02 / Built, not planned</div>
+            <h2 style="font-family:var(--disp);font-weight:600;font-size:clamp(32px,3.6vw,48px);letter-spacing:-.02em;line-height:1.03;margin:0;text-transform:uppercase">A real, tested<br><span style="color:transparent;-webkit-text-stroke:1.2px rgba(242,244,248,.8)">Layer-1 — today.</span></h2>
+          </div>
+          <p style="color:var(--tx2);font-size:15px;line-height:1.65;margin:0">One binary, four chainspecs: a faithful simulation on real primitives, with the production consensus path wired end-to-end and gated to mainnet by external audit. <a href="#" style="color:var(--orange);font-weight:600">Read the whitepaper →</a></p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:16px">
+          <sc-for list="{{ builtStats }}" as="s" hint-placeholder-count="6">
+            <div class="rise" style="border:1px solid var(--line);border-radius:14px;padding:22px 18px;background:var(--panel);position:relative">
+              <span style="position:absolute;top:-1px;left:14px;width:22px;height:1px;background:var(--orange)"></span>
+              <div style="font-family:var(--disp);font-weight:600;font-size:23px;line-height:1;letter-spacing:-.01em">{{ s.n }}</div>
+              <div style="color:var(--tx3);font-family:var(--mono);font-size:10.5px;margin-top:10px;line-height:1.5">{{ s.l }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+          <sc-for list="{{ featureTiles }}" as="f" hint-placeholder-count="6">
+            <a href="#" class="rise" style="border:1px solid var(--line);border-radius:16px;padding:26px;background:var(--panel);display:block;color:var(--tx);position:relative;overflow:hidden" style-hover="border-color:var(--line2);background:var(--panel2)">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><span style="font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--cyan)">{{ f.tag }}</span><span style="color:var(--tx3);font-size:13px">→</span></div>
+              <div style="font-family:var(--disp);font-weight:500;font-size:16.5px;margin-bottom:10px;letter-spacing:-.01em">{{ f.title }}</div>
+              <div style="color:var(--tx2);font-size:13px;line-height:1.6">{{ f.desc }}</div>
+            </a>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <!-- NEURAX — full color-block -->
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:linear-gradient(150deg,#0c2744 0%,#123a63 55%,#0e2c4d 100%)">
+      <div style="position:absolute;inset:0;background:var(--noise)"></div>
+      <div style="position:absolute;top:-60px;right:-30px;font-family:var(--disp);font-weight:700;font-size:300px;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.09);pointer-events:none;user-select:none">AI</div>
+      <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1600&auto=format&fit=crop" alt="GPU compute racks" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.14;filter:saturate(.3)">
+      <div style="position:relative;max-width:1280px;margin:0 auto;padding:100px 56px 90px">
+        <div class="rise" style="display:grid;grid-template-columns:1.1fr .9fr;gap:70px;align-items:center">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--cyan);margin-bottom:18px">03 / NEURAX · Stream B</div>
+            <h2 style="font-family:var(--disp);font-weight:600;font-size:clamp(32px,3.8vw,52px);letter-spacing:-.02em;line-height:1.03;margin:0 0 22px;text-transform:uppercase">Idle GPUs become a <span style="color:transparent;-webkit-text-stroke:1.2px rgba(254,210,60,.9)">verifiable</span> compute market.</h2>
+            <p style="color:rgba(255,255,255,.75);font-size:15.5px;line-height:1.7;margin:0 0 32px;max-width:520px">The same hardware that mines Stream B runs paid AI and compute jobs, settled on-chain at a fixed 8 PYRX per compute unit. A four-rung verification ladder — redundancy, fraud proofs, interactive dispute, and TEE attestation — replaces blind trust with cryptographic proof.</p>
+            <div style="display:flex;gap:14px;flex-wrap:wrap">
+              <a href="#" style="background:#fff;color:#0c2744;padding:14px 26px;border-radius:100px;font-weight:700;font-size:14px">How NEURAX works</a>
+              <a href="#" style="border:1px solid rgba(255,255,255,.35);color:#fff;padding:14px 26px;border-radius:100px;font-weight:600;font-size:14px" style-hover="border-color:var(--gold);color:var(--gold)">AI &amp; compute industries →</a>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <sc-for list="{{ neuraxStats }}" as="s" hint-placeholder-count="4">
+              <div style="background:rgba(5,6,9,.5);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:26px 24px"><div style="font-family:var(--disp);font-weight:600;font-size:26px;color:var(--gold);letter-spacing:-.01em;line-height:1">{{ s.n }}</div><div style="color:rgba(255,255,255,.66);font-size:12.5px;margin-top:10px;line-height:1.55">{{ s.l }}</div></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INDUSTRIES -->
+    <section style="padding:96px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto">
+        <div class="rise" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:18px;margin-bottom:46px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--orange);margin-bottom:16px">04 / Industries</div>
+            <h2 style="font-family:var(--disp);font-weight:600;font-size:clamp(32px,3.6vw,48px);letter-spacing:-.02em;line-height:1.03;margin:0;text-transform:uppercase">PYRAX for<br><span style="color:transparent;-webkit-text-stroke:1.2px rgba(242,244,248,.8)">your industry.</span></h2>
+          </div>
+          <p style="color:var(--tx2);font-size:15px;max-width:400px;line-height:1.6;margin:0">100 industries mapped to concrete PYRAX integrations, current market projections, and buildathon-ready dApp ideas.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+          <sc-for list="{{ industries }}" as="i" hint-placeholder-count="10">
+            <a href="#" class="rise" style="position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);display:block;color:var(--tx);height:170px" style-hover="border-color:var(--orange)">
+              <img src="{{ i.img }}" alt="{{ i.name }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.35) brightness(.66) contrast(1.05)">
+              <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,6,9,.15),rgba(5,6,9,.86) 82%)"></div>
+              <div style="position:absolute;left:16px;right:14px;bottom:14px"><div style="font-family:var(--disp);font-weight:500;font-size:14px;line-height:1.25;margin-bottom:6px;letter-spacing:-.01em">{{ i.name }}</div><div style="font-family:var(--mono);font-size:10px;color:var(--gold)">10 business types →</div></div>
+            </a>
+          </sc-for>
+        </div>
+        <div class="rise" style="text-align:center;margin-top:34px"><a href="#" style="display:inline-block;border:1px solid var(--line2);color:var(--tx);padding:14px 30px;border-radius:100px;font-weight:600;font-size:14px" style-hover="border-color:var(--orange);color:var(--orange)">Explore all 100 industries →</a></div>
+      </div>
+    </section>
+
+    <!-- DUAL CTA -->
+    <section style="padding:80px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <a href="#" class="rise" style="position:relative;border:1px solid rgba(246,138,36,.3);border-radius:20px;padding:40px;display:block;color:var(--tx);background:linear-gradient(140deg,rgba(218,84,39,.14),var(--panel) 60%);overflow:hidden" style-hover="border-color:var(--orange)">
+          <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--orange);margin-bottom:18px">DEVELOPERS</div>
+          <div style="font-family:var(--disp);font-weight:500;font-size:27px;letter-spacing:-.01em;margin-bottom:12px">Build on PYRAX</div>
+          <p style="color:var(--tx2);font-size:14px;line-height:1.6;margin:0 0 22px;max-width:380px">EVM, WASM, and Cairo — three virtual machines, one chain. Bring your Ethereum tooling or write provable contracts.</p>
+          <span style="font-weight:700;font-size:14px;color:var(--orange)">Start building →</span>
+        </a>
+        <a href="#" class="rise" style="position:relative;border:1px solid rgba(57,131,195,.32);border-radius:20px;padding:40px;display:block;color:var(--tx);background:linear-gradient(140deg,rgba(25,99,169,.16),var(--panel) 60%);overflow:hidden" style-hover="border-color:var(--blue)">
+          <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--cyan);margin-bottom:18px">INVESTORS</div>
+          <div style="font-family:var(--disp);font-weight:500;font-size:27px;letter-spacing:-.01em;margin-bottom:12px">For investors</div>
+          <p style="color:var(--tx2);font-size:14px;line-height:1.6;margin:0 0 22px;max-width:380px">An interactive, animated deck — the vision, the technology, the tokenomics, and the ask.</p>
+          <span style="font-weight:700;font-size:14px;color:var(--cyan)">Open the pitch deck →</span>
+        </a>
+      </div>
+    </section>
+
+    {{ footer }}
+  </div>
+</div>
+
+<!-- HOME MOBILE -->
+<div style="max-width:1620px;margin:0 auto;padding:36px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">HOME — MOBILE · route /</div>
+  <div data-screen-label="V2 Home · Mobile" style="width:392px;border:1px solid var(--line);border-radius:32px;overflow:hidden;background:var(--bg)">
+    <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(5,6,9,.92);position:sticky;top:0;z-index:3">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:22px;display:block">
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <span style="font-family:var(--mono);font-size:9px;border:1px solid var(--line2);padding:5px 8px;border-radius:100px;display:flex;align-items:center;gap:5px"><span style="width:6px;height:6px;border-radius:50%;background:var(--live);animation:blink 2s infinite"></span>Seed</span>
+        <div style="display:flex;flex-direction:column;gap:4.5px;padding:9px 7px"><span style="width:20px;height:1.5px;background:var(--tx)"></span><span style="width:20px;height:1.5px;background:var(--tx)"></span></div>
+      </div>
+    </div>
+    <div style="position:relative;padding:44px 20px 36px;overflow:hidden;border-bottom:1px solid var(--line)">
+      <div style="position:absolute;inset:0;background:radial-gradient(420px 320px at 85% 6%,rgba(218,84,39,.18),transparent 60%)"></div>
+      <div style="position:relative">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px"><span style="width:20px;height:1px;background:var(--orange)"></span><span style="font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--orange)">Private, parallel L1</span></div>
+        <h1 style="font-family:var(--disp);font-weight:500;font-size:29px;line-height:1.1;letter-spacing:-.015em;margin:0 0 16px">The blockchain built like the <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">future demands</span>.</h1>
+        <p style="color:var(--tx2);font-size:14px;line-height:1.6;margin:0 0 24px">A GhostDAG web of blocks — private by default, ISP-resistant, 500,000+ TPS.</p>
+        <a href="#" style="display:block;text-align:center;background:var(--grad);color:#140803;padding:15px;border-radius:100px;font-weight:700;margin-bottom:10px">Explore the network</a>
+        <a href="#" style="display:block;text-align:center;border:1px solid var(--line2);color:var(--tx);padding:15px;border-radius:100px;font-weight:600">Read the whitepaper →</a>
+      </div>
+    </div>
+    <div style="padding:20px;border-bottom:1px solid var(--line)">{{ liveWidget }}</div>
+    <div style="padding:32px 20px;border-bottom:1px solid var(--line)">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3);margin-bottom:10px">01 / Invariants</div>
+      <h2 style="font-family:var(--disp);font-weight:500;font-size:23px;margin:0 0 18px;letter-spacing:-.01em">Four invariants, not features.</h2>
+      <div style="display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden">
+        <sc-for list="{{ invariants }}" as="c" hint-placeholder-count="4">
+          <div style="background:var(--bg);padding:22px 20px">
+            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px"><span style="font-family:var(--disp);font-weight:600;font-size:20px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">{{ c.stat }}</span><span style="font-family:var(--mono);font-size:9.5px;color:var(--tx3)">{{ c.statLabel }}</span></div>
+            <div style="font-family:var(--disp);font-weight:500;font-size:15px;margin-bottom:6px">{{ c.title }}</div>
+            <div style="color:var(--tx2);font-size:12.5px;line-height:1.55">{{ c.desc }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="padding:28px 20px;text-align:center;color:var(--tx3);font-family:var(--mono);font-size:10px">Built · NEURAX · Industries · CTAs · Footer ↓</div>
+  </div>
+</div>
+
+<!-- ====== TECHNOLOGY ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:64px 44px 0">{{ tagTech }}</div>
+<div style="max-width:1620px;margin:0 auto;padding:20px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">TECHNOLOGY — DESKTOP · route /technology</div>
+  <div data-screen-label="V2 Technology · Desktop" style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg);box-shadow:0 60px 160px -50px rgba(0,0,0,.9)">
+    <nav style="display:flex;align-items:center;gap:30px;padding:0 32px;height:70px;background:rgba(5,6,9,.82);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:28px;display:block">
+      <div style="display:flex;gap:2px;margin-left:16px">
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx);cursor:pointer;padding:9px 13px;border-radius:9px;background:var(--panel2)">Technology</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Network</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Token</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Industries</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Developers</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Company</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+        <button onClick="{{ openSwitcher }}" style="display:flex;align-items:center;gap:9px;background:transparent;border:1px solid var(--line2);color:var(--tx);padding:9px 14px;border-radius:100px;cursor:pointer;font-family:var(--mono);font-size:12px"><span style="width:7px;height:7px;border-radius:50%;background:var(--live);animation:blink 2s infinite"></span>{{ selName }}<span style="color:var(--tx3);font-size:9px">▼</span></button>
+        <a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:10px 19px;border-radius:100px;font-weight:700;font-size:13.5px">Launch App ↗</a>
+      </div>
+    </nav>
+
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--line)">
+      <div style="position:absolute;inset:0;background:radial-gradient(900px 480px at 82% 0%,rgba(25,99,169,.16),transparent 60%)"></div>
+      <div style="position:relative;max-width:1280px;margin:0 auto;padding:88px 56px 0">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px"><span style="width:26px;height:1px;background:var(--cyan)"></span><span style="font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan)">Technology</span></div>
+        <h1 style="font-family:var(--disp);font-weight:500;font-size:clamp(34px,3.8vw,54px);line-height:1.06;letter-spacing:-.015em;margin:0 0 22px;max-width:900px">A Layer-1 that is parallel, private, and <span style="background:var(--grad-b);-webkit-background-clip:text;background-clip:text;color:transparent">provable</span>.</h1>
+        <p style="color:var(--tx2);font-size:16px;line-height:1.65;max-width:760px;margin:0 0 40px">One binary, four chainspecs. A blockDAG that includes honest parallel work instead of orphaning it, transfers that are shielded by default, three virtual machines, and a verifiable compute market — with a single external audit standing between the code and mainnet.</p>
+      </div>
+      <div style="position:relative;display:flex;gap:4px;padding:0 56px 0;max-width:1280px;margin:0 auto;border-bottom:1px solid transparent">
+        <sc-for list="{{ techAnchors }}" as="a" hint-placeholder-count="6">
+          <span style="font-family:var(--mono);font-size:12px;color:var(--tx2);padding:13px 16px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap" style-hover="color:var(--tx);border-color:var(--orange)">{{ a }}</span>
+        </sc-for>
+      </div>
+    </section>
+
+    <!-- 01 consensus -->
+    <section style="padding:88px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto">
+        <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:48px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">01 / Consensus</div>
+            <h2 style="font-family:var(--disp);font-weight:500;font-size:36px;letter-spacing:-.01em;line-height:1.1;margin:0">GhostDAG + TriStream</h2>
+          </div>
+          <p style="color:var(--tx2);font-size:14.5px;line-height:1.68;margin:0">PYRAX orders a blockDAG, not a single chain. GhostDAG's k-cluster rule selects a "blue set" of well-connected blocks and orders everything relative to a selected-parent chain — so honest blocks mined in parallel are included and rewarded, not orphaned. That is what lets throughput scale without sacrificing the security of proof-of-work.</p>
+        </div>
+        <div class="rise" style="border:1px solid var(--line);border-radius:18px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr;background:var(--bg2);border-bottom:1px solid var(--line);padding:0"><span style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--tx3);padding:13px 22px">STREAM</span><span style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--tx3);padding:13px 22px">SEAL LANE</span><span style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--tx3);padding:13px 22px">HARDWARE</span></div>
+          <sc-for list="{{ sealLanes }}" as="l" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:100px 1fr 1fr;border-bottom:1px solid var(--hair);align-items:center" style-hover="background:var(--panel)">
+              <span style="padding:17px 22px"><span style="display:inline-flex;width:26px;height:26px;border-radius:8px;align-items:center;justify-content:center;font-family:var(--disp);font-weight:600;font-size:12px;border:1px solid {{ l.color }};color:{{ l.color }}">{{ l.stream }}</span></span>
+              <span style="font-family:var(--body);font-weight:600;font-size:14.5px;padding:17px 22px">{{ l.algo }}</span>
+              <span style="color:var(--tx2);font-size:13.5px;padding:17px 22px;font-family:var(--mono)">{{ l.hw }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+          <div style="border:1px solid var(--line);border-radius:16px;padding:28px;background:var(--panel);position:relative"><span style="position:absolute;top:-1px;left:22px;width:34px;height:1px;background:var(--cyan)"></span>
+            <div style="font-family:var(--disp);font-weight:500;font-size:17px;margin-bottom:10px">BLS-aggregated PoS finality</div>
+            <div style="color:var(--tx2);font-size:13.5px;line-height:1.65">Proof-of-work gives probabilistic ordering; Stream C adds deterministic finality. Validators bond a minimum 32 PYRX and vote with BLS12-381 signatures that aggregate — hundreds compress to one. A block is final once attestations cover &gt; 2/3 of staked weight, and <span style="color:var(--gold)">finality overrides work</span>.</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:16px;padding:28px;background:var(--panel);position:relative"><span style="position:absolute;top:-1px;left:22px;width:34px;height:1px;background:var(--orange)"></span>
+            <div style="font-family:var(--disp);font-weight:500;font-size:17px;margin-bottom:10px">51%-resistance across three resources</div>
+            <div style="color:var(--tx2);font-size:13.5px;line-height:1.65">Rewriting history would require a majority of ASIC and GPU+CPU hashpower and a staked supermajority — three uncorrelated supply chains at once — while GhostDAG colors withheld branches red and reverting a finalized block is a slashable offense (<span style="color:var(--orange)">5% burn + 10% reporter bounty</span>).</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 privacy -->
+    <section style="padding:88px 56px;border-bottom:1px solid var(--line);position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background:radial-gradient(800px 460px at 10% 30%,rgba(25,99,169,.1),transparent 60%)"></div>
+      <div style="position:relative;max-width:1280px;margin:0 auto">
+        <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:48px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">02 / Privacy</div>
+            <h2 style="font-family:var(--disp);font-weight:500;font-size:36px;letter-spacing:-.01em;line-height:1.1;margin:0">Shielded by default</h2>
+          </div>
+          <p style="color:var(--tx2);font-size:14.5px;line-height:1.68;margin:0">On every production network the default transfer is Shielded — transparent is the explicit special case, enforced at the type level. A shielded transaction reveals no sender, no receiver, and no per-note amount.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:stretch">
+          <div class="rise" style="display:flex;flex-direction:column;gap:14px">
+            <sc-for list="{{ privacyCards }}" as="p" hint-placeholder-count="3">
+              <div style="border:1px solid var(--line);border-radius:16px;padding:24px 26px;background:var(--panel)" style-hover="border-color:var(--line2)">
+                <div style="font-family:var(--disp);font-weight:500;font-size:16px;margin-bottom:8px">{{ p.t }}</div>
+                <div style="color:var(--tx2);font-size:13.5px;line-height:1.62">{{ p.d }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div class="rise" style="border:1px solid var(--line2);border-radius:20px;background:rgba(7,9,14,.8);padding:32px;display:flex;flex-direction:column">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--tx3);letter-spacing:.16em;margin-bottom:26px">SHIELDED TRANSACTION · WHAT AN OBSERVER SEES</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex:1">
+              <div style="text-align:center"><div style="width:64px;height:64px;border-radius:50%;background:var(--panel2);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:20px;color:var(--tx3)">?</div><div style="font-family:var(--mono);font-size:10px;color:var(--tx3)">sender<br><span style="color:var(--cyan)">hidden</span></div></div>
+              <div style="flex:1;position:relative;height:2px;background:linear-gradient(90deg,var(--blue),var(--orange));border-radius:2px"><span style="position:absolute;left:50%;top:-13px;transform:translateX(-50%);font-family:var(--mono);font-size:10px;color:var(--tx);background:#0b0d13;border:1px solid var(--line2);padding:3px 10px;border-radius:100px">amount <span style="color:var(--cyan)">hidden</span></span></div>
+              <div style="text-align:center"><div style="width:64px;height:64px;border-radius:50%;background:var(--panel2);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:20px;color:var(--tx3)">?</div><div style="font-family:var(--mono);font-size:10px;color:var(--tx3)">receiver<br><span style="color:var(--cyan)">hidden</span></div></div>
+            </div>
+            <div style="margin-top:28px;padding:18px;background:rgba(5,6,9,.7);border:1px solid var(--line);border-radius:14px;font-family:var(--mono);font-size:11.5px;color:var(--tx2);line-height:1.8">→ note commitment → depth-32 Merkle tree<br>→ nullifier published · double-spend blocked<br>→ <span style="color:var(--orange)">100 Ash shielded fee burned (anti-DoS)</span></div>
+            <div style="margin-top:14px;font-size:12px;color:var(--tx3);line-height:1.6">Recursive aggregation folds thousands of shielded proofs into one — a validator performs roughly a single verification per batch.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 vms -->
+    <section style="padding:88px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto">
+        <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:48px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">03 / Virtual machines</div>
+            <h2 style="font-family:var(--disp);font-weight:500;font-size:36px;letter-spacing:-.01em;line-height:1.12;margin:0">Three VMs, cross-VM calls, one chain.</h2>
+          </div>
+          <p style="color:var(--tx2);font-size:14.5px;line-height:1.68;margin:0">Deploy in the language and toolchain you already know. All three virtual machines share one state, one gas market, and can call each other — and a recursive ZK-rollup layer folds thousands of proofs into one.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:16px">
+          <sc-for list="{{ vms }}" as="v" hint-placeholder-count="3">
+            <div class="rise" style="background:var(--bg);padding:32px 28px" style-hover="background:var(--bg2)">
+              <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:18px"><span style="font-family:var(--disp);font-weight:600;font-size:24px;letter-spacing:-.01em;background:var(--grad-b);-webkit-background-clip:text;background-clip:text;color:transparent">{{ v.name }}</span><span style="font-family:var(--mono);font-size:11px;color:var(--tx3)">{{ v.engine }}</span></div>
+              <div style="color:var(--tx2);font-size:13.5px;line-height:1.65">{{ v.desc }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div class="rise" style="border:1px solid var(--line);border-radius:16px;padding:24px 28px;background:var(--panel)">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--tx3);margin-bottom:16px">SIX TRANSACTION TYPES, ONE LEDGER</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+            <sc-for list="{{ txTypes }}" as="t" hint-placeholder-count="6"><span style="font-family:var(--body);font-weight:600;font-size:13px;padding:9px 17px;border-radius:100px;border:1px solid var(--line2)" style-hover="border-color:var(--gold);color:var(--gold)">{{ t }}</span></sc-for>
+          </div>
+          <div style="color:var(--tx2);font-size:12.5px;line-height:1.6;font-family:var(--mono)">Escrow (Lock / Refund / Release / Drip / Split) · Stake (Bond / Unbond / Withdraw / Slash) · Governance (Propose / Vote) — first-class transaction kinds, not bolted-on contracts.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 neurax -->
+    <section style="padding:88px 56px;border-bottom:1px solid var(--line);position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background:radial-gradient(800px 460px at 90% 60%,rgba(218,84,39,.09),transparent 60%)"></div>
+      <div style="position:relative;max-width:1280px;margin:0 auto">
+        <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:48px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">04 / NEURAX</div>
+            <h2 style="font-family:var(--disp);font-weight:500;font-size:36px;letter-spacing:-.01em;line-height:1.12;margin:0">Verifiable AI &amp; GPU compute.</h2>
+          </div>
+          <p style="color:var(--tx2);font-size:14.5px;line-height:1.68;margin:0">The same GPUs that mine Stream B run paid AI and compute jobs, funded by on-chain escrow and priced at a fixed 8 PYRX per compute unit. Instead of trusting a provider's word, results climb a four-rung verification ladder.</p>
+        </div>
+        <div class="rise" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:16px">
+          <sc-for list="{{ neuraxLadder }}" as="r" hint-placeholder-count="4">
+            <div style="background:var(--bg);padding:28px 24px;position:relative" style-hover="background:var(--bg2)">
+              <div style="font-family:var(--disp);font-weight:600;font-size:34px;background:var(--grad-b);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1;margin-bottom:16px">{{ r.n }}</div>
+              <div style="font-family:var(--disp);font-weight:500;font-size:15px;margin-bottom:6px;letter-spacing:-.01em">{{ r.t }}</div>
+              <div style="color:var(--tx2);font-size:12.5px;line-height:1.55">{{ r.d }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+          <sc-for list="{{ neuraxStats2 }}" as="s" hint-placeholder-count="4">
+            <div class="rise" style="border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--panel);position:relative"><span style="position:absolute;top:-1px;left:16px;width:26px;height:1px;background:var(--cyan)"></span><div style="font-family:var(--disp);font-weight:600;font-size:19px;color:var(--cyan);letter-spacing:-.01em">{{ s.n }}</div><div style="color:var(--tx2);font-size:12px;margin-top:8px;line-height:1.5">{{ s.l }}</div></div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 network -->
+    <section style="padding:88px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto">
+        <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:48px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">05 / Network</div>
+            <h2 style="font-family:var(--disp);font-weight:500;font-size:36px;letter-spacing:-.01em;line-height:1.1;margin:0">Bootstrapless &amp; ISP-resistant.</h2>
+          </div>
+          <p style="color:var(--tx2);font-size:14.5px;line-height:1.68;margin:0">There is no company-run starter server that can be seized or blocked. Peers discover each other through a decentralized mesh, and traffic can ride an onion Sphinx mixnet so an on-path observer — including an ISP — sees only uniform, encrypted flows.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center">
+          <div class="rise" style="display:flex;flex-direction:column;gap:14px">
+            <sc-for list="{{ networkPoints }}" as="p" hint-placeholder-count="3">
+              <div style="border:1px solid var(--line);border-radius:16px;padding:24px 26px;background:var(--panel)" style-hover="border-color:var(--line2)"><div style="font-family:var(--disp);font-weight:500;font-size:16px;margin-bottom:8px">{{ p.t }}</div><div style="color:var(--tx2);font-size:13.5px;line-height:1.62">{{ p.d }}</div></div>
+            </sc-for>
+          </div>
+          <div class="rise" style="border:1px solid var(--line2);border-radius:20px;background:rgba(7,9,14,.8);padding:36px;display:flex;flex-direction:column;align-items:center">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--tx3);letter-spacing:.16em;align-self:flex-start;margin-bottom:24px">SPHINX ONION MIXNET</div>
+            <div style="position:relative;width:250px;height:250px;display:flex;align-items:center;justify-content:center">
+              <div style="position:absolute;width:250px;height:250px;border-radius:50%;border:1px dashed rgba(218,84,39,.45);animation:orbit 40s linear infinite"></div>
+              <div style="position:absolute;width:184px;height:184px;border-radius:50%;border:1px dashed rgba(246,138,36,.5);animation:orbit 28s linear infinite reverse"></div>
+              <div style="position:absolute;width:120px;height:120px;border-radius:50%;border:1px dashed rgba(254,210,60,.55);animation:orbit 18s linear infinite"></div>
+              <div style="width:56px;height:56px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:600;font-size:10px;color:#140803;box-shadow:0 0 40px rgba(246,138,36,.4)">PKT</div>
+              <span style="position:absolute;top:2px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;color:var(--orange-deep);background:var(--bg);padding:2px 8px;border-radius:100px">hop 3</span>
+              <span style="position:absolute;top:35px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;color:var(--orange);background:var(--bg);padding:2px 8px;border-radius:100px">hop 2</span>
+              <span style="position:absolute;top:67px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;color:var(--gold);background:var(--bg);padding:2px 8px;border-radius:100px">hop 1</span>
+            </div>
+            <div style="margin-top:24px;font-size:12px;color:var(--tx2);text-align:center;line-height:1.6;max-width:340px">Fixed-size packets + cover traffic. Each relay peels one layer; no hop ever sees source and destination together.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 security -->
+    <section style="padding:88px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto">
+        <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:48px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">06 / Security</div>
+            <h2 style="font-family:var(--disp);font-weight:500;font-size:36px;letter-spacing:-.01em;line-height:1.1;margin:0">Audit-gated to mainnet.</h2>
+          </div>
+          <p style="color:var(--tx2);font-size:14.5px;line-height:1.68;margin:0">PYRAX is open-core: the protocol, node, and SDK are public. The supply cap is enforced in consensus, the fee split is frozen, and a single external audit of consensus, ZK, and the bridge stands between the code and PYRAX One.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:40px">
+          <sc-for list="{{ securityCards }}" as="c" hint-placeholder-count="4">
+            <div class="rise" style="background:var(--bg);padding:28px 24px" style-hover="background:var(--bg2)"><div style="font-family:var(--disp);font-weight:500;font-size:15.5px;margin-bottom:10px;letter-spacing:-.01em">{{ c.t }}</div><div style="color:var(--tx2);font-size:12.5px;line-height:1.6">{{ c.d }}</div></div>
+          </sc-for>
+        </div>
+        <div class="rise" style="display:flex;gap:14px;flex-wrap:wrap">
+          <a href="#" style="background:var(--grad);color:#140803;padding:14px 26px;border-radius:100px;font-weight:700;font-size:14px">Read the whitepaper →</a>
+          <a href="#" style="border:1px solid var(--line2);color:var(--tx);padding:14px 26px;border-radius:100px;font-weight:600;font-size:14px" style-hover="border-color:var(--orange)">The four networks</a>
+          <a href="https://explorer.pyraxchain.com" style="border:1px solid var(--line2);color:var(--tx);padding:14px 26px;border-radius:100px;font-weight:600;font-size:14px" style-hover="border-color:var(--cyan)">Open the explorer ↗</a>
+        </div>
+      </div>
+    </section>
+
+    {{ footer }}
+  </div>
+</div>
+
+<!-- TECH MOBILE -->
+<div style="max-width:1620px;margin:0 auto;padding:36px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">TECHNOLOGY — MOBILE</div>
+  <div data-screen-label="V2 Technology · Mobile" style="width:392px;border:1px solid var(--line);border-radius:32px;overflow:hidden;background:var(--bg)">
+    <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(5,6,9,.92)"><img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:22px;display:block"><div style="margin-left:auto;display:flex;flex-direction:column;gap:4.5px;padding:9px 7px"><span style="width:20px;height:1.5px;background:var(--tx)"></span><span style="width:20px;height:1.5px;background:var(--tx)"></span></div></div>
+    <div style="padding:36px 20px 24px;border-bottom:1px solid var(--line)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="width:20px;height:1px;background:var(--cyan)"></span><span style="font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)">Technology</span></div>
+      <h1 style="font-family:var(--disp);font-weight:500;font-size:27px;line-height:1.12;letter-spacing:-.015em;margin:0">A Layer-1 that is parallel, private, and provable.</h1>
+    </div>
+    <div style="display:flex;gap:4px;padding:10px 14px;border-bottom:1px solid var(--line);overflow-x:auto">
+      <sc-for list="{{ techAnchors }}" as="a" hint-placeholder-count="6"><span style="font-family:var(--mono);font-size:11px;color:var(--tx2);padding:8px 12px;border-radius:100px;border:1px solid var(--line);white-space:nowrap">{{ a }}</span></sc-for>
+    </div>
+    <div style="padding:28px 20px;border-bottom:1px solid var(--line)">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3);margin-bottom:8px">01 / Consensus</div>
+      <div style="font-family:var(--disp);font-weight:500;font-size:20px;margin-bottom:16px">GhostDAG + TriStream</div>
+      <div style="display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden">
+        <sc-for list="{{ sealLanes }}" as="l" hint-placeholder-count="5">
+          <div style="background:var(--bg);padding:14px 16px;display:flex;align-items:center;gap:12px"><span style="display:inline-flex;width:24px;height:24px;border-radius:7px;align-items:center;justify-content:center;font-family:var(--disp);font-weight:600;font-size:11px;border:1px solid {{ l.color }};color:{{ l.color }};flex:none">{{ l.stream }}</span><div><div style="font-weight:600;font-size:13px">{{ l.algo }}</div><div style="font-family:var(--mono);font-size:10px;color:var(--tx3);margin-top:2px">{{ l.hw }}</div></div></div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="padding:26px 20px;text-align:center;color:var(--tx3);font-family:var(--mono);font-size:10px">Privacy · VMs · NEURAX · Network · Security ↓</div>
+  </div>
+</div>
+
+<!-- ====== NETWORK ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:64px 44px 0">{{ tagNet }}</div>
+<div style="max-width:1620px;margin:0 auto;padding:20px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">NETWORK — DESKTOP · route /network</div>
+  <div data-screen-label="V2 Network · Desktop" style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg);box-shadow:0 60px 160px -50px rgba(0,0,0,.9)">
+    <nav style="display:flex;align-items:center;gap:30px;padding:0 32px;height:70px;background:rgba(5,6,9,.82);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:28px;display:block">
+      <div style="display:flex;gap:2px;margin-left:16px">
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Technology</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx);cursor:pointer;padding:9px 13px;border-radius:9px;background:var(--panel2)">Network</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Token</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Industries</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Developers</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Company</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+        <button onClick="{{ openSwitcher }}" style="display:flex;align-items:center;gap:9px;background:transparent;border:1px solid var(--line2);color:var(--tx);padding:9px 14px;border-radius:100px;cursor:pointer;font-family:var(--mono);font-size:12px"><span style="width:7px;height:7px;border-radius:50%;background:var(--live);animation:blink 2s infinite"></span>{{ selName }}<span style="color:var(--tx3);font-size:9px">▼</span></button>
+        <a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:10px 19px;border-radius:100px;font-weight:700;font-size:13.5px">Launch App ↗</a>
+      </div>
+    </nav>
+
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--line)">
+      <div style="position:absolute;inset:0;background:radial-gradient(900px 480px at 16% 0%,rgba(218,84,39,.13),transparent 60%)"></div>
+      <div style="position:relative;max-width:1280px;margin:0 auto;padding:88px 56px 64px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px"><span style="width:26px;height:1px;background:var(--orange)"></span><span style="font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--orange)">The network</span></div>
+        <h1 style="font-family:var(--disp);font-weight:500;font-size:clamp(34px,3.8vw,54px);line-height:1.06;letter-spacing:-.015em;margin:0 0 22px">One binary, <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">four networks</span>.</h1>
+        <p style="color:var(--tx2);font-size:16px;line-height:1.65;max-width:760px;margin:0">The node ships exactly four chainspecs. Seed is a permanent simulation; Forge, Rise, and One share the real Production consensus, differing only by launch order and audit gating. A production chain-id can never fake instant-seal.</p>
+      </div>
+    </section>
+
+    <section style="padding:72px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <sc-for list="{{ networksList }}" as="n" hint-placeholder-count="4">
+            <div class="rise" style="border:1px solid {{ n.border }};border-radius:20px;overflow:hidden;background:var(--panel)" style-hover="border-color:var(--line2)">
+              <div style="padding:26px 28px 22px;display:flex;gap:18px;align-items:flex-start">
+                <div style="width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:600;font-size:24px;flex:none;background:{{ n.markBg }};color:{{ n.markCol }}">{{ n.code }}</div>
+                <div style="flex:1">
+                  <div style="display:flex;align-items:center;gap:10px"><span style="font-family:var(--disp);font-weight:500;font-size:21px;letter-spacing:-.01em">{{ n.name }}</span><span style="width:8px;height:8px;border-radius:50%;background:{{ n.dot }};box-shadow:{{ n.glow }}"></span></div>
+                  <div style="font-family:var(--mono);font-size:11px;color:{{ n.statusCol }};margin-top:5px">{{ n.status }} · chain {{ n.chain }} · {{ n.block }} blocks</div>
+                </div>
+                <span style="font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;padding:6px 11px;border-radius:100px;border:1px solid var(--line2);color:{{ n.statusCol }};white-space:nowrap">{{ n.badge }}</span>
+              </div>
+              <div style="padding:0 28px 26px;color:var(--tx2);font-size:13.5px;line-height:1.65">{{ n.desc }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div class="rise" style="margin-top:22px;font-family:var(--mono);font-size:11.5px;color:var(--tx3);text-align:center;line-height:1.6">Live figures are read from each network's public RPC at page load. A network that isn't reachable shows honest status — never fabricated numbers.</div>
+      </div>
+    </section>
+
+    <!-- roadmap -->
+    <section style="padding:88px 56px;border-bottom:1px solid var(--line);position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background:radial-gradient(800px 480px at 88% 20%,rgba(25,99,169,.1),transparent 60%)"></div>
+      <div style="position:relative;max-width:1280px;margin:0 auto">
+        <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:52px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">Roadmap</div>
+            <h2 style="font-family:var(--disp);font-weight:500;font-size:36px;letter-spacing:-.01em;line-height:1.1;margin:0">The path to mainnet.</h2>
+          </div>
+          <p style="color:var(--tx2);font-size:14.5px;line-height:1.68;margin:0">Deliberate and audit-gated. Each network de-risks the next; nothing carrying real value ships before the external audit clears.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+          <sc-for list="{{ roadmap }}" as="r" hint-placeholder-count="5">
+            <div class="rise" style="position:relative">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><span style="width:12px;height:12px;border-radius:50%;background:{{ r.col }};box-shadow:0 0 12px {{ r.col }}"></span><span style="font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:{{ r.col }}">{{ r.stage }}</span><span style="flex:1;height:1px;background:var(--line)"></span></div>
+              <sc-if value="{{ r.gate }}" hint-placeholder-val="{{ false }}">
+                <div style="border:1px solid var(--cyan);border-radius:16px;padding:24px 20px;min-height:210px;background:linear-gradient(180deg,rgba(25,99,169,.22),var(--panel));position:relative;overflow:hidden">
+                  <div style="position:absolute;top:0;bottom:0;left:10px;width:1px;background:linear-gradient(180deg,transparent,rgba(92,186,206,.5),transparent)"></div>
+                  <div style="position:absolute;top:0;bottom:0;right:10px;width:1px;background:linear-gradient(180deg,transparent,rgba(92,186,206,.5),transparent)"></div>
+                  <div style="font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--cyan);margin-bottom:12px">⟨ CHECKPOINT ⟩</div>
+                  <div style="font-family:var(--disp);font-weight:500;font-size:16px;margin-bottom:10px;letter-spacing:-.01em">{{ r.title }}</div>
+                  <div style="color:var(--tx2);font-size:12.5px;line-height:1.58">{{ r.desc }}</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ r.notGate }}" hint-placeholder-val="{{ true }}">
+                <div style="border:1px solid var(--line);border-radius:16px;padding:24px 20px;min-height:210px;background:var(--panel)" style-hover="border-color:var(--line2)">
+                  <div style="font-family:var(--disp);font-weight:500;font-size:16px;margin-bottom:10px;letter-spacing:-.01em">{{ r.title }}</div>
+                  <div style="color:var(--tx2);font-size:12.5px;line-height:1.58">{{ r.desc }}</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div class="rise" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:44px">
+          <a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:14px 26px;border-radius:100px;font-weight:700;font-size:14px">Explore Seed live →</a>
+          <a href="https://nodes.pyraxchain.com" style="border:1px solid var(--line2);color:var(--tx);padding:14px 26px;border-radius:100px;font-weight:600;font-size:14px" style-hover="border-color:var(--orange)">Run a node ↗</a>
+          <a href="#" style="border:1px solid var(--line2);color:var(--tx);padding:14px 26px;border-radius:100px;font-weight:600;font-size:14px" style-hover="border-color:var(--cyan)">How it works</a>
+        </div>
+      </div>
+    </section>
+
+    {{ footer }}
+  </div>
+</div>
+
+<!-- NETWORK MOBILE -->
+<div style="max-width:1620px;margin:0 auto;padding:36px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">NETWORK — MOBILE</div>
+  <div data-screen-label="V2 Network · Mobile" style="width:392px;border:1px solid var(--line);border-radius:32px;overflow:hidden;background:var(--bg)">
+    <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(5,6,9,.92)"><img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:22px;display:block"><div style="margin-left:auto;display:flex;flex-direction:column;gap:4.5px;padding:9px 7px"><span style="width:20px;height:1.5px;background:var(--tx)"></span><span style="width:20px;height:1.5px;background:var(--tx)"></span></div></div>
+    <div style="padding:36px 20px 26px;border-bottom:1px solid var(--line)"><h1 style="font-family:var(--disp);font-weight:500;font-size:27px;letter-spacing:-.015em;line-height:1.1;margin:0 0 12px">One binary, four networks.</h1><p style="color:var(--tx2);font-size:13px;line-height:1.6;margin:0">Live figures read from each network's public RPC at page load.</p></div>
+    <div style="padding:18px 18px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--line)">
+      <sc-for list="{{ networksList }}" as="n" hint-placeholder-count="4">
+        <div style="border:1px solid {{ n.border }};border-radius:16px;padding:18px;background:var(--panel)">
+          <div style="display:flex;align-items:center;gap:13px;margin-bottom:10px"><div style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:600;font-size:18px;background:{{ n.markBg }};color:{{ n.markCol }}">{{ n.code }}</div><div><div style="font-family:var(--disp);font-weight:500;font-size:16px">{{ n.name }}</div><div style="font-family:var(--mono);font-size:10px;color:{{ n.statusCol }};margin-top:3px">{{ n.status }} · {{ n.badge }}</div></div></div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--tx2)">chain {{ n.chain }} · {{ n.block }} blocks</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="padding:26px 20px;text-align:center;color:var(--tx3);font-family:var(--mono);font-size:10px">Roadmap: Now · Next · Then · Gate · Launch ↓</div>
+  </div>
+</div>
+
+<!-- ====== TOKEN ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:64px 44px 0">{{ tagToken }}</div>
+<div style="max-width:1620px;margin:0 auto;padding:20px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">TOKEN — DESKTOP · route /token</div>
+  <div data-screen-label="V2 Token · Desktop" style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg);box-shadow:0 60px 160px -50px rgba(0,0,0,.9)">
+    <nav style="display:flex;align-items:center;gap:30px;padding:0 32px;height:70px;background:rgba(5,6,9,.82);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:28px;display:block">
+      <div style="display:flex;gap:2px;margin-left:16px">
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Technology</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Network</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx);cursor:pointer;padding:9px 13px;border-radius:9px;background:var(--panel2)">Token</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Industries</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Developers</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Company</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+        <button onClick="{{ openSwitcher }}" style="display:flex;align-items:center;gap:9px;background:transparent;border:1px solid var(--line2);color:var(--tx);padding:9px 14px;border-radius:100px;cursor:pointer;font-family:var(--mono);font-size:12px"><span style="width:7px;height:7px;border-radius:50%;background:var(--live);animation:blink 2s infinite"></span>{{ selName }}<span style="color:var(--tx3);font-size:9px">▼</span></button>
+        <a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:10px 19px;border-radius:100px;font-weight:700;font-size:13.5px">Launch App ↗</a>
+      </div>
+    </nav>
+
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--line)">
+      <div style="position:absolute;inset:0;background:radial-gradient(900px 480px at 82% 0%,rgba(254,210,60,.09),transparent 60%)"></div>
+      <div style="position:relative;max-width:1280px;margin:0 auto;padding:88px 56px 60px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px"><span style="width:26px;height:1px;background:var(--gold)"></span><span style="font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)">Tokenomics</span></div>
+        <h1 style="font-family:var(--disp);font-weight:500;font-size:clamp(34px,3.8vw,54px);line-height:1.06;letter-spacing:-.015em;margin:0 0 22px">The <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">PYRX</span> economy.</h1>
+        <p style="color:var(--tx2);font-size:16px;line-height:1.65;max-width:740px;margin:0 0 40px">A fixed 50-billion supply enforced in consensus, a transparent premine, mining that runs for a quarter-century, and a fee split no one — not even a governance vote — can ever change.</p>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden">
+          <sc-for list="{{ tokenHero }}" as="s" hint-placeholder-count="4">
+            <div style="background:var(--bg);padding:26px 26px"><div style="font-family:var(--disp);font-weight:600;font-size:27px;letter-spacing:-.01em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1">{{ s.n }}</div><div style="color:var(--tx2);font-family:var(--mono);font-size:11px;margin-top:10px">{{ s.l }}</div></div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <!-- genesis distribution -->
+    <section style="padding:88px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto">
+        <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:48px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">01 / Genesis distribution</div>
+            <h2 style="font-family:var(--disp);font-weight:500;font-size:36px;letter-spacing:-.01em;line-height:1.1;margin:0">50,000,000,000 PYRX.</h2>
+          </div>
+          <p style="color:var(--tx2);font-size:14.5px;line-height:1.68;margin:0">Every pool is seeded into a reserved, credit-only system account at genesis. The 12.5B mining share is the only supply not present at launch — it is minted to block producers over ~26 years.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:290px 1fr 320px;gap:40px;align-items:start">
+          <div class="rise" style="display:flex;flex-direction:column;align-items:center">
+            <div style="position:relative;width:240px;height:240px;border-radius:50%;background:conic-gradient(var(--orange) 0 50%,var(--blue) 50% 75%,var(--gold) 75% 85%,var(--cyan) 85% 93%,var(--orange-deep) 93% 98%,#454c5b 98% 100%);box-shadow:0 0 80px rgba(246,138,36,.14)">
+              <div style="position:absolute;inset:30px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:var(--disp);font-weight:600;font-size:32px;letter-spacing:-.01em">50B</span><span style="font-family:var(--mono);font-size:10px;color:var(--tx3);margin-top:4px">HARD CAP</span></div>
+            </div>
+            <div style="margin-top:20px;font-family:var(--mono);font-size:11.5px;color:var(--tx2)">75% premine · 25% mined</div>
+          </div>
+          <div class="rise" style="display:flex;flex-direction:column">
+            <sc-for list="{{ allocations }}" as="a" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:16px;padding:16px 6px;border-bottom:1px solid var(--hair)" style-hover="background:var(--panel)">
+                <span style="width:11px;height:11px;border-radius:3px;background:{{ a.color }};flex:none"></span>
+                <div style="flex:1"><div style="font-weight:600;font-size:14.5px">{{ a.name }}</div><div style="color:var(--tx3);font-size:12px;margin-top:3px">{{ a.note }}</div></div>
+                <div style="text-align:right"><div style="font-family:var(--disp);font-weight:600;font-size:16px;letter-spacing:-.01em">{{ a.amt }}</div><div style="font-family:var(--mono);font-size:11px;color:{{ a.color }};margin-top:2px">{{ a.pct }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+          <div class="rise" style="border:1px solid rgba(246,138,36,.32);border-radius:20px;background:linear-gradient(160deg,rgba(218,84,39,.14),var(--panel) 55%);padding:28px;position:relative;overflow:hidden">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--orange);margin-bottom:20px">THE GENESIS EVENT</div>
+            <div style="font-family:var(--disp);font-weight:600;font-size:30px;letter-spacing:-.01em;line-height:1.1">$50,000,000</div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--tx2);margin:6px 0 22px">20B PYRX @ $0.0025</div>
+            <div style="display:flex;flex-direction:column;gap:14px;font-size:12.5px;color:var(--tx2);line-height:1.6">
+              <div style="padding-top:14px;border-top:1px solid var(--line)"><span style="color:var(--gold);font-weight:600">+ 25% utility bonus (5B PYRX)</span><br>Network access / compute credits — never an investment return.</div>
+              <div style="padding-top:14px;border-top:1px solid var(--line)"><span style="color:var(--tx);font-weight:600">25B PYRX to genesis participants</span><br>The full public pool.</div>
+              <div style="padding-top:14px;border-top:1px solid var(--line)"><span style="color:var(--tx);font-weight:600">≈ 27.1B (~54%) initial circulating</span><br>Team vests 12-mo cliff + 36-mo linear; ecosystem 40% at TGE.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- emissions + fees -->
+    <section style="padding:88px 56px;border-bottom:1px solid var(--line);position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background:radial-gradient(800px 460px at 8% 80%,rgba(25,99,169,.1),transparent 60%)"></div>
+      <div style="position:relative;max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px">
+        <div class="rise">
+          <div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">02 / Emissions</div>
+          <h2 style="font-family:var(--disp);font-weight:500;font-size:32px;letter-spacing:-.01em;line-height:1.12;margin:0 0 14px">Halving to a hard cap.</h2>
+          <p style="color:var(--tx2);font-size:14px;line-height:1.65;margin:0 0 26px">Bitcoin-style, but four-year halvings and a hard mining cap. After the cap, block producers are paid entirely by fees.</p>
+          <div style="border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:24px;margin-bottom:20px">
+            <svg viewBox="0 0 400 150" style="width:100%;height:auto" data-om-raster>
+              <defs><linearGradient id="emv2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fed23c" stop-opacity=".45"/><stop offset="1" stop-color="#fed23c" stop-opacity="0"/></linearGradient></defs>
+              <line x1="0" y1="132" x2="400" y2="132" stroke="rgba(255,255,255,.1)"/>
+              <path d="M0,16 C56,16 56,72 112,72 C168,72 168,102 224,102 C280,102 280,118 336,118 C366,118 384,123 400,125 L400,132 L0,132 Z" fill="url(#emv2)"/>
+              <path d="M0,16 C56,16 56,72 112,72 C168,72 168,102 224,102 C280,102 280,118 336,118 C366,118 384,123 400,125" fill="none" stroke="#fed23c" stroke-width="2.5"/>
+              <text x="4" y="146" fill="#565e6d" font-family="monospace" font-size="9">year 0</text>
+              <text x="106" y="146" fill="#565e6d" font-family="monospace" font-size="9">~4y</text>
+              <text x="218" y="146" fill="#565e6d" font-family="monospace" font-size="9">~8y · ~80%</text>
+              <text x="352" y="146" fill="#565e6d" font-family="monospace" font-size="9">~26y cap</text>
+            </svg>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ emissionFacts }}" as="e" hint-placeholder-count="5">
+              <div style="display:flex;gap:16px;align-items:baseline;padding:12px 4px;border-bottom:1px solid var(--hair)"><span style="font-family:var(--mono);font-size:11px;color:var(--gold);min-width:120px;letter-spacing:.04em">{{ e.k }}</span><span style="color:var(--tx2);font-size:13.5px;line-height:1.5">{{ e.v }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div class="rise">
+          <div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">03 / Fees · EIP-1559</div>
+          <h2 style="font-family:var(--disp);font-weight:500;font-size:32px;letter-spacing:-.01em;line-height:1.12;margin:0 0 14px">Consensus-frozen.</h2>
+          <p style="color:var(--tx2);font-size:14px;line-height:1.65;margin:0 0 26px">The split is frozen in consensus — <span style="color:var(--gold);font-weight:600">no governance vote can ever touch it</span>.</p>
+          <div style="display:flex;flex-direction:column;gap:24px">
+            <sc-for list="{{ feeBars }}" as="b" hint-placeholder-count="2">
+              <div>
+                <div style="font-family:var(--disp);font-weight:500;font-size:15px;margin-bottom:12px">{{ b.label }}</div>
+                <div style="display:flex;height:52px;border-radius:14px;overflow:hidden;border:1px solid var(--line)">
+                  <sc-for list="{{ b.parts }}" as="p" hint-placeholder-count="3">
+                    <div style="flex:{{ p.flex }};background:{{ p.color }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:{{ p.tc }}"><b style="font-family:var(--disp);font-weight:600;font-size:15px">{{ p.pct }}</b><span style="font-family:var(--mono);font-size:9px;letter-spacing:.06em;opacity:.85">{{ p.name }}</span></div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:24px;border:1px solid var(--line);border-radius:14px;padding:18px 22px;background:var(--panel);font-family:var(--mono);font-size:11.5px;color:var(--tx3);line-height:1.75">Flat shielded fee (100 Ash) burned per shielded transfer · 30,000,000 block gas · base fee moves ±12.5%/block · gas priced in Cinders (1 Cinder = 10⁹ Ash).</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- utility -->
+    <section style="padding:88px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto">
+        <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:48px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">04 / Put PYRX to work</div>
+            <h2 style="font-family:var(--disp);font-weight:500;font-size:36px;letter-spacing:-.01em;line-height:1.1;margin:0">Staking, governance &amp; compute.</h2>
+          </div>
+          <p style="color:var(--tx2);font-size:14.5px;line-height:1.68;margin:0">Three ways the token is used: secure finality by staking, steer the protocol by voting, and turn idle GPUs into verifiable compute.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden">
+          <sc-for list="{{ utility }}" as="u" hint-placeholder-count="3">
+            <div class="rise" style="background:var(--bg);padding:32px 28px" style-hover="background:var(--bg2)">
+              <div style="font-family:var(--disp);font-weight:500;font-size:19px;margin-bottom:22px;color:{{ u.color }};letter-spacing:-.01em">{{ u.title }}</div>
+              <div style="display:flex;flex-direction:column;gap:13px">
+                <sc-for list="{{ u.rows }}" as="r" hint-placeholder-count="5">
+                  <div style="display:flex;gap:12px;align-items:flex-start"><span style="width:5px;height:5px;border-radius:50%;background:{{ u.color }};margin-top:7px;flex:none"></span><span style="color:var(--tx2);font-size:13px;line-height:1.6">{{ r }}</span></div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div class="rise" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:40px">
+          <a href="#" style="background:var(--grad);color:#140803;padding:14px 26px;border-radius:100px;font-weight:700;font-size:14px">Read the full whitepaper →</a>
+          <a href="https://explorer.pyraxchain.com" style="border:1px solid var(--line2);color:var(--tx);padding:14px 26px;border-radius:100px;font-weight:600;font-size:14px" style-hover="border-color:var(--cyan)">Open the explorer ↗</a>
+        </div>
+      </div>
+    </section>
+
+    {{ footer }}
+  </div>
+</div>
+
+<!-- TOKEN MOBILE -->
+<div style="max-width:1620px;margin:0 auto;padding:36px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">TOKEN — MOBILE</div>
+  <div data-screen-label="V2 Token · Mobile" style="width:392px;border:1px solid var(--line);border-radius:32px;overflow:hidden;background:var(--bg)">
+    <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(5,6,9,.92)"><img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:22px;display:block"><div style="margin-left:auto;display:flex;flex-direction:column;gap:4.5px;padding:9px 7px"><span style="width:20px;height:1.5px;background:var(--tx)"></span><span style="width:20px;height:1.5px;background:var(--tx)"></span></div></div>
+    <div style="padding:36px 20px 24px;border-bottom:1px solid var(--line)"><h1 style="font-family:var(--disp);font-weight:500;font-size:27px;letter-spacing:-.015em;margin:0 0 18px">The PYRX economy.</h1>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden">
+        <sc-for list="{{ tokenHero }}" as="s" hint-placeholder-count="4"><div style="background:var(--bg);padding:16px"><div style="font-family:var(--disp);font-weight:600;font-size:18px;color:var(--orange)">{{ s.n }}</div><div style="color:var(--tx3);font-family:var(--mono);font-size:9.5px;margin-top:6px">{{ s.l }}</div></div></sc-for>
+      </div>
+    </div>
+    <div style="padding:26px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;align-items:center">
+      <div style="position:relative;width:190px;height:190px;border-radius:50%;background:conic-gradient(var(--orange) 0 50%,var(--blue) 50% 75%,var(--gold) 75% 85%,var(--cyan) 85% 93%,var(--orange-deep) 93% 98%,#454c5b 98% 100%)"><div style="position:absolute;inset:26px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:var(--disp);font-weight:600;font-size:24px">50B</span><span style="font-family:var(--mono);font-size:9px;color:var(--tx3)">HARD CAP</span></div></div>
+      <div style="margin-top:14px;font-family:var(--mono);font-size:10.5px;color:var(--tx2)">75% premine · 25% mined</div>
+    </div>
+    <div style="padding:26px 20px;text-align:center;color:var(--tx3);font-family:var(--mono);font-size:10px">Allocations · Emissions · Fees · Staking / Governance / NEURAX ↓</div>
+  </div>
+</div>
+
+<!-- ====== DEVELOPERS ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:64px 44px 0">{{ tagDev }}</div>
+<div style="max-width:1620px;margin:0 auto;padding:20px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">DEVELOPERS — DESKTOP · route /developers</div>
+  <div data-screen-label="V2 Developers · Desktop" style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg);box-shadow:0 60px 160px -50px rgba(0,0,0,.9)">
+    <nav style="display:flex;align-items:center;gap:30px;padding:0 32px;height:70px;background:rgba(5,6,9,.82);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:28px;display:block">
+      <div style="display:flex;gap:2px;margin-left:16px">
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Technology</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Network</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Token</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Industries</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx);cursor:pointer;padding:9px 13px;border-radius:9px;background:var(--panel2)">Developers</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Company</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+        <button onClick="{{ openSwitcher }}" style="display:flex;align-items:center;gap:9px;background:transparent;border:1px solid var(--line2);color:var(--tx);padding:9px 14px;border-radius:100px;cursor:pointer;font-family:var(--mono);font-size:12px"><span style="width:7px;height:7px;border-radius:50%;background:var(--live);animation:blink 2s infinite"></span>{{ selName }}<span style="color:var(--tx3);font-size:9px">▼</span></button>
+        <a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:10px 19px;border-radius:100px;font-weight:700;font-size:13.5px">Launch App ↗</a>
+      </div>
+    </nav>
+
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--line)">
+      <div style="position:absolute;inset:0;background:radial-gradient(900px 480px at 80% 0%,rgba(92,186,206,.1),transparent 60%)"></div>
+      <div style="position:absolute;top:-40px;right:20px;font-family:var(--disp);font-weight:700;font-size:220px;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.06);pointer-events:none">&lt;/&gt;</div>
+      <div style="position:relative;max-width:1280px;margin:0 auto;padding:88px 56px 64px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px"><span style="width:26px;height:1px;background:var(--cyan)"></span><span style="font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan)">Developers</span></div>
+        <h1 style="font-family:var(--disp);font-weight:600;font-size:clamp(34px,4.4vw,60px);line-height:1.02;letter-spacing:-.02em;margin:0 0 26px;text-transform:uppercase;max-width:900px">Build with the tools <span style="color:transparent;-webkit-text-stroke:1.2px rgba(242,244,248,.8)">you already know.</span></h1>
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <a href="#" style="background:var(--grad);color:#140803;padding:15px 28px;border-radius:100px;font-weight:700;font-size:14.5px">Read the docs →</a>
+          <a href="https://github.com/PYRAX-NETWORK" style="border:1px solid var(--line2);color:var(--tx);padding:15px 28px;border-radius:100px;font-weight:600;font-size:14.5px" style-hover="border-color:var(--cyan)">GitHub ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding:80px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto">
+        <div class="rise" style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--cyan);margin-bottom:28px">Connect in one step</div>
+        <div style="display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start">
+          <div class="rise" style="border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--panel)">
+            <div style="padding:18px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;border-radius:50%;background:var(--live);box-shadow:0 0 9px var(--live);animation:blink 2s infinite"></span><span style="font-family:var(--disp);font-weight:500;font-size:15px">PYRAX Seed</span></div>
+            <sc-for list="{{ connectParams }}" as="p" hint-placeholder-count="4">
+              <div style="display:flex;justify-content:space-between;padding:15px 24px;border-bottom:1px solid var(--hair)"><span style="color:var(--tx2);font-size:13px">{{ p.k }}</span><span style="font-family:var(--mono);font-weight:600;font-size:13px">{{ p.v }}</span></div>
+            </sc-for>
+            <div style="padding:15px 24px;font-family:var(--mono);font-size:10.5px;color:var(--tx3);line-height:1.6">RPC: pyrax-seed.rpc.pyraxchain.com</div>
+          </div>
+          <div class="rise" style="background:#07090e;border:1px solid var(--line2);border-radius:18px;overflow:hidden">
+            <div style="display:flex;align-items:center;padding:12px 18px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--line)">
+              <div style="display:flex;gap:7px;margin-right:16px"><span style="width:11px;height:11px;border-radius:50%;background:#ff5f57"></span><span style="width:11px;height:11px;border-radius:50%;background:#febc2e"></span><span style="width:11px;height:11px;border-radius:50%;background:#28c840"></span></div>
+              <span style="font-family:var(--mono);font-size:12px;color:var(--tx2)">connect.ts</span>
+              <button onClick="{{ copyCode }}" style="margin-left:auto;background:transparent;border:1px solid var(--line2);color:var(--tx2);font-family:var(--mono);font-size:11px;padding:7px 13px;border-radius:100px;cursor:pointer" style-hover="color:var(--tx);border-color:var(--orange)">⧉ Copy</button>
+            </div>
+            <pre style="margin:0;padding:24px;font-family:var(--mono);font-size:13px;line-height:1.75;overflow-x:auto"><code><span style="color:#c678dd">import</span> <span style="color:var(--tx)">{ ethers }</span> <span style="color:#c678dd">from</span> <span style="color:#98c379">"ethers"</span>;
+
+<span style="color:#c678dd">const</span> <span style="color:#61afef">provider</span> = <span style="color:#c678dd">new</span> <span style="color:#e5c07b">ethers.JsonRpcProvider</span>(
+  <span style="color:#98c379">"https://pyrax-seed.rpc.pyraxchain.com"</span>
+);
+
+<span style="color:#c678dd">const</span> <span style="color:#61afef">net</span> = <span style="color:#c678dd">await</span> provider.<span style="color:#61afef">getNetwork</span>();
+<span style="color:#e5c07b">console</span>.<span style="color:#61afef">log</span>(net.chainId); <span style="color:var(--tx3)">// 881109n</span>
+
+<span style="color:#c678dd">const</span> <span style="color:#61afef">block</span> = <span style="color:#c678dd">await</span> provider.<span style="color:#61afef">getBlockNumber</span>();
+<span style="color:#e5c07b">console</span>.<span style="color:#61afef">log</span>(<span style="color:#98c379">"PYRAX Seed height"</span>, block);</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding:80px 56px;border-bottom:1px solid var(--line);position:relative;overflow:hidden">
+      <div style="position:absolute;top:20px;right:40px;font-family:var(--disp);font-weight:700;font-size:180px;line-height:.8;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.06);pointer-events:none">6</div>
+      <div style="position:relative;max-width:1280px;margin:0 auto">
+        <div class="rise" style="margin-bottom:40px">
+          <div style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--orange);margin-bottom:16px">Pick your path</div>
+          <h2 style="font-family:var(--disp);font-weight:600;font-size:clamp(28px,3vw,40px);letter-spacing:-.02em;margin:0;text-transform:uppercase">Six ways in.</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden">
+          <sc-for list="{{ devPaths }}" as="p" hint-placeholder-count="6">
+            <a href="#" class="rise" style="background:var(--bg);padding:30px 28px;color:var(--tx);display:block" style-hover="background:var(--bg2)">
+              <div style="display:flex;justify-content:space-between;margin-bottom:18px"><span style="font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--cyan)">{{ p.tag }}</span><span style="color:var(--tx3)">→</span></div>
+              <div style="font-family:var(--disp);font-weight:500;font-size:16.5px;margin-bottom:9px;letter-spacing:-.01em">{{ p.title }}</div>
+              <div style="color:var(--tx2);font-size:13px;line-height:1.6">{{ p.desc }}</div>
+            </a>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding:80px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto">
+        <div class="rise" style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--cyan);margin-bottom:28px">Resources</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+          <sc-for list="{{ devResources }}" as="r" hint-placeholder-count="6">
+            <a href="#" class="rise" style="border:1px solid var(--line);border-radius:16px;padding:24px;background:var(--panel);color:var(--tx);display:block;position:relative" style-hover="border-color:var(--line2)">
+              <span style="position:absolute;top:-1px;left:18px;width:28px;height:1px;background:var(--cyan)"></span>
+              <div style="font-family:var(--disp);font-weight:500;font-size:16px;margin-bottom:6px">{{ r.t }}</div>
+              <div style="color:var(--tx2);font-size:12.5px;margin-bottom:14px">{{ r.d }}</div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--cyan)">{{ r.u }}</div>
+            </a>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    {{ footer }}
+  </div>
+</div>
+
+<!-- DEVELOPERS MOBILE -->
+<div style="max-width:1620px;margin:0 auto;padding:36px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">DEVELOPERS — MOBILE</div>
+  <div data-screen-label="V2 Developers · Mobile" style="width:392px;border:1px solid var(--line);border-radius:32px;overflow:hidden;background:var(--bg)">
+    <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(5,6,9,.92)"><img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:22px;display:block"><div style="margin-left:auto;display:flex;flex-direction:column;gap:4.5px;padding:9px 7px"><span style="width:20px;height:1.5px;background:var(--tx)"></span><span style="width:20px;height:1.5px;background:var(--tx)"></span></div></div>
+    <div style="padding:36px 20px 26px;border-bottom:1px solid var(--line)"><h1 style="font-family:var(--disp);font-weight:600;font-size:25px;line-height:1.08;letter-spacing:-.015em;margin:0 0 18px;text-transform:uppercase">Build with the tools you already know.</h1><a href="#" style="display:block;text-align:center;background:var(--grad);color:#140803;padding:15px;border-radius:100px;font-weight:700">Read the docs →</a></div>
+    <div style="padding:20px;border-bottom:1px solid var(--line)">
+      <div style="background:#07090e;border:1px solid var(--line2);border-radius:16px;overflow:hidden">
+        <div style="display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)"><span style="font-family:var(--mono);font-size:11px;color:var(--tx2)">connect.ts</span><button onClick="{{ copyCode }}" style="margin-left:auto;background:transparent;border:1px solid var(--line2);color:var(--tx2);font-family:var(--mono);font-size:10px;padding:5px 10px;border-radius:100px;cursor:pointer">⧉ Copy</button></div>
+        <pre style="margin:0;padding:16px;font-family:var(--mono);font-size:11px;line-height:1.65;overflow-x:auto;color:var(--tx2)"><code><span style="color:#c678dd">const</span> p = <span style="color:#c678dd">new</span> ethers.<span style="color:#e5c07b">JsonRpcProvider</span>(
+  <span style="color:#98c379">"…seed.rpc.pyraxchain.com"</span>);
+<span style="color:#c678dd">await</span> p.<span style="color:#61afef">getNetwork</span>(); <span style="color:var(--tx3)">// 881109n</span></code></pre>
+      </div>
+    </div>
+    <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <sc-for list="{{ devPaths }}" as="p" hint-placeholder-count="6"><div style="border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:16px"><div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--cyan);margin-bottom:8px">{{ p.tag }}</div><div style="font-family:var(--disp);font-weight:500;font-size:12.5px;line-height:1.3">{{ p.title }}</div></div></sc-for>
+    </div>
+  </div>
+</div>
+
+<!-- ====== PITCH ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:64px 44px 0">{{ tagPitch }}</div>
+<div style="max-width:1620px;margin:0 auto;padding:20px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">INVESTOR PITCH — interactive deck · route /pitch · ← → arrows · click edges · swipe</div>
+  <div data-screen-label="V2 Investor Pitch · Deck" tabindex="0" onKeyDown="{{ pitchOnKey }}" onPointerDown="{{ pitchStart }}" onPointerUp="{{ pitchEnd }}" style="border:1px solid var(--line2);border-radius:18px;overflow:hidden;background:var(--bg);box-shadow:0 60px 160px -50px rgba(0,0,0,.9);outline:none;max-width:1080px;margin:0 auto">
+    <div style="display:flex;align-items:center;padding:15px 24px;border-bottom:1px solid var(--line);background:rgba(5,6,9,.7)">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:20px;display:block;margin-right:16px">
+      <span style="font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--orange)">Investor Deck</span>
+      <span style="font-family:var(--mono);font-size:10.5px;color:var(--tx3);margin-left:12px;border:1px solid var(--line2);padding:4px 11px;border-radius:100px">CONFIDENTIAL</span>
+      <span style="margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--tx2)"><b style="color:var(--tx);font-weight:600">{{ pitchNum }}</b> / 10</span>
+    </div>
+    <div style="position:relative;aspect-ratio:16/9;background:radial-gradient(900px 500px at 76% 18%,rgba(218,84,39,.13),transparent 60%),radial-gradient(760px 460px at 10% 92%,rgba(25,99,169,.13),transparent 60%),var(--bg);overflow:hidden">
+      <div key="{{ pitchNum }}" style="position:absolute;inset:0;animation:riseS .45s ease both">{{ pitchSlide }}</div>
+      <div onClick="{{ pitchPrev }}" style="position:absolute;left:0;top:0;bottom:64px;width:15%;cursor:w-resize"></div>
+      <div onClick="{{ pitchNext }}" style="position:absolute;right:0;top:0;bottom:64px;width:15%;cursor:e-resize"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;padding:15px 24px;border-top:1px solid var(--line);background:rgba(5,6,9,.7)">
+      <button onClick="{{ pitchPrev }}" style="background:transparent;border:1px solid var(--line2);color:var(--tx);width:40px;height:40px;border-radius:100px;cursor:pointer;font-size:16px" style-hover="border-color:var(--orange)">‹</button>
+      <button onClick="{{ pitchNext }}" style="background:transparent;border:1px solid var(--line2);color:var(--tx);width:40px;height:40px;border-radius:100px;cursor:pointer;font-size:16px" style-hover="border-color:var(--orange)">›</button>
+      <div style="flex:1;height:3px;background:var(--panel2);border-radius:3px;overflow:hidden"><div style="height:100%;width:{{ pitchProg }};background:var(--grad);transition:width .4s ease"></div></div>
+      <div style="display:flex;gap:7px">
+        <sc-for list="{{ pitchDots }}" as="d" hint-placeholder-count="10"><span onClick="{{ pitchGo }}" data-i="{{ d }}" style="width:8px;height:8px;border-radius:50%;background:var(--line2);cursor:pointer" style-hover="background:var(--orange)"></span></sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== COMPANY ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:64px 44px 0">{{ tagCompany }}</div>
+<div style="max-width:1620px;margin:0 auto;padding:20px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">COMPANY — DESKTOP · route /company</div>
+  <div data-screen-label="V2 Company · Desktop" style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg);box-shadow:0 60px 160px -50px rgba(0,0,0,.9)">
+    <nav style="display:flex;align-items:center;gap:30px;padding:0 32px;height:70px;background:rgba(5,6,9,.82);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:28px;display:block">
+      <div style="display:flex;gap:2px;margin-left:16px">
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Technology</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Network</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Token</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Industries</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Developers</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx);cursor:pointer;padding:9px 13px;border-radius:9px;background:var(--panel2)">Company</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+        <button onClick="{{ openSwitcher }}" style="display:flex;align-items:center;gap:9px;background:transparent;border:1px solid var(--line2);color:var(--tx);padding:9px 14px;border-radius:100px;cursor:pointer;font-family:var(--mono);font-size:12px"><span style="width:7px;height:7px;border-radius:50%;background:var(--live);animation:blink 2s infinite"></span>{{ selName }}<span style="color:var(--tx3);font-size:9px">▼</span></button>
+        <a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:10px 19px;border-radius:100px;font-weight:700;font-size:13.5px">Launch App ↗</a>
+      </div>
+    </nav>
+
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--line)">
+      <div style="position:absolute;inset:0;background:radial-gradient(900px 480px at 22% 0%,rgba(218,84,39,.12),transparent 60%)"></div>
+      <div style="position:relative;max-width:1280px;margin:0 auto;padding:96px 56px 70px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:26px"><span style="width:26px;height:1px;background:var(--orange)"></span><span style="font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--orange)">Company</span></div>
+        <h1 style="font-family:var(--disp);font-weight:600;font-size:clamp(34px,4.2vw,58px);line-height:1.02;letter-spacing:-.02em;margin:0 0 34px;text-transform:uppercase;max-width:980px">Money that is <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">private</span>, infrastructure that is <span style="color:transparent;-webkit-text-stroke:1.2px rgba(242,244,248,.8)">unstoppable</span>.</h1>
+        <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:56px;align-items:start">
+          <div style="color:var(--tx2);font-size:15.5px;line-height:1.75;border-left:1px solid var(--line2);padding-left:24px">
+            <p style="margin:0 0 16px">PYRAX exists to make private, sovereign money real — not a slide. We build a Layer-1 where privacy is the default, decentralization survives adversarial ISPs, and every claim is backed by running code.</p>
+            <p style="margin:0">We ship in public under an open-core license, gate mainnet behind external audit, and refuse to fabricate metrics. If a number is not live, it is an em-dash.</p>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden">
+            <sc-for list="{{ companyStats }}" as="s" hint-placeholder-count="4"><div style="background:var(--bg);padding:22px"><div style="font-family:var(--disp);font-weight:600;font-size:25px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1">{{ s.n }}</div><div style="color:var(--tx3);font-family:var(--mono);font-size:10.5px;margin-top:8px">{{ s.l }}</div></div></sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding:80px 56px;border-bottom:1px solid var(--line);position:relative;overflow:hidden">
+      <div style="position:absolute;top:20px;right:40px;font-family:var(--disp);font-weight:700;font-size:170px;line-height:.8;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.06);pointer-events:none">✕4</div>
+      <div style="position:relative;max-width:1280px;margin:0 auto">
+        <div class="rise" style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--cyan);margin-bottom:32px">What we believe</div>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+          <sc-for list="{{ beliefs }}" as="b" hint-placeholder-count="4">
+            <div class="rise" style="display:grid;grid-template-columns:90px 320px 1fr;gap:34px;align-items:center;padding:30px 8px;border-bottom:1px solid var(--line)" style-hover="background:var(--panel);padding-left:22px">
+              <span style="font-family:var(--disp);font-weight:700;font-size:40px;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.2)">0{{ $index }}</span>
+              <div style="font-family:var(--disp);font-weight:500;font-size:18px;letter-spacing:-.01em;text-transform:uppercase">{{ b.t }}</div>
+              <div style="color:var(--tx2);font-size:14px;line-height:1.62">{{ b.d }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding:80px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:44px">
+          <sc-for list="{{ companyContact }}" as="c" hint-placeholder-count="3">
+            <a href="#" class="rise" style="border:1px solid var(--line);border-radius:18px;padding:28px;background:var(--panel);color:var(--tx);display:block;position:relative" style-hover="border-color:var(--line2)">
+              <span style="position:absolute;top:-1px;left:20px;width:30px;height:1px;background:var(--orange)"></span>
+              <div style="font-family:var(--disp);font-weight:500;font-size:17px;margin-bottom:8px">{{ c.t }}</div>
+              <div style="color:var(--tx2);font-size:13px;margin-bottom:16px;line-height:1.5">{{ c.d }}</div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--cyan)">{{ c.u }}</div>
+            </a>
+          </sc-for>
+        </div>
+        <div class="rise" style="display:flex;gap:14px;flex-wrap:wrap">
+          <a href="#" style="background:var(--grad);color:#140803;padding:14px 26px;border-radius:100px;font-weight:700;font-size:14px">Investor pitch →</a>
+          <a href="#" style="border:1px solid var(--line2);color:var(--tx);padding:14px 26px;border-radius:100px;font-weight:600;font-size:14px" style-hover="border-color:var(--gold)">Read the whitepaper</a>
+        </div>
+      </div>
+    </section>
+
+    {{ footer }}
+  </div>
+</div>
+
+<!-- ====== WHITEPAPER ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:64px 44px 0">{{ tagWp }}</div>
+<div style="max-width:1620px;margin:0 auto;padding:20px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">WHITEPAPER — DESKTOP · route /whitepaper</div>
+  <div data-screen-label="V2 Whitepaper · Desktop" style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg);box-shadow:0 60px 160px -50px rgba(0,0,0,.9)">
+    <nav style="display:flex;align-items:center;gap:30px;padding:0 32px;height:70px;background:rgba(5,6,9,.82);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:28px;display:block">
+      <div style="display:flex;gap:2px;margin-left:16px">
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Technology</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Network</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Token</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Industries</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Developers</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Company</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+        <button onClick="{{ openSwitcher }}" style="display:flex;align-items:center;gap:9px;background:transparent;border:1px solid var(--line2);color:var(--tx);padding:9px 14px;border-radius:100px;cursor:pointer;font-family:var(--mono);font-size:12px"><span style="width:7px;height:7px;border-radius:50%;background:var(--live);animation:blink 2s infinite"></span>{{ selName }}<span style="color:var(--tx3);font-size:9px">▼</span></button>
+        <a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:10px 19px;border-radius:100px;font-weight:700;font-size:13.5px">Launch App ↗</a>
+      </div>
+    </nav>
+
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--line)">
+      <div style="position:absolute;inset:0;background:radial-gradient(900px 480px at 80% 0%,rgba(254,210,60,.08),transparent 60%)"></div>
+      <div style="position:absolute;top:-30px;right:30px;font-family:var(--disp);font-weight:700;font-size:230px;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.055);pointer-events:none">v4</div>
+      <div style="position:relative;max-width:1280px;margin:0 auto;padding:88px 56px 64px">
+        <div style="display:inline-flex;font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--gold);border:1px solid rgba(254,210,60,.4);padding:8px 16px;border-radius:100px;margin-bottom:26px">WHITEPAPER V4</div>
+        <h1 style="font-family:var(--disp);font-weight:600;font-size:clamp(34px,4.2vw,56px);line-height:1.02;letter-spacing:-.02em;margin:0 0 28px;text-transform:uppercase;max-width:960px">A system that is <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">built</span>, not merely <span style="color:transparent;-webkit-text-stroke:1.2px rgba(242,244,248,.8)">designed</span>.</h1>
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <a href="#" style="background:var(--grad);color:#140803;padding:15px 28px;border-radius:100px;font-weight:700;font-size:14.5px">Technical paper ↓ .md</a>
+          <a href="#" style="border:1px solid var(--line2);color:var(--tx);padding:15px 28px;border-radius:100px;font-weight:600;font-size:14.5px" style-hover="border-color:var(--gold)">Plain-English edition ↓ .md</a>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding:72px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1fr 380px;gap:50px;align-items:start">
+        <div class="rise" style="border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:18px;padding:36px 38px;background:var(--panel)">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--tx3);letter-spacing:.2em;margin-bottom:18px">ABSTRACT</div>
+          <p style="color:var(--tx);font-size:15px;line-height:1.8;margin:0 0 16px">PYRAX is a Layer-1 that treats parallelism, privacy and provability as invariants rather than features. Blocks form a GhostDAG web ordered by the blue-set rule; three mining streams over five seal lanes distribute security across ASIC, GPU/CPU and stake, with BLS-aggregated proof-of-stake providing finality that overrides work.</p>
+          <p style="color:var(--tx2);font-size:15px;line-height:1.8;margin:0">Value moves as shielded notes with no trusted setup, carriage is anonymized through a Sphinx onion mixnet, and idle compute is monetized through NEURAX under a four-rung verification ladder. The protocol is open-core and audit-gated to mainnet.</p>
+        </div>
+        <div class="rise" style="display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden">
+          <div style="background:var(--bg2);padding:14px 22px;font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--tx3)">FIVE NORTH STARS</div>
+          <sc-for list="{{ wpNorthStars }}" as="n" hint-placeholder-count="5">
+            <div style="background:var(--bg);padding:17px 22px;display:flex;gap:16px;align-items:baseline" style-hover="background:var(--bg2)">
+              <span style="font-family:var(--disp);font-weight:700;font-size:19px;color:transparent;-webkit-text-stroke:1px rgba(254,210,60,.6)">{{ n.n }}</span>
+              <div><div style="font-family:var(--disp);font-weight:500;font-size:14px">{{ n.t }}</div><div style="color:var(--tx3);font-size:11.5px;margin-top:3px;line-height:1.5">{{ n.d }}</div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding:72px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto">
+        <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:54px">
+          <div style="border:1px solid var(--line);border-radius:18px;padding:30px;background:var(--panel);position:relative"><span style="position:absolute;top:-1px;left:20px;width:30px;height:1px;background:var(--gold)"></span><div style="font-family:var(--disp);font-weight:500;font-size:19px;margin-bottom:8px">Technical edition</div><div style="color:var(--tx2);font-size:13.5px;line-height:1.6;margin-bottom:16px">The full protocol specification — consensus, circuits, economics.</div><div style="font-family:var(--mono);font-size:11.5px;color:var(--gold)">19 sections</div></div>
+          <div style="border:1px solid var(--line);border-radius:18px;padding:30px;background:var(--panel);position:relative"><span style="position:absolute;top:-1px;left:20px;width:30px;height:1px;background:var(--cyan)"></span><div style="font-family:var(--disp);font-weight:500;font-size:19px;margin-bottom:8px">Plain-English edition</div><div style="color:var(--tx2);font-size:13.5px;line-height:1.6;margin-bottom:16px">The same substance, no maths required.</div><div style="font-family:var(--mono);font-size:11.5px;color:var(--cyan)">Accessible walkthrough</div></div>
+        </div>
+        <div class="rise" style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);margin-bottom:24px">Table of contents · 19 sections</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0 48px">
+          <sc-for list="{{ wpToc }}" as="s" hint-placeholder-count="19">
+            <div style="display:flex;gap:18px;align-items:baseline;padding:13px 6px;border-bottom:1px solid var(--hair)" style-hover="background:var(--panel)">
+              <span style="font-family:var(--disp);font-weight:700;font-size:15px;color:transparent;-webkit-text-stroke:.8px rgba(255,255,255,.3);min-width:28px">{{ $index }}</span>
+              <span style="font-weight:500;font-size:14.5px">{{ s }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    {{ footer }}
+  </div>
+</div>
+
+<!-- ====== INDUSTRIES HUB ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:64px 44px 0">{{ tagInd }}</div>
+<div style="max-width:1620px;margin:0 auto;padding:20px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">INDUSTRIES HUB — DESKTOP · route /industries</div>
+  <div data-screen-label="V2 Industries Hub · Desktop" style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg);box-shadow:0 60px 160px -50px rgba(0,0,0,.9)">
+    <nav style="display:flex;align-items:center;gap:30px;padding:0 32px;height:70px;background:rgba(5,6,9,.82);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:28px;display:block">
+      <div style="display:flex;gap:2px;margin-left:16px">
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Technology</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Network</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Token</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx);cursor:pointer;padding:9px 13px;border-radius:9px;background:var(--panel2)">Industries</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Developers</span>
+        <span style="font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;padding:9px 13px;border-radius:9px">Company</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+        <button onClick="{{ openSwitcher }}" style="display:flex;align-items:center;gap:9px;background:transparent;border:1px solid var(--line2);color:var(--tx);padding:9px 14px;border-radius:100px;cursor:pointer;font-family:var(--mono);font-size:12px"><span style="width:7px;height:7px;border-radius:50%;background:var(--live);animation:blink 2s infinite"></span>{{ selName }}<span style="color:var(--tx3);font-size:9px">▼</span></button>
+        <a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:10px 19px;border-radius:100px;font-weight:700;font-size:13.5px">Launch App ↗</a>
+      </div>
+    </nav>
+
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--line)">
+      <div style="position:absolute;inset:0;background:radial-gradient(900px 480px at 18% 0%,rgba(218,84,39,.12),transparent 60%)"></div>
+      <div style="position:absolute;top:-40px;right:20px;font-family:var(--disp);font-weight:700;font-size:230px;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.055);pointer-events:none">100</div>
+      <div style="position:relative;max-width:1280px;margin:0 auto;padding:88px 56px 48px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px"><span style="width:26px;height:1px;background:var(--orange)"></span><span style="font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--orange)">Industries</span></div>
+        <h1 style="font-family:var(--disp);font-weight:600;font-size:clamp(34px,4.2vw,56px);line-height:1.02;letter-spacing:-.02em;margin:0 0 16px;text-transform:uppercase;max-width:920px">PYRAX for <span style="color:transparent;-webkit-text-stroke:1.2px rgba(242,244,248,.8)">every industry</span>.</h1>
+        <p style="color:var(--tx2);font-size:15.5px;margin:0 0 30px">10 categories · 100 business types — each mapped to a concrete integration.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <div style="display:flex;align-items:center;gap:9px;border:1px solid var(--line2);border-radius:100px;padding:11px 18px;font-family:var(--mono);font-size:12px;color:var(--tx3);min-width:240px"><span>⌕</span>Search 100 business types…</div>
+          <span style="font-weight:600;font-size:12.5px;padding:10px 16px;border-radius:100px;background:var(--grad);color:#140803">All</span>
+          <sc-for list="{{ indCategories }}" as="c" hint-placeholder-count="10"><span style="font-weight:500;font-size:12.5px;padding:10px 16px;border-radius:100px;border:1px solid var(--line2);color:var(--tx2);cursor:pointer" style-hover="color:var(--tx);border-color:var(--orange)">{{ c.name }}</span></sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding:56px 56px 72px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:18px">
+        <sc-for list="{{ indCategories }}" as="c" hint-placeholder-count="10">
+          <div class="rise" style="border:1px solid var(--line);border-radius:18px;padding:28px 30px;background:var(--panel)" style-hover="border-color:var(--line2)">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+              <div style="display:flex;align-items:baseline;gap:18px"><span style="font-family:var(--disp);font-weight:700;font-size:26px;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.22)">0{{ $index }}</span><div><div style="font-family:var(--disp);font-weight:500;font-size:19px;letter-spacing:-.01em">{{ c.name }}</div><div style="color:var(--tx2);font-size:13px;margin-top:4px">{{ c.vp }}</div></div></div>
+              <a href="#" style="font-family:var(--mono);font-size:11.5px;color:var(--orange);white-space:nowrap">10 business types →</a>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <sc-for list="{{ financeTypes }}" as="t" hint-placeholder-count="10"><a href="#" style="font-weight:500;font-size:12.5px;padding:8px 14px;border-radius:100px;border:1px solid var(--line);color:var(--tx2)" style-hover="color:var(--tx);border-color:var(--line2)">{{ t }}</a></sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    {{ footer }}
+  </div>
+</div>
+
+<!-- ====== CATEGORY TEMPLATE ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:44px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">INDUSTRY CATEGORY — TEMPLATE (×10) · route /industries/finance-banking</div>
+  <div data-screen-label="V2 Industry Category · Template" style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg)">
+    <nav style="display:flex;align-items:center;gap:30px;padding:0 32px;height:70px;background:rgba(5,6,9,.82);border-bottom:1px solid var(--line)">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:28px;display:block">
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+        <button onClick="{{ openSwitcher }}" style="display:flex;align-items:center;gap:9px;background:transparent;border:1px solid var(--line2);color:var(--tx);padding:9px 14px;border-radius:100px;cursor:pointer;font-family:var(--mono);font-size:12px"><span style="width:7px;height:7px;border-radius:50%;background:var(--live);animation:blink 2s infinite"></span>{{ selName }}<span style="color:var(--tx3);font-size:9px">▼</span></button>
+        <a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:10px 19px;border-radius:100px;font-weight:700;font-size:13.5px">Launch App ↗</a>
+      </div>
+    </nav>
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--line)">
+      <div style="position:absolute;top:-30px;right:30px;font-family:var(--disp);font-weight:700;font-size:190px;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.055);pointer-events:none">01</div>
+      <div style="position:relative;max-width:1280px;margin:0 auto;padding:52px 56px 44px">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);margin-bottom:24px"><a href="#" style="color:var(--tx3)">Industries</a> <span style="margin:0 6px">/</span> <span style="color:var(--tx2)">Finance &amp; Banking</span></div>
+        <h1 style="font-family:var(--disp);font-weight:600;font-size:clamp(30px,3.6vw,46px);letter-spacing:-.02em;margin:0 0 12px;text-transform:uppercase">Finance &amp; <span style="color:transparent;-webkit-text-stroke:1.2px rgba(242,244,248,.8)">Banking</span></h1>
+        <p style="color:var(--tx2);font-size:15px;max-width:640px;margin:0">Settlement, shielded payments and compliant disclosure — 10 business types built on PYRAX.</p>
+      </div>
+    </section>
+    <section style="padding:48px 56px 64px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1280px;margin:0 auto">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:44px">
+          <sc-for list="{{ financeTypes }}" as="t" hint-placeholder-count="10">
+            <a href="#" class="rise" style="background:var(--bg);padding:22px 26px;color:var(--tx);display:flex;align-items:center;justify-content:space-between" style-hover="background:var(--bg2)"><span style="display:flex;align-items:baseline;gap:16px"><span style="font-family:var(--disp);font-weight:700;font-size:15px;color:transparent;-webkit-text-stroke:.8px rgba(255,255,255,.28)">{{ $index }}</span><span style="font-family:var(--disp);font-weight:500;font-size:15.5px">{{ t }}</span></span><span style="color:var(--tx3)">→</span></a>
+          </sc-for>
+        </div>
+        <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--tx3);margin-bottom:16px">EXPLORE OTHER CATEGORIES</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ indCategories }}" as="c" hint-placeholder-count="10"><a href="#" style="font-weight:500;font-size:12.5px;padding:9px 15px;border-radius:100px;border:1px solid var(--line2);color:var(--tx2)" style-hover="color:var(--tx);border-color:var(--orange)">{{ c.name }}</a></sc-for></div>
+      </div>
+    </section>
+    {{ footer }}
+  </div>
+</div>
+
+<!-- ====== BUSINESS-TYPE DETAIL TEMPLATE ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:44px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">BUSINESS-TYPE DETAIL — TEMPLATE (×100, one reusable design) · route /industries/finance-banking/cross-border-payments</div>
+  <div data-screen-label="V2 Business-Type Detail · Template" style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg);box-shadow:0 60px 160px -50px rgba(0,0,0,.9)">
+    <nav style="display:flex;align-items:center;gap:30px;padding:0 32px;height:70px;background:rgba(5,6,9,.82);border-bottom:1px solid var(--line)">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:28px;display:block">
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+        <button onClick="{{ openSwitcher }}" style="display:flex;align-items:center;gap:9px;background:transparent;border:1px solid var(--line2);color:var(--tx);padding:9px 14px;border-radius:100px;cursor:pointer;font-family:var(--mono);font-size:12px"><span style="width:7px;height:7px;border-radius:50%;background:var(--live);animation:blink 2s infinite"></span>{{ selName }}<span style="color:var(--tx3);font-size:9px">▼</span></button>
+        <a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:10px 19px;border-radius:100px;font-weight:700;font-size:13.5px">Launch App ↗</a>
+      </div>
+    </nav>
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--line)">
+      <div style="position:absolute;inset:0;background:radial-gradient(800px 440px at 80% 0%,rgba(25,99,169,.12),transparent 60%)"></div>
+      <div style="position:relative;max-width:1160px;margin:0 auto;padding:52px 56px 48px">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);margin-bottom:26px"><a href="#" style="color:var(--tx3)">Industries</a> <span style="margin:0 6px">/</span> <a href="#" style="color:var(--tx3)">Finance &amp; Banking</a> <span style="margin:0 6px">/</span> <span style="color:var(--tx2)">Cross-border payments</span></div>
+        <h1 style="font-family:var(--disp);font-weight:600;font-size:clamp(30px,3.8vw,48px);letter-spacing:-.02em;line-height:1.04;margin:0 0 18px;text-transform:uppercase;max-width:880px">Cross-border payments <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">on PYRAX</span>.</h1>
+        <p style="color:var(--tx2);font-size:15.5px;line-height:1.65;max-width:720px;margin:0 0 26px">Move value across borders with shielded amounts, sub-second finality and fees that don't compound at every correspondent hop.</p>
+        <div style="display:flex;gap:26px;flex-wrap:wrap;font-family:var(--mono);font-size:13px"><span style="color:var(--tx2)">Market size <b style="color:var(--tx);font-weight:600">$XX.XT</b></span><span style="color:var(--tx2)">Projection <b style="color:var(--gold);font-weight:600">XX% CAGR</b></span></div>
+      </div>
+    </section>
+    <section style="padding:52px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1160px;margin:0 auto">
+        <div class="rise" style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--cyan);margin-bottom:22px">The market</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:14px">
+          <sc-for list="{{ detailMarketStats }}" as="s" hint-placeholder-count="4"><div style="background:var(--bg);padding:24px"><div style="font-family:var(--disp);font-weight:600;font-size:24px;color:var(--cyan);letter-spacing:-.01em">{{ s.n }}</div><div style="color:var(--tx3);font-family:var(--mono);font-size:10.5px;margin-top:8px">{{ s.l }}</div></div></sc-for>
+        </div>
+        <div style="font-family:var(--mono);font-size:10.5px;color:var(--tx3)">Figures populated per business type at build · source cited in footnote.</div>
+      </div>
+    </section>
+    <section style="padding:52px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:56px">
+        <div class="rise">
+          <div style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--orange);margin-bottom:22px">What's broken today</div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ detailPains }}" as="p" hint-placeholder-count="4">
+              <div style="display:flex;gap:15px;align-items:flex-start;padding:15px 4px;border-bottom:1px solid var(--hair)"><span style="color:var(--orange-deep);font-family:var(--mono);font-size:13px;margin-top:2px">✕</span><span style="color:var(--tx2);font-size:14px;line-height:1.58">{{ p }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div class="rise">
+          <div style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--cyan);margin-bottom:22px">How PYRAX transforms it</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ detailElements }}" as="e" hint-placeholder-count="5">
+              <div style="border:1px solid var(--line);border-radius:13px;padding:15px 18px;background:var(--panel);display:flex;gap:14px;align-items:baseline" style-hover="border-color:var(--cyan)"><span style="font-family:var(--disp);font-weight:500;font-size:13.5px;color:var(--cyan);min-width:150px">{{ e.t }}</span><span style="color:var(--tx2);font-size:12.5px;line-height:1.5">{{ e.d }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section style="padding:52px 56px;border-bottom:1px solid var(--line);position:relative;overflow:hidden">
+      <div style="position:absolute;top:10px;right:40px;font-family:var(--disp);font-weight:700;font-size:150px;line-height:.8;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.05);pointer-events:none">8</div>
+      <div style="position:relative;max-width:1160px;margin:0 auto">
+        <div class="rise" style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:24px">
+          <div style="font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold)">Buildathon · dApp ideas</div>
+          <a href="#" style="font-weight:600;font-size:13px;color:var(--orange)">Start building →</a>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden">
+          <sc-for list="{{ detailIdeas }}" as="i" hint-placeholder-count="8">
+            <div class="rise" style="background:var(--bg);padding:22px" style-hover="background:var(--bg2)">
+              <div style="font-family:var(--disp);font-weight:700;font-size:17px;color:transparent;-webkit-text-stroke:.8px rgba(254,210,60,.55);margin-bottom:10px">{{ i.n }}</div>
+              <div style="font-family:var(--disp);font-weight:500;font-size:14.5px;margin-bottom:6px">{{ i.name }}</div>
+              <div style="color:var(--tx2);font-size:12px;line-height:1.5;margin-bottom:14px">{{ i.d }}</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ i.tags }}" as="tg" hint-placeholder-count="2"><span style="font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:4px 9px;border-radius:100px;border:1px solid var(--line2);color:var(--tx2)">{{ tg }}</span></sc-for></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+    <section style="padding:28px 56px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1160px;margin:0 auto;display:flex;justify-content:space-between;gap:14px">
+        <a href="#" style="flex:1;border:1px solid var(--line);border-radius:14px;padding:18px 22px;color:var(--tx);background:var(--panel)" style-hover="border-color:var(--line2)"><div style="font-family:var(--mono);font-size:10px;color:var(--tx3);letter-spacing:.14em">← PREVIOUS</div><div style="font-family:var(--disp);font-weight:500;font-size:15px;margin-top:6px">Retail banking</div></a>
+        <a href="#" style="flex:none;align-self:center;font-family:var(--mono);font-size:11px;color:var(--tx3);padding:0 10px">Back to category</a>
+        <a href="#" style="flex:1;border:1px solid var(--line);border-radius:14px;padding:18px 22px;color:var(--tx);background:var(--panel);text-align:right" style-hover="border-color:var(--line2)"><div style="font-family:var(--mono);font-size:10px;color:var(--tx3);letter-spacing:.14em">NEXT →</div><div style="font-family:var(--disp);font-weight:500;font-size:15px;margin-top:6px">Lending &amp; credit</div></a>
+      </div>
+    </section>
+    {{ footer }}
+  </div>
+</div>
+
+<!-- ====== LEGAL ====== -->
+<div style="max-width:1620px;margin:0 auto;padding:64px 44px 0">{{ tagLegal }}</div>
+<div style="max-width:1620px;margin:0 auto;padding:20px 44px 0">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em;margin-bottom:10px">LEGAL — TEMPLATE (privacy / terms) · sticky TOC · last-updated stamp</div>
+  <div data-screen-label="V2 Legal · Template" style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg)">
+    <nav style="display:flex;align-items:center;gap:30px;padding:0 32px;height:70px;background:rgba(5,6,9,.82);border-bottom:1px solid var(--line)">
+      <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:28px;display:block">
+      <div style="margin-left:auto"><a href="https://explorer.pyraxchain.com" style="background:var(--grad);color:#140803;padding:10px 19px;border-radius:100px;font-weight:700;font-size:13.5px">Launch App ↗</a></div>
+    </nav>
+    <section style="padding:64px 56px 44px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1160px;margin:0 auto">
+        <h1 style="font-family:var(--disp);font-weight:600;font-size:clamp(30px,3.4vw,44px);letter-spacing:-.02em;margin:0 0 12px;text-transform:uppercase">Privacy <span style="color:transparent;-webkit-text-stroke:1.2px rgba(242,244,248,.8)">Policy</span></h1>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--tx3)">Last updated · 8 July 2026</div>
+      </div>
+    </section>
+    <section style="padding:48px 56px 72px;border-bottom:1px solid var(--line)">
+      <div style="max-width:1160px;margin:0 auto;display:grid;grid-template-columns:250px 1fr;gap:52px;align-items:start">
+        <div style="position:sticky;top:20px">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3);margin-bottom:16px">On this page</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ legalToc }}" as="s" hint-placeholder-count="11"><a href="#" style="font-size:13px;color:var(--tx2);padding:8px 13px;border-left:1px solid var(--line)" style-hover="color:var(--tx);border-color:var(--orange)">{{ s }}</a></sc-for>
+          </div>
+        </div>
+        <div style="max-width:680px">
+          <sc-for list="{{ legalToc }}" as="s" hint-placeholder-count="11">
+            <div style="margin-bottom:38px">
+              <h2 style="font-family:var(--disp);font-weight:500;font-size:21px;letter-spacing:-.01em;margin:0 0 14px;display:flex;gap:15px;align-items:baseline"><span style="font-family:var(--disp);font-weight:700;font-size:16px;color:transparent;-webkit-text-stroke:.8px rgba(246,138,36,.6)">{{ $index }}</span>{{ s }}</h2>
+              <p style="color:var(--tx2);font-size:15px;line-height:1.78;margin:0 0 12px">This section is a placeholder for the {{ s }} clause. The template establishes readable measure (~68ch), a sticky table of contents, a last-updated stamp, and consistent dark-system styling shared by both /privacy and /terms.</p>
+              <p style="color:var(--tx2);font-size:15px;line-height:1.78;margin:0">Body copy uses the grotesque at 15px with 1.78 line-height; links inherit the palette cyan and shift to gold on hover.</p>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+    {{ footer }}
+  </div>
+</div>
+
+<div style="max-width:1620px;margin:0 auto;padding:60px 44px 100px;text-align:center">
+  <img src="https://pyraxchain.com/brand/logo-horizontal.svg" alt="PYRAX" style="height:26px;display:block;margin:0 auto 16px;opacity:.7">
+  <div style="font-family:var(--disp);font-weight:500;font-size:15px;letter-spacing:.04em;color:var(--tx2)">All pages, templates, modals &amp; states delivered — V2.</div>
+  <div style="font-family:var(--mono);font-size:11px;color:var(--tx3);margin-top:10px">Home · Technology · Network · Token · Developers · Pitch · Company · Whitepaper · Industries (hub + category + detail) · Legal — desktop + mobile</div>
+</div>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:95;background:#12151d;border:1px solid var(--line2);color:var(--tx);padding:13px 22px;border-radius:100px;font-family:var(--mono);font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 20px 60px rgba(0,0,0,.7)"><span style="color:var(--live)">✓</span>Copied to clipboard</div>
+</sc-if>
+
+<sc-if value="{{ switcherOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeSwitcher }}" style="position:fixed;inset:0;z-index:90;background:rgba(2,3,5,.74);backdrop-filter:blur(5px);display:flex;align-items:flex-start;justify-content:center;padding-top:84px">
+    <div onClick="{{ stop }}" style="width:460px;max-width:calc(100vw - 40px);animation:riseS .3s ease both">{{ switcherCard }}</div>
+  </div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.networks = [
+      {code:'S', name:'PYRAX Seed', status:'Simulated · live', live:true, chain:'881,109', block:'5s', desc:'Permanent developer sandbox. Play-money, welcome faucet — never becomes mainnet.'},
+      {code:'F', name:'PYRAX Forge', status:'Production · not yet live', live:false, chain:'710,823', block:'5s', desc:'Closed public alpha. Three seeded genesis validators.'},
+      {code:'R', name:'PYRAX Rise', status:'Production · not yet live', live:false, chain:'104,928', block:'6s', desc:'Official incentivized public testnet. Emission ramp.'},
+      {code:'O', name:'PYRAX One', status:'Production · not yet live', live:false, chain:'563,821', block:'6s', desc:'Mainnet. Genesis pending external audit. No faucet, no dev keys.'}
+    ];
+    this.state = { sel:0, switcherOpen:false, height:12486301, peers:47, tps:12840, toast:false, slide:0 };
+    this.codeText = 'import { ethers } from "ethers";\n\nconst provider = new ethers.JsonRpcProvider(\n  "https://pyrax-seed.rpc.pyraxchain.com"\n);\n\nconst net = await provider.getNetwork();\nconsole.log(net.chainId); // 881109n\n\nconst block = await provider.getBlockNumber();\nconsole.log("PYRAX Seed height", block);';
+  }
+  componentDidMount(){
+    this._iv = setInterval(()=>{
+      this.setState(s=>({
+        height: s.height + Math.floor(1+Math.random()*2),
+        peers: Math.max(38, Math.min(63, s.peers + (Math.random()<.5?-1:1))),
+        tps: Math.max(9000, Math.min(16500, s.tps + Math.floor((Math.random()-.5)*1400)))
+      }));
+    }, 1600);
+    this._raf = requestAnimationFrame(()=>this.drawDag());
+  }
+  componentWillUnmount(){ clearInterval(this._iv); cancelAnimationFrame(this._raf); }
+  drawDag(){
+    const c = document.getElementById('v2dag'); if(!c){ this._raf=requestAnimationFrame(()=>this.drawDag()); return; }
+    const ctx = c.getContext('2d'); const dpr = Math.min(2, window.devicePixelRatio||1);
+    const resize=()=>{ const r=c.getBoundingClientRect(); c.width=r.width*dpr; c.height=r.height*dpr; };
+    resize();
+    if(!this._nodes){
+      const per=[2,3,4,3,4,3,4,3,3,2]; const nodes=[]; let id=0;
+      for(let x=0;x<per.length;x++){ for(let y=0;y<per[x];y++){ nodes.push({id:id++, col:x, row:y, rows:per[x], blue:Math.random()<.6, ph:Math.random()*Math.PI*2}); } }
+      const edges=[];
+      nodes.forEach(nd=>{ const parents=nodes.filter(p=>p.col===nd.col-1); const k=Math.min(parents.length, 1+Math.floor(Math.random()*2)); parents.slice().sort(()=>Math.random()-.5).slice(0,k).forEach(p=>edges.push([p.id, nd.id])); });
+      this._nodes=nodes; this._edges=edges;
+    }
+    const nodes=this._nodes, edges=this._edges;
+    const loop=(now)=>{
+      const w=c.width, h=c.height; ctx.clearRect(0,0,w,h);
+      const padX=w*0.04, padY=h*0.14, gw=(w-padX*2)/(9);
+      const pos=(nd)=>{ const x=padX+nd.col*gw; const gap=(h-padY*2)/(nd.rows+1); const y=padY+gap*(nd.row+1)+Math.sin(now/1600+nd.ph)*7*dpr; return {x,y}; };
+      edges.forEach(([a,b])=>{ const A=pos(nodes[a]),B=pos(nodes[b]); const both=nodes[a].blue&&nodes[b].blue; ctx.beginPath(); ctx.moveTo(A.x,A.y); const mx=(A.x+B.x)/2; ctx.bezierCurveTo(mx,A.y,mx,B.y,B.x,B.y); ctx.strokeStyle=both?'rgba(57,131,195,.3)':'rgba(255,255,255,.05)'; ctx.lineWidth=1*dpr; ctx.stroke(); });
+      const blueEdges=edges.filter(([a,b])=>nodes[a].blue&&nodes[b].blue);
+      blueEdges.forEach((e,i)=>{ const [a,b]=e; const A=pos(nodes[a]),B=pos(nodes[b]); const tt=((now/3000)+(i*0.11))%1; ctx.beginPath(); ctx.arc(A.x+(B.x-A.x)*tt, A.y+(B.y-A.y)*tt, 1.9*dpr,0,7); ctx.fillStyle='rgba(254,210,60,.85)'; ctx.fill(); });
+      nodes.forEach(nd=>{ const P=pos(nd); const r=(nd.blue?4.6:3.4)*dpr*(1+Math.sin(now/1000+nd.ph)*.1); if(nd.blue){ const g=ctx.createRadialGradient(P.x,P.y,0,P.x,P.y,r*3); g.addColorStop(0,'rgba(92,186,206,.75)'); g.addColorStop(1,'rgba(57,131,195,0)'); ctx.beginPath(); ctx.arc(P.x,P.y,r*3,0,7); ctx.fillStyle=g; ctx.fill(); ctx.beginPath(); ctx.arc(P.x,P.y,r*.6,0,7); ctx.fillStyle='#d5edf4'; ctx.fill(); } else { ctx.beginPath(); ctx.arc(P.x,P.y,r*.7,0,7); ctx.fillStyle='rgba(246,138,36,.75)'; ctx.fill(); } });
+      this._raf=requestAnimationFrame(loop);
+    };
+    window.removeEventListener('resize', this._rz); this._rz=resize; window.addEventListener('resize', this._rz);
+    this._raf=requestAnimationFrame(loop);
+  }
+  fmt(n){ return n.toLocaleString('en-US'); }
+  buildPitch(i){
+    const R=React.createElement;
+    const kick=(t,c)=>R('div',{style:{fontFamily:'var(--mono)',fontSize:'11px',letterSpacing:'.26em',textTransform:'uppercase',color:c||'var(--orange)',marginBottom:'20px'}},t);
+    const H=(t,sz)=>R('h2',{style:{fontFamily:'var(--disp)',fontWeight:600,fontSize:(sz||42)+'px',lineHeight:1.04,letterSpacing:'-.02em',margin:'0 0 20px',maxWidth:'880px',textTransform:'uppercase'}},t);
+    const P=(t)=>R('p',{style:{color:'var(--tx2)',fontSize:'16.5px',lineHeight:1.65,margin:0,maxWidth:'660px'}},t);
+    const stat=(n,l,c)=>R('div',{style:{border:'1px solid var(--line)',background:'var(--panel)',borderRadius:'16px',padding:'24px',position:'relative'}},R('span',{style:{position:'absolute',top:'-1px',left:'18px',width:'28px',height:'1px',background:c||'var(--orange)'}}),R('div',{style:{fontFamily:'var(--disp)',fontWeight:600,fontSize:'28px',color:c||'var(--orange)',letterSpacing:'-.01em',lineHeight:1}},n),R('div',{style:{color:'var(--tx2)',fontSize:'12.5px',marginTop:'10px',lineHeight:1.5}},l));
+    const wrap=(kids,center)=>R('div',{style:{width:'100%',height:'100%',padding:'64px 76px',display:'flex',flexDirection:'column',justifyContent:'center',alignItems:center?'center':'flex-start',textAlign:center?'center':'left',position:'relative'}},kids);
+    const ghost=(t)=>R('div',{style:{position:'absolute',right:'30px',bottom:'6px',fontFamily:'var(--disp)',fontWeight:700,fontSize:'150px',lineHeight:1,color:'transparent',WebkitTextStroke:'1px rgba(255,255,255,.07)',pointerEvents:'none',userSelect:'none'}},t);
+    const logo=R('img',{src:'https://pyraxchain.com/brand/logo-horizontal.svg',alt:'PYRAX',style:{height:'46px',display:'block',margin:'0 auto 34px'}});
+    const grid=(cols,kids)=>R('div',{style:{display:'grid',gridTemplateColumns:'repeat('+cols+',1fr)',gap:'14px',width:'100%',maxWidth:'940px',marginTop:'12px'}},kids);
+    const slides=[
+      ()=>wrap([logo,H('The blockchain built like the future demands.',46),R('div',{style:{color:'var(--tx2)',fontSize:'18px',fontWeight:500,marginTop:'4px'}},'Private by default. Parallel by design. Verifiable by proof.')],true),
+      ()=>wrap([ghost('01'),kick('01 · The problem'),H("Today's chains force a false choice."),grid(3,[stat('Throughput','sacrificed for decentralization','var(--orange)'),stat('Privacy','public ledgers leak everything','var(--gold)'),stat('Sovereignty','ISPs & boot nodes are chokepoints','var(--cyan)')])]),
+      ()=>wrap([ghost('02'),kick('02 · The technology','var(--cyan)'),H('One protocol, four guarantees.'),grid(2,[stat('GhostDAG','a web of blocks, not a chain','var(--orange)'),stat('TriStream','3 streams · 5 seal lanes','var(--gold)'),stat('Shielded ZK','no trusted setup','var(--cyan)'),stat('Multi-VM','EVM · WASM · Cairo','var(--blue)')])]),
+      ()=>wrap([ghost('03'),kick('03 · The market','var(--gold)'),H('Mapped to real demand.'),P('PYRAX ships concrete integrations across the economy — not abstractions.'),grid(3,[stat('10','industry categories','var(--orange)'),stat('100','business types','var(--gold)'),stat('100','mapped integrations','var(--cyan)')])]),
+      ()=>wrap([ghost('04'),kick('04 · NEURAX','var(--cyan)'),H('Idle GPUs become a verifiable compute market.'),grid(4,[stat('8 PYRX','per compute unit','var(--cyan)'),stat('4B','AI-compute pool','var(--orange)'),stat('4-rung','verification ladder','var(--gold)'),stat('RTX 3060','local-first baseline','var(--blue)')])]),
+      ()=>wrap([ghost('05'),kick('05 · Traction','var(--orange)'),H('Built, not planned.'),P('A real, tested Layer-1 today — PYRAX Seed is live, the whitepaper is at v4.'),grid(4,[stat('Live','PYRAX Seed today','var(--live)'),stat('4','networks','var(--orange)'),stat('3','virtual machines','var(--cyan)'),stat('100%','open-core','var(--gold)')])]),
+      ()=>wrap([ghost('06'),kick('06 · Tokenomics','var(--gold)'),H('50B hard cap. One inflation source.'),R('div',{style:{display:'flex',gap:'44px',alignItems:'center',marginTop:'12px'}},
+        R('div',{style:{position:'relative',width:'180px',height:'180px',borderRadius:'50%',flex:'none',background:'conic-gradient(var(--orange) 0 50%,var(--blue) 50% 75%,var(--gold) 75% 85%,var(--cyan) 85% 93%,var(--orange-deep) 93% 98%,#454c5b 98% 100%)',boxShadow:'0 0 60px rgba(246,138,36,.16)'}},R('div',{style:{position:'absolute',inset:'26px',borderRadius:'50%',background:'var(--bg)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}},R('span',{style:{fontFamily:'var(--disp)',fontWeight:600,fontSize:'26px'}},'50B'),R('span',{style:{fontFamily:'var(--mono)',fontSize:'9px',color:'var(--tx3)'}},'HARD CAP'))),
+        R('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px',flex:1}},[stat('$0.0025','genesis price','var(--orange)'),stat('75 / 25','premine / mined','var(--cyan)'),stat('12.5B','mined over ~26y','var(--gold)'),stat('$50M','genesis event','var(--blue)')]))]),
+      ()=>wrap([ghost('07'),kick('07 · Roadmap','var(--orange)'),H('Now → Gate → Launch.'),R('div',{style:{display:'flex',gap:'12px',width:'100%',maxWidth:'940px',marginTop:'12px'}},
+        [['NOW','Seed live','var(--live)'],['NEXT','Forge alpha','var(--orange)'],['THEN','Rise testnet','var(--gold)'],['GATE','External audit','var(--cyan)'],['LAUNCH','One mainnet','var(--orange-deep)']].map((s,k)=>R('div',{key:k,style:{flex:1,background:s[0]==='GATE'?'linear-gradient(180deg,rgba(25,99,169,.24),var(--panel))':'var(--panel)',border:'1px solid '+(s[0]==='GATE'?'var(--cyan)':'var(--line)'),borderRadius:'14px',padding:'18px 16px'}},R('div',{style:{fontFamily:'var(--mono)',fontSize:'9.5px',color:s[2],letterSpacing:'.16em',marginBottom:'10px'}},s[0]),R('div',{style:{fontFamily:'var(--disp)',fontWeight:500,fontSize:'14px'}},s[1]))))]),
+      ()=>wrap([ghost('08'),kick('08 · The ask','var(--orange)'),H('20B PYRX @ $0.0025 = $50,000,000.'),P('A genesis event with a 25% utility bonus (5B PYRX) framed as network access & compute credits — never a return. Initial circulating ≈27.1B (~54%).'),R('a',{href:'#',style:{marginTop:'28px',background:'var(--grad)',color:'#140803',padding:'15px 30px',borderRadius:'100px',fontWeight:700,fontSize:'15px',textDecoration:'none'}},'Request the data room →')]),
+      ()=>wrap([logo,H('Prove, don\u2019t promise.',44),R('div',{style:{color:'var(--tx2)',fontSize:'15px',fontFamily:'var(--mono)',marginTop:'8px'}},'invest@pyraxchain.com · pyraxchain.com')],true)
+    ];
+    return (slides[i]||slides[0])();
+  }
+  renderVals(){
+    const S=this.state; const net=this.networks[S.sel]; const R=React.createElement;
+
+    const tag=(num,label,color)=>R('div',{style:{display:'flex',alignItems:'center',gap:'18px'}},
+      R('span',{style:{fontFamily:'var(--mono)',fontWeight:600,fontSize:'12px',letterSpacing:'.2em',color:color,border:'1px solid '+color,padding:'7px 14px',borderRadius:'100px',opacity:.92}},num),
+      R('span',{style:{fontFamily:'var(--disp)',fontWeight:500,fontSize:'22px',letterSpacing:'-.01em'}},label),
+      R('span',{style:{flex:1,height:'1px',background:'var(--line)'}}));
+
+    const switcherCard = R('div',{style:{background:'#0b0d13',border:'1px solid var(--line2)',borderRadius:'20px',overflow:'hidden',boxShadow:'0 40px 120px -20px rgba(0,0,0,.9)'}},
+      R('div',{style:{padding:'18px 22px',borderBottom:'1px solid var(--line)',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+        R('div',{},R('div',{style:{fontFamily:'var(--disp)',fontWeight:500,fontSize:'16px',letterSpacing:'-.01em'}},'Switch network'),R('div',{style:{fontFamily:'var(--mono)',fontSize:'10px',color:'var(--tx3)',marginTop:'4px'}},'Live widgets site-wide read the selected RPC')),
+        R('span',{onClick:()=>this.setState({switcherOpen:false}),style:{cursor:'pointer',color:'var(--tx3)',fontSize:'14px',width:'30px',height:'30px',display:'flex',alignItems:'center',justifyContent:'center',border:'1px solid var(--line)',borderRadius:'100px'}},'✕')),
+      R('div',{style:{padding:'10px'}}, this.networks.map((n,i)=>
+        R('div',{key:i,onClick:()=>this.setState({sel:i,switcherOpen:false}),style:{display:'flex',alignItems:'center',gap:'14px',padding:'14px',borderRadius:'14px',cursor:'pointer',background:i===S.sel?'var(--panel2)':'transparent',border:'1px solid '+(i===S.sel?'var(--line2)':'transparent'),marginBottom:'2px'}},
+          R('div',{style:{width:'40px',height:'40px',borderRadius:'12px',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--disp)',fontWeight:600,fontSize:'16px',background:n.live?'var(--grad)':'var(--panel2)',color:n.live?'#140803':'var(--tx2)',flex:'none'}},n.code),
+          R('div',{style:{flex:1,minWidth:0}},
+            R('div',{style:{fontFamily:'var(--body)',fontWeight:600,fontSize:'14.5px',display:'flex',alignItems:'center',gap:'8px'}},n.name,
+              R('span',{style:{width:'7px',height:'7px',borderRadius:'50%',background:n.live?'var(--live)':'var(--off)',boxShadow:n.live?'0 0 8px var(--live)':'none'}})),
+            R('div',{style:{fontFamily:'var(--mono)',fontSize:'10.5px',color:'var(--tx3)',marginTop:'3px'}},n.status+' · chain '+n.chain+' · '+n.block+' blocks')),
+          i===S.sel?R('span',{style:{color:'var(--orange)',fontSize:'14px'}},'✓'):null))));
+
+    const widget=(online)=>{
+      const rows = online
+        ? [['Block height', this.fmt(S.height),''],['Connected peers', String(S.peers),''],['Live TPS', this.fmt(S.tps),'target 500.0k'],['Finality','Stream C','>2/3 stake']]
+        : [['Block height','—','offline'],['Connected peers','—',''],['Live TPS','—','target 500.0k'],['Finality','—','Stream C · >2/3 stake']];
+      return R('div',{style:{position:'relative',background:'rgba(7,9,14,.82)',backdropFilter:'blur(14px)',border:'1px solid '+(online?'var(--line2)':'var(--line)'),borderRadius:'20px',overflow:'hidden'}},
+        R('span',{style:{position:'absolute',top:'-1px',left:'22px',width:'42px',height:'1px',background:online?'var(--grad)':'var(--line2)'}}),
+        R('div',{style:{padding:'16px 22px',borderBottom:'1px solid var(--line)',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+          R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
+            R('span',{style:{width:'8px',height:'8px',borderRadius:'50%',background:online?'var(--live)':'var(--off)',boxShadow:online?'0 0 10px var(--live)':'none',animation:online?'blink 2s infinite':'none'}}),
+            R('span',{style:{fontFamily:'var(--mono)',fontSize:'12px',letterSpacing:'.04em'}},online?'PYRAX Seed · Simulated':'PYRAX One · Production')),
+          R('span',{style:{fontFamily:'var(--mono)',fontSize:'9.5px',letterSpacing:'.08em',padding:'5px 10px',borderRadius:'100px',background:online?'rgba(61,220,132,.1)':'rgba(91,98,112,.12)',color:online?'var(--live)':'var(--off)',border:'1px solid '+(online?'rgba(61,220,132,.3)':'var(--line2)')}},online?'LIVE RPC':'AWAITING RPC')),
+        R('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr'}}, rows.map((r,i)=>
+          R('div',{key:i,style:{padding:'18px 22px',borderBottom:i<2?'1px solid var(--hair)':'none',borderRight:i%2===0?'1px solid var(--hair)':'none'}},
+            R('div',{style:{fontFamily:'var(--mono)',fontSize:'10px',letterSpacing:'.1em',color:'var(--tx3)',textTransform:'uppercase',marginBottom:'8px'}},r[0]),
+            R('div',{style:{fontFamily:'var(--disp)',fontWeight:500,fontSize:'21px',letterSpacing:'-.01em',color:online?'var(--tx)':'var(--tx3)',lineHeight:1}},r[1]),
+            r[2]?R('div',{style:{fontFamily:'var(--mono)',fontSize:'9.5px',color:'var(--tx3)',marginTop:'7px'}},r[2]):null))),
+        R('div',{style:{padding:'13px 22px',borderTop:'1px solid var(--line)',fontSize:'11px',color:'var(--tx3)',lineHeight:1.55,background:'rgba(5,6,9,.6)'}},
+          online?'Live on PYRAX Seed · switch networks in the navbar. Numbers are real — an offline network shows em-dashes, never fabricated figures.':'Network unreachable. Figures read from public RPC at page load; until live, every figure is an em-dash.'));
+    };
+
+    const socials=[['X','https://x.com/PYRAX_Official'],['DC','https://discord.gg/cEX6uQn24'],['TG','https://t.me/+3DreJAHGxqhjYWQx'],['GH','https://github.com/PYRAX-NETWORK'],['YT','https://www.youtube.com/@PYRAXNETWORK']];
+    const cols=[
+      ['Product',['Explorer ↗','Run a Node ↗','Devnet Portal ↗','Network']],
+      ['Developers',['Docs','Whitepaper','GitHub ↗','Token']],
+      ['Industries',['Finance & Banking','Supply Chain & Logistics','Healthcare & Life Sciences','Gaming & Entertainment','Real Estate & Property','View all →']],
+      ['Company',['Company','Investors','Roadmap','Security']]
+    ];
+    const footer = R('footer',{style:{background:'var(--bg2)',padding:'56px 48px 30px',position:'relative',overflow:'hidden'}},
+      R('div',{style:{display:'grid',gridTemplateColumns:'1.5fr repeat(4,1fr)',gap:'34px',maxWidth:'1280px',margin:'0 auto',position:'relative'}},
+        R('div',{},
+          R('img',{src:'https://pyraxchain.com/brand/logo-horizontal.svg',alt:'PYRAX Network',style:{height:'30px',display:'block',marginBottom:'18px'}}),
+          R('div',{style:{color:'var(--tx2)',fontSize:'12.5px',lineHeight:1.65,maxWidth:'250px'}},'High-throughput · private-by-default · fully decentralized · ISP-resistant · open-core.'),
+          R('div',{style:{display:'flex',gap:'8px',marginTop:'20px'}}, socials.map((s,i)=>R('a',{key:i,href:s[1],style:{width:'36px',height:'36px',borderRadius:'100px',border:'1px solid var(--line2)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--mono)',fontSize:'10px',color:'var(--tx2)'}},s[0])))),
+        cols.map((c,i)=>R('div',{key:i},
+          R('div',{style:{fontFamily:'var(--mono)',fontSize:'10.5px',letterSpacing:'.16em',textTransform:'uppercase',marginBottom:'16px',color:'var(--tx3)'}},c[0]),
+          c[1].map((l,j)=>R('div',{key:j,style:{color:'var(--tx2)',fontSize:'13px',padding:'6px 0',cursor:'pointer'}},l))))),
+      R('div',{style:{maxWidth:'1280px',margin:'40px auto 0',paddingTop:'22px',borderTop:'1px solid var(--line)',display:'flex',flexWrap:'wrap',gap:'14px',alignItems:'center',justifyContent:'space-between',position:'relative'}},
+        R('div',{style:{fontSize:'11.5px',color:'var(--tx3)',display:'flex',gap:'18px',flexWrap:'wrap'}},R('span',{},'© 2026 PYRAX™ Network. All rights reserved.'),R('span',{style:{cursor:'pointer'}},'Privacy'),R('span',{style:{cursor:'pointer'}},'Terms')),
+        R('div',{style:{fontSize:'11px',color:'var(--tx3)',maxWidth:'520px',lineHeight:1.55}},'Open protocol under Apache-2.0. Apps, wallet, NEURAX & services proprietary. PYRAX™ is a trademark.')));
+
+    const U=(id)=>'https://images.unsplash.com/'+id+'?q=80&w=640&auto=format&fit=crop';
+
+    return {
+      selName: net.name,
+      openSwitcher: ()=>this.setState({switcherOpen:true}),
+      closeSwitcher: ()=>this.setState({switcherOpen:false}),
+      stop:(e)=>e.stopPropagation(),
+      switcherOpen: S.switcherOpen,
+      navItems:['Technology','Network','Token','Industries','Developers','Company'],
+      switcherCard,
+      liveWidget:widget(true), offlineWidget:widget(false),
+      footer,
+      tagGlobal: tag('A','Global components','var(--orange)'),
+      tagHome: tag('01','Home  ·  /','var(--cyan)'),
+      tagTech: tag('02','Technology  ·  /technology','var(--cyan)'),
+      tagNet: tag('03','Network  ·  /network','var(--orange)'),
+      tagToken: tag('04','Token  ·  /token','var(--gold)'),
+      tagDev: tag('05','Developers  ·  /developers','var(--cyan)'),
+      tagPitch: tag('06','Investor pitch  ·  /pitch','var(--orange)'),
+      tagCompany: tag('07','Company  ·  /company','var(--cyan)'),
+      tagWp: tag('08','Whitepaper  ·  /whitepaper','var(--gold)'),
+      tagInd: tag('09','Industries  ·  /industries','var(--orange)'),
+      tagLegal: tag('10','Legal template  ·  /privacy · /terms','var(--tx3)'),
+      toast: S.toast,
+      copyCode: ()=>{ try{ navigator.clipboard.writeText(this.codeText); }catch(e){} clearTimeout(this._tt); this.setState({toast:true}); this._tt=setTimeout(()=>this.setState({toast:false}),1800); },
+      connectParams: [
+        {k:'Network', v:'PYRAX Seed'},{k:'Chain ID', v:'881109'},{k:'Currency', v:'PYRX'},{k:'Block time', v:'5s'}
+      ],
+      devPaths: [
+        {tag:'EVM', title:'Deploy a Solidity contract', desc:'Full eth_* equivalence via revm — ship existing Solidity unchanged.'},
+        {tag:'WASM', title:'Write a Rust contract', desc:'Rust-first contracts on wasmtime, metered by the same gas market.'},
+        {tag:'CAIRO', title:'Prove with Cairo', desc:'STARK-provable execution — prove off-chain, verify on-chain.'},
+        {tag:'ZK', title:'Build a shielded dApp', desc:'Notes, nullifiers and viewing keys, no trusted setup.'},
+        {tag:'NEURAX', title:'Buy verifiable compute', desc:'GPU-hours settled on-chain with a ComputeReceipt per job.'},
+        {tag:'P2P', title:'Run a node', desc:'One binary joins any of the four networks.'}
+      ],
+      devResources: [
+        {t:'Documentation', d:'Guides, references and tutorials', u:'docs'},
+        {t:'Whitepaper v4', d:'The full technical paper', u:'/whitepaper'},
+        {t:'GitHub', d:'Open-core source · Apache-2.0', u:'github.com/PYRAX-NETWORK ↗'},
+        {t:'Block explorer', d:'Live chain data on any network', u:'explorer.pyraxchain.com ↗'},
+        {t:'Node & wallet apps', d:'Desktop node and wallet', u:'nodes.pyraxchain.com ↗'},
+        {t:'Devnet tester portal', d:'Faucet and test tooling', u:'devnet.pyraxchain.com ↗'}
+      ],
+      pitchIndex:S.slide, pitchNum:String(S.slide+1).padStart(2,'0'),
+      pitchProg:((S.slide+1)/10*100)+'%',
+      pitchDots:Array.from({length:10},(_,i)=>i),
+      pitchNext:()=>this.setState(s=>({slide:Math.min(9,s.slide+1)})),
+      pitchPrev:()=>this.setState(s=>({slide:Math.max(0,s.slide-1)})),
+      pitchGo:(e)=>{ const i=parseInt(e.currentTarget.dataset.i,10); if(!isNaN(i))this.setState({slide:i}); },
+      pitchOnKey:(e)=>{ if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();this.setState(s=>({slide:Math.min(9,s.slide+1)}));} else if(e.key==='ArrowLeft'){e.preventDefault();this.setState(s=>({slide:Math.max(0,s.slide-1)}));} },
+      pitchStart:(e)=>{ this._sx=(e.touches?e.touches[0].clientX:e.clientX); },
+      pitchEnd:(e)=>{ if(this._sx==null)return; const x=(e.changedTouches?e.changedTouches[0].clientX:e.clientX); const d=x-this._sx; this._sx=null; if(d<-45)this.setState(s=>({slide:Math.min(9,s.slide+1)})); else if(d>45)this.setState(s=>({slide:Math.max(0,s.slide-1)})); },
+      pitchSlide:this.buildPitch(S.slide),
+      companyStats:[{n:'50B', l:'hard cap'},{n:'4', l:'networks'},{n:'3', l:'VMs'},{n:'100%', l:'open-core'}],
+      beliefs:[
+        {t:'Private by default', d:'Shielding is the baseline, not an add-on. Transparent is the explicit exception.'},
+        {t:'Decentralized for real', d:'No boot authority, no privileged keys, three uncorrelated mining resources.'},
+        {t:'Prove, don\u2019t promise', d:'Live figures are real; an offline network shows em-dashes, never fabricated numbers.'},
+        {t:'Open-core', d:'The protocol is Apache-2.0 — verify every claim in the source.'}
+      ],
+      companyContact:[
+        {t:'Team & careers', d:'Gated portal for the team and hiring', u:'team.pyraxchain.com ↗'},
+        {t:'Get in touch', d:'General enquiries', u:'hello@pyraxchain.com'},
+        {t:'Read the source', d:'Open-core repositories', u:'github.com/PYRAX-NETWORK ↗'}
+      ],
+      wpNorthStars:[
+        {n:'01', t:'DAG not a chain', d:'A web of blocks, deterministically ordered by the blue-set rule.'},
+        {n:'02', t:'Privacy by default', d:'Shielded notes with no trusted setup.'},
+        {n:'03', t:'No boot node', d:'Bootstrapless peer discovery — nothing central to seize.'},
+        {n:'04', t:'ISP-resistance', d:'Sphinx mixnet hides metadata from carriers.'},
+        {n:'05', t:'Open & verifiable', d:'Apache-2.0 protocol, formal invariants, audit-gated.'}
+      ],
+      wpToc:['Design Goals','System Overview','GhostDAG Consensus','TriStream Mining','BLS Finality','Shielded Transactions','ZK Proof System','Virtual Machines','Transaction Types','L2 & L3 Rollups','NEURAX Compute','Crucible zero-fee mining','NOVA autonomous operations','Networking & Mixnet','Tokenomics','Fees & EIP-1559','Governance','Security & Threat Model','Cryptographic Primitives'],
+      indCategories:[
+        {name:'Finance & Banking', vp:'Settlement, shielded payments and compliant disclosure.'},
+        {name:'Supply Chain & Logistics', vp:'Provenance and tamper-evident custody at throughput.'},
+        {name:'Healthcare & Life Sciences', vp:'Private records with auditable, consented access.'},
+        {name:'Gaming & Entertainment', vp:'High-TPS assets and verifiable ownership.'},
+        {name:'Real Estate & Property', vp:'Tokenized title, escrow and fractional ownership.'},
+        {name:'Energy & Sustainability', vp:'Metering, credits and settlement you can prove.'},
+        {name:'Government & Public Sector', vp:'Transparent processes, private citizen data.'},
+        {name:'Retail & Commerce', vp:'Loyalty, payments and supply integrity.'},
+        {name:'Media, Art & Creator Economy', vp:'Provenance, royalties and direct monetization.'},
+        {name:'AI, Data & Compute', vp:'Verifiable compute markets via NEURAX.'}
+      ],
+      financeTypes:['Retail banking','Cross-border payments','Lending & credit','Asset management','Insurance','Capital markets','Custody','Payments processing','Trade finance','Compliance & KYC'],
+      detailMarketStats:[
+        {n:'$X.XT', l:'market size'},{n:'XX% CAGR', l:'projected growth'},{n:'$XXXB', l:'annual settlement'},{n:'XX%', l:'still off-chain'}
+      ],
+      detailPains:['Settlement takes days across correspondent banks','Ledgers are either fully public or fully siloed','Compliance and privacy are treated as opposites','Cross-border fees stack at every hop'],
+      detailElements:[
+        {t:'BLS finality', d:'Sub-second, irreversible settlement.'},
+        {t:'Shielded ZK transfers', d:'Private amounts with selective disclosure via viewing keys.'},
+        {t:'GhostDAG throughput', d:'500k+ TPS for institutional volume.'},
+        {t:'Multi-VM contracts', d:'EVM, WASM or Cairo per use-case.'},
+        {t:'NEURAX', d:'Verifiable risk & fraud compute on demand.'}
+      ],
+      detailIdeas:[
+        {n:'01', name:'ShieldPay Rails', d:'Private B2B settlement with viewing-key audit.', tags:['Shielded','Finality']},
+        {n:'02', name:'FX Netting Engine', d:'Multilateral netting settled atomically.', tags:['EVM','Escrow']},
+        {n:'03', name:'Compliant Stablecoin', d:'Programmable disclosure to regulators.', tags:['ZK','Gov']},
+        {n:'04', name:'Trade-Finance LC', d:'Letters of credit as on-chain escrow.', tags:['Escrow','WASM']},
+        {n:'05', name:'Private Payroll', d:'Salaries paid without leaking amounts.', tags:['Shielded']},
+        {n:'06', name:'Risk Oracle', d:'NEURAX-verified credit scoring.', tags:['NEURAX','Cairo']},
+        {n:'07', name:'Bond Issuance', d:'Tokenized fixed-income with coupons.', tags:['EVM','Finality']},
+        {n:'08', name:'Cross-Border Remit', d:'Shielded remittance at mixnet privacy.', tags:['Shielded','ZK']}
+      ],
+      legalToc:['Introduction','Information we collect','How we use data','Cookies','Third parties','Data retention','Your rights','Security','International transfers','Changes','Contact'],
+      techAnchors:['Consensus','Privacy','Virtual machines','NEURAX','Network','Security'],
+      sealLanes:[
+        {stream:'A', algo:'BLAKE3 PoW', hw:'ASIC / specialized', color:'var(--orange)'},
+        {stream:'A', algo:'double-SHA-256', hw:'ASIC', color:'var(--orange)'},
+        {stream:'B', algo:'kHeavyHash', hw:'Commodity GPU', color:'var(--gold)'},
+        {stream:'B', algo:'Argon2id (memory-hard)', hw:'Commodity CPU', color:'var(--gold)'},
+        {stream:'C', algo:'BLS proof-of-stake', hw:'Staked validators', color:'var(--cyan)'}
+      ],
+      privacyCards:[
+        {t:'Notes, not balances', d:'State is a set of notes in a depth-32 note-commitment Merkle tree plus a nullifier set. Spending reveals a nullifier — never which commitment it came from.'},
+        {t:'No trusted setup', d:'Poseidon-over-Goldilocks proofs with a plonky2-style backend. There is no toxic-waste ceremony to trust, and the circuit is default-on today.'},
+        {t:'Auditable by choice', d:'Viewing keys grant read-only visibility to an auditor or regulator without ever exposing the ability to spend — private for users, provable for oversight.'}
+      ],
+      vms:[
+        {name:'EVM', engine:'revm', desc:'Full Ethereum equivalence — Solidity/Vyper, the complete eth_* JSON-RPC, filters, subscriptions, precompiles, CREATE2, and EIP-1559.'},
+        {name:'WASM', engine:'wasmtime', desc:'Rust-first smart contracts compiled to WebAssembly — sandboxed, fast, and metered by the same gas market.'},
+        {name:'Cairo', engine:'STARK-provable', desc:'The Cairo VM for provable computation, so heavy logic can be proven off-chain and verified on-chain.'}
+      ],
+      txTypes:['Shielded','Transparent','Ethereum','Escrow','Stake','Governance'],
+      neuraxLadder:[
+        {n:'1', t:'Redundant re-execution', d:'across independent providers'},
+        {n:'2', t:'Fraud proofs', d:'that pin the single divergent step'},
+        {n:'3', t:'Interactive dispute', d:'a bisection game to that step'},
+        {n:'4', t:'TEE attestation', d:'for hardware-sealed execution'}
+      ],
+      neuraxStats2:[
+        {n:'8 PYRX', l:'per compute unit (1 reference-GPU-hour)'},{n:'4B PYRX', l:'AI-compute pool · ~70M/month budget'},
+        {n:'1 receipt', l:'one on-chain ComputeReceipt per verified job'},{n:'RTX 3060', l:'local-first baseline; ShardedExecutor pools GPUs'}
+      ],
+      networkPoints:[
+        {t:'No bootstrap authority', d:'Discovery is peer-to-peer with a relay directory and Kademlia routing. Nothing central to shut off.'},
+        {t:'Onion Sphinx mixnet', d:'Layered encryption with cover traffic hides who is talking to whom — metadata privacy, not just payload privacy.'},
+        {t:'Anonymous carriage', d:'A pull-based want/have engine moves files and media over the mixnet with reply-route loop guards and bounded reassembly.'}
+      ],
+      securityCards:[
+        {t:'Formal invariants', d:'Supply, finality, and nullifier-set invariants asserted in code and tested.'},
+        {t:'Documented threat model', d:'51% across three resources, rogue-key defense, DoS bounds, mempool caps.'},
+        {t:'External audit gate', d:'Consensus + ZK + bridge audited by an independent firm before mainnet.'},
+        {t:'Open-core', d:'Apache-2.0 protocol — verify the claims on this page in the source.'}
+      ],
+      networksList: this.networks.map(n=>({
+        code:n.code, name:n.name, chain:n.chain, block:n.block,
+        status: n.live?'Simulated':'Production',
+        dot: n.live?'var(--live)':'var(--off)',
+        glow: n.live?'0 0 9px var(--live)':'none',
+        statusCol: n.live?'var(--live)':'var(--tx3)',
+        badge: n.live?'CONNECTING':'NOT YET LIVE',
+        border: n.live?'rgba(61,220,132,.3)':'var(--line)',
+        markBg: n.live?'var(--grad)':'var(--panel2)',
+        markCol: n.live?'#140803':'var(--tx2)',
+        desc: n.code==='S'?'Permanent developer sandbox — a byte-identical simulation on real primitives with play-money and a welcome faucet. It never becomes mainnet; it stays a sandbox forever.'
+          : n.code==='F'?'Closed public alpha on the real Production consensus, launched with three seeded genesis validators. The first network where the production path runs for outside testers.'
+          : n.code==='R'?'The official public testnet — incentivized and audit-facing, with a testnet emission ramp. The dress rehearsal for mainnet.'
+          : 'Mainnet. The genesis ceremony is pending the external audit gate — no faucet, no dev keys, real value.'
+      })),
+      roadmap:[
+        {stage:'NOW', title:'PYRAX Seed is live', desc:'A faithful simulation of the full protocol — GhostDAG, shielded pool, multi-VM contracts, NEURAX — running today as a permanent developer sandbox.', col:'var(--live)', gate:false, notGate:true},
+        {stage:'NEXT', title:'PYRAX Forge · closed alpha', desc:'The production consensus path (real 5-lane TriStream + BLS finality) opens to invited testers with seeded validators.', col:'var(--orange)', gate:false, notGate:true},
+        {stage:'THEN', title:'PYRAX Rise · public testnet', desc:'Open, incentivized testnet with the emission ramp — the audit-facing rehearsal, load-tested in the open.', col:'var(--gold)', gate:false, notGate:true},
+        {stage:'GATE', title:'External audit', desc:'A single independent audit of consensus, the ZK circuits, and the bridge. Nothing reaches mainnet before it clears.', col:'var(--cyan)', gate:true, notGate:false},
+        {stage:'LAUNCH', title:'PYRAX One · mainnet', desc:'The genesis ceremony, the 50B hard cap enforced in consensus, and real value — after the gate.', col:'var(--orange-deep)', gate:false, notGate:true}
+      ],
+      tokenHero:[
+        {n:'50B', l:'Max supply · hard cap'},{n:'$0.0025', l:'Genesis price'},{n:'75%', l:'Premine · 25% mined'},{n:'PYRX', l:'Ticker · 18 decimals'}
+      ],
+      allocations:[
+        {name:'Public distribution', amt:'25B', pct:'50%', deg:50, color:'var(--orange)', note:'Genesis event — sold + 25% utility bonus'},
+        {name:'Mining emissions', amt:'12.5B', pct:'25%', color:'var(--blue)', note:'Minted to coinbase over ~26 yr; the only inflation'},
+        {name:'Ecosystem & liquidity', amt:'5B', pct:'10%', color:'var(--gold)', note:'40% at TGE + 60% linear over 24 months'},
+        {name:'AI-Compute pool', amt:'4B', pct:'8%', color:'var(--cyan)', note:'Streamed over 48 months; funds NEURAX payouts'},
+        {name:'Team & advisors', amt:'2.5B', pct:'5%', color:'var(--orange-deep)', note:'12-month cliff, then 36-month linear'},
+        {name:'DAO treasury & reserve', amt:'1B', pct:'2%', color:'#454c5b', note:'10% liquid at TGE; accrues fee share ongoing'}
+      ],
+      emissionFacts:[
+        {k:'Initial subsidy', v:'300 PYRX / block'},
+        {k:'Halving', v:'every 21,000,000 blocks (~4 years)'},
+        {k:'Cap', v:'12.5B mined, then fees only'},
+        {k:'Schedule', v:'~26 years to the cap · ~80% in the first ~8 years'},
+        {k:'Per-stream split', v:'Emergent one-third per stream (each stream mines ≈⅓ of blocks)'}
+      ],
+      feeBars:[
+        {label:'Base fee', parts:[
+          {name:'Burned', pct:'25%', flex:25, color:'var(--orange-deep)', tc:'#fff'},
+          {name:'PYRAX treasury', pct:'50%', flex:50, color:'var(--blue-deep)', tc:'#fff'},
+          {name:'DAO', pct:'25%', flex:25, color:'#454c5b', tc:'var(--tx)'}]},
+        {label:'Priority tip', parts:[
+          {name:'Block producer', pct:'70%', flex:70, color:'var(--orange)', tc:'#140803'},
+          {name:'PYRAX treasury', pct:'20%', flex:20, color:'var(--blue)', tc:'#03121f'},
+          {name:'DAO', pct:'10%', flex:10, color:'#454c5b', tc:'var(--tx)'}]}
+      ],
+      utility:[
+        {title:'Staking', color:'var(--orange)', rows:['Run a validator — 260,000 PYRX ≈ $650 at genesis','Join a pool — 10,000 PYRX minimum to delegate','Unbonding ~7 days · slashing 5% + 10% bounty','Validators earn Stream-C emission share · 70% producer tip · staking rewards','Pool rewards pro-rata, minus operator commission (≤ 20%); slashing shared pro-rata']},
+        {title:'Governance', color:'var(--cyan)', rows:['Exactly three governable parameters:','block_gas_limit (≤ 64×) · min_validator_stake (≤ 1024×) · unbonding_period (≤ 64×)','Quorum ≥ 1/3 of bonded stake · pass > 2/3 of voting stake','Frozen forever: fee split, the 12.5B emission cap + halving, and the governance rules themselves']},
+        {title:'NEURAX compute', color:'var(--gold)', rows:['Price — 8 PYRX / CU','Pool budget — ~70M PYRX / month (4B ÷ ~57 months)','Job cap — 10,000 PYRX per job (1,250 CU)','1 CU = 1 reference-GPU-hour (RTX-4090-class)','Bootstrap from the 4B pool → revenue-funded as coverage rises → unspent returns to the DAO']}
+      ],
+      tickerItems:[
+        {k:'500k+',v:'TPS target'},{k:'50B',v:'max supply hard cap'},{k:'3 VMs',v:'EVM · WASM · Cairo'},
+        {k:'5 lanes',v:'TriStream seals'},{k:'18s',v:'L3 recursive proof'},{k:'100%',v:'open-core protocol'},{k:'4 networks',v:'Seed · Forge · Rise · One'},
+        {k:'500k+',v:'TPS target'},{k:'50B',v:'max supply hard cap'},{k:'3 VMs',v:'EVM · WASM · Cairo'},
+        {k:'5 lanes',v:'TriStream seals'},{k:'18s',v:'L3 recursive proof'},{k:'100%',v:'open-core protocol'},{k:'4 networks',v:'Seed · Forge · Rise · One'}
+      ],
+      invariants:[
+        {idx:'01', stat:'500k+', statLabel:'TPS TARGET', title:'High throughput', desc:'A GhostDAG blockDAG accepts many blocks at once — honest parallel work is included, not orphaned. Target: 500,000+ TPS as a measured, benchmarked aggregate.'},
+        {idx:'02', stat:'ZK', statLabel:'NO TRUSTED SETUP', title:'Private by default', desc:'Every transfer is shielded by default with no-trusted-setup zero-knowledge proofs. Sender, receiver, and amount are hidden. Transparent is the explicit exception.'},
+        {idx:'03', stat:'3+2', statLabel:'STREAMS · FINALITY', title:'Fully decentralized', desc:'Bootstrapless peer discovery — no company-run starter server on the critical path to joining. Three uncorrelated mining streams plus BLS proof-of-stake finality.'},
+        {idx:'04', stat:'Sphinx', statLabel:'ONION MIXNET', title:'ISP-resistant', desc:'Traffic rides an onion Sphinx mixnet with fixed-size packets and cover traffic, so an on-path observer — including your ISP — sees only uniform encrypted flows.'}
+      ],
+      builtStats:[
+        {n:'50B', l:'Max supply (hard cap)'},{n:'3 VMs', l:'EVM · WASM · Cairo'},{n:'5 lanes', l:'TriStream seal lanes'},
+        {n:'4 nets', l:'Seed · Forge · Rise · One'},{n:'18s', l:'L3 recursive proof'},{n:'100%', l:'open-core protocol'}
+      ],
+      featureTiles:[
+        {tag:'CONSENSUS', title:'GhostDAG blockDAG', desc:'A multi-parent web of blocks ordered by GhostDAG (k-cluster blue set), so honest parallel work is included, not orphaned.'},
+        {tag:'MINING', title:'TriStream mining', desc:'Three streams over five seal lanes — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU), and BLS proof-of-stake finality.'},
+        {tag:'PRIVACY', title:'Shielded by default', desc:'Every transfer hides sender, receiver, and amount with plonky2 proofs — no trusted setup, and the circuit is default-on today.'},
+        {tag:'EXECUTION', title:'Multi-VM L2 + ZK-rollup L3', desc:'EVM (revm), WASM (wasmtime), and Cairo with cross-VM calls; a recursive ZK-rollup folds thousands of proofs into one.'},
+        {tag:'NETWORK', title:'Bootstrapless & ISP-resistant', desc:'No company-run starter server; traffic rides an onion Sphinx mixnet so an on-path observer sees only uniform encrypted flows.'},
+        {tag:'SECURITY', title:'Audit-gated to mainnet', desc:'Formal invariants, a documented threat model, and a single external audit of consensus + ZK + bridge before PYRAX One.'}
+      ],
+      neuraxStats:[
+        {n:'8 PYRX', l:'per compute unit (1 RTX-4090-hour)'},{n:'4B', l:'PYRX AI-compute pool'},
+        {n:'4-rung', l:'verification ladder'},{n:'RTX 3060', l:'local-first baseline GPU'}
+      ],
+      industries:[
+        {name:'Finance & Banking', img:U('photo-1611974789855-9c2a0a7236a3')},
+        {name:'Supply Chain & Logistics', img:U('photo-1494412574643-ff11b0a5c1c3')},
+        {name:'Healthcare & Life Sciences', img:U('photo-1576091160399-112ba8d25d1d')},
+        {name:'Gaming & Entertainment', img:U('photo-1542751371-adc38448a05e')},
+        {name:'Real Estate & Property', img:U('photo-1480714378408-67cf0d13bc1b')},
+        {name:'Energy & Sustainability', img:U('photo-1509391366360-2e959784a276')},
+        {name:'Government & Public Sector', img:U('photo-1555848962-6e79363ec58f')},
+        {name:'Retail & Commerce', img:U('photo-1441986300917-64674bd600d8')},
+        {name:'Media, Art & Creator Economy', img:U('photo-1460661419201-fd4cecdf8a8b')},
+        {name:'AI, Data & Compute', img:U('photo-1518770660439-4636190af475')}
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -12,11 +12,11 @@ const L = (p: string) => localizePath(lang, p);
 const seed = NETWORKS[0];
 
 const paths = [
-  { t: t("devPage.path1Title", "Deploy a Solidity contract"), d: t("devPage.path1Desc", "Point your existing Ethereum toolchain (Hardhat, Foundry, ethers) at the PYRAX RPC — the full eth_* surface is there."), c: "#f58722", vm: "EVM" },
+  { t: t("devPage.path1Title", "Deploy a Solidity contract"), d: t("devPage.path1Desc", "Point your existing Ethereum toolchain (Hardhat, Foundry, ethers) at the PYRAX RPC — the full eth_* surface is there."), c: "#f68a24", vm: "EVM" },
   { t: t("devPage.path2Title", "Write a Rust contract"), d: t("devPage.path2Desc", "Compile to WebAssembly and deploy to the WASM VM, metered by the same gas market as everything else."), c: "#34d399", vm: "WASM" },
   { t: t("devPage.path3Title", "Prove with Cairo"), d: t("devPage.path3Desc", "Move heavy computation off-chain and verify a STARK proof on-chain via the Cairo VM."), c: "#7c5cff", vm: "Cairo" },
-  { t: t("devPage.path4Title", "Build a shielded dApp"), d: t("devPage.path4Desc", "Use shielded transfers and viewing keys so your users are private by default and your auditors still have read-only proof."), c: "#60b8cc", vm: "ZK" },
-  { t: t("devPage.path5Title", "Buy verifiable compute"), d: t("devPage.path5Desc", "Escrow a NEURAX job, get a ComputeReceipt, and pay per compute unit — AI inference and training with proof, not trust."), c: "#fcd03d", vm: "NEURAX" },
+  { t: t("devPage.path4Title", "Build a shielded dApp"), d: t("devPage.path4Desc", "Use shielded transfers and viewing keys so your users are private by default and your auditors still have read-only proof."), c: "#5cbace", vm: "ZK" },
+  { t: t("devPage.path5Title", "Buy verifiable compute"), d: t("devPage.path5Desc", "Escrow a NEURAX job, get a ComputeReceipt, and pay per compute unit — AI inference and training with proof, not trust."), c: "#fed23c", vm: "NEURAX" },
   { t: t("devPage.path6Title", "Run a node"), d: t("devPage.path6Desc", "Join the mesh with an Inferno node, mine a stream, or stake to validate — no bootstrap server required."), c: "#f5a623", vm: "P2P" },
 ];
 
@@ -42,8 +42,8 @@ const ICON: Record<string, string> = {
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
     <div class="pointer-events-none absolute right-0 -top-40 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(52,211,153,0.14),transparent_60%)] blur-3xl"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20">
-      <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">{t("devPage.eyebrow", "Developers")}</div>
-      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">{t("devPage.headingPre", "Build with the tools you ")}<span class="flame-text">{t("devPage.headingEmphasis", "already know")}</span></h1>
+      <div class="eyebrow eyebrow-rule text-[color:var(--color-bolt-bright)]">{t("devPage.eyebrow", "Developers")}</div>
+      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold uppercase sm:text-6xl">{t("devPage.headingPre", "Build with the tools you ")}<span class="flame-text">{t("devPage.headingEmphasis", "already know")}</span></h1>
       <p class="mt-5 max-w-2xl text-lg text-muted">{t("devPage.subtitle", "Ship Solidity today against the full Ethereum RPC, or reach for Rust, Cairo, shielded transfers, and verifiable compute when you need them. Start free on the always-on Seed sandbox.")}</p>
       <div class="mt-8 flex flex-wrap gap-3">
         <a href={DOMAINS.docs || DOMAINS.site} class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">{t("devPage.ctaDocs", "Read the docs →")}</a>

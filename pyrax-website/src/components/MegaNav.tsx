@@ -89,6 +89,7 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
               </button>
             ))}
             <a href={L("/token")} className="rounded-lg px-3.5 py-2 text-sm font-medium text-muted transition hover:text-ink">{t("nav.token")}</a>
+            <a href={L("/company")} className="rounded-lg px-3.5 py-2 text-sm font-medium text-muted transition hover:text-ink">{t("nav.company")}</a>
           </div>
 
           {/* right cluster */}
@@ -168,6 +169,7 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
                 <a href={L("/token")} className="mobile-top">{t("nav.token")}</a>
                 <a href={L("/network")} className="mobile-top">{t("nav.network")}</a>
                 <a href={L("/developers")} className="mobile-top">{t("nav.developers")}</a>
+                <a href={L("/company")} className="mobile-top">{t("nav.company")}</a>
                 <a href={L("/pitch")} className="mobile-top">{t("nav.pitch")}</a>
               </div>
               <a href={DOMAINS.explorer} className="mt-5 block rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-4 py-2.5 text-center text-sm font-bold text-[#1a0f06]">{t("nav.launchApp")}</a>
@@ -210,7 +212,7 @@ function ProductsPanel({ t, L }: any) {
         ))}
       </div>
       <a href={L("/network")} className={`${featTone} flex flex-col justify-between`}>
-        <div><div className="text-xs font-semibold uppercase tracking-wider text-[color:var(--color-brand)]">{t("navPanels.productsFeatureEyebrow", "Network")}</div><div className="mt-2 font-display text-xl font-extrabold">{t("navPanels.productsFeatureTitle", "One binary, four networks")}</div><p className="mt-1.5 text-sm text-muted">{t("navPanels.productsFeatureBody", "Seed, Forge, Rise, and One — a faithful simulation on real primitives, gated to mainnet by external audit.")}</p></div>
+        <div><div className="eyebrow text-[color:var(--color-brand)]">{t("navPanels.productsFeatureEyebrow", "Network")}</div><div className="mt-2 font-display text-xl font-extrabold">{t("navPanels.productsFeatureTitle", "One binary, four networks")}</div><p className="mt-1.5 text-sm text-muted">{t("navPanels.productsFeatureBody", "Seed, Forge, Rise, and One — a faithful simulation on real primitives, gated to mainnet by external audit.")}</p></div>
         <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--color-brand)]">{t("navPanels.productsFeatureLink", "Explore the network →")}</span>
       </a>
     </div>
@@ -276,7 +278,7 @@ function DevelopersPanel({ t, L }: any) {
         ))}
       </div>
       <a href={L("/pitch")} className={`${featTone} flex flex-col justify-between`}>
-        <div><div className="text-xs font-semibold uppercase tracking-wider text-[color:var(--color-brand)]">{t("navPanels.devFeatureEyebrow", "Investors")}</div><div className="mt-2 font-display text-xl font-extrabold">{t("navPanels.devFeatureTitle", "See the pitch")}</div><p className="mt-1.5 text-sm text-muted">{t("navPanels.devFeatureBody", "An interactive, animated investor deck — the vision, the tech, the tokenomics, the ask.")}</p></div>
+        <div><div className="eyebrow text-[color:var(--color-brand)]">{t("navPanels.devFeatureEyebrow", "Investors")}</div><div className="mt-2 font-display text-xl font-extrabold">{t("navPanels.devFeatureTitle", "See the pitch")}</div><p className="mt-1.5 text-sm text-muted">{t("navPanels.devFeatureBody", "An interactive, animated investor deck — the vision, the tech, the tokenomics, the ask.")}</p></div>
         <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--color-brand)]">{t("navPanels.devFeatureLink", "Open the deck →")}</span>
       </a>
     </div>

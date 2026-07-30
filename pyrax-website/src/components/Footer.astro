@@ -38,12 +38,12 @@ const socials = [
         <a href={L("/")} class="flex items-center" aria-label="PYRAX Network — home"><img src="/brand/logo-horizontal.svg" alt="PYRAX™ Network" class="nodrag h-9 w-auto" /></a>
         <p class="mt-3 max-w-xs text-sm text-muted">{t("footer.tagline")}</p>
         <div class="mt-4 flex gap-2">
-          {socials.map((s) => (<a href={s.href} target="_blank" rel="noopener" aria-label={s.k} class="grid h-9 w-9 place-items-center rounded-lg border border-line text-muted transition hover:border-[color:#34405a] hover:text-ink"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d={s.d}/></svg></a>))}
+          {socials.map((s) => (<a href={s.href} target="_blank" rel="noopener" aria-label={s.k} class="grid h-9 w-9 place-items-center rounded-full border border-line-soft text-muted transition hover:border-[color:var(--color-brand)] hover:text-ink"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d={s.d}/></svg></a>))}
         </div>
       </div>
       {cols.map((col) => (
         <div>
-          <div class="text-xs font-semibold uppercase tracking-wider text-faint">{col.title}</div>
+          <div class="eyebrow text-faint">{col.title}</div>
           <ul class="mt-3 space-y-2">{col.links.map((l) => (<li><a href={l.href} class="text-sm text-muted transition hover:text-ink">{l.label}</a></li>))}</ul>
         </div>
       ))}
