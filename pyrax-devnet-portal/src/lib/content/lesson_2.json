@@ -1,0 +1,73 @@
+{
+  "id": "lesson_2",
+  "title": "Node Architecture & Security",
+  "intro": "A PYRAX node is more than a process running on your machine — it is your active identity on the network. Understanding what each component does, and how to keep it secure, is non-negotiable for every DevNet tester.\n\nThis module covers the three core layers of a node, key management best practices, and the network security responsibilities that come with participation.",
+  "sections": [
+    {
+      "title": "Node Architecture",
+      "content": "CORE COMPONENTS\nEvery PYRAX node is composed of three tightly coupled subsystems that must all be running for the node to participate in the network:\n\nCore Daemon (pyraxd): The primary process. It syncs the blockchain, validates incoming blocks against the TriStream Consensus rules, and maintains the local state database. If the daemon crashes, the node is offline.\nConsensus Engine: Embedded within the daemon. Handles PoS vote aggregation (Stream C), validates block proposals from Streams A and B, and enforces finality. You cannot run the consensus engine independently.\nRPC Interface: The local HTTP/WebSocket interface used by tooling, the portal agent, and monitoring scripts to query node state, submit transactions, and read logs.\n\nNODE LIFECYCLE\nWhen you start a PYRAX node, it goes through four stages:\nGenesis Sync: Downloads and verifies the genesis block. Only happens on first run.\nPeer Discovery: Connects to the Dynamic Intelligent Mesh Network to find active peers using the DHT (Distributed Hash Table).\nFull Sync: Downloads and validates all blocks from the chain tip to your local head. On a fresh node, this can take several hours depending on your hardware.\nSteady State: Normal operation. The node receives new blocks, validates them, and broadcasts its votes if it is also staking."
+    },
+    {
+      "title": "Security & Key Management",
+      "content": "PRIVATE KEY PRINCIPLES\nYour node identity is controlled by a secp256k1 private key generated at setup. This key:\n\nSeed Phrase (BIP-39): Never share it. Never type it on a remote machine. Store it on paper in a physically secure location. There is no recovery mechanism if it is lost or stolen.\nKeystore File: Encrypted on disk with your passphrase. Do not copy it to cloud storage. Do not put it in a git repository. Treat it like a password file.\nPassphrase: The decryption key for the keystore. Longer is better. Do not reuse a password from another service.\n\nENVIRONMENT SECURITY\nYour node machine should be treated as a dedicated system:\nDedicated Machine: Do not use your node machine as a daily-use workstation. Mixing roles increases the attack surface.\nFirewall Rules: Only open the ports the node requires (default P2P: 30303 TCP/UDP, RPC: 8545 — only if needed externally). Block all other inbound traffic.\nAutomatic Updates (OS): Keep the operating system patched. Unpatched systems are the most common vector for compromise.\nSSH Hardening (if remote): Use key-based authentication only. Disable password login. Consider fail2ban.\n\nWHAT HAPPENS IF KEYS ARE COMPROMISED\nIf your private key is stolen, the attacker gains full control of your node identity and accrued PYRX allocation. There is no admin key recovery. Contact the DevNet team immediately via the portal if you suspect compromise — they can blacklist the compromised node address from the reward ledger before the mainnet airdrop.",
+      "quiz": []
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Which component of a PYRAX node is responsible for validating incoming blocks and maintaining the local state database?",
+      "options": [
+        "The RPC Interface, which handles all incoming block data via HTTP",
+        "The Core Daemon (pyraxd), which syncs the blockchain and enforces consensus rules",
+        "The Consensus Engine alone, which operates as a separate process from the daemon",
+        "The DHT Client, which coordinates block delivery from peers"
+      ],
+      "correct_answer": 1,
+      "explanation": "The Core Daemon (pyraxd) is the primary process. It syncs the chain, validates blocks against the TriStream Consensus rules, and maintains the state database. The Consensus Engine is embedded within it, not a separate process. The RPC Interface is for querying — not block validation."
+    },
+    {
+      "question": "A tester wants to store their node's keystore file for backup. Which of the following is safe?",
+      "options": [
+        "Uploading it to Google Drive so it can be restored if the machine dies",
+        "Committing it to a private GitHub repository with a strong access token",
+        "Storing an encrypted copy on an offline USB drive kept in a secure physical location",
+        "Emailing it to their own email address as an attachment"
+      ],
+      "correct_answer": 2,
+      "explanation": "The keystore file must never be placed in cloud storage, version control, or transmitted over email — even to yourself. An encrypted offline backup on a physically secured USB drive is the correct approach. Cloud and email backups expose the file to network-based attack vectors."
+    },
+    {
+      "question": "What happens during the 'Peer Discovery' stage of the node lifecycle?",
+      "options": [
+        "The node downloads and verifies the genesis block for the first time",
+        "The node connects to the Dynamic Intelligent Mesh Network to find active peers via the DHT",
+        "The node receives new blocks and broadcasts its PoS votes in steady state",
+        "The node generates a new private key and keystore file"
+      ],
+      "correct_answer": 1,
+      "explanation": "Peer Discovery is the second stage of the node lifecycle. The node connects to the PYRAX P2P mesh using the DHT (Distributed Hash Table) to locate and connect to active peers. Genesis Sync (downloading the genesis block) is the first stage and only happens once. Steady State is the fourth stage."
+    },
+    {
+      "question": "Which ports should be open on a node machine running in default configuration?",
+      "options": [
+        "All ports should be open to ensure peer connectivity",
+        "Only port 443 (HTTPS) and port 22 (SSH) for remote management",
+        "Port 30303 (P2P TCP/UDP) and RPC port 8545 only if needed externally — all others blocked",
+        "Port 80 (HTTP) so the node's web dashboard is accessible from the internet"
+      ],
+      "correct_answer": 2,
+      "explanation": "A correctly hardened node only opens what it needs: port 30303 (TCP and UDP) for peer-to-peer connectivity. The RPC port 8545 should only be opened externally if you specifically need remote tooling access — otherwise it should be restricted to localhost. All other ports should be blocked by the firewall."
+    },
+    {
+      "question": "A tester suspects their private key has been compromised. What is the correct immediate action?",
+      "options": [
+        "Generate a new private key and continue running — the old key will expire automatically",
+        "Delete the keystore file and reinstall the node software to remove the threat",
+        "Contact the DevNet team immediately via the portal so they can blacklist the compromised node address from the reward ledger",
+        "Wait to see if any unauthorized transactions appear before taking action"
+      ],
+      "correct_answer": 2,
+      "explanation": "There is no automatic key recovery or expiry in PYRAX. If you suspect compromise, the only protective action is to notify the DevNet team immediately so they can blacklist the compromised node address from the reward ledger before the mainnet airdrop. Waiting, reinstalling, or generating a new key alone does not protect the accrued PYRX allocation."
+    }
+  ]
+}

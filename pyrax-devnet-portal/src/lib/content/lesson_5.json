@@ -1,0 +1,72 @@
+{
+  "id": "lesson_5",
+  "title": "Incident Reporting & Best Practices",
+  "intro": "The entire value of the DevNet programme depends on the quality of the information testers provide. A node crash that is not reported is a missed opportunity. A report that lacks a stack trace or version number cannot be actioned.\n\nThis final module covers exactly what to report, how to report it, and what separates a high-value submission from a rejected one.",
+  "sections": [
+    {
+      "title": "What to Report",
+      "content": "REPORTABLE EVENTS BY SEVERITY\nNot every node hiccup is worth a report. Here is how to classify what you observe:\n\nCritical (report immediately):\nConsensus halt — no new blocks for 10+ minutes across the network\nNode producing invalid blocks that are rejected by all peers\nConsensus vulnerability — you have found a way to produce a valid-looking fraudulent block\nAny event that could allow double-spending or chain reversion\n\nHigh (report within 2 hours):\nNode crash (FATAL/PANIC) with a stack trace\nFork that does not resolve within 5 blocks\nSlashing event (SLASHING_DETECTED in logs)\nNode stuck on a minority chain (20+ blocks behind)\n\nMedium (report within 24 hours):\nContinuous memory or CPU leak (growing over 12+ hours)\nPeer connectivity issues affecting multiple testers simultaneously\nRPC interface returning incorrect data\nBlock validation taking significantly longer than expected\n\nLow (report in your next session):\nDocumentation errors or misleading log messages\nMinor UI bugs in the DevNet portal\nSuggestions for tooling improvements\n\nWHAT DOES NOT NEED A REPORT\nTemporary peer disconnections that self-resolve\nNormal WARN log messages\nExpected behaviour during announced stress test campaigns\nYour personal hardware limitations (slow sync on a low-spec machine)\n\nSTRESS TEST CAMPAIGNS\nWhen the DevNet team announces a stress test (e.g., transaction flooding, mempool stress, network partition simulation), you will be given specific instructions. During these campaigns:\nFollow instructions exactly — do not deviate\nDocument your observations throughout, not just at the end\nSubmit your stress test report via the Issue Council within 48 hours of campaign end\nInclude exact timestamps, transaction counts, and node behaviour"
+    },
+    {
+      "title": "How to Report",
+      "content": "THE ISSUE COUNCIL\nAll reports must go through the Issue Council module in the DevNet portal. Do not:\nDM developers directly on Discord or Telegram\nEmail the team with bug reports\nPost issues in public channels\n\nThe Issue Council is the only channel that:\nCreates a trackable, auditable record\nTriggers the reward accounting system\nAllows the engineering team to triage and assign\nAllows you to track resolution status\n\nANATOMY OF A HIGH-QUALITY REPORT\nEvery submission must contain:\n\nTitle: Short and specific. Bad: 'Node crashed'. Good: 'pyraxd v0.4.2 PANIC on block import at height 88,421'\n\nSeverity: Choose accurately — overclassifying wastes triage time; underclassifying delays critical fixes.\n\nNode Version: Run pyraxd --version and paste the exact output. The team needs this to locate the exact code.\n\nBlock Height: What was the chain head when the issue occurred? Check with pyrax attach --exec 'eth.blockNumber'.\n\nFull Log Extract: The 50 lines before and after the error. Not a screenshot — paste the raw text.\n\nReproduction Steps: Numbered, exact steps to reproduce the issue from a fresh state. If you cannot reproduce it, say so.\n\nExpected vs Actual Behaviour: One sentence each. What should have happened, and what actually happened.\n\nEnvironment: OS, RAM, disk type (SSD/HDD), CPU cores, internet connection type.\n\nTHE REJECTION CRITERIA\nReports are rejected (and earn no PYRX) if they:\nLack a node version\nContain only a screenshot instead of raw log text\nDescribe known issues already in the tracker\nAre submitted for non-reportable events\nContain fabricated or exaggerated data\n\nCONDUCT\nThe DevNet testing programme is a professional environment. Submissions are reviewed by engineers, not automated systems. Treat every report as a document you would be comfortable with your employer reading.\nDo not submit spam reports to farm PYRX — the review team will identify the pattern and it will result in account suspension."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "A tester discovers their node is producing blocks that are being rejected by all peers. How should this be classified and when should it be reported?",
+      "options": [
+        "Low severity — report in the next session since the network is self-correcting the issue",
+        "Medium severity — report within 24 hours after observing the pattern consistently",
+        "Critical severity — report immediately via the Issue Council",
+        "High severity — report within 2 hours after gathering a full stack trace"
+      ],
+      "correct_answer": 2,
+      "explanation": "A node producing invalid blocks that are universally rejected by peers is a Critical severity event — it indicates a potential consensus vulnerability or a bug that could affect network integrity. This must be reported immediately via the Issue Council, not after gathering more data."
+    },
+    {
+      "question": "Which of the following is a mandatory element in every incident report?",
+      "options": [
+        "A screenshot of the terminal window showing the error",
+        "The tester's IP address and ISP information",
+        "The exact node version obtained by running pyraxd --version",
+        "A video recording of the issue occurring in real time"
+      ],
+      "correct_answer": 2,
+      "explanation": "The exact node version (from pyraxd --version) is mandatory because engineers use it to locate the precise code that produced the error. Screenshots are not acceptable substitutes for raw log text. IP address and videos are not required fields in the standard report template."
+    },
+    {
+      "question": "Why is it prohibited to report bugs by directly messaging developers on Discord or Telegram?",
+      "options": [
+        "Developers are not permitted to use those platforms for work communication",
+        "Direct messages do not create a trackable record, do not trigger reward accounting, and cannot be triaged or assigned by the engineering team",
+        "The response time for direct messages is faster, which the team wants to avoid",
+        "Discord and Telegram are not encrypted, so bug details would be publicly visible"
+      ],
+      "correct_answer": 1,
+      "explanation": "The Issue Council is the only reportin channel because it creates an auditable, trackable record, triggers the PYRX reward accounting system, and allows engineering to triage and assign issues. Direct messages are informal and cannot be tracked, meaning they may be lost and will not generate any rewards."
+    },
+    {
+      "question": "A report is submitted that says only: 'My node crashed. Please fix.' What is the most likely outcome?",
+      "options": [
+        "It is accepted and the team will ask follow-up questions to gather the missing details",
+        "It is rejected because it lacks the node version, log extract, block height, and reproduction steps",
+        "It earns a reduced PYRX reward since partial information is still useful",
+        "It is escalated to Critical severity because crashes are always high-priority"
+      ],
+      "correct_answer": 1,
+      "explanation": "Reports without a node version, log extract, block height, and reproduction steps are rejected and earn no PYRX. The engineering team cannot action a report without these fundamentals. The review team does not follow up to gather missing information — the responsibility is on the tester to submit complete reports."
+    },
+    {
+      "question": "A tester notices a stress test campaign is in progress. They observe interesting behaviour but decide to wait until the campaign ends to write their report. Is this correct?",
+      "options": [
+        "Yes — final reports are more valuable because they summarise the full picture",
+        "No — observations should be documented throughout the campaign, and the report submitted within 48 hours of campaign end, not delayed indefinitely",
+        "Yes — submitting during a campaign can interfere with the test conditions",
+        "No — reports must be submitted within 1 hour of observing any event during a stress test"
+      ],
+      "correct_answer": 1,
+      "explanation": "During stress test campaigns you should document observations throughout — not just at the end. The submission deadline is within 48 hours of campaign end. Waiting indefinitely risks forgetting critical timestamps and transaction counts. Submitting during the campaign does not interfere with test conditions."
+    }
+  ]
+}
