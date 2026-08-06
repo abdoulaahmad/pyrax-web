@@ -127,7 +127,7 @@ function StepCard({ step, index, result, atts, onResult, onUpload, onRemoveAtt, 
       )}
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <button onClick={() => onResult({ ...result, pass: true })} className={`rounded-lg border px-3 py-1.5 text-sm ${result.pass === true ? "border-[color:rgba(52,211,153,0.5)] bg-[rgba(52,211,153,0.1)] text-[color:var(--color-positive)]" : "border-line text-muted hover:text-ink"}`}>✓ Pass</button>
+        <button onClick={() => onResult({ ...result, pass: true })} className={`rounded-lg border px-3 py-1.5 text-sm ${result.pass === true ? "border-[color:rgba(61,220,132,0.5)] bg-[rgba(61,220,132,0.1)] text-[color:var(--color-positive)]" : "border-line text-muted hover:text-ink"}`}>✓ Pass</button>
         <button onClick={() => onResult({ ...result, pass: false })} className={`rounded-lg border px-3 py-1.5 text-sm ${result.pass === false ? "border-[color:rgba(251,111,115,0.5)] bg-[rgba(251,111,115,0.1)] text-[color:var(--color-negative)]" : "border-line text-muted hover:text-ink"}`}>✕ Fail</button>
         {result.pass === false && <Button variant="ghost" className="ml-auto text-xs" onClick={onFileBug}><Icon.alert className="h-3.5 w-3.5" /> File a bug for this step</Button>}
       </div>
@@ -216,7 +216,7 @@ function Runner({ test, onClose, onSubmitted, onFileBug }: {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClose}>
         <Card className="max-w-md p-8 text-center" >
-          <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[rgba(52,211,153,0.12)] text-[color:var(--color-positive)]"><Icon.check className="h-6 w-6" /></div>
+          <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[rgba(61,220,132,0.12)] text-[color:var(--color-positive)]"><Icon.check className="h-6 w-6" /></div>
           <p className="mt-3 text-lg font-bold">Submitted for review</p>
           <p className="mx-auto mt-1 max-w-sm text-sm text-muted">Your proof is in. It's screened by Sentinel and reviewed by the team — you'll be notified and, if accepted, {fmt(test.weightPyrx)} PYRX is added to your earnings.</p>
           <div className="mt-4"><Button variant="primary" onClick={onClose}>Back to tests</Button></div>
@@ -348,7 +348,7 @@ function LeaderboardMini({ rows, meId }: { rows: any[]; meId: string }) {
       <p className="mb-2 text-xs text-faint">Top testers by accrued PYRX.</p>
       <div className="space-y-1">
         {rows.slice(0, 8).map((t: any, i: number) => (
-          <div key={t.id} className={`flex items-center justify-between rounded-lg px-2 py-1.5 text-sm ${t.id === meId ? "bg-[rgba(245,134,34,0.08)]" : "odd:bg-[rgba(255,255,255,0.02)]"}`}>
+          <div key={t.id} className={`flex items-center justify-between rounded-lg px-2 py-1.5 text-sm ${t.id === meId ? "bg-[rgba(246,138,36,0.08)]" : "odd:bg-[rgba(255,255,255,0.02)]"}`}>
             <div className="flex items-center gap-3"><span className="w-5 text-center font-mono text-faint">{i + 1}</span><span className="font-medium">{t.handle ? "@" + t.handle : t.display_name}</span>{t.id === meId && <span className="text-xs text-faint">you</span>}</div>
             <span className="font-mono text-muted">{fmt(Number(t.total))} PYRX</span>
           </div>
@@ -388,7 +388,7 @@ export function Tests({ me }: { me: { id: string } }) {
 
   return (
     <>
-      <PageHeader title="Tests" subtitle="Work through the CLI and Inferno tracks step by step. Capture proof at each step, paste your logs, and submit — accepted tests pay PYRX toward the airdrop." />
+      <PageHeader eyebrow="Testing" index="06" title="Tests" subtitle="Work through the CLI and Inferno tracks step by step. Capture proof at each step, paste your logs, and submit — accepted tests pay PYRX toward the airdrop." />
       {err && <Card className="mb-4 p-4 text-sm text-[color:var(--color-negative)]">{err}</Card>}
 
       <div className="mb-4 grid gap-4 lg:grid-cols-3">

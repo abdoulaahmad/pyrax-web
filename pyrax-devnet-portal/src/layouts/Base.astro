@@ -18,16 +18,35 @@ const fullTitle = /^PYRAX/.test(title) ? title : `PYRAX™ · ${title}`;
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#06070b" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap"
-      rel="stylesheet"
-    />
+    <meta name="theme-color" content="#050609" />
+    <!-- Self-hosted fonts (see styles/fonts.css) — no third-party origin, keeps the CSP tight. -->
+    <link rel="preload" href="/fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/unbounded-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <noscript><style>[data-reveal]{opacity:1!important;transform:none!important}</style></noscript>
   </head>
   <body>
     <slot />
     <CookieConsent client:idle />
+    <script is:inline>
+      // Progressive scroll-reveal — mirrors the marketing site so both surfaces animate identically.
+      // No-JS / observer failure shows everything (see the [data-reveal] noscript rule in <head>).
+      (() => {
+        const arm = () => {
+          const els = document.querySelectorAll("[data-reveal]:not(.revealed)");
+          if (!("IntersectionObserver" in window)) { els.forEach((e) => e.classList.add("revealed")); return; }
+          const io = new IntersectionObserver((entries) => {
+            for (const en of entries) {
+              if (en.isIntersecting) { en.target.classList.add("revealed"); io.unobserve(en.target); }
+            }
+          }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+          els.forEach((e) => {
+            const r = e.getBoundingClientRect();
+            if (r.top < window.innerHeight * 0.92) e.classList.add("revealed"); // already in view on load
+            else io.observe(e);
+          });
+        };
+        if (document.readyState !== "loading") arm(); else document.addEventListener("DOMContentLoaded", arm);
+      })();
+    </script>
   </body>
 </html>

@@ -10,8 +10,8 @@ import { Button } from "./ui";
 const EMOJI = ["😀", "😂", "🤣", "😊", "😍", "😎", "🤔", "👀", "🔥", "🚀", "💪", "🙌", "👍", "👎", "🎉", "✅", "❌", "⚠️", "💯", "🐛", "⚡", "🧪", "🛠️", "💎", "🦅", "❤️", "🙏", "😅", "😉", "🤝", "👋", "💀"];
 // Chat name colors: testers = PYRAX orange, community-support = green, admins = PYRAX blue, and the
 // on-GPU NEURAX Sentinel assistant = gold.
-const ROLE_COLOR: Record<string, string> = { admin: "#5aa6e0", support: "#3fcf8e", tester: "#f58622", sentinel: "#fcd03d" };
-const roleColor = (r?: string) => ROLE_COLOR[r || "tester"] || "#f58622";
+const ROLE_COLOR: Record<string, string> = { admin: "#5aa6e0", support: "#3fcf8e", tester: "#f68a24", sentinel: "#fed23c" };
+const roleColor = (r?: string) => ROLE_COLOR[r || "tester"] || "#f68a24";
 
 interface Msg { id: string; channel: string; author_id: string; author_name: string; author_user: string; author_admin: boolean; author_role?: string; body: string; gif: string | null; created_at: number }
 interface Member { id: string; user: string; name: string; admin: boolean; role?: string }
@@ -117,18 +117,18 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
     offline.forEach((u, i) => out.push({ ...u, _off: true, _divider: i === 0 && (onlineAdmins.length || onlineUsers.length) ? "offline" : undefined }));
     return out.slice(0, 10);
   }, [mentionMatch, roster, presence, onlineSet]);
-  function renderBody(text: string) { return text.split(/(@[a-z0-9_]+)/gi).map((p, i) => /^@/.test(p) ? <span key={i} className="rounded bg-[rgba(245,134,34,0.18)] px-1 font-semibold text-gold">{p}</span> : <React.Fragment key={i}>{p}</React.Fragment>); }
+  function renderBody(text: string) { return text.split(/(@[a-z0-9_]+)/gi).map((p, i) => /^@/.test(p) ? <span key={i} className="rounded bg-[rgba(246,138,36,0.18)] px-1 font-semibold text-gold">{p}</span> : <React.Fragment key={i}>{p}</React.Fragment>); }
 
   return (
     <div className="flex h-[calc(100vh-9rem)] overflow-hidden rounded-2xl border border-line bg-[rgba(8,10,17,0.6)]">
       {/* left: channels + conversations */}
       <div className="hidden w-48 shrink-0 flex-col overflow-y-auto border-r border-line p-3 lg:flex">
-        <div className="px-2 text-[0.66rem] font-semibold uppercase tracking-wider text-faint">Channels</div>
-        <div className="mt-1 space-y-0.5">{channels.map((c) => <button key={c} onClick={() => switchTo(c)} className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm ${current === c ? "bg-[rgba(245,134,34,0.1)] text-ink" : "text-muted hover:text-ink"}`}># {c}</button>)}</div>
-        <div className="mt-4 flex items-center justify-between px-2"><span className="text-[0.66rem] font-semibold uppercase tracking-wider text-faint">Direct & Groups</span><button onClick={() => setNewChat("dm")} className="text-faint hover:text-ink" title="New message">＋</button></div>
+        <div className="px-2 eyebrow text-faint">Channels</div>
+        <div className="mt-1 space-y-0.5">{channels.map((c) => <button key={c} onClick={() => switchTo(c)} className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm ${current === c ? "bg-[rgba(246,138,36,0.1)] text-ink" : "text-muted hover:text-ink"}`}># {c}</button>)}</div>
+        <div className="mt-4 flex items-center justify-between px-2"><span className="eyebrow text-faint">Direct & Groups</span><button onClick={() => setNewChat("dm")} className="text-faint hover:text-ink" title="New message">＋</button></div>
         <div className="mt-1 space-y-0.5">
           {convos.length === 0 && <p className="px-2.5 py-1 text-xs text-faint">No conversations yet.</p>}
-          {convos.map((c) => <button key={c.id} onClick={() => switchTo(c.id)} className={`block w-full truncate rounded-lg px-2.5 py-1.5 text-left text-sm ${current === c.id ? "bg-[rgba(245,134,34,0.1)] text-ink" : "text-muted hover:text-ink"}`}>{c.type === "dm" ? convLabel(c) : "👥 " + (c.name || "Group")}</button>)}
+          {convos.map((c) => <button key={c.id} onClick={() => switchTo(c.id)} className={`block w-full truncate rounded-lg px-2.5 py-1.5 text-left text-sm ${current === c.id ? "bg-[rgba(246,138,36,0.1)] text-ink" : "text-muted hover:text-ink"}`}>{c.type === "dm" ? convLabel(c) : "👥 " + (c.name || "Group")}</button>)}
         </div>
       </div>
       {/* center: messages */}
@@ -184,7 +184,7 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
                 <React.Fragment key={(p._off ? "off:" : p._sentinel ? "s:" : "") + p.user}>
                   {p._divider === "users" && <div className="my-1 border-t border-line" />}
                   {p._divider === "offline" && <div className="mt-1 border-t border-line px-3 pt-1 text-[0.6rem] font-semibold uppercase tracking-wide text-faint">Offline</div>}
-                  <button onClick={() => setInput(input.replace(/@([a-z0-9_]*)$/i, "@" + p.user + " "))} className={`flex w-full items-center gap-1.5 px-3 py-1.5 text-left text-sm hover:bg-[rgba(245,134,34,0.1)] ${p._off ? "opacity-50" : ""}`}>
+                  <button onClick={() => setInput(input.replace(/@([a-z0-9_]*)$/i, "@" + p.user + " "))} className={`flex w-full items-center gap-1.5 px-3 py-1.5 text-left text-sm hover:bg-[rgba(246,138,36,0.1)] ${p._off ? "opacity-50" : ""}`}>
                     {p._sentinel ? <span className="text-gold">✦</span> : <span className={`h-1.5 w-1.5 rounded-full ${onlineSet.has(p.user) ? "bg-[color:var(--color-positive)]" : "bg-faint"}`} />}
                     <span>@{p.user}</span>
                     {p._sentinel ? <span className="text-xs text-gold">AI assistant</span> : p.admin ? <span className="text-xs text-[color:var(--color-brand)]">admin</span> : null}
@@ -225,7 +225,7 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
       </div>
       {/* right: members roster */}
       <div className="hidden w-48 shrink-0 flex-col overflow-y-auto border-l border-line p-3 xl:flex">
-        <div className="px-2 text-[0.66rem] font-semibold uppercase tracking-wider text-faint">Members · {onlineSet.size} online</div>
+        <div className="px-2 eyebrow text-faint">Members · {onlineSet.size} online</div>
         <div className="mt-1 space-y-0.5">
           {roster.map((u) => {
             const on = onlineSet.has(u.user);
@@ -247,16 +247,16 @@ export default function ChatRoom({ apiBase = "/api/chat" }: { apiBase?: string }
             <div className="flame-bar -mx-3 -mt-3 mb-3 h-1" />
             <div className="flex items-center justify-between px-1"><span className="text-sm font-bold">Chat</span><button onClick={() => setMobileNav(false)} aria-label="Close" className="grid h-7 w-7 place-items-center rounded-lg border border-line text-muted">✕</button></div>
 
-            <div className="mt-4 px-1 text-[0.66rem] font-semibold uppercase tracking-wider text-faint">Channels</div>
-            <div className="mt-1 space-y-0.5">{channels.map((c) => <button key={c} onClick={() => switchTo(c)} className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm ${current === c ? "bg-[rgba(245,134,34,0.1)] text-ink" : "text-muted hover:text-ink"}`}># {c}</button>)}</div>
+            <div className="mt-4 px-1 eyebrow text-faint">Channels</div>
+            <div className="mt-1 space-y-0.5">{channels.map((c) => <button key={c} onClick={() => switchTo(c)} className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm ${current === c ? "bg-[rgba(246,138,36,0.1)] text-ink" : "text-muted hover:text-ink"}`}># {c}</button>)}</div>
 
-            <div className="mt-4 flex items-center justify-between px-1"><span className="text-[0.66rem] font-semibold uppercase tracking-wider text-faint">Direct & Groups</span><button onClick={() => { setMobileNav(false); setNewChat("dm"); }} className="text-faint hover:text-ink" title="New message">＋</button></div>
+            <div className="mt-4 flex items-center justify-between px-1"><span className="eyebrow text-faint">Direct & Groups</span><button onClick={() => { setMobileNav(false); setNewChat("dm"); }} className="text-faint hover:text-ink" title="New message">＋</button></div>
             <div className="mt-1 space-y-0.5">
               {convos.length === 0 && <p className="px-2.5 py-1 text-xs text-faint">No conversations yet.</p>}
-              {convos.map((c) => <button key={c.id} onClick={() => switchTo(c.id)} className={`block w-full truncate rounded-lg px-2.5 py-1.5 text-left text-sm ${current === c.id ? "bg-[rgba(245,134,34,0.1)] text-ink" : "text-muted hover:text-ink"}`}>{c.type === "dm" ? convLabel(c) : "👥 " + (c.name || "Group")}</button>)}
+              {convos.map((c) => <button key={c.id} onClick={() => switchTo(c.id)} className={`block w-full truncate rounded-lg px-2.5 py-1.5 text-left text-sm ${current === c.id ? "bg-[rgba(246,138,36,0.1)] text-ink" : "text-muted hover:text-ink"}`}>{c.type === "dm" ? convLabel(c) : "👥 " + (c.name || "Group")}</button>)}
             </div>
 
-            <div className="mt-4 px-1 text-[0.66rem] font-semibold uppercase tracking-wider text-faint">Members · {onlineSet.size} online</div>
+            <div className="mt-4 px-1 eyebrow text-faint">Members · {onlineSet.size} online</div>
             <div className="mt-1 space-y-0.5">
               {roster.map((u) => {
                 const on = onlineSet.has(u.user);
@@ -295,12 +295,12 @@ function NewChat({ apiBase, initial, onClose, onCreated }: { apiBase: string; in
       <div className="w-full max-w-md rounded-2xl border border-line bg-[rgba(8,10,17,0.98)] p-5" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between"><h3 className="font-bold">New conversation</h3><button onClick={onClose} className="text-faint hover:text-ink">✕</button></div>
         <div className="mb-3 flex gap-1 rounded-lg border border-line p-0.5 text-sm">
-          {(["dm", "group"] as const).map((t) => <button key={t} onClick={() => { setType(t); setPicked(t === "dm" ? picked.slice(0, 1) : picked); }} className={`flex-1 rounded-md py-1.5 ${type === t ? "bg-[rgba(245,134,34,0.16)] text-ink" : "text-faint"}`}>{t === "dm" ? "Direct message" : "Group chat"}</button>)}
+          {(["dm", "group"] as const).map((t) => <button key={t} onClick={() => { setType(t); setPicked(t === "dm" ? picked.slice(0, 1) : picked); }} className={`flex-1 rounded-md py-1.5 ${type === t ? "bg-[rgba(246,138,36,0.16)] text-ink" : "text-faint"}`}>{t === "dm" ? "Direct message" : "Group chat"}</button>)}
         </div>
         {type === "group" && <input className="input mb-2" placeholder="Group name" value={name} onChange={(e) => setName(e.target.value)} />}
         {picked.length > 0 && <div className="mb-2 flex flex-wrap gap-1.5">{picked.map((p) => <span key={p.id} className="chip" onClick={() => setPicked(picked.filter((x) => x.id !== p.id))}>@{p.handle} ✕</span>)}</div>}
         <input className="input" placeholder="Search by @handle or name…" value={q} onChange={(e) => setQ(e.target.value)} />
-        {results.length > 0 && <div className="mt-1 overflow-hidden rounded-lg border border-line">{results.map((u) => <button key={u.id} onClick={() => add(u)} className="block w-full px-3 py-2 text-left text-sm hover:bg-[rgba(245,134,34,0.1)]">@{u.handle} <span className="text-faint">· {u.display_name}</span></button>)}</div>}
+        {results.length > 0 && <div className="mt-1 overflow-hidden rounded-lg border border-line">{results.map((u) => <button key={u.id} onClick={() => add(u)} className="block w-full px-3 py-2 text-left text-sm hover:bg-[rgba(246,138,36,0.1)]">@{u.handle} <span className="text-faint">· {u.display_name}</span></button>)}</div>}
         {err && <p className="mt-2 text-sm text-[color:var(--color-negative)]">{err}</p>}
         <Button variant="primary" className="mt-4 w-full justify-center" onClick={create} disabled={busy}>{busy ? "Creating…" : type === "dm" ? "Start DM" : "Create group"}</Button>
       </div>

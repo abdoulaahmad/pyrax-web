@@ -44,7 +44,7 @@ export function Logo({ className = "h-7 w-[5.1rem]", tag = "Team" }: { className
   return (
     <div className="flex items-center gap-2.5">
       <BrandMark variant="horizontal" className={className} />
-      {tag && <span className="rounded-md border border-line px-1.5 py-[0.18rem] text-[0.6rem] font-bold uppercase tracking-wider text-faint">{tag}</span>}
+      {tag && <span className="rounded-md border border-line px-1.5 py-[0.18rem] font-mono text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-faint">{tag}</span>}
     </div>
   );
 }
@@ -77,15 +77,17 @@ export function Pagination({ page, total, pageSize, onPage }: { page: number; to
 }
 
 export function StatTile({ label, value, sub, accent = "brand", icon, delay = 0 }: { label: string; value: React.ReactNode; sub?: string; accent?: "brand" | "water" | "positive"; icon?: React.ReactNode; delay?: number }) {
-  const ring = accent === "water" ? "rgba(96,184,204,0.35)" : accent === "positive" ? "rgba(52,211,153,0.35)" : "rgba(245,134,34,0.35)";
+  const ring = accent === "water" ? "rgba(92,186,206,0.3)" : accent === "positive" ? "rgba(61,220,132,0.3)" : "rgba(246,138,36,0.3)";
+  const tick = accent === "water" ? "tick-water" : accent === "positive" ? "tick-positive" : "";
   return (
-    <Card hover delay={delay} className="p-5">
-      <div className="flex items-start justify-between">
-        <div className="text-[0.72rem] font-semibold uppercase tracking-wider text-muted">{label}</div>
-        {icon && <div className="grid h-9 w-9 place-items-center rounded-lg border" style={{ borderColor: ring }}>{icon}</div>}
+    <Card hover delay={delay} className={`tick ${tick} p-5`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="stat-caption">{label}</div>
+        {icon && <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border" style={{ borderColor: ring }}>{icon}</div>}
       </div>
-      <div className="mt-3 font-display text-3xl font-extrabold">{value}</div>
-      {sub && <div className="mt-1 text-xs text-faint">{sub}</div>}
+      {/* Tabular figures keep stat columns from jittering as live values update. */}
+      <div className="stat-figure mt-4 text-[1.75rem]">{value}</div>
+      {sub && <div className="mt-1.5 text-xs text-faint">{sub}</div>}
     </Card>
   );
 }
@@ -95,14 +97,53 @@ export function Badge({ children, tone = "muted", className = "" }: { children: 
   return <span className={`chip ${cls} ${className}`.trim()}>{children}</span>;
 }
 
-export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: React.ReactNode }) {
+/** Page title block. `eyebrow` renders the redesign's mono kicker above the heading; `index` draws
+ *  the hollow section numeral watermark the marketing site uses to anchor each section. */
+export function PageHeader({ title, subtitle, eyebrow, index, action }: { title: string; subtitle?: string; eyebrow?: string; index?: string; action?: React.ReactNode }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h1 className="text-2xl font-extrabold">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
+    <div className="relative mb-8 overflow-hidden">
+      {index && <div className="ghost-index pointer-events-none absolute -top-3 right-0 text-[5.5rem] sm:text-[7rem]">{index}</div>}
+      <div className="relative flex flex-wrap items-end justify-between gap-4 pb-5 section-rule-b">
+        <div className="min-w-0">
+          {eyebrow && <div className="eyebrow eyebrow-rule mb-2.5">{eyebrow}</div>}
+          <h1 className="display-caps text-[1.6rem] leading-[1.05] sm:text-[1.9rem]">{title}</h1>
+          {subtitle && <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">{subtitle}</p>}
+        </div>
+        {action && <div className="shrink-0">{action}</div>}
+      </div>
+    </div>
+  );
+}
+
+/** Heading for a block inside a page — the smaller sibling of PageHeader. */
+export function SectionHeader({ title, eyebrow, action, className = "" }: { title: string; eyebrow?: string; action?: React.ReactNode; className?: string }) {
+  return (
+    <div className={`mb-4 flex flex-wrap items-center justify-between gap-3 ${className}`.trim()}>
+      <div className="min-w-0">
+        {eyebrow && <div className="eyebrow mb-1.5">{eyebrow}</div>}
+        <h3 className="panel-title">{title}</h3>
       </div>
       {action}
+    </div>
+  );
+}
+
+/** Flat surface for content nested inside a Card — no blur/gradient, so layers don't compound. */
+export function Panel({ children, className = "", inset = false }: { children: React.ReactNode; className?: string; inset?: boolean }) {
+  return <div className={`${inset ? "panel-inset" : "panel"} ${className}`.trim()}>{children}</div>;
+}
+
+/** One row of a divider-separated list. Pass `cols` as a grid-template-columns value. */
+export function Row({ children, cols, className = "" }: { children: React.ReactNode; cols?: string; className?: string }) {
+  return <div className={`row ${className}`.trim()} style={cols ? { gridTemplateColumns: cols } : undefined}>{children}</div>;
+}
+
+/** Slim gradient progress bar. `value` is a 0–100 percentage. */
+export function Progress({ value, className = "" }: { value: number; className?: string }) {
+  const pct = Math.min(100, Math.max(0, value));
+  return (
+    <div className={`track ${className}`.trim()} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+      <motion.div className="track-fill" initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} />
     </div>
   );
 }

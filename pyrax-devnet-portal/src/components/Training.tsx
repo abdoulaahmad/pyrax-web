@@ -41,7 +41,7 @@ export default function Training() {
   }
 
   if (loading) return <div className="p-8 text-center text-muted animate-pulse">Loading training modules...</div>;
-  if (error) return <div className="p-8 text-center text-[color:var(--color-danger)]">{error}</div>;
+  if (error) return <div className="p-8 text-center text-[color:var(--color-negative)]">{error}</div>;
 
   if (activeLesson) {
      const currentIndex = lessons.findIndex(l => l.id === activeLesson.id);
@@ -54,15 +54,15 @@ export default function Training() {
 
   return (
     <div>
-      <PageHeader title="Training Modules" subtitle="Complete the required modules to unlock the certification quiz." />
+      <PageHeader eyebrow="Onboarding" index="03" title="Training Modules" subtitle="Complete the required modules to unlock the certification quiz." />
       {progressPercent === 100 && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 p-4 rounded-xl border border-[color:var(--color-positive)] bg-[rgba(52,211,153,0.1)] flex items-center gap-4">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 p-4 rounded-xl border border-[color:var(--color-positive)] bg-[rgba(61,220,132,0.1)] flex items-center gap-4">
           <div className="grid h-10 w-10 place-items-center rounded-full bg-[color:var(--color-positive)] text-black shrink-0">
              <Icon.shield className="h-5 w-5" />
           </div>
           <div>
             <h3 className="font-bold text-lg text-ink">Certification Quiz Unlocked!</h3>
-            <p className="text-sm text-muted">You have completed all training modules. Click the <strong className="text-white">Quiz</strong> tab in the sidebar to begin your certification.</p>
+            <p className="text-sm text-muted">You have completed all training modules. Click the <strong className="text-ink">Quiz</strong> tab in the sidebar to begin your certification.</p>
           </div>
         </motion.div>
       )}
@@ -122,7 +122,7 @@ function inlineHighlight(text: string): React.ReactNode[] {
       const cls = isTier
         ? 'font-bold text-[#c084fc]'
         : isPct
-        ? 'font-semibold text-[color:var(--color-water,#60b8cc)]'
+        ? 'font-semibold text-[color:var(--color-bolt-bright)]'
         : 'font-bold text-[color:var(--color-brand)]';
       return <span key={i} className={cls}>{part}</span>;
     }
@@ -146,7 +146,7 @@ function renderLines(lines: string[], key: number): React.ReactNode {
     return (
       <div key={key} className="space-y-2">
         {labeled.map((item, li) => item && (
-          <div key={li} className="flex gap-3 items-start p-3 rounded-lg bg-[rgba(245,134,34,0.04)] border border-[rgba(245,134,34,0.12)]">
+          <div key={li} className="flex gap-3 items-start p-3 rounded-lg bg-[rgba(246,138,36,0.04)] border border-[rgba(246,138,36,0.12)]">
             <span className="shrink-0 min-w-[120px] text-xs font-bold text-[color:var(--color-brand)] uppercase tracking-wide mt-0.5">{item.label}</span>
             <span className="text-sm text-muted leading-relaxed">{inlineHighlight(item.body)}</span>
           </div>
@@ -158,7 +158,7 @@ function renderLines(lines: string[], key: number): React.ReactNode {
   if (labeled[0] && lines.length === 1) {
     const item = labeled[0]!;
     return (
-      <div key={key} className="flex gap-3 items-start p-3 rounded-lg bg-[rgba(245,134,34,0.04)] border border-[rgba(245,134,34,0.12)]">
+      <div key={key} className="flex gap-3 items-start p-3 rounded-lg bg-[rgba(246,138,36,0.04)] border border-[rgba(246,138,36,0.12)]">
         <span className="shrink-0 min-w-[120px] text-xs font-bold text-[color:var(--color-brand)] uppercase tracking-wide mt-0.5">{item.label}</span>
         <span className="text-sm text-muted leading-relaxed">{inlineHighlight(item.body)}</span>
       </div>
@@ -190,7 +190,7 @@ function RichContent({ text }: { text: string }) {
           return (
             <div key={pi}>
               <div className="mt-6 mb-3">
-                <span className="text-[0.65rem] font-black uppercase tracking-[0.18em] text-[color:var(--color-brand)]">{first}</span>
+                <span className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[color:var(--color-brand)]">{first}</span>
               </div>
               {rest.length > 0 && renderLines(rest, pi)}
             </div>
@@ -293,13 +293,13 @@ function LessonView({ lesson, nextLesson, onBack, onComplete, onNext }: { lesson
             const showFeedback = showResults || lesson.completed;
 
             return (
-              <div key={i} className={`p-5 rounded-xl border ${showFeedback ? (isCorrect ? 'border-[color:var(--color-positive)] bg-[rgba(52,211,153,0.05)]' : 'border-[#ef4444] bg-[rgba(239,68,68,0.05)]') : 'border-line bg-[rgba(0,0,0,0.2)]'}`}>
+              <div key={i} className={`p-5 rounded-xl border ${showFeedback ? (isCorrect ? 'border-[color:var(--color-positive)] bg-[rgba(61,220,132,0.05)]' : 'border-[#ef4444] bg-[rgba(239,68,68,0.05)]') : 'border-line bg-[rgba(0,0,0,0.2)]'}`}>
                 <p className="font-semibold mb-4 text-ink">{i + 1}. {q.question}</p>
                 <div className="space-y-2">
                   {q.options.map((opt: string, oIdx: number) => {
                     const selected = answers[i] === oIdx;
                     return (
-                      <label key={oIdx} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer border transition-colors ${selected ? 'border-[color:var(--color-brand)] bg-[rgba(245,134,34,0.1)]' : 'border-line hover:border-[rgba(255,255,255,0.2)]'} ${lesson.completed ? 'cursor-default' : ''}`}>
+                      <label key={oIdx} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer border transition-colors ${selected ? 'border-[color:var(--color-brand)] bg-[rgba(246,138,36,0.1)]' : 'border-line hover:border-[rgba(255,255,255,0.2)]'} ${lesson.completed ? 'cursor-default' : ''}`}>
                         <input type="radio" name={`quiz-${i}`} checked={selected} onChange={() => handleSelect(i, oIdx)} disabled={lesson.completed} className="text-brand focus:ring-brand" />
                         <span className={`text-sm ${selected ? 'text-ink font-medium' : 'text-muted'}`}>{opt}</span>
                       </label>
@@ -322,13 +322,13 @@ function LessonView({ lesson, nextLesson, onBack, onComplete, onNext }: { lesson
     renderContent = (
       <div>
         {currentStep === 0 && content.intro && (
-          <div className="mb-6 p-4 rounded-xl bg-[rgba(245,134,34,0.06)] border border-[rgba(245,134,34,0.2)]">
+          <div className="mb-6 p-4 rounded-xl bg-[rgba(246,138,36,0.06)] border border-[rgba(246,138,36,0.2)]">
             <p className="text-sm leading-relaxed text-muted italic">{content.intro}</p>
           </div>
         )}
         {s && (
           <div className="mb-2">
-            <h3 className="text-xl font-extrabold mb-5 text-ink flex items-center gap-2">
+            <h3 className="text-xl font-semibold mb-5 text-ink flex items-center gap-2">
               <span className="block h-5 w-1 rounded-full bg-[color:var(--color-brand)]" />
               {s.title}
             </h3>
@@ -351,7 +351,7 @@ function LessonView({ lesson, nextLesson, onBack, onComplete, onNext }: { lesson
        <Card className="p-8">
           <div className="mb-6 flex items-center justify-between border-b border-line pb-6">
             <div>
-              <h1 className="text-3xl font-extrabold">{lesson.title}</h1>
+              <h1 className="text-3xl font-semibold">{lesson.title}</h1>
               {totalPages > 1 && <div className="mt-2 text-sm font-medium text-brand">Part {currentStep + 1} of {totalPages}</div>}
             </div>
             {lesson.completed && <Badge tone="positive">Completed</Badge>}
@@ -377,11 +377,11 @@ function LessonView({ lesson, nextLesson, onBack, onComplete, onNext }: { lesson
                 )}
                 
                 {currentStep < totalPages - 1 ? (
-                  <Button onClick={nextStep} disabled={!readTimeUnlocked} className="bg-[color:var(--color-brand)] text-black px-6 py-2 rounded-lg font-bold hover:bg-orange-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                  <Button onClick={nextStep} disabled={!readTimeUnlocked} variant="primary" className="px-6 py-2.5">
                     Next Section →
                   </Button>
                 ) : (
-                  <Button onClick={onComplete} disabled={!showResults || !allCorrect} className="bg-[color:var(--color-positive)] text-black px-6 py-2 rounded-lg font-bold hover:bg-emerald-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                  <Button onClick={onComplete} disabled={!showResults || !allCorrect} variant="primary" className="px-6 py-2.5">
                     Complete Lesson
                   </Button>
                 )}
@@ -391,14 +391,14 @@ function LessonView({ lesson, nextLesson, onBack, onComplete, onNext }: { lesson
                  {currentStep > 0 && <Button variant="ghost" onClick={() => setCurrentStep(prev => prev - 1)}>← Previous</Button>}
                  <div className="flex items-center gap-3 ml-auto">
                    {currentStep < totalPages - 1 ? (
-                     <Button onClick={nextStep} className="bg-[color:var(--color-brand)] text-black px-6 py-2 rounded-lg font-bold hover:bg-orange-400 transition">
+                     <Button onClick={nextStep} variant="primary" className="px-6 py-2.5">
                        Next Section →
                      </Button>
                    ) : (
                      <>
                        <Button variant="ghost" onClick={onBack}>Done</Button>
                        {nextLesson && (
-                         <Button onClick={onNext} className="bg-[color:var(--color-brand)] text-black px-6 py-2 rounded-lg font-bold hover:bg-orange-400 transition">
+                         <Button onClick={onNext} variant="primary" className="px-6 py-2.5">
                            Next Module: {nextLesson.title}
                          </Button>
                        )}

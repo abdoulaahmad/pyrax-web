@@ -164,7 +164,7 @@ export const LEDGER_LABELS: Record<LedgerReason, string> = {
 // Contribution tiers (cosmetic + status), by lifetime accrued PYRX.
 export const TIERS = [
   { key: "diamond", label: "Diamond", min: 750_000, color: "#60b8cc" },
-  { key: "gold", label: "Gold", min: 200_000, color: "#fcd03d" },
+  { key: "gold", label: "Gold", min: 200_000, color: "#fed23c" },
   { key: "silver", label: "Silver", min: 50_000, color: "#c4cad4" },
   { key: "bronze", label: "Bronze", min: 0, color: "#d75427" },
 ] as const;

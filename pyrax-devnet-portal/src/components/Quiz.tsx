@@ -80,10 +80,10 @@ export default function Quiz() {
 
     return (
       <div className="max-w-4xl mx-auto">
-        <PageHeader title="Certification Quiz" subtitle="Pass the quiz to become a certified node operator." />
+        <PageHeader eyebrow="Onboarding" index="04" title="Certification Quiz" subtitle="Pass the quiz to become a certified node operator." />
         <Card className="p-8 mt-6">
           <div className="flex flex-col items-center text-center">
-            <div className="grid h-16 w-16 place-items-center rounded-full bg-[rgba(245,134,34,0.1)] text-[color:var(--color-brand)] mb-4">
+            <div className="grid h-16 w-16 place-items-center rounded-full bg-[rgba(246,138,36,0.1)] text-[color:var(--color-brand)] mb-4">
                <Icon.shield className="h-8 w-8" />
             </div>
             <h2 className="text-2xl font-bold mb-2">Ready to test your knowledge?</h2>
@@ -93,15 +93,15 @@ export default function Quiz() {
             </p>
             {QUIZ_MAX_RETRIES > 0 && !hasPassed && (
               <div className="mb-8 font-medium bg-[rgba(255,255,255,0.05)] py-2 px-6 rounded-full border border-line">
-                 Attempts Remaining: <span className={`font-bold ${attemptsRemaining === 0 ? "text-[color:var(--color-danger)]" : "text-white"}`}>{attemptsRemaining}</span> of {QUIZ_MAX_RETRIES}
+                 Attempts Remaining: <span className={`font-bold ${attemptsRemaining === 0 ? "text-[color:var(--color-negative)]" : "text-ink"}`}>{attemptsRemaining}</span> of {QUIZ_MAX_RETRIES}
               </div>
             )}
-            {error && <div className="mb-4 text-[color:var(--color-danger)]">{error}</div>}
+            {error && <div className="mb-4 text-[color:var(--color-negative)]">{error}</div>}
             
             {hasPassed ? (
                <Badge tone="positive" className="text-lg py-3 px-6">Certification Passed!</Badge>
             ) : (
-               <Button onClick={startQuiz} disabled={loading || !canAttempt} className="bg-[color:var(--color-brand)] text-black px-8 py-3 rounded-lg font-bold hover:bg-orange-400 transition text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+               <Button onClick={startQuiz} disabled={loading || !canAttempt} variant="primary" className="px-7 py-3">
                  {loading ? "Starting..." : (canAttempt ? "Start Quiz" : "No attempts remaining")}
                </Button>
             )}
@@ -141,7 +141,7 @@ export default function Quiz() {
                <div className="font-bold mb-4"><span className="text-[color:var(--color-brand)] mr-2">{idx + 1}.</span> {q.question}</div>
                <div className="space-y-2 mt-4">
                  {q.options.map((opt, i) => (
-                   <label key={i} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${answers[q.id] === i ? 'border-[color:var(--color-brand)] bg-[rgba(245,134,34,0.05)]' : 'border-line hover:border-[rgba(255,255,255,0.2)]'}`}>
+                   <label key={i} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${answers[q.id] === i ? 'border-[color:var(--color-brand)] bg-[rgba(246,138,36,0.05)]' : 'border-line hover:border-[rgba(255,255,255,0.2)]'}`}>
                      <input type="radio" name={`q-${q.id}`} value={i} checked={answers[q.id] === i} onChange={() => setAnswers({...answers, [q.id]: i})} className="mt-1" />
                      <span>{opt}</span>
                    </label>
@@ -151,7 +151,7 @@ export default function Quiz() {
            ))}
          </div>
          <div className="mt-8 flex justify-end">
-           <Button onClick={submitQuiz} disabled={loading || Object.keys(answers).length < questions.length} className="bg-[color:var(--color-brand)] text-black px-6 py-2 rounded-lg font-bold hover:bg-orange-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
+           <Button onClick={submitQuiz} disabled={loading || Object.keys(answers).length < questions.length} variant="primary" className="px-6 py-2.5">
              {loading ? "Submitting..." : "Submit Quiz"}
            </Button>
          </div>
@@ -163,11 +163,11 @@ export default function Quiz() {
     return (
       <div className="max-w-2xl mx-auto text-center mt-12">
         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
-          <div className={`mx-auto grid h-24 w-24 place-items-center rounded-full mb-6 ${result.passed ? 'bg-[rgba(52,211,153,0.1)] text-[color:var(--color-positive)]' : 'bg-[rgba(239,68,68,0.1)] text-red-500'}`}>
+          <div className={`mx-auto grid h-24 w-24 place-items-center rounded-full mb-6 ${result.passed ? 'bg-[rgba(61,220,132,0.1)] text-[color:var(--color-positive)]' : 'bg-[rgba(239,68,68,0.1)] text-red-500'}`}>
             {result.passed ? <Icon.check className="h-12 w-12" /> : <Icon.alert className="h-12 w-12" />}
           </div>
-          <h1 className="text-4xl font-extrabold mb-2">{result.passed ? "Congratulations!" : "Keep Trying"}</h1>
-          <p className="text-xl text-muted mb-6">You scored <span className="font-bold text-white">{result.score}%</span></p>
+          <h1 className="text-4xl font-semibold mb-2">{result.passed ? "Congratulations!" : "Keep Trying"}</h1>
+          <p className="text-xl text-muted mb-6">You scored <span className="font-bold text-ink">{result.score}%</span></p>
           
           <Card className="p-6 text-left mb-8 bg-[rgba(0,0,0,0.2)]">
             <h3 className="font-bold mb-2">Feedback</h3>

@@ -21,7 +21,7 @@ const ago = (ms: number) => { const s = Math.floor((Date.now() - ms) / 1000); if
 function ComingSoon({ title, detail }: { title: string; detail: string }) {
   return (
     <Card className="p-10 text-center">
-      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-line bg-[rgba(245,134,34,0.06)]">
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-line bg-[rgba(246,138,36,0.06)]">
         <svg viewBox="0 0 24 24" className="h-6 w-6 text-faint" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
       </div>
       <p className="mt-3 font-semibold">{title}</p>
@@ -38,7 +38,7 @@ function ComingSoon({ title, detail }: { title: string; detail: string }) {
 const legalWhen = (ms: number) => new Date(ms).toLocaleString("en-US", { timeZone: "UTC", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }) + " UTC";
 function SignedBanner({ label, rec }: { label: string; rec: any }) {
   return (
-    <Card className="mb-4 border-[color:rgba(52,211,153,0.4)] bg-[rgba(52,211,153,0.06)] p-4">
+    <Card className="mb-4 border-[color:rgba(61,220,132,0.4)] bg-[rgba(61,220,132,0.06)] p-4">
       <div className="flex items-center gap-2 text-sm font-semibold text-[color:var(--color-positive)]"><Icon.check className="h-4 w-4" /> You accepted this {label}</div>
       <div className="mt-2 grid gap-x-6 gap-y-1 text-sm text-muted sm:grid-cols-2">
         {rec.recipient_name && <div>Recipient: <span className="text-ink">{rec.recipient_name}</span></div>}
@@ -58,7 +58,7 @@ export function NdaPage() {
   const mine = useMyLegal();
   return (
     <>
-      <PageHeader title={NDA.title} subtitle={`Version ${NDA.version} · effective ${NDA.effectiveDate}. This is the agreement you signed to join the program — your executed copy is recorded below.`} />
+      <PageHeader eyebrow="Legal" title={NDA.title} subtitle={`Version ${NDA.version} · effective ${NDA.effectiveDate}. This is the agreement you signed to join the program — your executed copy is recorded below.`} />
       {mine?.nda && <SignedBanner label="Non-Disclosure Agreement" rec={mine.nda} />}
       <Card className="p-6"><LegalDocBody doc={NDA} /></Card>
     </>
@@ -68,7 +68,7 @@ export function TosPage() {
   const mine = useMyLegal();
   return (
     <>
-      <PageHeader title={TOS.title} subtitle={`Version ${TOS.version} · effective ${TOS.effectiveDate}. You accept these each time you sign in.`} />
+      <PageHeader eyebrow="Legal" title={TOS.title} subtitle={`Version ${TOS.version} · effective ${TOS.effectiveDate}. You accept these each time you sign in.`} />
       {mine?.tos && <SignedBanner label="Alpha Test Program Terms" rec={mine.tos} />}
       <Card className="p-6"><LegalDocBody doc={TOS} /></Card>
     </>
@@ -121,7 +121,7 @@ export function Downloads() {
   if (!d.open) {
     return (
       <>
-        <PageHeader title="Downloads" subtitle="Get the Inferno node app or the pyrax CLI." />
+        <PageHeader eyebrow="Workspace" title="Downloads" subtitle="Get the Inferno node app or the pyrax CLI." />
         <Card className="p-10 text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[rgba(215,84,39,0.12)] text-[color:var(--color-ember)]"><Icon.shield className="h-6 w-6" /></div>
           <p className="mt-4 text-lg font-bold">Downloads are closed</p>
@@ -135,7 +135,7 @@ export function Downloads() {
   const noBuilds = !d.inferno?.assets?.length && !d.cli?.assets?.length;
   return (
     <>
-      <PageHeader title="Downloads" subtitle="Get the Inferno node app or the headless pyrax CLI, then connect it to your account." />
+      <PageHeader eyebrow="Workspace" title="Downloads" subtitle="Get the Inferno node app or the headless pyrax CLI, then connect it to your account." />
       <MacGatekeeperBanner />
       {d.error && <Card className="mb-4 p-4 text-sm text-[color:var(--color-negative)]">{d.error}</Card>}
       {!d.error && noBuilds && (
@@ -156,14 +156,23 @@ export function Leaderboard({ me }: { me: any }) {
   useEffect(() => { fetch("/api/dashboard").then((r) => r.json()).then((x) => x?.ok && setD(x)).catch(() => {}); }, []);
   return (
     <>
-      <PageHeader title="Leaderboard" subtitle="Top testers by accrued PYRX. Staff are excluded." />
+      <PageHeader eyebrow="Community" index="07" title="Leaderboard" subtitle="Top testers by accrued PYRX. Staff are excluded." />
       {!d ? <Card className="p-10 text-center text-sm text-muted">Loading…</Card> : (
         <Card className="overflow-hidden">
-          <div className="divide-y divide-line">
+          <div className="divide-y divide-line-soft">
             {(d.leaderboardTop || []).map((t: any, i: number) => (
-              <div key={t.id} className={`flex items-center justify-between px-4 py-3 text-sm ${t.id === me.id ? "bg-[rgba(245,134,34,0.08)]" : ""}`}>
-                <div className="flex items-center gap-3"><span className="w-7 text-center font-mono text-faint">{i + 1}</span><span className="font-semibold">{t.handle ? "@" + t.handle : t.display_name}</span>{t.founding_rank && <Badge tone="brand">Founding #{t.founding_rank}</Badge>}{t.id === me.id && <span className="text-xs text-faint">you</span>}</div>
-                <div className="flex items-center gap-3 text-xs"><span className="text-faint">{t.bugs || 0} bugs</span><span className="font-mono text-muted">{fmt(Number(t.total))} PYRX</span></div>
+              <div key={t.id} className={`flex items-center justify-between gap-4 px-5 py-3.5 text-sm transition-colors hover:bg-[rgba(255,255,255,0.02)] ${t.id === me.id ? "bg-[rgba(246,138,36,0.07)]" : ""}`}>
+                <div className="flex min-w-0 items-center gap-3.5">
+                  {/* Top three get the fire ramp; the rest stay quiet so the podium reads instantly. */}
+                  <span className={`stat-figure w-7 shrink-0 text-center text-sm ${i < 3 ? "text-[color:var(--color-brand)]" : "text-faint"}`}>{String(i + 1).padStart(2, "0")}</span>
+                  <span className="truncate font-semibold">{t.handle ? "@" + t.handle : t.display_name}</span>
+                  {t.founding_rank && <Badge tone="brand">Founding #{t.founding_rank}</Badge>}
+                  {t.id === me.id && <span className="mono-meta">you</span>}
+                </div>
+                <div className="flex shrink-0 items-center gap-4">
+                  <span className="mono-meta">{t.bugs || 0} bugs</span>
+                  <span className="stat-figure text-sm">{fmt(Number(t.total))} <span className="stat-caption">PYRX</span></span>
+                </div>
               </div>
             ))}
             {(!d.leaderboardTop || d.leaderboardTop.length === 0) && <div className="p-6 text-center text-sm text-faint">No ranked testers yet.</div>}
@@ -195,7 +204,7 @@ export function Settings({ me, onSaved }: { me: any; onSaved: (t: any) => void }
   }
   return (
     <>
-      <PageHeader title="Settings" subtitle="Your tester account." />
+      <PageHeader eyebrow="Account" title="Settings" subtitle="Your tester account." />
       <Card className="max-w-xl p-5">
         <div className="grid gap-3">
           <div><label className="label">Email</label><input className="input opacity-60" value={me.email} readOnly /></div>
@@ -237,7 +246,7 @@ export function IssueCouncil({ me, subject, initialStatus = "", title = "Issue C
   useEffect(() => { load(); setPage(1); }, [status, sort]);
   return (
     <>
-      <PageHeader title={title} subtitle={subtitle}
+      <PageHeader eyebrow="Community" title={title} subtitle={subtitle}
         action={can2(subject, "issues.submit") && <Button variant="primary" onClick={() => setCreating(true)}><Icon.plus className="h-4 w-4" /> Report a bug</Button>} />
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <select className="input w-auto py-1.5 text-sm" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">All statuses</option>{Object.entries(STATUS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
@@ -379,7 +388,7 @@ function BugDetail({ id, me, subject, onClose, onChanged }: { id: string; me: an
 function Section({ title, children }: { title: string; children: React.ReactNode }) { return <div className="mt-3"><div className="label">{title}</div><div className="mt-1 whitespace-pre-wrap rounded-lg border border-line bg-[rgba(5,6,9,0.4)] p-3 text-sm text-muted">{children}</div></div>; }
 function MiniBox({ title, body }: { title: string; body: string }) { return <div><div className="label">{title}</div><div className="mt-1 whitespace-pre-wrap rounded-lg border border-line p-2.5 text-sm text-muted">{body || "—"}</div></div>; }
 export function Chat(_: { me: any }) {
-  return <><PageHeader title="Chat" subtitle="Realtime community — channels, DMs + group chats, @mentions, emoji + GIFs. Team = Admin, Community Support = green." /><ChatRoom apiBase="/api/chat" /></>;
+  return <><PageHeader eyebrow="Community" title="Chat" subtitle="Realtime community — channels, DMs + group chats, @mentions, emoji + GIFs. Team = Admin, Community Support = green." /><ChatRoom apiBase="/api/chat" /></>;
 }
 function urlB64ToUint8(base64: string) {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
@@ -421,7 +430,7 @@ export function Releases({ subject }: { subject: AccessSubject }) {
   }
   return (
     <>
-      <PageHeader title="Releases" subtitle="Latest devnet builds + changelog. Get a browser push + email the moment one drops."
+      <PageHeader eyebrow="Workspace" title="Releases" subtitle="Latest devnet builds + changelog. Get a browser push + email the moment one drops."
         action={<div className="flex items-center gap-2"><Button onClick={enablePush}>🔔 Enable alerts</Button>{canPublish && <Button variant="primary" onClick={() => setPub(true)}><Icon.plus className="h-4 w-4" /> Publish</Button>}</div>} />
       {pushState && <p className="mb-3 text-xs text-faint">{pushState}</p>}
       {pub && (
@@ -459,5 +468,5 @@ export function Triage({ me, subject }: { me: any; subject: AccessSubject }) {
   return <IssueCouncil me={me} subject={subject} initialStatus="new" title="Triage" subtitle="Incoming reports awaiting triage. Open one to set its status/severity, link duplicates, and award a bug bounty." />;
 }
 export function Testers(_: { subject: AccessSubject }) {
-  return <><PageHeader title="Testers" subtitle="Staff: tester roster, uptime + earnings." /><ComingSoon title="Tester admin is being wired up" detail="The roster, uptime + earnings overview, and eligibility controls live here." /></>;
+  return <><PageHeader eyebrow="Admin" title="Testers" subtitle="Staff: tester roster, uptime + earnings." /><ComingSoon title="Tester admin is being wired up" detail="The roster, uptime + earnings overview, and eligibility controls live here." /></>;
 }

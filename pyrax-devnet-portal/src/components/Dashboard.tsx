@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import React, { useEffect, useState } from "react";
-import { Card, Button, Badge, PageHeader, Icon } from "./ui";
+import { Card, Button, Badge, PageHeader, SectionHeader, Panel, Progress, Icon } from "./ui";
 import type { UserOnboardingState, Mission } from "../types/onboarding";
-import { motion } from "framer-motion";
 
 export default function Dashboard({ onNavigate }: { onNavigate: (k: string) => void }) {
   const [state, setState] = useState<UserOnboardingState | null>(null);
@@ -29,7 +28,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (k: string) => v
   }, []);
 
   if (loading) return <div className="p-8 text-center text-muted animate-pulse">Loading dashboard...</div>;
-  if (error) return <Card className="p-8 text-center text-[color:var(--color-danger)]">{error}</Card>;
+  if (error) return <Card className="p-8 text-center text-[color:var(--color-negative)]">{error}</Card>;
   if (!state) return null;
 
   const currentMission = state.missions?.find(m => m.mission_number === state.current_mission);
@@ -56,118 +55,137 @@ export default function Dashboard({ onNavigate }: { onNavigate: (k: string) => v
   const nextAction = getNextAction();
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <PageHeader title={`Welcome back, ${state.display_name}`} subtitle="Pyrax DevNet Testing Portal" />
+    <div className="mx-auto max-w-6xl">
+      <PageHeader
+        eyebrow="Onboarding"
+        index="01"
+        title={`Welcome back, ${state.display_name}`}
+        subtitle="Your DevNet operator progress, node status, and the next step to unlock full network access."
+      />
 
-      {/* Onboarding Banner */}
-      <Card className="border-[color:var(--color-brand)] bg-[rgba(245,134,34,0.05)] p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-xl font-bold">Current Status: {state.onboarding_status.replace(/_/g, ' ')}</h2>
-            {state.certification_id && <Badge tone="positive"><Icon.shield className="h-3 w-3 inline mr-1" /> Certified</Badge>}
+      {/* Status banner — the single most important "what do I do next" surface. */}
+      <Card className="tick relative overflow-hidden p-6" data-reveal>
+        <div className="grid-backdrop pointer-events-none absolute inset-0 opacity-30" />
+        <div className="relative flex flex-col justify-between gap-6 md:flex-row md:items-center">
+          <div className="min-w-0">
+            <div className="stat-caption">Current status</div>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <h2 className="display-caps font-display text-xl leading-tight">{state.onboarding_status.replace(/_/g, " ")}</h2>
+              {state.certification_id && <Badge tone="positive"><Icon.shield className="mr-1 inline h-3 w-3" /> Certified</Badge>}
+            </div>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-muted">Complete the remaining steps to unlock full DevNet access.</p>
           </div>
-          <p className="text-sm text-muted">Complete the remaining steps to unlock full DevNet access.</p>
+          {nextAction && (
+            <Button variant="primary" onClick={nextAction.action} className="shrink-0 px-5 py-2.5">
+              {nextAction.label} <span aria-hidden="true">→</span>
+            </Button>
+          )}
         </div>
-        {nextAction && (
-          <Button onClick={nextAction.action} className="bg-[color:var(--color-brand)] text-black px-6 py-3 rounded-lg font-bold hover:bg-orange-400 transition whitespace-nowrap">
-            {nextAction.label}
-          </Button>
-        )}
       </Card>
 
-      <div className="grid md:grid-cols-3 gap-6">
-        {/* Current Mission Focus */}
-        <Card className="md:col-span-2 p-6 flex flex-col">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg flex items-center gap-2"><Icon.activity className="h-5 w-5 text-[color:var(--color-brand)]" /> Current Mission</h3>
-            <Button variant="ghost" onClick={() => onNavigate('missions')} className="text-xs">View All</Button>
-          </div>
-          
+      <div className="mt-5 grid gap-5 lg:grid-cols-3">
+        {/* Current mission */}
+        <Card className="flex flex-col p-6 lg:col-span-2" data-reveal data-reveal-delay="1">
+          <SectionHeader
+            eyebrow="In progress"
+            title="Current mission"
+            action={<Button variant="ghost" onClick={() => onNavigate("missions")} className="px-3 py-1.5 text-xs">View all</Button>}
+          />
           {currentMission ? (
-            <div className="bg-[rgba(255,255,255,0.02)] border border-line p-5 rounded-xl flex-1 flex flex-col">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="grid h-8 w-8 place-items-center rounded-lg bg-[color:var(--color-brand)] text-black font-bold">
-                  {currentMission.mission_number}
+            <Panel className="flex flex-1 flex-col p-5">
+              <div className="flex items-start gap-3.5">
+                <div className="stat-figure grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[color:rgba(246,138,36,0.35)] bg-[rgba(246,138,36,0.08)] text-sm text-[color:var(--color-brand)]">
+                  {String(currentMission.mission_number).padStart(2, "0")}
                 </div>
-                <h4 className="font-bold text-xl">{currentMission.title}</h4>
-              </div>
-              <p className="text-muted text-sm mb-6 flex-1">{currentMission.description}</p>
-              
-              <div className="mt-auto">
-                <div className="flex justify-between text-xs text-faint mb-2">
-                  <span>Mission Progress</span>
-                  <span>{progressPercent}% Complete</span>
-                </div>
-                <div className="h-2 w-full bg-[rgba(255,255,255,0.1)] rounded-full overflow-hidden">
-                  <motion.div initial={{ width: 0 }} animate={{ width: `${progressPercent}%` }} className="h-full bg-[color:var(--color-brand)]" />
+                <div className="min-w-0">
+                  <h4 className="font-display text-lg font-semibold leading-snug">{currentMission.title}</h4>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted">{currentMission.description}</p>
                 </div>
               </div>
-            </div>
+              <div className="mt-auto pt-6">
+                <div className="mb-2 flex items-baseline justify-between">
+                  <span className="stat-caption">Mission progress</span>
+                  <span className="stat-figure text-sm text-[color:var(--color-brand)]">{progressPercent}%</span>
+                </div>
+                <Progress value={progressPercent} />
+                <div className="mono-meta mt-2">{completedMissionsCount} of {missionsTotal} complete</div>
+              </div>
+            </Panel>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 border border-dashed border-line rounded-xl">
-              <Icon.check className="h-10 w-10 text-[color:var(--color-positive)] mb-3" />
-              <p className="font-bold">All Missions Completed!</p>
-              <p className="text-sm text-muted">You have finished the core onboarding missions.</p>
-            </div>
+            <Panel inset className="flex flex-1 flex-col items-center justify-center p-8 text-center">
+              <Icon.check className="mb-3 h-9 w-9 text-[color:var(--color-positive)]" />
+              <p className="font-display font-semibold">All missions completed</p>
+              <p className="mt-1 text-sm text-muted">You have finished the core onboarding missions.</p>
+            </Panel>
           )}
         </Card>
 
-        {/* Quick Status / Certification */}
-        <div className="space-y-6">
-          <Card className="p-6">
-             <h3 className="font-bold text-base mb-4 flex items-center gap-2"><Icon.shield className="h-4 w-4" /> Certification</h3>
-             {state.certification_id ? (
-               <div className="text-center">
-                 <div className="grid h-16 w-16 mx-auto place-items-center rounded-full bg-[rgba(52,211,153,0.1)] text-[color:var(--color-positive)] mb-3">
-                    <Icon.shield className="h-8 w-8" />
-                 </div>
-                 <Badge tone="positive">Active</Badge>
-                 <div className="mt-3 text-xs text-faint font-mono">{state.certification_id}</div>
-                 <Button variant="ghost" onClick={() => onNavigate('certification')} className="w-full mt-4 border border-line">View Certificate</Button>
-               </div>
-             ) : (
-               <div className="text-center">
-                 <div className="grid h-16 w-16 mx-auto place-items-center rounded-full bg-[rgba(255,255,255,0.05)] text-muted mb-3">
-                    <Icon.shield className="h-8 w-8" />
-                 </div>
-                 <Badge tone="muted">Pending</Badge>
-                 <p className="text-xs text-muted mt-3 mb-4">Complete training & quiz</p>
-                 <Button variant="ghost" onClick={() => onNavigate('training')} className="w-full border border-line">Go to Training</Button>
-               </div>
-             )}
+        {/* Certification + node */}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
+          <Card className="tick tick-positive p-6" data-reveal data-reveal-delay="2">
+            <SectionHeader eyebrow="Credential" title="Certification" />
+            {state.certification_id ? (
+              <div className="text-center">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[color:rgba(61,220,132,0.3)] bg-[rgba(61,220,132,0.08)] text-[color:var(--color-positive)]">
+                  <Icon.shield className="h-7 w-7" />
+                </div>
+                <div className="mt-3"><Badge tone="positive">Active</Badge></div>
+                <div className="mono-meta mt-2.5 break-all">{state.certification_id}</div>
+                <Button variant="ghost" onClick={() => onNavigate("certification")} className="mt-4 w-full justify-center">View certificate</Button>
+              </div>
+            ) : (
+              <div className="text-center">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-line bg-[rgba(255,255,255,0.03)] text-faint">
+                  <Icon.shield className="h-7 w-7" />
+                </div>
+                <div className="mt-3"><Badge tone="muted">Pending</Badge></div>
+                <p className="mt-2.5 text-xs text-muted">Complete training &amp; quiz</p>
+                <Button variant="ghost" onClick={() => onNavigate("training")} className="mt-4 w-full justify-center">Go to training</Button>
+              </div>
+            )}
           </Card>
-          
-          {/* Node Status Summary */}
-          <Card className="p-6">
-            <h3 className="font-bold text-base mb-4 flex items-center gap-2"><Icon.grid className="h-4 w-4" /> Node Status</h3>
+
+          <Card className={`tick ${state.node_paired ? "tick-positive" : ""} p-6`} data-reveal data-reveal-delay="3">
+            <SectionHeader eyebrow="Hardware" title="Node status" />
             {state.node_paired ? (
               <div className="flex items-center gap-3">
-                <span className="h-3 w-3 rounded-full bg-[color:var(--color-positive)] shrink-0 animate-pulse" />
-                <div>
-                  <div className="font-semibold text-sm">Node Paired</div>
-                  <div className="text-xs text-faint">Connected to DevNet</div>
+                <span className="relative flex h-2.5 w-2.5 shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[color:var(--color-positive)] opacity-60" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[color:var(--color-positive)]" />
+                </span>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold">Node paired</div>
+                  <div className="mono-meta mt-0.5">Connected to DevNet</div>
                 </div>
               </div>
             ) : (
-              <div className="text-center p-4 bg-[rgba(255,255,255,0.02)] border border-dashed border-line rounded-lg">
-                <p className="text-sm text-muted mb-3">No node paired yet.</p>
-                <Button onClick={() => onNavigate('downloads')} disabled={!state.certification_id} className="w-full text-xs">Download Node</Button>
-              </div>
+              <Panel inset className="p-4 text-center">
+                <p className="text-sm text-muted">No node paired yet.</p>
+                <Button onClick={() => onNavigate("downloads")} disabled={!state.certification_id} className="mt-3 w-full justify-center text-xs">Download node</Button>
+              </Panel>
             )}
           </Card>
         </div>
       </div>
-      
+
       {/* Announcements */}
-      <Card className="p-6 border-line-soft">
-        <h3 className="font-bold text-base mb-4 flex items-center gap-2"><Icon.activity className="h-4 w-4 text-[color:var(--color-brand)]" /> Announcements</h3>
-        <div className="space-y-3">
-           <div className="p-3 bg-[rgba(255,255,255,0.03)] rounded-lg border border-line text-sm">
-             <strong className="text-[color:var(--color-brand)]">Phase 3 Testing Started:</strong> The onboarding module is now live. Complete your missions to earn your operator certification!
-           </div>
-           <div className="p-3 bg-[rgba(255,255,255,0.03)] rounded-lg border border-line text-sm">
-             <strong>New Training Materials:</strong> 5 new modules have been added covering consensus and incident reporting.
-           </div>
+      <Card className="mt-5 p-6" data-reveal data-reveal-delay="4">
+        <SectionHeader eyebrow="Network" title="Announcements" />
+        <div className="rows">
+          <div className="row" style={{ gridTemplateColumns: "auto 1fr" }}>
+            <span className="stat-figure text-sm text-[color:var(--color-brand)]">01</span>
+            <p className="text-sm leading-relaxed text-muted">
+              <strong className="font-semibold text-[color:var(--color-brand)]">Phase 3 testing started.</strong>{" "}
+              The onboarding module is now live — complete your missions to earn your operator certification.
+            </p>
+          </div>
+          <div className="row" style={{ gridTemplateColumns: "auto 1fr" }}>
+            <span className="stat-figure text-sm text-faint">02</span>
+            <p className="text-sm leading-relaxed text-muted">
+              <strong className="font-semibold text-ink">New training materials.</strong>{" "}
+              Five new modules have been added covering consensus and incident reporting.
+            </p>
+          </div>
         </div>
       </Card>
     </div>

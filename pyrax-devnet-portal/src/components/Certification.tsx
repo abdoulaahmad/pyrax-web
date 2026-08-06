@@ -28,14 +28,14 @@ export default function Certification() {
   }, []);
 
   if (loading) return <div className="p-8 text-center text-muted animate-pulse">Checking certification status...</div>;
-  if (error) return <div className="p-8 text-center text-[color:var(--color-danger)]">{error}</div>;
+  if (error) return <div className="p-8 text-center text-[color:var(--color-negative)]">{error}</div>;
   if (!state) return null;
 
   const hasCert = !!state.certification_id && state.certification;
   
   return (
     <div className="max-w-3xl mx-auto">
-      <PageHeader title="Operator Certification" subtitle="Your official credentials for running a Pyrax node." />
+      <PageHeader eyebrow="Onboarding" index="05" title="Operator Certification" subtitle="Your official credentials for running a Pyrax node." />
       
       {hasCert ? (
         <CertificationBadge state={state} />
@@ -52,22 +52,22 @@ function CertificationBadge({ state }: { state: UserOnboardingState }) {
   const expiresDate = cert.expires_at ? new Date(Number(cert.expires_at)).toLocaleDateString() : 'Never';
 
   return (
-    <Card className="overflow-hidden border-[color:var(--color-brand)] bg-gradient-to-br from-[rgba(245,134,34,0.1)] to-transparent">
+    <Card className="overflow-hidden border-[color:var(--color-brand)] bg-gradient-to-br from-[rgba(246,138,36,0.1)] to-transparent">
       <div className="p-8">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-          <div className="grid h-32 w-32 shrink-0 place-items-center rounded-full bg-[rgba(245,134,34,0.15)] border-4 border-[rgba(245,134,34,0.3)] shadow-[0_0_30px_rgba(245,134,34,0.2)]">
+          <div className="grid h-32 w-32 shrink-0 place-items-center rounded-full bg-[rgba(246,138,36,0.15)] border-4 border-[rgba(246,138,36,0.3)] shadow-[0_0_30px_rgba(246,138,36,0.2)]">
             <Icon.shield className="h-14 w-14 text-[color:var(--color-brand)]" />
           </div>
           
           <div className="flex-1 text-center md:text-left">
             <Badge tone="positive" className="mb-3 font-bold uppercase tracking-widest text-xs">Official Certification</Badge>
-            <h2 className="text-3xl font-extrabold mb-1 text-white">{state.display_name}</h2>
+            <h2 className="text-3xl font-semibold mb-1 text-ink">{state.display_name}</h2>
             <p className="text-lg text-[color:var(--color-brand)] font-medium mb-6">Certified Node Operator</p>
             
             <div className="grid grid-cols-2 gap-4 bg-[rgba(0,0,0,0.3)] p-4 rounded-xl border border-[rgba(255,255,255,0.05)]">
               <div>
                 <div className="text-[0.65rem] uppercase tracking-wider text-faint mb-1">Certification ID</div>
-                <div className="font-mono text-sm text-white bg-[rgba(255,255,255,0.05)] px-2 py-1 rounded inline-block">{cert.cert_number}</div>
+                <div className="font-mono text-sm text-ink bg-[rgba(255,255,255,0.05)] px-2 py-1 rounded inline-block">{cert.cert_number}</div>
               </div>
               <div>
                 <div className="text-[0.65rem] uppercase tracking-wider text-faint mb-1">Status</div>
@@ -85,7 +85,7 @@ function CertificationBadge({ state }: { state: UserOnboardingState }) {
           </div>
         </div>
       </div>
-      <div className="bg-[rgba(245,134,34,0.05)] border-t border-[rgba(245,134,34,0.1)] p-4 text-center">
+      <div className="bg-[rgba(246,138,36,0.05)] border-t border-[rgba(246,138,36,0.1)] p-4 text-center">
         <p className="text-xs text-muted">This certification authorizes the holder to participate in the Pyrax DevNet as a trusted node operator.</p>
       </div>
     </Card>
@@ -115,14 +115,14 @@ function CertificationPending({ state }: { state: UserOnboardingState }) {
             <div className={`grid h-6 w-6 place-items-center rounded-full ${isTrainingComplete ? 'bg-[color:var(--color-positive)] text-black' : 'bg-line text-muted'}`}>
               <Icon.check className="h-4 w-4" />
             </div>
-            <span className={isTrainingComplete ? 'text-white' : 'text-muted'}>Complete Training Modules</span>
+            <span className={isTrainingComplete ? 'text-ink' : 'text-muted'}>Complete Training Modules</span>
           </div>
           
           <div className="flex items-center gap-3">
             <div className={`grid h-6 w-6 place-items-center rounded-full ${isQuizPassed ? 'bg-[color:var(--color-positive)] text-black' : 'bg-line text-muted'}`}>
               <Icon.check className="h-4 w-4" />
             </div>
-            <span className={isQuizPassed ? 'text-white' : 'text-muted'}>Pass Certification Quiz (80%+)</span>
+            <span className={isQuizPassed ? 'text-ink' : 'text-muted'}>Pass Certification Quiz (80%+)</span>
           </div>
         </div>
       </div>
