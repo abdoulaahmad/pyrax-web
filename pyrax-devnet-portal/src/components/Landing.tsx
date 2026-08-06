@@ -104,9 +104,9 @@ export default function Landing() {
                 </div>
                 <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-line"><motion.div className={low ? "h-full rounded-full bg-[color:var(--color-ember)]" : "h-full rounded-full flame-bar"} animate={{ width: `${pct}%` }} transition={{ ease: "linear", duration: 1 }} /></div>
               </div>
-              <div className="mt-5 grid grid-cols-9 gap-1" onPaste={onPaste}>
+              <div className="mt-5 grid grid-cols-9 gap-1 min-w-0" onPaste={onPaste}>
                 {digits.map((d, i) => (
-                  <input key={i} ref={(el) => { boxes.current[i] = el; }} inputMode="numeric" maxLength={1} value={d} onChange={(e) => setDigit(i, e.target.value)} onKeyDown={(e) => { if (e.key === "Backspace" && !digits[i] && i > 0) boxes.current[i - 1]?.focus(); }} className="input aspect-square p-0 text-center font-mono text-sm sm:text-base" />
+                  <input key={i} ref={(el) => { boxes.current[i] = el; }} inputMode="numeric" maxLength={1} value={d} onChange={(e) => setDigit(i, e.target.value)} onKeyDown={(e) => { if (e.key === "Backspace" && !digits[i] && i > 0) boxes.current[i - 1]?.focus(); }} className="input aspect-square min-w-0 p-0 text-center font-mono text-sm sm:text-base" />
                 ))}
               </div>
               {error && <p className="mt-3 text-sm text-[color:var(--color-negative)]">{error}</p>}

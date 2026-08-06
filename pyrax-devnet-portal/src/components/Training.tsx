@@ -54,7 +54,7 @@ export default function Training() {
 
   return (
     <div>
-      <PageHeader eyebrow="Onboarding" index="03" title="Training Modules" subtitle="Complete the required modules to unlock the certification quiz." />
+      <PageHeader navKey="training" title="Training Modules" subtitle="Complete the required modules to unlock the certification quiz." />
       {progressPercent === 100 && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 p-4 rounded-xl border border-[color:var(--color-positive)] bg-[rgba(61,220,132,0.1)] flex items-center gap-4">
           <div className="grid h-10 w-10 place-items-center rounded-full bg-[color:var(--color-positive)] text-black shrink-0">
@@ -147,7 +147,7 @@ function renderLines(lines: string[], key: number): React.ReactNode {
       <div key={key} className="space-y-2">
         {labeled.map((item, li) => item && (
           <div key={li} className="flex gap-3 items-start p-3 rounded-lg bg-[rgba(246,138,36,0.04)] border border-[rgba(246,138,36,0.12)]">
-            <span className="shrink-0 min-w-[120px] text-xs font-bold text-[color:var(--color-brand)] uppercase tracking-wide mt-0.5">{item.label}</span>
+            <span className="shrink-0 text-xs font-bold sm:min-w-[120px] text-[color:var(--color-brand)] uppercase tracking-wide mt-0.5">{item.label}</span>
             <span className="text-sm text-muted leading-relaxed">{inlineHighlight(item.body)}</span>
           </div>
         ))}
@@ -159,7 +159,7 @@ function renderLines(lines: string[], key: number): React.ReactNode {
     const item = labeled[0]!;
     return (
       <div key={key} className="flex gap-3 items-start p-3 rounded-lg bg-[rgba(246,138,36,0.04)] border border-[rgba(246,138,36,0.12)]">
-        <span className="shrink-0 min-w-[120px] text-xs font-bold text-[color:var(--color-brand)] uppercase tracking-wide mt-0.5">{item.label}</span>
+        <span className="shrink-0 text-xs font-bold sm:min-w-[120px] text-[color:var(--color-brand)] uppercase tracking-wide mt-0.5">{item.label}</span>
         <span className="text-sm text-muted leading-relaxed">{inlineHighlight(item.body)}</span>
       </div>
     );

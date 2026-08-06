@@ -80,7 +80,7 @@ export default function Quiz() {
 
     return (
       <div className="max-w-4xl mx-auto">
-        <PageHeader eyebrow="Onboarding" index="04" title="Certification Quiz" subtitle="Pass the quiz to become a certified node operator." />
+        <PageHeader navKey="quiz" title="Certification Quiz" subtitle="Pass the quiz to become a certified node operator." />
         <Card className="p-8 mt-6">
           <div className="flex flex-col items-center text-center">
             <div className="grid h-16 w-16 place-items-center rounded-full bg-[rgba(246,138,36,0.1)] text-[color:var(--color-brand)] mb-4">

@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo, Icon, Badge, BrandMark } from "./ui";
 import { can, type Permission } from "../lib/permissions";
+import { NAV, type ModuleKey as NavKey } from "../lib/nav";
 import { Downloads, IssueCouncil, Leaderboard, Chat, Releases, Settings, Triage, Testers, NdaPage, TosPage } from "./modules";
 import Dashboard from "./Dashboard";
 import Training from "./Training";
@@ -12,27 +13,8 @@ import Certification from "./Certification";
 import { Tests } from "./Tests";
 import { LegalGate, type LegalStatus } from "./Legal";
 
-type ModuleKey = "dashboard" | "downloads" | "releases" | "tests" | "issues" | "leaderboard" | "chat" | "settings" | "triage" | "testers" | "nda" | "tos" | "training" | "quiz" | "missions" | "certification";
+type ModuleKey = NavKey;
 export interface Me { id: string; email: string; displayName: string; handle: string; payoutWallet: string | null; rewardEligible: boolean; isStaff: boolean; permissions: Permission[]; isSuperuser: boolean; status: string; sessionMaxDays: number; foundingRank: number | null; }
-
-const NAV: { key: ModuleKey; label: string; perm: Permission | null; icon: keyof typeof Icon; group: string }[] = [
-  { key: "dashboard", label: "Dashboard", perm: null, icon: "grid", group: "Workspace" },
-  { key: "missions", label: "Missions", perm: null, icon: "shield", group: "Onboarding" },
-  { key: "training", label: "Training", perm: null, icon: "activity", group: "Onboarding" },
-  { key: "quiz", label: "Quiz", perm: null, icon: "check", group: "Onboarding" },
-  { key: "certification", label: "Certificate", perm: null, icon: "trophy", group: "Onboarding" },
-  { key: "downloads", label: "Downloads", perm: null, icon: "download", group: "Workspace" },
-  { key: "releases", label: "Releases", perm: null, icon: "activity", group: "Workspace" },
-  { key: "tests", label: "Tests", perm: "campaigns.view", icon: "check", group: "Testing" },
-  { key: "issues", label: "Issue Council", perm: "issues.view", icon: "alert", group: "Testing" },
-  { key: "leaderboard", label: "Leaderboard", perm: null, icon: "trophy", group: "Community" },
-  { key: "chat", label: "Chat", perm: null, icon: "chat", group: "Community" },
-  { key: "settings", label: "Settings", perm: null, icon: "user", group: "Account" },
-  { key: "nda", label: "NDA", perm: null, icon: "shield", group: "Legal" },
-  { key: "tos", label: "Terms & Conditions", perm: null, icon: "check", group: "Legal" },
-  { key: "triage", label: "Triage", perm: "issues.triage", icon: "shield", group: "Admin" },
-  { key: "testers", label: "Testers", perm: "testers.view", icon: "users", group: "Admin" },
-];
 
 function Bell() {
   const [open, setOpen] = useState(false);

@@ -75,8 +75,7 @@ export default function Missions({ onNavigate }: { onNavigate?: (k: string) => v
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader
-        eyebrow="Onboarding"
-        index="02"
+        navKey="missions"
         title="DevNet onboarding journey"
         subtitle="Follow these steps to fully unlock your operator access."
       />

@@ -62,12 +62,19 @@
 @layer base {
   * { border-color: var(--color-line); }
   html { color-scheme: dark; scroll-behavior: smooth; }
+  /* Root horizontal-overflow guard. `clip` rather than `hidden` on purpose: `overflow-x: hidden`
+     turns the element into a scroll container, which silently kills `position: sticky` on every
+     descendant — and the portal shell leans on sticky for the sidebar, topbar and mobile bar.
+     `clip` trims the overflow without creating that container, so sticky keeps working. */
+  html, body { overflow-x: clip; }
   body {
     background: var(--color-bg);
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
+    /* Belt to the `clip` braces: content can't demand a wider line box than the viewport. */
+    max-width: 100%;
     /* Ambient dual-flame field sampled from the logo. */
     background-image:
       radial-gradient(1400px 800px at 15% -8%, rgba(25,99,169,0.12), transparent 55%),
@@ -244,6 +251,11 @@
 .marquee-track { animation: marquee 32s linear infinite; }
 .marquee-mask { -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
 .ticker-track { animation: tick 34s linear infinite; }
+/* Vestibular safety: a continuously scrolling strip is exactly the motion this query exists for.
+   The track keeps its duplicated items, so the visible half still reads as a full row of stats. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track, .ticker-track { animation: none; }
+}
 
 /* subtle grid backdrop used on section headers */
 .grid-backdrop { background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 44px 44px; }

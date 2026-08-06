@@ -388,7 +388,7 @@ export function Tests({ me }: { me: { id: string } }) {
 
   return (
     <>
-      <PageHeader eyebrow="Testing" index="06" title="Tests" subtitle="Work through the CLI and Inferno tracks step by step. Capture proof at each step, paste your logs, and submit — accepted tests pay PYRX toward the airdrop." />
+      <PageHeader navKey="tests" title="Tests" subtitle="Work through the CLI and Inferno tracks step by step. Capture proof at each step, paste your logs, and submit — accepted tests pay PYRX toward the airdrop." />
       {err && <Card className="mb-4 p-4 text-sm text-[color:var(--color-negative)]">{err}</Card>}
 
       <div className="mb-4 grid gap-4 lg:grid-cols-3">

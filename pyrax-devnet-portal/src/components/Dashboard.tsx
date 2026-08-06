@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import React, { useEffect, useState } from "react";
-import { Card, Button, Badge, PageHeader, SectionHeader, Panel, Progress, Icon } from "./ui";
+import { Card, Button, Badge, PageHeader, SectionHeader, Panel, Progress, Ticker, Icon } from "./ui";
 import type { UserOnboardingState, Mission } from "../types/onboarding";
 
 export default function Dashboard({ onNavigate }: { onNavigate: (k: string) => void }) {
@@ -54,14 +54,29 @@ export default function Dashboard({ onNavigate }: { onNavigate: (k: string) => v
 
   const nextAction = getNextAction();
 
+  /* Ticker content is derived from the operator's own state rather than hard-coded marketing copy —
+     on the landing page the strip sells the network, here it should report on *your* run. */
+  const tickerItems = [
+    { k: "STATUS", v: state.onboarding_status.replace(/_/g, " ") },
+    { k: `${completedMissionsCount}/${missionsTotal}`, v: "MISSIONS COMPLETE" },
+    { k: `${progressPercent}%`, v: "ONBOARDING PROGRESS" },
+    { k: "CERT", v: state.certification_id ? "ACTIVE" : "PENDING" },
+    { k: "NODE", v: state.node_paired ? "PAIRED · DEVNET" : "NOT PAIRED" },
+    { k: "PHASE 3", v: "TESTING LIVE" },
+  ];
+
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeader
-        eyebrow="Onboarding"
-        index="01"
+        navKey="dashboard"
         title={`Welcome back, ${state.display_name}`}
         subtitle="Your DevNet operator progress, node status, and the next step to unlock full network access."
       />
+
+      {/* Full-bleed stat ticker. The negative margins cancel <main>'s p-4/sm:p-7 so the strip runs
+          edge-to-edge like the marketing hero's, while Ticker's own overflow-hidden keeps the
+          intentionally-overwide track from adding a page-level horizontal scrollbar. */}
+      <Ticker items={tickerItems} className="-mx-4 mb-5 sm:-mx-7" />
 
       {/* Status banner — the single most important "what do I do next" surface. */}
       <Card className="tick relative overflow-hidden p-6" data-reveal>
