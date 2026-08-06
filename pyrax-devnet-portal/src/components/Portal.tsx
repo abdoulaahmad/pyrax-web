@@ -74,6 +74,15 @@ export default function Portal() {
 
   const subject = useMemo(() => me ? { isSuperuser: me.isSuperuser, permissions: me.permissions } : { isSuperuser: false, permissions: [] as Permission[] }, [me]);
 
+  /* `isStaff` means "Pyrax employee, not reward-eligible" (see lib/tester.ts — it is set purely from
+     the @pyraxchain.com email domain), NOT "has admin authority". Badging it as Admin showed Admin to
+     every colleague on the domain, including accounts holding only TESTER_BASELINE. Admin authority is
+     the same thing that gates the Admin nav group, so derive it from the same source. */
+  const isAdmin = useMemo(
+    () => subject.isSuperuser || can(subject, "issues.triage") || can(subject, "testers.view"),
+    [subject],
+  );
+
   if (loading || !me) return <div className="grid min-h-screen place-items-center"><div className="flex items-center gap-3 text-sm text-muted"><span className="h-4 w-4 animate-spin-slow rounded-full border-2 border-line border-t-[color:var(--color-brand)]" /> Loading…</div></div>;
 
   const meUser = me;
@@ -157,7 +166,7 @@ export default function Portal() {
           <div className="flex items-center gap-2"><Bell /><button onClick={() => setMobileOpen(true)} aria-label="Open menu" className="grid h-9 w-9 place-items-center rounded-lg border border-line text-muted"><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg></button></div>
         </div>
         <header className="sticky top-0 z-20 hidden items-center justify-between gap-3 border-b border-line bg-[rgba(5,6,9,0.82)] px-5 py-3 backdrop-blur-xl md:flex">
-          <div className="flex items-center gap-2.5">{meUser.isStaff && <Badge tone="brand"><Icon.shield className="h-3 w-3" /> Admin</Badge>}<span className="eyebrow eyebrow-rule text-muted">{NAV.find((n) => n.key === cur)?.label}</span></div>
+          <div className="flex items-center gap-2.5">{isAdmin ? <Badge tone="brand"><Icon.shield className="h-3 w-3" /> Admin</Badge> : meUser.isStaff ? <Badge tone="muted"><Icon.shield className="h-3 w-3" /> Staff</Badge> : null}<span className="eyebrow eyebrow-rule text-muted">{NAV.find((n) => n.key === cur)?.label}</span></div>
           <div className="flex items-center gap-3">{meUser.foundingRank && <Badge tone="brand">Founding Tester #{meUser.foundingRank}</Badge>}<Bell /></div>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 p-4 sm:p-7">

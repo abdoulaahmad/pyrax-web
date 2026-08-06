@@ -81,7 +81,9 @@ export const TRAINING_MODULES_COUNT = TRAINING_MODULES.length;
 // ---- Quiz Configuration ----
 export const QUIZ_PASSING_SCORE = 80; // percentage
 export const QUIZ_QUESTIONS_PER_ATTEMPT = 20;
-export const QUIZ_MAX_RETRIES = 3; // unlimited if 0
+// `: number`, not an inferred literal `3` — the call sites legitimately test `=== 0` to detect the
+// documented "unlimited" setting, and a literal type makes that comparison a type error.
+export const QUIZ_MAX_RETRIES: number = 3; // unlimited if 0
 
 // Quiz questions seed data (will be stored in DB, but initialized with these)
 export const QUIZ_QUESTIONS_SEED = [
