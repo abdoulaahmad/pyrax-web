@@ -47,8 +47,9 @@ export function buildCsp(env: NodeJS.ProcessEnv = process.env): string {
   return [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com",
+    // Fonts are self-hosted (public/fonts, see styles/fonts.css) — no Google Fonts origin needed.
+    "style-src 'self' 'unsafe-inline'",
+    "font-src 'self'",
     directive("img-src 'self' data:", GIPHY_IMG, spaces?.cdn || ""),
     directive("media-src 'self'", spaces?.cdn || ""),
     directive("connect-src 'self'", chat, spaces?.upload || ""),

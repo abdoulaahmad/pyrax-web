@@ -67,7 +67,7 @@ export default function Landing() {
   const StatePanel = ({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) => (
     <motion.div key={step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
       <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[rgba(215,84,39,0.12)] text-[color:var(--color-ember)]"><span className="h-6 w-6">{icon}</span></div>
-      <h2 className="mt-4 text-xl font-extrabold">{title}</h2>
+      <h2 className="mt-4 text-xl font-semibold">{title}</h2>
       <p className="mt-1 text-sm text-muted">{body}</p>
       <Button type="button" variant="primary" className="mt-6 w-full justify-center" disabled={busy} onClick={sendCode}>{busy ? "Sending…" : "Send a new code"}</Button>
       <button type="button" className="mt-3 w-full text-center text-xs text-faint hover:text-muted" onClick={reset}>← Use a different email</button>
@@ -81,7 +81,7 @@ export default function Landing() {
         <AnimatePresence mode="wait">
           {step === "email" && (
             <motion.form key="e" onSubmit={requestCode} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.22 }}>
-              <h2 className="text-xl font-extrabold">Tester sign in</h2>
+              <h2 className="text-xl font-semibold">Tester sign in</h2>
               <p className="mt-1 text-sm text-muted">We'll email a one-time sign-in code. No password.</p>
               <label className="label mt-6">Email</label>
               <div className="relative">
@@ -95,7 +95,7 @@ export default function Landing() {
           )}
           {step === "code" && (
             <motion.form key="c" onSubmit={verify} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.22 }}>
-              <h2 className="text-xl font-extrabold">Enter your code</h2>
+              <h2 className="text-xl font-semibold">Enter your code</h2>
               <p className="mt-1 text-sm text-muted">Sent to <span className="text-ink">{email || "your email"}</span>.</p>
               <div className="mt-4">
                 <div className="flex items-center justify-between text-xs">
@@ -104,9 +104,9 @@ export default function Landing() {
                 </div>
                 <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-line"><motion.div className={low ? "h-full rounded-full bg-[color:var(--color-ember)]" : "h-full rounded-full flame-bar"} animate={{ width: `${pct}%` }} transition={{ ease: "linear", duration: 1 }} /></div>
               </div>
-              <div className="mt-5 grid grid-cols-9 gap-1" onPaste={onPaste}>
+              <div className="mt-5 grid grid-cols-9 gap-1 min-w-0" onPaste={onPaste}>
                 {digits.map((d, i) => (
-                  <input key={i} ref={(el) => { boxes.current[i] = el; }} inputMode="numeric" maxLength={1} value={d} onChange={(e) => setDigit(i, e.target.value)} onKeyDown={(e) => { if (e.key === "Backspace" && !digits[i] && i > 0) boxes.current[i - 1]?.focus(); }} className="input aspect-square p-0 text-center font-mono text-sm sm:text-base" />
+                  <input key={i} ref={(el) => { boxes.current[i] = el; }} inputMode="numeric" maxLength={1} value={d} onChange={(e) => setDigit(i, e.target.value)} onKeyDown={(e) => { if (e.key === "Backspace" && !digits[i] && i > 0) boxes.current[i - 1]?.focus(); }} className="input aspect-square min-w-0 p-0 text-center font-mono text-sm sm:text-base" />
                 ))}
               </div>
               {error && <p className="mt-3 text-sm text-[color:var(--color-negative)]">{error}</p>}
@@ -125,13 +125,14 @@ export default function Landing() {
     <div className="lg:grid lg:min-h-screen lg:grid-cols-[1.05fr_1fr]">
       <div className="relative flex flex-col items-center justify-center overflow-hidden px-6 pt-12 pb-6 text-center lg:border-r lg:border-line lg:p-12">
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(245,134,34,0.2),transparent_62%)] blur-2xl animate-float" />
-          <div className="absolute -bottom-24 left-1/3 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(28,99,166,0.18),transparent_62%)] blur-2xl" style={{ animation: "float 9s ease-in-out infinite" }} />
+          <div className="grid-backdrop absolute inset-0 opacity-40" />
+          <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(246,138,36,0.2),transparent_62%)] blur-2xl animate-float" />
+          <div className="absolute -bottom-24 left-1/3 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(25,99,169,0.18),transparent_62%)] blur-2xl" style={{ animation: "float 9s ease-in-out infinite" }} />
         </div>
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col items-center">
-          <BrandMark variant="vertical" className="h-28 w-28 animate-[float_7s_ease-in-out_infinite] drop-shadow-[0_0_45px_rgba(245,134,34,0.28)] sm:h-32 sm:w-32 lg:h-44 lg:w-44" />
-          <div className="chip chip-brand mt-5 lg:mt-8">Closed Alpha · Tester Portal</div>
-          <h1 className="mt-4 max-w-md font-display text-2xl font-extrabold leading-tight sm:text-3xl lg:text-4xl">Help us forge <span className="flame-text">the network.</span></h1>
+          <BrandMark variant="vertical" className="h-28 w-28 animate-[float_7s_ease-in-out_infinite] drop-shadow-[0_0_45px_rgba(246,138,36,0.28)] sm:h-32 sm:w-32 lg:h-44 lg:w-44" />
+          <div className="eyebrow mt-5 lg:mt-8">Closed Alpha · Tester Portal</div>
+          <h1 className="display-caps mt-4 max-w-md font-display text-2xl leading-tight sm:text-3xl lg:text-4xl">Help us forge <span className="flame-text">the network.</span></h1>
           <p className="mt-3 max-w-sm text-sm text-muted sm:text-[0.95rem] lg:mt-4">Run a node, break things, file reports. You're testing PYRAX before the world sees it.</p>
         </motion.div>
         <div className="hidden text-xs text-faint lg:absolute lg:inset-x-0 lg:bottom-6 lg:block">© {new Date().getFullYear()} PYRAX LLC · Authorized testers only.</div>

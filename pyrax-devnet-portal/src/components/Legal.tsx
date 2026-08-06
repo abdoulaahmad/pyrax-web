@@ -64,7 +64,7 @@ function ModalShell({ title, subtitle, children }: { title: string; subtitle?: s
       <div className="flex h-full max-h-[92dvh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-line bg-[rgba(10,12,19,0.98)] shadow-2xl">
         <div className="flame-bar h-1 shrink-0" />
         <div className="shrink-0 px-6 pb-3 pt-5">
-          <h2 className="text-lg font-extrabold text-ink sm:text-xl">{title}</h2>
+          <h2 className="text-lg font-semibold text-ink sm:text-xl">{title}</h2>
           {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
         </div>
         {children}
@@ -208,7 +208,7 @@ export function RewardsContent() {
   const founding = REWARDS.foundingTester;
   return (
     <div className="space-y-5 text-sm">
-      <div className="rounded-xl border border-[rgba(245,134,34,0.3)] bg-[rgba(245,134,34,0.06)] p-4">
+      <div className="rounded-xl border border-[rgba(246,138,36,0.3)] bg-[rgba(246,138,36,0.06)] p-4">
         <div className="font-semibold text-ink">How tester rewards work</div>
         <p className="mt-1 text-muted">You earn <strong className="text-ink">PYRX</strong> for helping test the network. Rewards <strong className="text-ink">accrue now</strong> and are paid out via the <strong className="text-ink">mainnet airdrop</strong>. Everything you earn is shown transparently on your dashboard ledger. Valued at <strong className="text-ink">${PYX_USD}/PYRX</strong> for the USD estimates below.</p>
         <p className="mt-2 text-xs text-faint">Only reward-eligible testers accrue (PYRAX staff accounts participate but don't earn). One node is rewarded per tester, even if you run several.</p>

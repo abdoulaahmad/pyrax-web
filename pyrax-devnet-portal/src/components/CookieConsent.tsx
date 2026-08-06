@@ -42,7 +42,7 @@ export default function CookieConsent() {
             <div className="flame-bar h-1 w-full" />
             <div className="p-5">
               <div className="flex items-start gap-3">
-                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[color:rgba(245,134,34,0.3)] bg-[rgba(245,134,34,0.07)] text-base">🍪</div>
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[color:rgba(246,138,36,0.3)] bg-[rgba(246,138,36,0.07)] text-base">🍪</div>
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-bold">We value your privacy</div>
                   <p className="mt-1 text-xs text-muted">We use cookies to keep you signed in, secure the site, and (optionally) understand usage. You're in control — accept all, reject the optional ones, or choose.</p>

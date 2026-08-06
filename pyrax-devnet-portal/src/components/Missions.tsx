@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Badge, Icon, PageHeader, Button } from "./ui";
+import { Card, Icon, PageHeader, SectionHeader, Button } from "./ui";
 import type { Mission, MissionProgress } from "../types/onboarding";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -67,32 +67,46 @@ export default function Missions({ onNavigate }: { onNavigate?: (k: string) => v
   }
 
   const actionInfo = activeMission ? getActionLabelAndRoute(activeMission.mission_number) : null;
+  // Guard the single-mission case: (length - 1) would divide by zero and blow the width out to Infinity%.
+  const trackPercent = missions.length > 1
+    ? Math.min(100, Math.max(0, ((currentMissionNumber - 1) / (missions.length - 1)) * 100))
+    : (isAllComplete ? 100 : 0);
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold mb-2">DevNet Onboarding Journey</h1>
-        <p className="text-muted">Follow these steps to fully unlock your operator access.</p>
-      </div>
+    <div className="mx-auto max-w-4xl">
+      <PageHeader
+        navKey="missions"
+        title="DevNet onboarding journey"
+        subtitle="Follow these steps to fully unlock your operator access."
+      />
 
-      {/* Progress Steps Header */}
-      <div className="mb-10 relative">
-        <div className="absolute top-1/2 left-0 right-0 h-1 bg-[rgba(255,255,255,0.05)] -translate-y-1/2 z-0" />
-        <div className="absolute top-1/2 left-0 h-1 bg-[color:var(--color-brand)] -translate-y-1/2 z-0 transition-all duration-500" 
-             style={{ width: `${Math.max(0, (currentMissionNumber - 1) / (missions.length - 1)) * 100}%` }} />
-        
-        <div className="flex justify-between relative z-10">
+      {/* Step rail */}
+      <div className="relative mb-10 px-1" data-reveal>
+        <div className="absolute left-0 right-0 top-4 h-px -translate-y-1/2 bg-[color:var(--color-line)]" />
+        <div
+          className="absolute left-0 top-4 h-px -translate-y-1/2 bg-[color:var(--color-brand)] transition-all duration-500"
+          style={{ width: `${trackPercent}%` }}
+        />
+        <div className="relative flex justify-between">
           {missions.map((m) => {
-            const isCompleted = m.mission_number < currentMissionNumber || m.progress?.status === 'completed';
+            const isCompleted = m.mission_number < currentMissionNumber || m.progress?.status === "completed";
             const isActive = m.mission_number === currentMissionNumber && !isAllComplete;
             return (
-              <div key={m.id} className="flex flex-col items-center">
-                <div className={`grid h-8 w-8 place-items-center rounded-full font-bold text-xs transition-all duration-300
-                  ${isCompleted ? 'bg-[color:var(--color-positive)] text-black shadow-[0_0_15px_rgba(52,211,153,0.5)]' : 
-                    isActive ? 'bg-[color:var(--color-brand)] text-black shadow-[0_0_20px_rgba(245,134,34,0.6)] scale-125' : 
-                    'bg-[rgba(255,255,255,0.1)] text-muted'}`}>
-                  {isCompleted ? <Icon.check className="h-4 w-4" /> : m.mission_number}
+              <div key={m.id} className="flex flex-col items-center gap-2">
+                <div
+                  className={`grid h-8 w-8 place-items-center rounded-full border font-mono text-[0.68rem] font-semibold transition-all duration-300 ${
+                    isCompleted
+                      ? "border-[color:var(--color-positive)] bg-[rgba(61,220,132,0.12)] text-[color:var(--color-positive)]"
+                      : isActive
+                        ? "border-[color:var(--color-brand)] bg-[rgba(246,138,36,0.12)] text-[color:var(--color-brand)] shadow-[0_0_0_4px_rgba(246,138,36,0.08)]"
+                        : "border-line bg-[color:var(--color-bg)] text-faint"
+                  }`}
+                >
+                  {isCompleted ? <Icon.check className="h-4 w-4" /> : String(m.mission_number).padStart(2, "0")}
                 </div>
+                <span className={`hidden text-[0.62rem] tracking-[0.1em] sm:block ${isActive ? "text-ink" : "text-faint"}`}>
+                  {String(m.mission_number).padStart(2, "0")}
+                </span>
               </div>
             );
           })}
@@ -101,71 +115,68 @@ export default function Missions({ onNavigate }: { onNavigate?: (k: string) => v
 
       <AnimatePresence mode="wait">
         {isAllComplete ? (
-          <motion.div key="completed" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16">
-            <div className="grid h-24 w-24 mx-auto place-items-center rounded-full bg-[rgba(52,211,153,0.1)] text-[color:var(--color-positive)] mb-6">
-              <Icon.check className="h-12 w-12" />
-            </div>
-            <h2 className="text-3xl font-bold mb-4">All Steps Completed!</h2>
-            <p className="text-muted mb-8 max-w-lg mx-auto">You have successfully completed the onboarding journey. You are now fully certified and ready to operate your DevNet node.</p>
-            <Button onClick={() => { window.location.reload(); }} className="bg-[color:var(--color-brand)] text-black px-8 py-3 rounded-xl font-bold text-lg hover:scale-105 transition-transform">
-              Go to Dashboard
-            </Button>
+          <motion.div key="completed" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <Card className="tick tick-positive px-8 py-16 text-center">
+              <div className="mx-auto grid h-20 w-20 place-items-center rounded-full border border-[color:rgba(61,220,132,0.3)] bg-[rgba(61,220,132,0.08)] text-[color:var(--color-positive)]">
+                <Icon.check className="h-10 w-10" />
+              </div>
+              <h2 className="display-caps mt-6 font-display text-2xl">All steps completed</h2>
+              <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted">
+                You have successfully completed the onboarding journey. You are now fully certified and ready to operate your DevNet node.
+              </p>
+              <Button variant="primary" onClick={() => window.location.reload()} className="mt-7 px-6 py-2.5">
+                Go to dashboard <span aria-hidden="true">→</span>
+              </Button>
+            </Card>
           </motion.div>
         ) : activeMission ? (
           <motion.div key={activeMission.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
-            <Card className="overflow-hidden border-2 border-[color:var(--color-brand)] shadow-[0_10px_40px_-10px_rgba(245,134,34,0.15)]">
-              <div className="bg-[rgba(245,134,34,0.05)] p-8 border-b border-[rgba(245,134,34,0.1)]">
-                <div className="flex items-center gap-3 mb-4">
-                  <Badge tone="brand" className="text-xs uppercase tracking-widest font-bold px-3 py-1">Step {activeMission.mission_number}</Badge>
+            <Card className="tick overflow-hidden">
+              <div className="relative overflow-hidden border-b border-line px-7 py-7">
+                <div className="grid-backdrop pointer-events-none absolute inset-0 opacity-30" />
+                <div className="relative">
+                  <div className="eyebrow">Step {String(activeMission.mission_number).padStart(2, "0")}</div>
+                  <h2 className="display-caps mt-3 font-display text-2xl leading-tight">{activeMission.title}</h2>
+                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">{activeMission.description}</p>
                 </div>
-                <h2 className="text-3xl font-bold mb-3">{activeMission.title}</h2>
-                <p className="text-lg text-muted">{activeMission.description}</p>
               </div>
-              
-              <div className="p-8 bg-[rgba(5,6,9,0.8)]">
-                <h3 className="font-semibold text-sm text-[color:var(--color-brand)] uppercase tracking-wider mb-4">What you need to do</h3>
-                
-                <ul className="space-y-4 mb-8">
-                  {Object.entries(activeMission.completion_criteria || {}).map(([key, val]) => (
-                    <li key={key} className="flex items-center gap-3 bg-[rgba(255,255,255,0.02)] p-4 rounded-xl border border-line-soft">
-                      <div className="h-6 w-6 rounded-full bg-[rgba(255,255,255,0.05)] flex items-center justify-center shrink-0">
-                        <div className="h-2 w-2 rounded-full bg-muted" />
-                      </div>
-                      <span className="text-sm">Ensure <strong className="capitalize text-ink">{key.replace(/_/g, ' ')}</strong> is completed.</span>
-                    </li>
+
+              <div className="px-7 py-7">
+                <SectionHeader eyebrow="Checklist" title="What you need to do" />
+                <div className="rows mb-7">
+                  {Object.entries(activeMission.completion_criteria || {}).map(([key], i) => (
+                    <div key={key} className="row" style={{ gridTemplateColumns: "auto 1fr" }}>
+                      <span className="mono-meta">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="text-sm">
+                        Ensure <strong className="font-semibold capitalize text-ink">{key.replace(/_/g, " ")}</strong> is completed.
+                      </span>
+                    </div>
                   ))}
                   {Object.keys(activeMission.completion_criteria || {}).length === 0 && (
-                    <li className="text-faint italic">Read the instructions carefully.</li>
+                    <div className="row" style={{ gridTemplateColumns: "1fr" }}>
+                      <span className="text-sm text-faint">Read the instructions carefully.</span>
+                    </div>
                   )}
-                </ul>
+                </div>
 
                 {errorMsg && (
-                  <div className="mb-6 p-4 bg-[rgba(239,68,68,0.1)] border border-[color:var(--color-danger)] text-[color:var(--color-danger)] rounded-xl text-sm font-medium flex items-center gap-2">
-                    <Icon.alert className="h-5 w-5 shrink-0" />
+                  <div className="mb-6 flex items-center gap-2.5 rounded-xl border border-[color:rgba(251,111,115,0.4)] bg-[rgba(251,111,115,0.08)] px-4 py-3 text-sm text-[color:var(--color-negative)]">
+                    <Icon.alert className="h-4 w-4 shrink-0" />
                     {errorMsg}
                   </div>
                 )}
 
-                <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-line-soft">
+                <div className="flex flex-col gap-3 border-t border-line-soft pt-6 sm:flex-row">
                   {onNavigate && actionInfo && (
-                    <Button 
-                      onClick={() => onNavigate(actionInfo.route)} 
-                      className="flex-1 py-4 bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)] border border-line rounded-xl font-semibold transition-colors"
-                    >
+                    <Button variant="ghost" onClick={() => onNavigate(actionInfo.route)} className="flex-1 justify-center py-3">
                       {actionInfo.label}
                     </Button>
                   )}
-                  <Button 
-                    onClick={() => handleVerify(activeMission.id)} 
-                    disabled={verifying}
-                    className="flex-1 py-4 bg-[color:var(--color-brand)] text-black hover:bg-orange-400 rounded-xl font-bold transition-all shadow-lg hover:shadow-[0_0_20px_rgba(245,134,34,0.4)] disabled:opacity-50 disabled:hover:shadow-none"
-                  >
+                  <Button variant="primary" onClick={() => handleVerify(activeMission.id)} disabled={verifying} className="flex-1 justify-center py-3">
                     {verifying ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <Icon.activity className="h-5 w-5 animate-spin" /> Verifying...
-                      </span>
+                      <><Icon.activity className="h-4 w-4 animate-spin" /> Verifying…</>
                     ) : (
-                      "I've Done This! Verify & Continue →"
+                      <>Verify &amp; continue <span aria-hidden="true">→</span></>
                     )}
                   </Button>
                 </div>

@@ -26,7 +26,7 @@ export default function Join({ token, email, telegram, error }: { token: string;
     <div className="grid min-h-screen place-items-center px-6 py-10">
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
         <div className="mb-6 flex flex-col items-center text-center">
-          <BrandMark variant="vertical" className="h-20 w-20 drop-shadow-[0_0_40px_rgba(245,134,34,0.28)]" />
+          <BrandMark variant="vertical" className="h-20 w-20 drop-shadow-[0_0_40px_rgba(246,138,36,0.28)]" />
           <div className="chip chip-brand mt-4">Closed Alpha Invite</div>
         </div>
         <div className="card overflow-hidden">
@@ -34,13 +34,13 @@ export default function Join({ token, email, telegram, error }: { token: string;
           <div className="p-7">
             {error ? (
               <div className="text-center">
-                <h1 className="text-xl font-extrabold">Invite unavailable</h1>
+                <h1 className="text-xl font-semibold">Invite unavailable</h1>
                 <p className="mt-2 text-sm text-muted">{error}</p>
                 <a href="/" className="btn btn-ghost mt-6 w-full justify-center">Go to sign in</a>
               </div>
             ) : (
               <form onSubmit={submit}>
-                <h1 className="text-xl font-extrabold">Welcome aboard, tester.</h1>
+                <h1 className="text-xl font-semibold">Welcome aboard, tester.</h1>
                 <p className="mt-1 text-sm text-muted">Finish setting up your account to get started.</p>
                 <div className="mt-5 grid gap-3">
                   <div><label className="label">Email</label><input className="input opacity-60" value={email} readOnly /></div>

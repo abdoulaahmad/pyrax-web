@@ -59,4 +59,11 @@ describe("buildCsp()", () => {
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("base-uri 'self'");
   });
+  it("allows no third-party font origin (fonts are self-hosted)", () => {
+    const csp = buildCsp(base());
+    expect(csp).toContain("font-src 'self'");
+    expect(csp).toContain("style-src 'self' 'unsafe-inline'");
+    expect(csp).not.toContain("fonts.googleapis.com");
+    expect(csp).not.toContain("fonts.gstatic.com");
+  });
 });
