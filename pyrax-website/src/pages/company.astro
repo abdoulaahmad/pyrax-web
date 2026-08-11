@@ -11,9 +11,9 @@ const L = (p: string) => localizePath(lang, p);
 
 const principles = [
   { t: t("companyPage.principle1Title", "Private by default"), d: t("companyPage.principle1Desc", "Financial privacy is a right, not a premium feature. Every transfer is shielded unless a user chooses otherwise — and auditors can still verify with viewing keys."), c: "#7c5cff" },
-  { t: t("companyPage.principle2Title", "Decentralized for real"), d: t("companyPage.principle2Desc", "No company-run bootstrap server, no privileged keys on mainnet. If PYRAX matters, it has to survive without us."), c: "#60b8cc" },
+  { t: t("companyPage.principle2Title", "Decentralized for real"), d: t("companyPage.principle2Desc", "No company-run bootstrap server, no privileged keys on mainnet. If PYRAX matters, it has to survive without us."), c: "#5cbace" },
   { t: t("companyPage.principle3Title", "Prove, don't promise"), d: t("companyPage.principle3Desc", "Claims on this site map to code you can read. The supply cap is enforced in consensus; results come with cryptographic proof."), c: "#34d399" },
-  { t: t("companyPage.principle4Title", "Open-core"), d: t("companyPage.principle4Desc", "The protocol, node, and SDK are Apache-2.0. We compete on execution and ecosystem, not on secrecy."), c: "#f58722" },
+  { t: t("companyPage.principle4Title", "Open-core"), d: t("companyPage.principle4Desc", "The protocol, node, and SDK are Apache-2.0. We compete on execution and ecosystem, not on secrecy."), c: "#f68a24" },
 ];
 
 const facts = [
@@ -28,8 +28,8 @@ const facts = [
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
     <div class="pointer-events-none absolute left-0 -top-40 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.14),transparent_60%)] blur-3xl"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20">
-      <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">{t("companyPage.eyebrow", "Company")}</div>
-      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">{t("companyPage.headingPre", "Money that is ")}<span class="flame-text">{t("companyPage.headingWord1", "private")}</span>{t("companyPage.headingMid", ", infrastructure that is ")}<span class="water-text">{t("companyPage.headingWord2", "unstoppable")}</span></h1>
+      <div class="eyebrow eyebrow-rule text-[color:var(--color-brand)]">{t("companyPage.eyebrow", "Company")}</div>
+      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold uppercase sm:text-6xl">{t("companyPage.headingPre", "Money that is ")}<span class="flame-text">{t("companyPage.headingWord1", "private")}</span>{t("companyPage.headingMid", ", infrastructure that is ")}<span class="water-text">{t("companyPage.headingWord2", "unstoppable")}</span></h1>
       <p class="mt-5 max-w-2xl text-lg text-muted">{t("companyPage.subtitle", "PYRAX exists to make private, high-throughput, verifiable value transfer the default — and to put a verifiable compute economy on the same rails. We build in the open and gate ourselves to mainnet with an external audit.")}</p>
     </div>
   </section>

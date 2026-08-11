@@ -20,12 +20,12 @@ export const TOKEN = {
 
 // Genesis distribution (the premine), % of the 50B hard cap.
 export const ALLOCATIONS: { label: string; amount: number; pct: number; color: string; note: string }[] = [
-  { label: "Public distribution", amount: 25_000_000_000, pct: 50, color: "#f58722", note: "Genesis event — sold + 25% utility bonus" },
-  { label: "Mining emissions", amount: 12_500_000_000, pct: 25, color: "#60b8cc", note: "Minted to coinbase over ~26 yr; the only inflation" },
+  { label: "Public distribution", amount: 25_000_000_000, pct: 50, color: "#f68a24", note: "Genesis event — sold + 25% utility bonus" },
+  { label: "Mining emissions", amount: 12_500_000_000, pct: 25, color: "#5cbace", note: "Minted to coinbase over ~26 yr; the only inflation" },
   { label: "Ecosystem & liquidity", amount: 5_000_000_000, pct: 10, color: "#34d399", note: "40% at TGE + 60% linear over 24 months" },
   { label: "AI-Compute pool", amount: 4_000_000_000, pct: 8, color: "#7c5cff", note: "Streamed over 48 months; funds NEURAX payouts" },
   { label: "Team & advisors", amount: 2_500_000_000, pct: 5, color: "#f5a623", note: "12-month cliff, then 36-month linear" },
-  { label: "DAO treasury & reserve", amount: 1_000_000_000, pct: 2, color: "#fcd03d", note: "10% liquid at TGE; accrues fee share ongoing" },
+  { label: "DAO treasury & reserve", amount: 1_000_000_000, pct: 2, color: "#fed23c", note: "10% liquid at TGE; accrues fee share ongoing" },
 ];
 
 export const GENESIS = {
@@ -46,13 +46,13 @@ export const EMISSIONS = {
 export const FEES = {
   baseFee: [
     { label: "Burned", pct: 25, color: "#fb6f73" },
-    { label: "PYRAX treasury", pct: 50, color: "#f58722" },
-    { label: "DAO", pct: 25, color: "#fcd03d" },
+    { label: "PYRAX treasury", pct: 50, color: "#f68a24" },
+    { label: "DAO", pct: 25, color: "#fed23c" },
   ],
   tip: [
-    { label: "Block producer", pct: 70, color: "#f58722" },
-    { label: "PYRAX treasury", pct: 20, color: "#60b8cc" },
-    { label: "DAO", pct: 10, color: "#fcd03d" },
+    { label: "Block producer", pct: 70, color: "#f68a24" },
+    { label: "PYRAX treasury", pct: 20, color: "#5cbace" },
+    { label: "DAO", pct: 10, color: "#fed23c" },
   ],
   shielded: "Flat shielded fee (100 Ash) is burned per shielded transfer",
   gasLimit: "30,000,000 block gas · base fee moves ±12.5%/block · gas priced in Cinders (1 Cinder = 10⁹ Ash)",

@@ -29,7 +29,7 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
         <a href={L(`/industries/${cat.slug}`)} class="hover:text-ink" style={`color:${cat.color}`}>{cat.name}</a><span class="text-faint">/</span>
         <span class="text-ink">{biz.name}</span>
       </div>
-      <h1 class="mt-4 font-display text-4xl font-extrabold sm:text-5xl">{biz.name} <span class="text-faint">{t("industriesUi.onPyrax", "on PYRAX")}</span></h1>
+      <h1 class="mt-4 font-display text-4xl font-extrabold uppercase sm:text-5xl">{biz.name} <span class="text-faint normal-case">{t("industriesUi.onPyrax", "on PYRAX")}</span></h1>
       <p class="mt-4 max-w-3xl text-lg text-muted">{c?.overview ?? biz.hook}</p>
       {c && (
         <div class="mt-6 flex flex-wrap gap-3">

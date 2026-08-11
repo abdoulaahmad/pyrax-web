@@ -12,11 +12,11 @@ const TECH = "/whitepaper/pyrax-whitepaper-v4-technical.md";
 const PLAIN = "/whitepaper/pyrax-whitepaper-v4-plain-english.md";
 
 const northStars = [
-  { n: "01", t: t("wpPage.northStar1Title", "DAG, not a chain"), d: t("wpPage.northStar1Desc", "A multi-parent blockDAG ordered by GhostDAG — honest parallel work is included, not orphaned."), c: "#f58722" },
+  { n: "01", t: t("wpPage.northStar1Title", "DAG, not a chain"), d: t("wpPage.northStar1Desc", "A multi-parent blockDAG ordered by GhostDAG — honest parallel work is included, not orphaned."), c: "#f68a24" },
   { n: "02", t: t("wpPage.northStar2Title", "Privacy by default"), d: t("wpPage.northStar2Desc", "The default transaction hides sender, receiver, and amount with no-trusted-setup zk-SNARKs. Transparent is the exception."), c: "#7c5cff" },
   { n: "03", t: t("wpPage.northStar3Title", "No boot node"), d: t("wpPage.northStar3Desc", "Peer discovery is bootstrapless — mDNS, Kademlia, peer exchange, and a signed seed list. No project server to join."), c: "#34d399" },
-  { n: "04", t: t("wpPage.northStar4Title", "ISP-resistance"), d: t("wpPage.northStar4Desc", "Traffic and services ride an onion Sphinx mixnet with fixed-size packets — an observer sees only uniform encrypted flows."), c: "#60b8cc" },
-  { n: "05", t: t("wpPage.northStar5Title", "Open & verifiable"), d: t("wpPage.northStar5Desc", "The protocol, consensus, ZK circuits, CLI, and SDK are Apache-2.0. A chain with secret rules is not trustless."), c: "#fcd03d" },
+  { n: "04", t: t("wpPage.northStar4Title", "ISP-resistance"), d: t("wpPage.northStar4Desc", "Traffic and services ride an onion Sphinx mixnet with fixed-size packets — an observer sees only uniform encrypted flows."), c: "#5cbace" },
+  { n: "05", t: t("wpPage.northStar5Title", "Open & verifiable"), d: t("wpPage.northStar5Desc", "The protocol, consensus, ZK circuits, CLI, and SDK are Apache-2.0. A chain with secret rules is not trustless."), c: "#fed23c" },
 ];
 
 const toc = [
@@ -28,8 +28,8 @@ const toc = [
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
     <div class="pointer-events-none absolute right-0 -top-40 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(245,134,34,0.16),transparent_60%)] blur-3xl"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20">
-      <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">{t("wpPage.eyebrow", "Whitepaper")} <span class="rounded-full border border-line px-2 py-0.5 text-faint">{t("wpPage.eyebrowVersion", "v4")}</span></div>
-      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">{t("wpPage.headingPre", "A system that is ")}<span class="flame-text">{t("wpPage.headingWord", "built")}</span>{t("wpPage.headingPost", ", not merely designed")}</h1>
+      <div class="flex items-center gap-2 eyebrow eyebrow-rule text-[color:var(--color-gold)]">{t("wpPage.eyebrow", "Whitepaper")} <span class="rounded-full border border-line px-2 py-0.5 text-faint">{t("wpPage.eyebrowVersion", "v4")}</span></div>
+      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold uppercase sm:text-6xl">{t("wpPage.headingPre", "A system that is ")}<span class="flame-text">{t("wpPage.headingWord", "built")}</span>{t("wpPage.headingPost", ", not merely designed")}</h1>
       <p class="mt-5 max-w-3xl text-lg text-muted">{t("wpPage.subtitle", "v4 specifies PYRAX as it is implemented today — one binary across four chainspecs, a faithful simulation on real primitives, with the production consensus path wired end-to-end and honest about what remains gated behind external audit.")}</p>
       <div class="mt-8 flex flex-wrap gap-3">
         <a href={TECH} download class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">{t("wpPage.downloadTechnical", "Download technical paper")}</a>
@@ -41,7 +41,7 @@ const toc = [
   <!-- ABSTRACT -->
   <section class="mx-auto max-w-4xl px-6 py-16">
     <div data-reveal class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-8">
-      <div class="text-xs font-semibold uppercase tracking-wider text-faint">{t("wpPage.abstractLabel", "Abstract")}</div>
+      <div class="eyebrow text-faint">{t("wpPage.abstractLabel", "Abstract")}</div>
       <p class="mt-4 text-muted">{t("wpPage.abstractPara1a", "PYRAX is a from-scratch, Rust-implemented Layer-1 organized around four properties most networks bolt on but PYRAX enforces as invariants: ")}<span class="text-ink">{t("wpPage.abstractPara1b", "high throughput, privacy by default, full decentralization, and resistance to ISP-level surveillance.")}</span>{t("wpPage.abstractPara1c", " Consensus is a blockDAG ordered by GhostDAG, fed by a TriStream model — two proof-of-work families across four seal lanes plus proof-of-stake — and finalized by BLS-aggregated proof-of-stake BFT.")}</p>
       <p class="mt-3 text-muted">{t("wpPage.abstractPara2a", "Value transfer is shielded by default with an Orchard-style note model and recursive zk-SNARKs that need no trusted setup. The peer layer is bootstrapless, traffic rides an onion Sphinx mixnet, execution scales through a multi-VM L2 (EVM, WASM, Cairo) and a recursive ZK-rollup L3, and the same idle GPUs that mine Stream B power ")}<span class="text-ink">NEURAX</span>{t("wpPage.abstractPara2c", ", a verifiable on-chain-settled compute market.")}</p>
     </div>
@@ -82,7 +82,7 @@ const toc = [
         <a href={L("/technology")} class="mt-6 inline-flex text-sm font-semibold text-[color:var(--color-brand)]">{t("wpPage.technologyLink", "Prefer the interactive tour? See Technology →")}</a>
       </div>
       <div data-reveal data-reveal-delay="1">
-        <div class="text-xs font-semibold uppercase tracking-wider text-faint">{t("wpPage.contentsLabel", "Technical paper · contents")}</div>
+        <div class="eyebrow text-faint">{t("wpPage.contentsLabel", "Technical paper · contents")}</div>
         <ol class="mt-4 grid gap-1 sm:grid-cols-2">
           {toc.map((s, i) => (
             <li class="flex items-baseline gap-3 rounded-lg px-2 py-1.5 text-sm text-muted transition hover:bg-[rgba(255,255,255,0.03)] hover:text-ink"><span class="font-mono text-xs text-faint">{String(i + 1).padStart(2, "0")}</span>{s}</li>

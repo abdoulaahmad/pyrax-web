@@ -20,8 +20,8 @@ const L = (p: string) => localizePath(lang, p);
       <div class="mt-5 flex items-center gap-4">
         <span class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl" style={`background:linear-gradient(135deg,${cat.color},${cat.color}44)`}></span>
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.2em]" style={`color:${cat.color}`}>{cat.tagline}</div>
-          <h1 class="mt-1 font-display text-3xl font-extrabold sm:text-5xl">{cat.name}</h1>
+          <div class="eyebrow" style={`color:${cat.color}`}>{cat.tagline}</div>
+          <h1 class="mt-1 font-display text-3xl font-extrabold uppercase sm:text-5xl">{cat.name}</h1>
         </div>
       </div>
       <p class="mt-5 max-w-3xl text-lg text-muted">{cat.blurb}</p>

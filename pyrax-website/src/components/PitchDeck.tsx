@@ -18,11 +18,11 @@ const ease = [0.22, 1, 0.36, 1] as const;
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease } } };
 
-const Kicker = ({ children }: { children: React.ReactNode }) => (
-  <motion.div variants={item} className="text-xs font-semibold uppercase tracking-[0.25em] text-[color:var(--color-brand)]">{children}</motion.div>
+const Kicker = ({ children, color }: { children: React.ReactNode; color?: string }) => (
+  <motion.div variants={item} className="eyebrow" style={color ? { color } : undefined}>{children}</motion.div>
 );
 const Title = ({ children }: { children: React.ReactNode }) => (
-  <motion.h2 variants={item} className="mt-3 font-display text-3xl font-extrabold leading-tight sm:text-5xl">{children}</motion.h2>
+  <motion.h2 variants={item} className="mt-3 font-display text-3xl font-semibold uppercase leading-[1.02] sm:text-5xl">{children}</motion.h2>
 );
 
 // ---- slides -------------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ const SLIDES: Slide[] = [
     render: (t) => (
       <motion.div variants={stagger} initial="hidden" animate="show" className="flex h-full flex-col items-center justify-center text-center">
         <motion.img variants={item} src="/brand/logo-horizontal.svg" alt="PYRAX" className="nodrag h-16 w-auto sm:h-24" />
-        <motion.h1 variants={item} className="mt-8 max-w-4xl font-display text-4xl font-extrabold leading-tight sm:text-6xl">{t("pitch.coverTitlePre", "The blockchain built like the ")}<span className="flame-text">{t("pitch.coverTitleFlame", "future demands")}</span></motion.h1>
+        <motion.h1 variants={item} className="mt-8 max-w-4xl font-display text-4xl font-extrabold uppercase leading-tight sm:text-6xl">{t("pitch.coverTitlePre", "The blockchain built like the ")}<span className="flame-text">{t("pitch.coverTitleFlame", "future demands")}</span></motion.h1>
         <motion.p variants={item} className="mt-5 max-w-2xl text-lg text-muted">{t("pitch.coverSubtitle", "Private by default. Parallel by design. Verifiable by proof. A from-scratch Layer-1 with a built-in market for AI compute.")}</motion.p>
         <motion.div variants={item} className="mt-8 flex items-center gap-3 rounded-full border border-line bg-[color:var(--color-surface)] px-5 py-2 text-sm text-muted">{t("pitch.coverInvestorDeck", "Investor Deck")} <span className="text-faint">·</span> <span className="text-ink">{t("pitch.coverConfidential", "Confidential")}</span></motion.div>
       </motion.div>
@@ -87,9 +87,9 @@ const SLIDES: Slide[] = [
         <motion.p variants={item} className="mt-4 max-w-2xl text-lg text-muted">{t("pitch.solutionBody", "A GhostDAG blockDAG for parallel throughput, shielded-by-default privacy with auditor viewing keys, three virtual machines, and a verifiable compute market — enforced as invariants in the lowest-level types.")}</motion.p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { t: t("pitch.solutionCard1Title", "Parallel"), d: t("pitch.solutionCard1Desc", "GhostDAG includes honest work instead of orphaning it."), c: "#f58722" },
+            { t: t("pitch.solutionCard1Title", "Parallel"), d: t("pitch.solutionCard1Desc", "GhostDAG includes honest work instead of orphaning it."), c: "#f68a24" },
             { t: t("pitch.solutionCard2Title", "Private"), d: t("pitch.solutionCard2Desc", "Every transfer hides sender, receiver, amount — by default."), c: "#7c5cff" },
-            { t: t("pitch.solutionCard3Title", "Decentralized"), d: t("pitch.solutionCard3Desc", "No bootstrap server. ISP-resistant Sphinx mixnet."), c: "#60b8cc" },
+            { t: t("pitch.solutionCard3Title", "Decentralized"), d: t("pitch.solutionCard3Desc", "No bootstrap server. ISP-resistant Sphinx mixnet."), c: "#5cbace" },
             { t: t("pitch.solutionCard4Title", "Verifiable"), d: t("pitch.solutionCard4Desc", "Open-core, audit-gated, proofs over promises."), c: "#34d399" },
           ].map((x) => (
             <motion.div key={x.t} variants={item} className="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
@@ -260,12 +260,12 @@ const SLIDES: Slide[] = [
         <Title>{t("pitch.askTitle", "Fund the launch of PYRAX One")}</Title>
         <div className="mt-8 grid gap-4 lg:grid-cols-[1.1fr_1fr]">
           <motion.div variants={item} className="rounded-3xl border border-line bg-[radial-gradient(120%_120%_at_0%_0%,rgba(245,134,34,0.14),transparent_60%)] p-7">
-            <div className="text-xs font-semibold uppercase tracking-wider text-[color:var(--color-brand)]">{t("pitch.askGenesisEvent", "Genesis event")}</div>
+            <div className="eyebrow text-[color:var(--color-brand)]">{t("pitch.askGenesisEvent", "Genesis event")}</div>
             <div className="mt-2 font-display text-4xl font-extrabold flame-text">$50,000,000</div>
             <p className="mt-2 text-sm text-muted">{t("pitch.askGenesisBody", "20B PYRX at $0.0025, plus a 25% utility bonus (5B PYRX) — participants receive 25B in network access and compute credits. Never framed as an investment return.")}</p>
           </motion.div>
           <motion.div variants={item} className="rounded-3xl border border-line bg-[color:var(--color-surface)] p-7">
-            <div className="text-xs font-semibold uppercase tracking-wider text-faint">{t("pitch.askUseOfFunds", "Use of funds")}</div>
+            <div className="eyebrow text-faint">{t("pitch.askUseOfFunds", "Use of funds")}</div>
             <ul className="mt-3 space-y-2 text-sm text-muted">
               {[t("pitch.askFund1", "External audit + mainnet genesis ceremony"), t("pitch.askFund2", "Ecosystem, liquidity & buildathon grants"), t("pitch.askFund3", "NEURAX compute buildout and provider incentives"), t("pitch.askFund4", "Core protocol, apps, and global team")].map((u) => (
                 <li key={u} className="flex gap-2"><span className="text-[color:var(--color-brand)]">→</span>{u}</li>

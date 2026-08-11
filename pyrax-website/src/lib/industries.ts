@@ -25,7 +25,7 @@ export interface IndustryCategory {
 export const CATEGORIES: IndustryCategory[] = [
   {
     slug: "finance-banking", name: "Finance & Banking", tagline: "Programmable, private, instant money",
-    icon: "bank", color: "#f58722",
+    icon: "bank", color: "#f68a24",
     blurb: "Settlement in seconds, privacy by default, and compliance you can prove — DeFi rails, payments, lending, and capital markets on one chain.",
     businesses: [
       { slug: "retail-banking", name: "Retail Banking", hook: "Shielded accounts, instant transfers, and audited reserves." },
@@ -42,7 +42,7 @@ export const CATEGORIES: IndustryCategory[] = [
   },
   {
     slug: "supply-chain-logistics", name: "Supply Chain & Logistics", tagline: "Provenance you can trust, privately",
-    icon: "truck", color: "#60b8cc",
+    icon: "truck", color: "#5cbace",
     blurb: "Track goods end-to-end with tamper-proof provenance, keep commercial terms confidential, and settle carriers automatically.",
     businesses: [
       { slug: "freight-shipping", name: "Freight & Shipping", hook: "Bills of lading and milestones anchored on-chain." },
@@ -127,7 +127,7 @@ export const CATEGORIES: IndustryCategory[] = [
   },
   {
     slug: "government-public-sector", name: "Government & Public Sector", tagline: "Verifiable trust for citizens",
-    icon: "gov", color: "#60b8cc",
+    icon: "gov", color: "#5cbace",
     blurb: "Self-sovereign identity, end-to-end-verifiable voting, and tamper-proof public records — private for citizens, auditable for oversight.",
     businesses: [
       { slug: "digital-identity", name: "Digital Identity", hook: "Self-sovereign, selective-disclosure credentials." },
@@ -144,7 +144,7 @@ export const CATEGORIES: IndustryCategory[] = [
   },
   {
     slug: "retail-commerce", name: "Retail & Commerce", tagline: "Loyalty, authenticity, and instant checkout",
-    icon: "cart", color: "#f58722",
+    icon: "cart", color: "#f68a24",
     blurb: "Interoperable loyalty, provable authenticity for luxury and brands, and payments that settle instantly with private customer data.",
     businesses: [
       { slug: "ecommerce", name: "E-Commerce", hook: "Instant settlement, private checkout, no chargebacks." },
@@ -178,7 +178,7 @@ export const CATEGORIES: IndustryCategory[] = [
   },
   {
     slug: "ai-data-compute", name: "AI, Data & Compute", tagline: "Verifiable compute, owned data",
-    icon: "chip", color: "#fcd03d",
+    icon: "chip", color: "#fed23c",
     blurb: "NEURAX turns idle GPUs into a verifiable compute marketplace, data becomes a private asset, and AI results come with cryptographic proof.",
     businesses: [
       { slug: "ai-inference", name: "AI Inference", hook: "Pay-per-CU inference with verified, private results." },

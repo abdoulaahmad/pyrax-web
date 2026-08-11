@@ -62,23 +62,29 @@ export default function LiveStats({ compact = false, lang = "en" }: { compact?: 
   ];
 
   return (
-    <div className={`rounded-2xl border border-line bg-[rgba(9,11,18,0.6)] backdrop-blur-md ${compact ? "p-4" : "p-5"}`}>
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm font-semibold">
-          <span className="relative flex h-2 w-2"><span className="inline-flex h-full w-full rounded-full" style={{ background: online ? "#34d399" : "#6a7286", boxShadow: online ? "0 0 8px #34d399" : "none" }} />{online && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34d399] opacity-60" />}</span>
-          <span className="text-ink">{sel?.name || "PYRAX Seed"}</span>
-          <span className="rounded px-1.5 py-0.5 text-[0.6rem] font-bold uppercase" style={{ color: sel?.color || "#60b8cc", background: `${sel?.color || "#60b8cc"}1a` }}>{sel?.mode || "Simulated"}</span>
+    <div className={`relative overflow-hidden rounded-[1.25rem] border bg-[rgba(7,9,14,0.82)] backdrop-blur-md ${online ? "border-[color:var(--color-line-soft)]" : "border-line"}`}>
+      <span className="absolute -top-px left-5 h-px w-10" style={{ background: online ? "linear-gradient(110deg,#da5427,#f68a24 55%,#fed23c)" : "var(--color-line-soft)" }} />
+      <div className={`flex items-center justify-between border-b border-line-soft ${compact ? "px-4 py-3" : "px-5 py-4"}`}>
+        <div className="flex items-center gap-2.5">
+          <span className="relative flex h-2 w-2"><span className="inline-flex h-full w-full rounded-full" style={{ background: online ? "#3ddc84" : "#5b6270", boxShadow: online ? "0 0 8px #3ddc84" : "none" }} />{online && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3ddc84] opacity-60" />}</span>
+          <span className="font-mono text-xs tracking-wide text-ink">{sel?.name || "PYRAX Seed"} <span className="text-faint">· {sel?.mode || "Simulated"}</span></span>
         </div>
-        <span className="text-[0.65rem] uppercase tracking-wider text-faint">{online ? t("homeExtra.statusLive", "live") : t("homeExtra.statusAwaitingRpc", "awaiting RPC")}</span>
+        <span className="rounded-full border px-2.5 py-1 font-mono text-[0.62rem] font-semibold tracking-wider" style={online ? { color: "#3ddc84", borderColor: "rgba(61,220,132,0.3)", background: "rgba(61,220,132,0.1)" } : { color: "#5b6270", borderColor: "var(--color-line-soft)", background: "rgba(91,98,112,0.12)" }}>{online ? t("homeExtra.statusLive", "LIVE RPC") : t("homeExtra.statusAwaitingRpc", "AWAITING RPC")}</span>
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2">
         {cells.map((c, i) => (
-          <motion.div key={c.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="min-w-0">
-            <div className="font-mono text-xl font-extrabold tabular-nums sm:text-2xl" style={{ color: c.color || "var(--color-ink)" }}>{c.value}</div>
-            <div className="mt-0.5 text-[0.7rem] font-semibold text-muted">{c.label}</div>
-            <div className="text-[0.62rem] text-faint">{c.sub}</div>
+          <motion.div key={c.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+            className={`min-w-0 px-5 py-4 ${i < 2 ? "border-b border-line-soft" : ""} ${i % 2 === 0 ? "border-r border-line-soft" : ""}`}>
+            <div className="font-mono text-[0.62rem] uppercase tracking-[0.1em] text-faint">{c.label}</div>
+            <div className="mt-1.5 font-display text-xl font-medium tabular-nums leading-none" style={{ color: c.color || (online ? "var(--color-ink)" : "var(--color-faint)") }}>{c.value}</div>
+            {c.sub && <div className="mt-1.5 font-mono text-[0.62rem] text-faint">{c.sub}</div>}
           </motion.div>
         ))}
+      </div>
+      <div className="border-t border-line-soft bg-[rgba(5,6,9,0.6)] px-5 py-3 text-[0.68rem] leading-relaxed text-faint">
+        {online
+          ? t("homeExtra.liveFootnote", "Live on PYRAX Seed · switch networks in the navbar. Numbers are real — an offline network shows em-dashes, never fabricated figures.")
+          : t("homeExtra.offlineFootnote", "Network unreachable. Figures read from public RPC at page load; until live, every figure is an em-dash.")}
       </div>
     </div>
   );

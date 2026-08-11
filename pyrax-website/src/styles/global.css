@@ -11,35 +11,37 @@
 @theme {
   /* Field (near-black, faint warm/cool undertone) */
   --color-bg: #050609;
-  --color-bg-2: #080a11;
+  --color-bg-2: #07090e;
   --color-surface: #0c0e16;
-  --color-elevated: #12141e;
+  --color-elevated: #12151d;
   --color-line: #232838;
   --color-line-soft: #171b27;
+  --color-hair: rgba(255, 255, 255, 0.035);
 
   /* Text */
-  --color-ink: #f7f9fd;
-  --color-muted: #9aa4ba;
-  --color-faint: #6a7286;
+  --color-ink: #f2f4f8;
+  --color-muted: #9aa3b2;
+  --color-faint: #565e6d;
 
   /* Fire ramp (phoenix) */
-  --color-gold: #fcd03d;
-  --color-brand: #f58622;
+  --color-gold: #fed23c;
+  --color-brand: #f68a24;
   --color-brand-soft: #f5a623;
-  --color-ember: #d75427;
+  --color-ember: #da5427;
 
   /* Water ramp (phoenix) */
-  --color-bolt-bright: #60b8cc;
-  --color-bolt: #3981c0;
-  --color-bolt-deep: #1c63a6;
+  --color-bolt-bright: #5cbace;
+  --color-bolt: #3983c3;
+  --color-bolt-deep: #1963a9;
 
   /* State */
-  --color-positive: #34d399;
+  --color-positive: #3ddc84;
   --color-warning: #f5a623;
   --color-negative: #fb6f73;
+  --color-offline: #5b6270;
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Unbounded", "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", monospace;
 
   --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -47,12 +49,15 @@
   --animate-glow: glow 2.8s ease-in-out infinite;
   --animate-shimmer: shimmer 8s linear infinite;
   --animate-spin-slow: spin 14s linear infinite;
+  --animate-tick: tick 34s linear infinite;
 }
 
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 @keyframes glow { 0%,100% { box-shadow: 0 0 0 0 rgba(245,134,34,0.0); } 50% { box-shadow: 0 0 38px -6px rgba(245,134,34,0.45); } }
 @keyframes shimmer { to { background-position: 200% center; } }
+@keyframes tick { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes orbit { to { transform: rotate(360deg); } }
 
 @layer base {
   * { border-color: var(--color-line); }
@@ -65,13 +70,16 @@
     min-height: 100vh;
     /* Ambient dual-flame field sampled from the logo. */
     background-image:
-      radial-gradient(900px 520px at 8% -8%, rgba(215,84,39,0.14), transparent 60%),
-      radial-gradient(820px 480px at 96% -6%, rgba(28,99,166,0.13), transparent 58%),
-      radial-gradient(1200px 800px at 50% 120%, rgba(245,134,34,0.06), transparent 60%);
+      radial-gradient(1400px 800px at 15% -8%, rgba(25,99,169,0.12), transparent 55%),
+      radial-gradient(1100px 640px at 92% 4%, rgba(218,84,39,0.09), transparent 55%),
+      radial-gradient(1200px 800px at 50% 120%, rgba(246,138,36,0.05), transparent 60%);
     background-attachment: fixed;
   }
-  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; font-weight: 700; }
-  ::selection { background: rgba(245,134,34,0.3); }
+  /* Unbounded display type. Uppercase is opt-in per heading (utility class) — the brand system
+     reserves it for marketing-forward H1s/section titles, not documentation-style section headers. */
+  h1, h2 { font-family: var(--font-display); letter-spacing: -0.02em; font-weight: 600; line-height: 1.04; }
+  h3 { font-family: var(--font-display); letter-spacing: -0.01em; font-weight: 500; }
+  ::selection { background: rgba(246,138,36,0.3); }
   /* Logo-theft protection: brand marks can't be dragged or selected. */
   img, [role="img"] { -webkit-user-drag: none; user-drag: none; }
   .nodrag { -webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -81,6 +89,24 @@
 }
 
 @layer components {
+  /* Mono eyebrow / kicker label — used above every section heading site-wide. */
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--color-brand);
+  }
+  .eyebrow-rule { display: inline-flex; align-items: center; gap: 0.6rem; }
+  .eyebrow-rule::before { content: ""; width: 22px; height: 1px; background: currentColor; opacity: 0.6; }
+
+  /* Outlined (hollow) display text — the mockup's secondary-emphasis heading treatment. */
+  .outline-text { color: transparent; -webkit-text-stroke: 1.2px rgba(242,244,248,0.8); }
+  .outline-text-soft { color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.14); }
+
+  /* Numbered section index — big hollow numeral used as a section watermark. */
+  .ghost-index {
+    font-family: var(--font-display); font-weight: 700; line-height: 0.85; color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,0.07); pointer-events: none; user-select: none;
+  }
+
   /* Glass surface */
   .card {
     background: linear-gradient(180deg, rgba(18,20,30,0.9), rgba(12,14,22,0.82));
@@ -168,10 +194,11 @@
 [data-reveal-delay="5"] { transition-delay: .40s; }
 @media (prefers-reduced-motion: reduce) { [data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; } }
 
-/* marquee for the trust/logo strip */
+/* marquee for the trust/logo strip + the homepage stat ticker */
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .marquee-track { animation: marquee 32s linear infinite; }
 .marquee-mask { -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.ticker-track { animation: tick 34s linear infinite; }
 
 /* subtle grid backdrop used on section headers */
 .grid-backdrop { background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 44px 44px; }

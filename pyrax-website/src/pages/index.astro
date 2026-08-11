@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Site from "../layouts/Site.astro";
 import Hero from "../components/Hero.tsx";
-import LiveStats from "../components/LiveStats.tsx";
 import { DEFAULT_LOCALE, localizePath } from "../i18n/config";
 import { useT } from "../i18n";
 import { CATEGORIES } from "../lib/industries";
@@ -12,11 +11,20 @@ const lang = DEFAULT_LOCALE;
 const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 
-const pillars = [
-  { t: t("pillars.throughputT"), d: t("pillars.throughputD"), c: "#f58722", n: "500k+", nl: "TPS target" },
-  { t: t("pillars.privacyT"), d: t("pillars.privacyD"), c: "#7c5cff", n: "ZK", nl: "no trusted setup" },
-  { t: t("pillars.decentralT"), d: t("pillars.decentralD"), c: "#34d399", n: "3+2", nl: "streams · finality" },
-  { t: t("pillars.ispT"), d: t("pillars.ispD"), c: "#60b8cc", n: "Sphinx", nl: "onion mixnet" },
+const invariants = [
+  { t: t("pillars.throughputT"), d: t("pillars.throughputD"), c: "#f68a24", n: "500k+", nl: "TPS TARGET" },
+  { t: t("pillars.privacyT"), d: t("pillars.privacyD"), c: "#5cbace", n: "ZK", nl: "NO TRUSTED SETUP" },
+  { t: t("pillars.decentralT"), d: t("pillars.decentralD"), c: "#3ddc84", n: "3+2", nl: "STREAMS · FINALITY" },
+  { t: t("pillars.ispT"), d: t("pillars.ispD"), c: "#5cbace", n: "Sphinx", nl: "ONION MIXNET" },
+];
+const tickerItems = [
+  { k: "500k+", v: t("homeExtra.tickerTps", "TPS target") },
+  { k: "50B", v: t("homeExtra.techStatMaxSupply", "Max supply (hard cap)") },
+  { k: "3 VMs", v: t("homeExtra.techStatVms", "EVM · WASM · Cairo") },
+  { k: "5 lanes", v: t("homeExtra.techStatSealLanes", "TriStream seal lanes") },
+  { k: "18s", v: t("homeExtra.techStatRecursiveProof", "L3 recursive proof") },
+  { k: "100%", v: t("homeExtra.techStatOpenCore", "open-core protocol") },
+  { k: "4 networks", v: t("homeExtra.techStatNetworks", "Seed · Forge · Rise · One") },
 ];
 const techStats = [
   { n: "50B", l: t("homeExtra.techStatMaxSupply", "Max supply (hard cap)") },
@@ -27,96 +35,124 @@ const techStats = [
   { n: "100%", l: t("homeExtra.techStatOpenCore", "open-core protocol") },
 ];
 const techCards = [
-  { t: t("homeExtra.techCard1T", "GhostDAG blockDAG"), d: t("homeExtra.techCard1D", "A multi-parent web of blocks ordered by GhostDAG (k-cluster blue set), so honest parallel work is included, not orphaned."), href: L("/technology#consensus"), c: "#f58722" },
-  { t: t("homeExtra.techCard2T", "TriStream mining"), d: t("homeExtra.techCard2D", "Three streams over five seal lanes — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU), and BLS proof-of-stake finality."), href: L("/technology#consensus"), c: "#60b8cc" },
-  { t: t("homeExtra.techCard3T", "Shielded by default"), d: t("homeExtra.techCard3D", "Every transfer hides sender, receiver, and amount with plonky2 proofs — no trusted setup, and the circuit is default-on today."), href: L("/technology#privacy"), c: "#7c5cff" },
-  { t: t("homeExtra.techCard4T", "Multi-VM L2 + ZK-rollup L3"), d: t("homeExtra.techCard4D", "EVM (revm), WASM (wasmtime), and Cairo with cross-VM calls; a recursive ZK-rollup folds thousands of proofs into one."), href: L("/technology#vms"), c: "#34d399" },
-  { t: t("homeExtra.techCard5T", "Bootstrapless & ISP-resistant"), d: t("homeExtra.techCard5D", "No company-run starter server; traffic rides an onion Sphinx mixnet so an on-path observer sees only uniform encrypted flows."), href: L("/technology#network"), c: "#4c99cc" },
-  { t: t("homeExtra.techCard6T", "Audit-gated to mainnet"), d: t("homeExtra.techCard6D", "Formal invariants, a documented threat model, and a single external audit of consensus + ZK + bridge before PYRAX One."), href: L("/technology#security"), c: "#fcd03d" },
+  { tag: "CONSENSUS", t: t("homeExtra.techCard1T", "GhostDAG blockDAG"), d: t("homeExtra.techCard1D", "A multi-parent web of blocks ordered by GhostDAG (k-cluster blue set), so honest parallel work is included, not orphaned."), href: L("/technology#consensus"), c: "#f68a24" },
+  { tag: "MINING", t: t("homeExtra.techCard2T", "TriStream mining"), d: t("homeExtra.techCard2D", "Three streams over five seal lanes — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU), and BLS proof-of-stake finality."), href: L("/technology#consensus"), c: "#5cbace" },
+  { tag: "PRIVACY", t: t("homeExtra.techCard3T", "Shielded by default"), d: t("homeExtra.techCard3D", "Every transfer hides sender, receiver, and amount with plonky2 proofs — no trusted setup, and the circuit is default-on today."), href: L("/technology#privacy"), c: "#fed23c" },
+  { tag: "EXECUTION", t: t("homeExtra.techCard4T", "Multi-VM L2 + ZK-rollup L3"), d: t("homeExtra.techCard4D", "EVM (revm), WASM (wasmtime), and Cairo with cross-VM calls; a recursive ZK-rollup folds thousands of proofs into one."), href: L("/technology#vms"), c: "#3ddc84" },
+  { tag: "NETWORK", t: t("homeExtra.techCard5T", "Bootstrapless & ISP-resistant"), d: t("homeExtra.techCard5D", "No company-run starter server; traffic rides an onion Sphinx mixnet so an on-path observer sees only uniform encrypted flows."), href: L("/technology#network"), c: "#3983c3" },
+  { tag: "SECURITY", t: t("homeExtra.techCard6T", "Audit-gated to mainnet"), d: t("homeExtra.techCard6D", "Formal invariants, a documented threat model, and a single external audit of consensus + ZK + bridge before PYRAX One."), href: L("/technology#security"), c: "#fed23c" },
 ];
+
+// Curated per-category photography for the industries teaser (same order as CATEGORIES).
+const industryPhotoIds = [
+  "photo-1611974789855-9c2a0a7236a3", "photo-1494412574643-ff11b0a5c1c3", "photo-1576091160399-112ba8d25d1d",
+  "photo-1542751371-adc38448a05e", "photo-1480714378408-67cf0d13bc1b", "photo-1509391366360-2e959784a276",
+  "photo-1555848962-6e79363ec58f", "photo-1441986300917-64674bd600d8", "photo-1460661419201-fd4cecdf8a8b",
+  "photo-1518770660439-4636190af475",
+];
+const industryPhotos = CATEGORIES.map((c, i) => ({ ...c, img: `https://images.unsplash.com/${industryPhotoIds[i]}?q=80&w=640&auto=format&fit=crop` }));
 ---
 <Site title="PYRAX™ Network — the private, parallel Layer-1" description={t("meta.description")} lang={lang}>
-  <!-- HERO + LIVE STATS -->
+  <!-- HERO (embeds the live widget) -->
   <Hero client:load lang={lang} />
-  <section class="relative z-10 mx-auto -mt-4 max-w-5xl px-6 pb-16">
-    <LiveStats client:load lang={lang} />
-    <p class="mt-3 text-center text-xs text-faint">{t("hero.liveOn")} <span class="text-muted">PYRAX Seed</span> · switch networks in the navbar. Numbers are real — an offline network shows em-dashes, never fabricated figures.</p>
-  </section>
 
-  <!-- PILLARS -->
-  <section class="mx-auto max-w-7xl px-6 py-16">
-    <div class="text-center">
-      <h2 class="font-display text-3xl font-extrabold sm:text-4xl">{t("pillars.title")}</h2>
-      <p class="mx-auto mt-3 max-w-2xl text-muted">{t("pillars.subtitle")}</p>
-    </div>
-    <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {pillars.map((p) => (
-        <div class="group relative overflow-hidden rounded-3xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:-translate-y-1 hover:border-[color:#34405a]">
-          <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full blur-2xl transition group-hover:opacity-80" style={`background:radial-gradient(circle,${p.c}22,transparent 70%)`}></div>
-          <div class="font-mono text-2xl font-extrabold" style={`color:${p.c}`}>{p.n}</div>
-          <div class="text-[0.7rem] uppercase tracking-wider text-faint">{p.nl}</div>
-          <h3 class="mt-4 text-lg font-bold">{p.t}</h3>
-          <p class="mt-2 text-sm text-muted">{p.d}</p>
-        </div>
+  <!-- STAT TICKER -->
+  <div class="overflow-hidden border-b border-line bg-[color:var(--color-bg-2)]">
+    <div class="flex w-max ticker-track py-4">
+      {[...tickerItems, ...tickerItems].map((it) => (
+        <span class="inline-flex items-center gap-3 whitespace-nowrap border-r border-line-soft px-8 font-mono text-[0.78rem] text-muted">
+          <b class="font-semibold text-[color:var(--color-gold)]">{it.k}</b>{it.v}
+        </span>
       ))}
     </div>
-  </section>
+  </div>
 
-  <!-- TECH SHOWCASE -->
-  <section class="border-y border-line bg-[color:var(--color-bg-2)]">
-    <div class="mx-auto max-w-7xl px-6 py-16">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">{t("homeExtra.techEyebrow", "Built, not planned")}</div>
-          <h2 class="mt-2 font-display text-3xl font-extrabold sm:text-4xl">{t("homeExtra.techHeading", "A real, tested Layer-1 — today")}</h2>
-          <p class="mt-2 max-w-2xl text-muted">{t("homeExtra.techParagraph", "One binary, four chainspecs: a faithful simulation on real primitives, with the production consensus path wired end-to-end and gated to mainnet by external audit.")}</p>
-        </div>
-        <a href={L("/whitepaper")} class="shrink-0 rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("homeExtra.readWhitepaper", "Read the whitepaper →")}</a>
+  <!-- FOUR INVARIANTS -->
+  <section class="relative overflow-hidden border-b border-line px-5 py-24 sm:px-10">
+    <div class="ghost-index absolute right-6 top-8 text-[9rem] sm:text-[12rem]">01</div>
+    <div class="relative mx-auto max-w-6xl">
+      <div class="mb-14 max-w-2xl">
+        <div class="eyebrow text-[color:var(--color-brand)]">01 / Invariants</div>
+        <h2 class="mt-4 text-3xl uppercase sm:text-5xl">
+          {lang === "en" ? (<>Four invariants, <span class="outline-text">not features.</span></>) : t("pillars.title")}
+        </h2>
+        <p class="mt-6 max-w-sm text-sm leading-relaxed text-muted">{t("pillars.subtitle")}</p>
       </div>
-      <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {techStats.map((s) => (
-          <div class="rounded-2xl border border-line bg-[color:var(--color-surface)] p-4 text-center">
-            <div class="font-mono text-2xl font-extrabold flame-text">{s.n}</div>
-            <div class="mt-1 text-[0.68rem] text-muted">{s.l}</div>
+      <div class="flex flex-col border-t border-line">
+        {invariants.map((p, i) => (
+          <div class="group grid grid-cols-2 items-center gap-4 border-b border-line px-2 py-8 transition hover:bg-[rgba(255,255,255,0.02)] sm:grid-cols-[80px_180px_220px_1fr] sm:gap-8">
+            <span class="hidden font-display text-4xl font-bold text-transparent sm:block" style="-webkit-text-stroke: 1px rgba(255,255,255,0.22)">{String(i + 1).padStart(2, "0")}</span>
+            <div>
+              <div class="font-display text-xl font-semibold" style={`color:${p.c}`}>{p.n}</div>
+              <div class="mt-1.5 font-mono text-[0.62rem] tracking-[0.12em] text-faint">{p.nl}</div>
+            </div>
+            <div class="font-display text-base font-medium uppercase tracking-tight">{p.t}</div>
+            <p class="text-sm leading-relaxed text-muted">{p.d}</p>
           </div>
         ))}
       </div>
-      <div class="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    </div>
+  </section>
+
+  <!-- BUILT NOT PLANNED -->
+  <section class="border-b border-line bg-[color:var(--color-bg-2)] px-5 py-24 sm:px-10">
+    <div class="mx-auto max-w-6xl">
+      <div class="mb-10 grid gap-8 lg:grid-cols-2 lg:items-end">
+        <div>
+          <div class="eyebrow text-[color:var(--color-bolt-bright)]">02 / Built, not planned</div>
+          <h2 class="mt-4 text-2xl uppercase sm:text-4xl">A real, tested<br /><span class="outline-text">Layer-1 — today.</span></h2>
+        </div>
+        <p class="text-sm leading-relaxed text-muted">{t("homeExtra.techParagraph", "One binary, four chainspecs: a faithful simulation on real primitives, with the production consensus path wired end-to-end and gated to mainnet by external audit.")} <a href={L("/whitepaper")} class="font-semibold text-[color:var(--color-brand)]">{t("homeExtra.readWhitepaper", "Read the whitepaper →")}</a></p>
+      </div>
+      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {techStats.map((s) => (
+          <div class="relative rounded-2xl border border-line bg-[color:var(--color-surface)] p-5">
+            <span class="absolute -top-px left-3.5 h-px w-6 bg-[color:var(--color-brand)]"></span>
+            <div class="font-display text-xl font-semibold leading-none">{s.n}</div>
+            <div class="mt-2.5 font-mono text-[0.62rem] leading-tight text-faint">{s.l}</div>
+          </div>
+        ))}
+      </div>
+      <div class="mt-4 grid gap-3 md:grid-cols-3">
         {techCards.map((c) => (
-          <a href={c.href} class="group rounded-3xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:-translate-y-1 hover:border-[color:#34405a]">
-            <div class="h-1 w-10 rounded-full" style={`background:${c.c}`}></div>
-            <h3 class="mt-4 text-lg font-bold group-hover:text-[color:var(--color-brand)]">{c.t}</h3>
-            <p class="mt-2 text-sm text-muted">{c.d}</p>
-            <span class="mt-4 inline-flex text-sm font-semibold text-[color:var(--color-brand)] opacity-0 transition group-hover:opacity-100">{t("homeExtra.learnMore", "Learn more →")}</span>
+          <a href={c.href} class="group relative overflow-hidden rounded-2xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:border-[color:var(--color-line-soft)] hover:bg-[color:var(--color-elevated)]">
+            <div class="mb-4 flex items-center justify-between">
+              <span class="font-mono text-[0.65rem] tracking-[0.14em]" style={`color:${c.c}`}>{c.tag}</span>
+              <span class="text-sm text-faint transition group-hover:translate-x-0.5 group-hover:text-ink">→</span>
+            </div>
+            <h3 class="text-base font-medium normal-case">{c.t}</h3>
+            <p class="mt-2 text-[0.82rem] leading-relaxed text-muted">{c.d}</p>
           </a>
         ))}
       </div>
     </div>
   </section>
 
-  <!-- NEURAX -->
-  <section class="mx-auto max-w-7xl px-6 py-16">
-    <div class="relative overflow-hidden rounded-[2rem] border border-line bg-[radial-gradient(140%_120%_at_100%_0%,rgba(124,92,255,0.12),transparent_55%),radial-gradient(120%_120%_at_0%_100%,rgba(245,134,34,0.1),transparent_55%)] p-8 sm:p-12">
-      <div class="grid gap-8 lg:grid-cols-2 lg:items-center">
+  <!-- NEURAX — full color-block -->
+  <section class="relative overflow-hidden border-b border-line bg-[linear-gradient(150deg,#0c2744_0%,#123a63_55%,#0e2c4d_100%)]">
+    <div class="ghost-index absolute -top-10 right-0 text-[16rem] sm:text-[22rem]" style="-webkit-text-stroke: 1px rgba(255,255,255,0.09)">AI</div>
+    <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1600&auto=format&fit=crop" alt="" class="absolute inset-0 h-full w-full object-cover opacity-[0.14] saturate-[0.3]" />
+    <div class="relative mx-auto max-w-6xl px-5 py-24 sm:px-10">
+      <div class="grid gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">NEURAX</div>
-          <h2 class="mt-2 font-display text-3xl font-extrabold sm:text-4xl">{t("homeExtra.neuraxHeading", "Idle GPUs become a verifiable compute market")}</h2>
-          <p class="mt-3 max-w-xl text-muted">{t("homeExtra.neuraxParagraph", "The same hardware that mines Stream B runs paid AI and compute jobs, settled on-chain and priced at a fixed 8 PYRX per compute unit. A four-rung verification ladder — redundancy, fraud proofs, interactive dispute, and TEE attestation — replaces blind trust with cryptographic proof.")}</p>
-          <div class="mt-6 flex flex-wrap gap-3">
-            <a href={L("/technology#neurax")} class="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("homeExtra.neuraxHowItWorks", "How NEURAX works")}</a>
-            <a href={L("/industries/ai-data-compute")} class="rounded-full px-4 py-2 text-sm font-semibold text-[color:var(--color-brand)]">{t("homeExtra.neuraxIndustries", "AI & compute industries →")}</a>
+          <div class="eyebrow" style="color:var(--color-bolt-bright)">03 / NEURAX · Stream B</div>
+          <h2 class="mt-4 text-2xl uppercase sm:text-4xl">Idle GPUs become a <span class="outline-text" style="-webkit-text-stroke: 1.2px rgba(254,210,60,0.9)">verifiable</span> compute market.</h2>
+          <p class="mt-6 max-w-lg text-[0.95rem] leading-relaxed text-white/75">{t("homeExtra.neuraxParagraph", "The same hardware that mines Stream B runs paid AI and compute jobs, settled on-chain at a fixed 8 PYRX per compute unit. A four-rung verification ladder — redundancy, fraud proofs, interactive dispute, and TEE attestation — replaces blind trust with cryptographic proof.")}</p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href={L("/technology#neurax")} class="rounded-full bg-white px-6 py-3.5 text-sm font-bold text-[#0c2744]">{t("homeExtra.neuraxHowItWorks", "How NEURAX works")}</a>
+            <a href={L("/industries/ai-data-compute")} class="rounded-full border border-white/35 px-6 py-3.5 text-sm font-semibold text-white transition hover:border-[color:var(--color-gold)] hover:text-[color:var(--color-gold)]">{t("homeExtra.neuraxIndustries", "AI & compute industries →")}</a>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-3.5">
           {[
             { n: "8 PYRX", l: t("homeExtra.neuraxTile1L", "per compute unit (1 RTX-4090-hour)") },
             { n: "4B", l: t("homeExtra.neuraxTile2L", "PYRX AI-compute pool") },
             { n: "4-rung", l: t("homeExtra.neuraxTile3L", "verification ladder") },
             { n: "RTX 3060", l: t("homeExtra.neuraxTile4L", "local-first baseline GPU") },
           ].map((x) => (
-            <div class="rounded-2xl border border-line bg-[rgba(9,11,18,0.6)] p-5">
-              <div class="font-mono text-xl font-extrabold text-[color:#7c5cff]">{x.n}</div>
-              <div class="mt-1 text-xs text-muted">{x.l}</div>
+            <div class="rounded-2xl border border-white/[0.14] bg-[rgba(5,6,9,0.5)] p-6 backdrop-blur-sm">
+              <div class="font-display text-2xl font-semibold leading-none text-[color:var(--color-gold)]">{x.n}</div>
+              <div class="mt-2.5 text-[0.78rem] leading-relaxed text-white/65">{x.l}</div>
             </div>
           ))}
         </div>
@@ -124,41 +160,48 @@ const techCards = [
     </div>
   </section>
 
-  <!-- INDUSTRIES TEASER -->
-  <section class="border-y border-line bg-[color:var(--color-bg-2)]">
-    <div class="mx-auto max-w-7xl px-6 py-16">
-      <div class="text-center">
-        <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--color-brand)]">Industries</div>
-        <h2 class="mt-2 font-display text-3xl font-extrabold sm:text-4xl">{t("cta.industriesTitle")}</h2>
-        <p class="mx-auto mt-3 max-w-2xl text-muted">{t("cta.industriesBody")}</p>
+  <!-- INDUSTRIES TEASER (photography) -->
+  <section class="border-b border-line px-5 py-24 sm:px-10">
+    <div class="mx-auto max-w-6xl">
+      <div class="mb-11 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div class="eyebrow text-[color:var(--color-brand)]">04 / Industries</div>
+          <h2 class="mt-4 text-2xl uppercase sm:text-4xl">PYRAX for<br /><span class="outline-text">your industry.</span></h2>
+        </div>
+        <p class="max-w-sm text-sm leading-relaxed text-muted">{t("cta.industriesBody")}</p>
       </div>
-      <div class="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {CATEGORIES.map((c) => (
-          <a href={L(`/industries/${c.slug}`)} class="group rounded-2xl border border-line bg-[color:var(--color-surface)] p-5 transition hover:-translate-y-1 hover:border-[color:#34405a]">
-            <div class="h-8 w-8 rounded-xl" style={`background:linear-gradient(135deg,${c.color},${c.color}55)`}></div>
-            <div class="mt-3 text-sm font-bold group-hover:text-[color:var(--color-brand)]">{c.name}</div>
-            <div class="mt-1 text-[0.7rem] text-faint">{c.businesses.length} {t("homeExtra.businessTypes", "business types")}</div>
+      <div class="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-5">
+        {industryPhotos.map((c) => (
+          <a href={L(`/industries/${c.slug}`)} class="group relative block h-[170px] overflow-hidden rounded-2xl border border-line transition hover:border-[color:var(--color-brand)]">
+            <img src={c.img} alt={c.name} class="absolute inset-0 h-full w-full object-cover saturate-[0.35] brightness-[0.66] contrast-[1.05] transition duration-300 group-hover:scale-105" />
+            <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,6,9,0.15),rgba(5,6,9,0.86)_82%)]"></div>
+            <div class="absolute inset-x-4 bottom-3.5">
+              <div class="text-[0.82rem] font-medium leading-tight text-ink">{c.name}</div>
+              <div class="mt-1.5 font-mono text-[0.62rem] text-[color:var(--color-gold)]">{c.businesses.length} {t("homeExtra.businessTypes", "business types")} →</div>
+            </div>
           </a>
         ))}
       </div>
-      <div class="mt-8 text-center">
-        <a href={L("/industries")} class="inline-flex rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">{t("nav.exploreIndustries")} →</a>
+      <div class="mt-9 text-center">
+        <a href={L("/industries")} class="inline-block rounded-full border border-line-soft px-7 py-3.5 text-sm font-semibold text-ink transition hover:border-[color:var(--color-brand)] hover:text-[color:var(--color-brand)]">{t("nav.exploreIndustries")} →</a>
       </div>
     </div>
   </section>
 
-  <!-- FINAL CTA -->
-  <section class="mx-auto max-w-7xl px-6 py-20">
-    <div class="grid gap-4 lg:grid-cols-2">
-      <a href={L("/developers")} class="group relative overflow-hidden rounded-[2rem] border border-line bg-[color:var(--color-surface)] p-8 transition hover:border-[color:#34405a] sm:p-10">
-        <h3 class="font-display text-2xl font-extrabold">{t("cta.buildTitle")}</h3>
-        <p class="mt-2 max-w-md text-muted">{t("cta.buildBody")}</p>
+  <!-- DUAL CTA -->
+  <section class="px-5 py-20 sm:px-10">
+    <div class="mx-auto grid max-w-6xl gap-4 lg:grid-cols-2">
+      <a href={L("/developers")} class="group relative overflow-hidden rounded-[1.25rem] border border-[rgba(246,138,36,0.3)] bg-[linear-gradient(140deg,rgba(218,84,39,0.14),var(--color-surface)_60%)] p-10 transition hover:border-[color:var(--color-brand)]">
+        <div class="eyebrow text-[color:var(--color-brand)]">{t("nav.developers")}</div>
+        <h3 class="mt-4 text-xl normal-case">{t("cta.buildTitle")}</h3>
+        <p class="mt-3 max-w-md text-sm leading-relaxed text-muted">{t("cta.buildBody")}</p>
         <span class="mt-6 inline-flex text-sm font-bold text-[color:var(--color-brand)]">{t("cta.build")} →</span>
       </a>
-      <a href={L("/pitch")} class="group relative overflow-hidden rounded-[2rem] border border-line bg-[radial-gradient(120%_120%_at_100%_0%,rgba(245,134,34,0.12),transparent_60%)] p-8 transition hover:border-[color:#34405a] sm:p-10">
-        <h3 class="font-display text-2xl font-extrabold">{t("homeExtra.investorsTitle", "For investors")}</h3>
-        <p class="mt-2 max-w-md text-muted">{t("homeExtra.investorsBody", "An interactive, animated deck — the vision, the technology, the tokenomics, and the ask.")}</p>
-        <span class="mt-6 inline-flex text-sm font-bold text-[color:var(--color-brand)]">{t("homeExtra.openPitchDeck", "Open the pitch deck →")}</span>
+      <a href={L("/pitch")} class="group relative overflow-hidden rounded-[1.25rem] border border-[rgba(57,131,195,0.32)] bg-[linear-gradient(140deg,rgba(25,99,169,0.16),var(--color-surface)_60%)] p-10 transition hover:border-[color:var(--color-bolt)]">
+        <div class="eyebrow text-[color:var(--color-bolt-bright)]">{t("navPanels.devFeatureEyebrow", "Investors")}</div>
+        <h3 class="mt-4 text-xl normal-case">{t("homeExtra.investorsTitle", "For investors")}</h3>
+        <p class="mt-3 max-w-md text-sm leading-relaxed text-muted">{t("homeExtra.investorsBody", "An interactive, animated deck — the vision, the technology, the tokenomics, and the ask.")}</p>
+        <span class="mt-6 inline-flex text-sm font-bold text-[color:var(--color-bolt-bright)]">{t("homeExtra.openPitchDeck", "Open the pitch deck →")}</span>
       </a>
     </div>
   </section>

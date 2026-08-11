@@ -22,12 +22,12 @@ const env = (k: string): string => (typeof process !== "undefined" ? process.env
 export const NETWORKS: PyraxNetwork[] = [
   {
     key: "seed", chainId: 881109, name: "PYRAX Seed", short: "Seed", mode: "Simulated", blockTime: 5,
-    color: "#60b8cc", rpc: env("RPC_881109") || "https://pyrax-seed.rpc.pyraxchain.com",
+    color: "#5cbace", rpc: env("RPC_881109") || "https://pyrax-seed.rpc.pyraxchain.com",
     role: "Permanent developer sandbox — faithful simulation, play-money.", live: true,
   },
   {
     key: "forge", chainId: 710823, name: "PYRAX Forge", short: "Forge", mode: "Production", blockTime: 5,
-    color: "#f58722", rpc: env("RPC_710823") || "",
+    color: "#f68a24", rpc: env("RPC_710823") || "",
     role: "Closed public alpha — real production consensus, seeded validators.", live: false,
   },
   {
@@ -37,7 +37,7 @@ export const NETWORKS: PyraxNetwork[] = [
   },
   {
     key: "one", chainId: 563821, name: "PYRAX One", short: "One", mode: "Production", blockTime: 6,
-    color: "#fcd03d", rpc: env("RPC_563821") || "",
+    color: "#fed23c", rpc: env("RPC_563821") || "",
     role: "Mainnet — launches after the external audit gate.", live: false,
   },
 ];
