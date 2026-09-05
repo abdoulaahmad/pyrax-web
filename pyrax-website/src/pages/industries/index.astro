@@ -5,6 +5,8 @@ import { isLocale, DEFAULT_LOCALE, localizePath } from "../../i18n/config";
 import { useT } from "../../i18n";
 import { CATEGORIES, TOTAL_INDUSTRIES } from "../../lib/industries";
 
+import IndustryIcon from '../../components/IndustryIcon.astro';
+
 const lang = DEFAULT_LOCALE;
 const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
@@ -24,7 +26,9 @@ const L = (p: string) => localizePath(lang, p);
         <div class="overflow-hidden rounded-3xl border border-line bg-[color:var(--color-surface)]">
           <div class="flex flex-col gap-3 border-b border-line-soft p-6 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-4">
-              <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl" style={`background:linear-gradient(135deg,${c.color},${c.color}44)`}></span>
+              <span class="grid h-12 w-12 shrink-0 place-items-center rounded-lg border" style={`color:${c.color};background:color-mix(in srgb,${c.color} 12%,transparent);border-color:color-mix(in srgb,${c.color} 35%,transparent)`}>
+                <IndustryIcon name={c.icon} class="h-7 w-7" />
+              </span>
               <div>
                 <a href={L(`/industries/${c.slug}`)} class="font-display text-xl font-extrabold hover:text-[color:var(--color-brand)]">{c.name}</a>
                 <p class="text-sm text-muted">{c.blurb}</p>

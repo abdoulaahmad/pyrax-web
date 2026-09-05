@@ -5,6 +5,8 @@ import { DEFAULT_LOCALE, localizePath } from "../../i18n/config";
 import { useT } from "../../i18n";
 import { categoryBySlug } from "../../lib/industries";
 
+import IndustryIcon from '../../components/IndustryIcon.astro';
+
 const lang = DEFAULT_LOCALE;
 const { category = "" } = Astro.params;
 const cat = categoryBySlug(category);
@@ -17,7 +19,9 @@ const L = (p: string) => localizePath(lang, p);
     <div class="mx-auto max-w-7xl px-6 py-16">
       <a href={L("/industries")} class="text-sm text-muted hover:text-ink">{t("industriesUi.allIndustries", "← All industries")}</a>
       <div class="mt-5 flex items-center gap-4">
-        <span class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl" style={`background:linear-gradient(135deg,${cat.color},${cat.color}44)`}></span>
+        <span class="grid h-14 w-14 shrink-0 place-items-center rounded-lg border" style={`color:${cat.color};background:color-mix(in srgb,${cat.color} 12%,transparent);border-color:color-mix(in srgb,${cat.color} 35%,transparent)`}>
+          <IndustryIcon name={cat.icon} class="h-8 w-8" />
+        </span>
         <div>
           <div class="eyebrow" style={`color:${cat.color}`}>{cat.tagline}</div>
           <h1 class="mt-1 font-display text-3xl font-extrabold uppercase sm:text-5xl">{cat.name}</h1>
