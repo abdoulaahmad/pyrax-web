@@ -18,7 +18,7 @@ Thumbs.db
 # local dev helper scripts
 CLAUDE-CODE-CLI.bat
 
-# This repository currently deploys only the public website and explorer.
+# This repository currently deploys only the public website.
 /.agents/
 /.claude/
 /.github/
@@ -26,6 +26,7 @@ CLAUDE-CODE-CLI.bat
 /fuzz/
 /holding/
 /pyrax-devnet-portal/
+/pyrax-explorer-app/
 /pyrax-nodes/
 /pyrax-shared/
 /pyrax-team-website/

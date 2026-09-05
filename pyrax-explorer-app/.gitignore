@@ -1,9 +1,0 @@
-# SPDX-License-Identifier: LicenseRef-Proprietary
-node_modules/
-dist/
-.astro/
-.env
-.env.*
-!.env.example
-*.log
-.DS_Store
