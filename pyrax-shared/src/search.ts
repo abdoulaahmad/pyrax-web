@@ -29,8 +29,8 @@ const CORE: CmdkEntry[] = [
   cmdkEntry("Token (PYRX)", "/token.html", "Token", "coin", "tokenomics supply emissions staking fees genesis burn cap"),
   cmdkEntry("Run a Node", "/node.html", "Develop", "server", "inferno cli mine stake relay verify full earn"),
   cmdkEntry("Roadmap & status", "/roadmap.html", "Resources", "map", "live building next shipped honest"),
-  cmdkEntry("Block explorer", "https://explorer.pyraxchain.com", "Resources", "globe", "blocks transactions address contract"),
-  cmdkEntry("Live peers", "https://peers.pyraxchain.com", "Resources", "pulse", "directory nodes network"),
+  cmdkEntry("Block explorer", "https://explorer.pyraxnetwork.org", "Resources", "globe", "blocks transactions address contract"),
+  cmdkEntry('Live peers', '', 'Resources', 'pulse', 'directory nodes network'),
 ];
 
 let mounted = false;

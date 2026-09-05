@@ -14,7 +14,6 @@ const L = (p: string) => localizePath(lang, p);
 ---
 <Site title={`${cat.name} — PYRAX Blockchain Solutions | PYRAX™ Network`} description={cat.blurb} lang={lang}>
   <section class="relative overflow-hidden border-b border-line">
-    <div class="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full blur-3xl" style={`background:radial-gradient(circle,${cat.color}22,transparent 62%)`}></div>
     <div class="mx-auto max-w-7xl px-6 py-16">
       <a href={L("/industries")} class="text-sm text-muted hover:text-ink">{t("industriesUi.allIndustries", "← All industries")}</a>
       <div class="mt-5 flex items-center gap-4">

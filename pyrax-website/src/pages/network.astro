@@ -34,7 +34,6 @@ const roadmap = [
 <Site title="The Four Networks — PYRAX™ Network" description="One binary, four chainspecs: PYRAX Seed (live simulation), Forge (closed alpha), Rise (public testnet), and One (mainnet). Live status, chain IDs, and the audit-gated roadmap to launch." lang={lang}>
   <section class="relative overflow-hidden border-b border-line">
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
-    <div class="pointer-events-none absolute left-1/2 -top-40 h-[30rem] w-[30rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(245,134,34,0.14),transparent_62%)] blur-3xl"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20 text-center">
       <div class="eyebrow eyebrow-rule text-[color:var(--color-brand)]">{t("networkPage.eyebrow", "The network")}</div>
       <h1 class="mx-auto mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">{t("networkPage.headingLead", "One binary,")} <span class="flame-text">{t("networkPage.headingFlame", "four networks")}</span></h1>
@@ -49,7 +48,6 @@ const roadmap = [
         const online = n.live?.online;
         return (
           <div data-reveal data-reveal-delay={String((i % 4) + 1)} class="relative overflow-hidden rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
-            <div class="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full blur-2xl" style={`background:radial-gradient(circle,${n.color}22,transparent 70%)`}></div>
             <div class="flex items-start justify-between">
               <div class="flex items-center gap-3">
                 <span class="grid h-11 w-11 place-items-center rounded-2xl font-display text-lg font-extrabold text-[#160a04]" style={`background:linear-gradient(135deg,${n.color},${n.color}88)`}>{n.short[0]}</span>

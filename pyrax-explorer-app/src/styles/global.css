@@ -11,35 +11,37 @@
 @theme {
   /* Field (near-black, faint warm/cool undertone) */
   --color-bg: #050609;
-  --color-bg-2: #080a11;
+  --color-bg-2: #07090e;
   --color-surface: #0c0e16;
-  --color-elevated: #12141e;
+  --color-elevated: #12151d;
   --color-line: #232838;
   --color-line-soft: #171b27;
+  --color-hair: rgba(255, 255, 255, 0.035);
 
   /* Text */
-  --color-ink: #f7f9fd;
-  --color-muted: #9aa4ba;
-  --color-faint: #6a7286;
+  --color-ink: #f2f4f8;
+  --color-muted: #9aa3b2;
+  --color-faint: #565e6d;
 
   /* Fire ramp (phoenix) */
-  --color-gold: #fcd03d;
-  --color-brand: #f58622;
+  --color-gold: #fed23c;
+  --color-brand: #f68a24;
   --color-brand-soft: #f5a623;
-  --color-ember: #d75427;
+  --color-ember: #da5427;
 
   /* Water ramp (phoenix) */
-  --color-bolt-bright: #60b8cc;
-  --color-bolt: #3981c0;
-  --color-bolt-deep: #1c63a6;
+  --color-bolt-bright: #5cbace;
+  --color-bolt: #3983c3;
+  --color-bolt-deep: #1963a9;
 
   /* State */
-  --color-positive: #34d399;
+  --color-positive: #3ddc84;
   --color-warning: #f5a623;
   --color-negative: #fb6f73;
+  --color-offline: #5b6270;
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: 'Unbounded', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", monospace;
 
   --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -65,12 +67,13 @@
     min-height: 100vh;
     /* Ambient dual-flame field sampled from the logo. */
     background-image:
-      radial-gradient(900px 520px at 8% -8%, rgba(215,84,39,0.14), transparent 60%),
-      radial-gradient(820px 480px at 96% -6%, rgba(28,99,166,0.13), transparent 58%),
-      radial-gradient(1200px 800px at 50% 120%, rgba(245,134,34,0.06), transparent 60%);
+      radial-gradient(1400px 800px at 15% -8%, rgba(25,99,169,0.12), transparent 55%),
+      radial-gradient(1100px 640px at 92% 4%, rgba(218,84,39,0.09), transparent 55%),
+      radial-gradient(1200px 800px at 50% 120%, rgba(246,138,36,0.05), transparent 60%);
     background-attachment: fixed;
   }
-  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; font-weight: 700; }
+  h1, h2 { font-family: var(--font-display); letter-spacing: 0; font-weight: 600; line-height: 1.08; }
+  h3 { font-family: var(--font-display); letter-spacing: 0; font-weight: 500; }
   ::selection { background: rgba(245,134,34,0.3); }
   /* Logo-theft protection: brand marks can't be dragged or selected. */
   img, [role="img"] { -webkit-user-drag: none; user-drag: none; }
@@ -81,12 +84,18 @@
 }
 
 @layer components {
+  main h1::before {
+    content: 'PYRAX EXPLORER'; display: block; margin-bottom: 0.55rem;
+    color: var(--color-brand); font-family: var(--font-mono); font-size: 0.62rem;
+    font-weight: 500; letter-spacing: 0.18em; line-height: 1; text-transform: uppercase;
+  }
+
   /* Glass surface */
   .card {
     background: linear-gradient(180deg, rgba(18,20,30,0.9), rgba(12,14,22,0.82));
     border: 1px solid var(--color-line);
-    border-radius: 1rem;
-    backdrop-filter: blur(8px);
+    border-radius: 0.5rem;
+    backdrop-filter: blur(6px);
   }
   .card-hover { transition: transform .25s, border-color .25s, box-shadow .25s; }
   .card-hover:hover { transform: translateY(-3px); border-color: #34405a; box-shadow: 0 18px 50px -24px rgba(0,0,0,0.8); }
@@ -103,7 +112,7 @@
   }
 
   /* Buttons */
-  .btn { display:inline-flex; align-items:center; gap:.5rem; padding:.6rem 1rem; border-radius:.7rem;
+  .btn { display:inline-flex; align-items:center; gap:.5rem; padding:.6rem 1rem; border-radius:.5rem;
          font-weight:600; font-size:.875rem; transition:all .2s; cursor:pointer; white-space:nowrap; }
   .btn-primary { color:#1a0f06; background:linear-gradient(92deg,var(--color-gold),var(--color-brand) 55%,var(--color-ember));
                  box-shadow:0 8px 24px -10px rgba(245,134,34,0.6); }
@@ -114,7 +123,7 @@
   .btn:disabled { opacity:.5; cursor:not-allowed; }
 
   /* Inputs */
-  .input { width:100%; background:rgba(5,6,9,0.6); border:1px solid var(--color-line); border-radius:.6rem;
+  .input { width:100%; background:rgba(5,6,9,0.6); border:1px solid var(--color-line); border-radius:.5rem;
            padding:.6rem .8rem; color:var(--color-ink); font-size:.9rem; transition:border-color .2s, box-shadow .2s; }
   .input:focus { outline:none; border-color:var(--color-brand); box-shadow:0 0 0 3px rgba(245,134,34,0.18); }
   .input::placeholder { color:var(--color-faint); }

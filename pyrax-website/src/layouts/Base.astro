@@ -9,7 +9,7 @@ const { title, description, lang = "en", ogImage = "/brand/pyrax-icon.png" } = A
 const dir = isRtl(lang) ? "rtl" : "ltr";
 const fullTitle = title.includes("PYRAX") ? title : `${title} | PYRAX™ Network`;
 const desc = description ?? "PYRAX — a private-by-default, fully decentralized, ISP-resistant Layer-1 with a GhostDAG blockDAG and a verifiable AI compute marketplace.";
-const canonical = new URL(Astro.url.pathname, "https://pyraxchain.com");
+const canonical = new URL(Astro.url.pathname, 'https://pyraxnetwork.org');
 // Single-language (English) for now — served at plain, locale-free URLs; hreflang alternates return
 // when the multi-locale routing is re-enabled.
 ---

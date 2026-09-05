@@ -41,7 +41,7 @@ export default function Topbar() {
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-[rgba(5,6,9,0.82)] backdrop-blur-xl">
       <div className="flame-bar h-[2px] w-full opacity-80" />
-      <div className="flex h-14 items-center gap-3 px-3 sm:px-5">
+      <div className='flex h-16 items-center gap-3 px-3 sm:px-5'>
         <button onClick={() => window.dispatchEvent(new Event("pyrax:open-nav"))} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-line text-muted md:hidden" aria-label="Menu">
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
         </button>
@@ -61,7 +61,7 @@ export default function Topbar() {
           <AnimatePresence>
             {open && (
               <motion.div initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 6, scale: 0.98 }} transition={{ duration: 0.15 }}
-                className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-xl border border-line bg-[rgba(10,12,19,0.98)] shadow-2xl">
+                className='absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-lg border border-line bg-[rgba(10,12,19,0.98)] shadow-2xl'>
                 <div className="border-b border-line px-3 py-2 text-[0.62rem] font-semibold uppercase tracking-wider text-faint">Network</div>
                 {nets.map((n) => (
                   <button key={n.chainId} onClick={() => pick(n)} className={`flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left transition hover:bg-[rgba(255,255,255,0.03)] ${n.chainId === sel ? "bg-[rgba(245,134,34,0.06)]" : ""}`}>

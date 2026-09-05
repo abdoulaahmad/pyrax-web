@@ -22,7 +22,6 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
 <Site title={`${biz.name} on PYRAX — Blockchain Solutions | PYRAX™ Network`} description={c?.overview ?? biz.hook} lang={lang}>
   <!-- header -->
   <section class="relative overflow-hidden border-b border-line">
-    <div class="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full blur-3xl" style={`background:radial-gradient(circle,${cat.color}22,transparent 62%)`}></div>
     <div class="mx-auto max-w-5xl px-6 py-16">
       <div class="flex flex-wrap items-center gap-2 text-sm text-muted">
         <a href={L("/industries")} class="hover:text-ink">{t("industriesUi.breadcrumbIndustries", "Industries")}</a><span class="text-faint">/</span>

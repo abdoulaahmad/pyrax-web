@@ -6,7 +6,7 @@
 import type { APIRoute } from "astro";
 import { CATEGORIES } from "../lib/industries";
 
-const ORIGIN = "https://pyraxchain.com";
+const ORIGIN = 'https://pyraxnetwork.org';
 
 // Path (no locale prefix) for every route, with a crawl priority.
 function routes(): { path: string; priority: number }[] {

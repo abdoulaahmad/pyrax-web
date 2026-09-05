@@ -3,15 +3,16 @@
 // Single source of truth for every PYRAX domain / social / service endpoint the marketing site links
 // to. Mirrors @pyrax/shared endpoints.ts — update here (or upstream) when a service address lands.
 export const DOMAINS = {
-  site: "https://pyraxchain.com",
-  explorer: "https://explorer.pyraxchain.com",
-  nodes: "https://nodes.pyraxchain.com",
-  devnet: "https://devnet.pyraxchain.com",
-  peers: "https://peers.pyraxchain.com",
+  site: "https://pyraxnetwork.org",
+  explorer: "https://explorer.pyraxnetwork.org",
+  nodes: "",
+  devnet: "",
+  peers: "",
   updates: "https://updates.pyraxchain.com",
   // Team portal — the source of truth for the cross-site default network (Network Management page).
   // Read server-side only; override with the TEAM_URL env for local dev against a local team portal.
   team: "https://team.pyraxchain.com",
+  teamPortal: "",
   email: "info@pyraxchain.com",
 } as const;
 

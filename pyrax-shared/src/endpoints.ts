@@ -7,14 +7,16 @@
 // Every value tagged (CONFIRM) is the best-known target today; verify it before a production deploy.
 
 export const DOMAINS = {
-  site: "https://pyraxchain.com", // (CONFIRM) main marketing site (this site)
-  docs: "https://pyraxchain.com/docs.html", // in-site docs page (built into this site; no longer a separate subdomain)
-  explorer: "https://explorer.pyraxchain.com", // (CONFIRM)
-  nodes: "https://nodes.pyraxchain.com", // (CONFIRM) the NEW "Status + Run-a-node" site (pyrax-nodes-website)
-  peers: "https://peers.pyraxchain.com", // (CONFIRM) the peer-directory service
+  site: "https://pyraxnetwork.org", // (CONFIRM) main marketing site (this site)
+  docs: "https://pyraxnetwork.org/docs.html", // in-site docs page (built into this site; no longer a separate subdomain)
+  explorer: "https://explorer.pyraxnetwork.org", // (CONFIRM)
+  nodes: "", // (CONFIRM) the NEW "Status + Run-a-node" site (pyrax-nodes-website)
+  peers: "", // (CONFIRM) the peer-directory service
   tunnel: "nodes.pyraxchain.com", // (CONFIRM) per-node portal/RPC wildcard base — each node is <id>.<tunnel>
   updates: "https://updates.pyraxchain.com", // (CONFIRM)
   email: "info@pyraxchain.com", // (CONFIRM)
+  teamPortal: "",
+  devnet: "",
 } as const;
 
 export const SOCIAL = {

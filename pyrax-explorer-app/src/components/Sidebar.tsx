@@ -99,7 +99,7 @@ export default function Sidebar() {
   return (
     <>
       {/* desktop rail */}
-      <aside className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-line bg-[rgba(8,10,17,0.72)] p-3 backdrop-blur transition-[width] duration-300 md:flex ${collapsed ? "w-20" : "w-64"}`}>
+      <aside className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-line bg-[rgba(7,9,14,0.82)] p-3 backdrop-blur-lg transition-[width] duration-300 md:flex ${collapsed ? 'w-20' : 'w-64'}`}>
         <div className={`flex items-center px-2 py-2 ${collapsed ? "justify-center" : "justify-between"}`}>
           <a href="/" className="flex items-center gap-2 nodrag">{collapsed ? <BrandMark variant="vertical" className="h-7 w-7" /> : <><BrandMark variant="horizontal" className="h-7 w-[5.1rem]" /><span className="rounded-md border border-line px-1.5 py-[0.15rem] text-[0.55rem] font-bold uppercase tracking-wider text-faint">Explorer</span></>}</a>
         </div>
