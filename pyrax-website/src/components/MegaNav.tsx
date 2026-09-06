@@ -82,13 +82,11 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
           {/* desktop top-level */}
           <div className="ml-3 hidden items-center lg:flex">
             {topItems.map((it) => (
-              <div key={it.key} className={'group'} onMouseEnter={() => enter(it.key)}>
-              <button onFocus={() => enter(it.key)} onClick={() => setOpen(open === it.key ? null : it.key)} aria-expanded={open === it.key}
+              <button key={it.key} onMouseEnter={() => enter(it.key)} onFocus={() => enter(it.key)}
                 className={`relative rounded-lg px-3.5 py-2 text-sm font-medium transition ${open === it.key ? "text-ink" : "text-muted hover:text-ink"}`}>
                 {it.label}
                 {open === it.key && <motion.span layoutId="navpill" className="absolute inset-0 -z-10 rounded-lg bg-[rgba(255,255,255,0.05)]" transition={{ type: "spring", stiffness: 500, damping: 40 }} />}
               </button>
-              </div>
             ))}
             <a href={L("/token")} className="rounded-lg px-3.5 py-2 text-sm font-medium text-muted transition hover:text-ink">{t("nav.token")}</a>
             <a href={L("/company")} className="rounded-lg px-3.5 py-2 text-sm font-medium text-muted transition hover:text-ink">{t("nav.company")}</a>
