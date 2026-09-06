@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LicenseRef-Proprietary
 #
-# Production image for the PYRAX marketing site (pyraxchain.com — Astro 5 SSR, @astrojs/node
+# Production image for the PYRAX marketing site (pyraxnetwork.org — Astro 5 SSR, @astrojs/node
 # standalone). Built by pyrax-infra (.github/workflows/web-website-image.yml) from the pyrax-web
 # source and pushed to GHCR; pyrax-infra/web-website/docker-compose.yml runs it on the websites
 # droplet behind the shared websites Caddy edge. The site is stateless: it reads only optional,

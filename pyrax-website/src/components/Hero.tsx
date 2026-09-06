@@ -138,7 +138,7 @@ export default function Hero({ lang = "en" }: { lang?: string }) {
       {/* vertical rails — signature framing element from the brand system */}
       <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-14 items-center justify-center border-r border-line lg:flex">
         <span className="whitespace-nowrap font-mono text-[0.62rem] tracking-[0.42em] text-faint" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
-          THE PRIVATE, PARALLEL LAYER-1 — PYRAXCHAIN.COM
+          THE PRIVATE, PARALLEL LAYER-1 — PYRAXNETWORK.ORG
         </span>
       </div>
       <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-14 flex-col items-center justify-between border-l border-line py-6 lg:flex">

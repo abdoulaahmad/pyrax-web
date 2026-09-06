@@ -430,7 +430,7 @@ scaffold; the full build is deferred until the L1 mainnet program passes.**
 
 ## 13. NOVA — Autonomous Operations
 
-`pyrax-nova` (status.pyraxchain.com, **built + live**) is the ecosystem's observability and autonomous
+`pyrax-nova` (status.pyraxnetwork.org, **built + live**) is the ecosystem's observability and autonomous
 ops brain: **patrol → dedup → investigate → dossier → RAG-assess → dispatch → edge auto-repair
 [test-gated] → monitor → resolve → learn.** An uptime engine checks every surface (including a `chain`
 monitor that flags STALLED if height stops advancing) behind an SSRF guard; faults are routed to the

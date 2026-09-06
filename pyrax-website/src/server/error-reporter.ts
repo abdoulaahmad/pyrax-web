@@ -24,7 +24,7 @@
 
 /** Env — canonical names shared across every Sentinel surface. */
 const env = (k: string): string => (typeof process !== "undefined" ? process.env?.[k] ?? "" : "");
-const INGEST_BASE = (env("SENTINEL_INGEST_URL") || "https://status.pyraxchain.com").replace(/\/+$/, "");
+const INGEST_BASE = (env("SENTINEL_INGEST_URL") || "https://status.pyraxnetwork.org").replace(/\/+$/, "");
 const AGENT_SECRET = env("NOVA_AGENT_SECRET");
 /** Stable service slug this site reports under. */
 const SOURCE = "pyrax-website";

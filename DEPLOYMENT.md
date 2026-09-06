@@ -68,13 +68,13 @@ ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443/tcp && ufw allow 30303/tcp
    - `DROPLET_HOST` = `64.227.8.153`
    - `DROPLET_USER` = `root`
 
-### (c) pyrax-team-website secrets (the gated team portal — `team.pyraxchain.com`)
+### (c) pyrax-team-website secrets (the gated team portal — `team.pyraxnetwork.org`)
 Deployed via **pyrax-infra** (`team-website-image.yml` + `team-website-deploy.yml`), which writes these from GitHub secrets into the droplet's `/opt/pyrax-team/.env`.
 - `DATABASE_URL_TEAM_PYRAX` **(required)** — the DO Managed Postgres **VPC (private)** connection string for the `team_pyrax` database (`postgresql://…@private-…nyc1.db.ondigitalocean.com:25061/team_pyrax?sslmode=require`). The container is stateless; the whitelist/roles/sessions live here. pyrax-team-website won't start without it.
 - `DATABASE_URL_EXPLORER` **(required for the explorer)** — same, for the `explorer` database.
 - `SESSION_SECRET` **(set this)** — pepper for hashing sign-in tokens/sessions + CSRF. Generate with `openssl rand -hex 32`. Unset → an ephemeral per-boot key (every restart invalidates sessions + pending links).
 - `BREVO_API_KEY` — Brevo transactional-email key for the magic links. Unset → links are written to the container log instead of emailed (sign-in still works for debugging).
-- `SPACES_KEY` / `SPACES_SECRET` — DigitalOcean Spaces creds so downloads are served as short-lived **presigned** URLs. Unset → downloads redirect to the public OTA CDN (`updates.pyraxchain.com`). The bucket/region default to `pyrax-updates`/`nyc3` in `docker-compose.yml` — confirm they match your Spaces.
+- `SPACES_KEY` / `SPACES_SECRET` — DigitalOcean Spaces creds so downloads are served as short-lived **presigned** URLs. Unset → downloads redirect to the public OTA CDN (`updates.pyraxnetwork.org`). The bucket/region default to `pyrax-updates`/`nyc3` in `docker-compose.yml` — confirm they match your Spaces.
 
 **Full secret list:** `PYRAX_DIRECTORY_SECRET` (org-level — already set), `DATABASE_URL_TEAM_PYRAX`, `DATABASE_URL_EXPLORER`, `SESSION_SECRET`, `BREVO_API_KEY`, `SPACES_KEY`, `SPACES_SECRET`, `GHCR_PULL_TOKEN`, `GHCR_USER`, `DROPLET_SSH_KEY`, `DROPLET_HOST`, `DROPLET_USER`. Ensure the org secret's **Repository access** includes `pyrax-web` (org → Settings → Secrets → Actions → the secret → Repository access), or the deploy job receives an empty value.
 
@@ -94,7 +94,7 @@ docker compose ps          # all services Up; caddy on 80/443
 
 ## 4. Point DNS — the only thing left
 Create **A records → `64.227.8.153`** for:
-`pyraxchain.com` · `www.pyraxchain.com` · `nodes.pyraxchain.com` · `explorer.pyraxchain.com` · `peers.pyraxchain.com` · `team.pyraxchain.com`
+`pyraxnetwork.org` · `www.pyraxnetwork.org` · `nodes.pyraxnetwork.org` · `explorer.pyraxnetwork.org` · `peers.pyraxnetwork.org` · `team.pyraxnetwork.org`
 
 Caddy provisions HTTPS automatically the first time each name resolves to the droplet — no cert steps. Within a minute of DNS propagating, every site is live on HTTPS.
 

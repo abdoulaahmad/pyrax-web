@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "PYRAX marketing site (pyraxchain.com) — Astro 5 SSR + React 19 + Tailwind v4, dark phoenix brand. Custom animated mega-menu, live chain data, 26-language i18n, 100 industry pages, investor pitch deck.",
+  "description": "PYRAX marketing site (pyraxnetwork.org) — Astro 5 SSR + React 19 + Tailwind v4, dark phoenix brand. Custom animated mega-menu, live chain data, 26-language i18n, 100 industry pages, investor pitch deck.",
   "engines": {
     "node": ">=24.0.0"
   },

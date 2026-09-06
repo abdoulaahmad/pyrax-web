@@ -22,7 +22,7 @@ const env = (k: string): string => (typeof process !== "undefined" ? process.env
 export const NETWORKS: PyraxNetwork[] = [
   {
     key: "seed", chainId: 881109, name: "PYRAX Seed", short: "Seed", mode: "Simulated", blockTime: 5,
-    color: "#5cbace", rpc: env("RPC_881109") || "https://pyrax-seed.rpc.pyraxchain.com",
+    color: "#5cbace", rpc: env("RPC_881109") || "https://pyrax-seed.rpc.pyraxnetwork.org",
     role: "Permanent developer sandbox — faithful simulation, play-money.", live: true,
   },
   {

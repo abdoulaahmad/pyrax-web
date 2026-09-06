@@ -3,22 +3,22 @@
 # Caddy provisions Let's Encrypt certs automatically the first time each domain resolves here —
 # so you only need to point DNS at this droplet and it "just works".
 {
-	email info@pyraxchain.com
+	email info@pyraxnetwork.org
 }
 
 # --- marketing site (apex) + www redirect ---
-pyraxchain.com {
+pyraxnetwork.org {
 	reverse_proxy website:80
 }
-www.pyraxchain.com {
-	redir https://pyraxchain.com{uri} permanent
+www.pyraxnetwork.org {
+	redir https://pyraxnetwork.org{uri} permanent
 }
 
 # --- nodes / status + run-a-node ---
 # The marketing/run-a-node site, EXCEPT /__tunnel/* which is the tunnel relay's node
-# registration endpoint (nodes dial wss://nodes.pyraxchain.com/__tunnel/register). Same
+# registration endpoint (nodes dial wss://nodes.pyraxnetwork.org/__tunnel/register). Same
 # host serves both: the relay path goes to the relay, everything else to the site.
-nodes.pyraxchain.com {
+nodes.pyraxnetwork.org {
 	@tunnel path /__tunnel/*
 	handle @tunnel {
 		reverse_proxy tunnel-relay:8792
@@ -32,7 +32,7 @@ nodes.pyraxchain.com {
 # Wildcard ORIGIN cert via Cloudflare DNS-01 (HTTP-01 can't do wildcards); the edge cert
 # is the zone's Advanced Certificate (Cloudflare-proxied). WebSockets pass through
 # natively (browser portal WS + the node's outbound agent WS). ---
-*.nodes.pyraxchain.com {
+*.nodes.pyraxnetwork.org {
 	tls {
 		dns cloudflare {env.CLOUDFLARE_DNS_TOKEN}
 	}
@@ -40,7 +40,7 @@ nodes.pyraxchain.com {
 }
 
 # --- block explorer: /api/* -> indexer, everything else -> static frontend ---
-explorer.pyraxchain.com {
+explorer.pyraxnetwork.org {
 	@api path /api/*
 	handle @api {
 		reverse_proxy explorer-indexer:8788
@@ -52,18 +52,18 @@ explorer.pyraxchain.com {
 
 # --- peer directory: the zero-dep Node server serves both the UI and the /api + SSE stream ---
 # (no `encode` here — SSE must stream unbuffered; the server sets its own headers.)
-peers.pyraxchain.com {
+peers.pyraxnetwork.org {
 	reverse_proxy peer-directory:8787
 }
 
 # --- team portal: the magic-link-gated Node server serves the SPA + the gated API ---
-team.pyraxchain.com {
+team.pyraxnetwork.org {
 	reverse_proxy team-pyrax:8790
 }
 
 # --- on-chain events relayer (`pyrax relay`): HMAC-gated POST /event. team-pyrax
 # reaches it internally (http://relay:8799); this public route is for health + future use. ---
-relay.pyraxchain.com {
+relay.pyraxnetwork.org {
 	reverse_proxy relay:8799
 }
 
@@ -76,7 +76,7 @@ relay.pyraxchain.com {
 # closing the "rotate a spoofed leftmost XFF for a fresh bucket each request" bypass.
 # This single-proxy topology (client -> Caddy -> faucet) is REQUIRED for the header to be
 # trustworthy; do not chain another appending proxy in front without re-establishing it. ---
-faucet.pyraxchain.com {
+faucet.pyraxnetwork.org {
 	reverse_proxy faucet:8800 {
 		header_up X-Forwarded-For {remote_host}
 	}
@@ -87,7 +87,7 @@ faucet.pyraxchain.com {
 # from a host dir mounted into this container; each release drops its manifest under the
 # matching path: cli/latest.json, node/latest*.yml, ember/latest*.yml, node-internal/.
 # Version metadata is no-cache (always fresh); the immutable installer files cache long.
-updates.pyraxchain.com {
+updates.pyraxnetwork.org {
 	encode gzip
 	root * /srv/updates
 	@manifests path *latest*.json *latest*.yml
