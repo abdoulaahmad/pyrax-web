@@ -152,14 +152,14 @@ export default function Hero({ lang = "en" }: { lang?: string }) {
       </div>
 
       <div className="relative mx-auto max-w-7xl px-6 pb-16 pt-24 lg:px-16 lg:pt-28">
-        <motion.div custom={0} variants={fade} initial="hidden" animate="show" className="mb-8 flex flex-wrap items-center gap-3">
+        <motion.div custom={0} variants={fade} initial={false} animate="show" className="mb-8 flex flex-wrap items-center gap-3">
           <span className="rounded-full border px-4 py-2 font-mono text-[0.68rem] uppercase tracking-[0.26em]" style={{ borderColor: "rgba(246,138,36,0.4)", color: "var(--color-brand)" }}>
             {t("hero.eyebrow")}
           </span>
           <span className="font-mono text-[0.68rem] tracking-[0.14em] text-faint">GHOSTDAG · SHIELDED · MIXNET</span>
         </motion.div>
 
-        <motion.h1 custom={1} variants={fade} initial="hidden" animate="show" className="max-w-4xl font-display text-[clamp(2.5rem,6.2vw,5.5rem)] font-semibold uppercase leading-[0.98] tracking-tight">
+        <motion.h1 custom={1} variants={fade} initial={false} animate="show" className="max-w-4xl font-display text-[clamp(2.5rem,6.2vw,5.5rem)] font-semibold uppercase leading-[0.98] tracking-tight">
           {lang === "en" ? (
             <>
               The blockchain<br />
@@ -172,7 +172,7 @@ export default function Hero({ lang = "en" }: { lang?: string }) {
         </motion.h1>
 
         <div className="mt-12 grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
-          <motion.div custom={2} variants={fade} initial="hidden" animate="show">
+          <motion.div custom={2} variants={fade} initial={false} animate="show">
             <p className="max-w-xl border-l border-line-soft pl-5 text-base leading-relaxed text-muted sm:text-lg">
               {t("hero.subtitle")}
             </p>
@@ -191,7 +191,7 @@ export default function Hero({ lang = "en" }: { lang?: string }) {
               </a>
             </div>
           </motion.div>
-          <motion.div custom={3} variants={fade} initial="hidden" animate="show">
+          <motion.div custom={3} variants={fade} initial={false} animate="show">
             <LiveStats lang={lang} />
           </motion.div>
         </div>
