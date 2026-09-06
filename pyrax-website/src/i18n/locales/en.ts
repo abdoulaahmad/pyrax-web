@@ -52,7 +52,7 @@ export const en = {
     exploreIndustries: "Explore all 100 industries",
   },
   hero: {
-    eyebrow: "The private, parallel Layer-1",
+    eyebrow: "The private, high-throughput Layer-1",
     title: "The blockchain built like the future demands.",
     subtitle: "PYRAX replaces the single chain with a GhostDAG web of blocks — private by default, fully decentralized, ISP-resistant, and engineered for 500,000+ transactions per second. Idle mining hardware becomes a verifiable AI compute marketplace.",
     ctaPrimary: "Explore the network",

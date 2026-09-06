@@ -26,7 +26,7 @@ export const de: LocaleDict = {
     exploreIndustries: "Alle 100 Branchen erkunden",
   },
   hero: {
-    eyebrow: "Die private, parallele Layer-1",
+    eyebrow: "Die private Layer-1 mit hohem Durchsatz",
     title: "Die Blockchain, gebaut wie es die Zukunft verlangt.",
     subtitle: "PYRAX ersetzt die einzelne Kette durch ein GhostDAG-Netz aus Blöcken – standardmäßig privat, vollständig dezentral, ISP-resistent und ausgelegt auf über 500,000 Transaktionen pro Sekunde. Ungenutzte Mining-Hardware wird zu einem verifizierbaren Marktplatz für KI-Rechenleistung.",
     ctaPrimary: "Netzwerk erkunden",

@@ -26,7 +26,7 @@ export const nl: LocaleDict = {
     exploreIndustries: "Ontdek alle 100 sectoren",
   },
   hero: {
-    eyebrow: "De private, parallelle Layer-1",
+    eyebrow: "De private Layer-1 met hoge doorvoer",
     title: "De blockchain gebouwd zoals de toekomst het vereist.",
     subtitle: "PYRAX vervangt de enkele keten door een GhostDAG-web van blokken — standaard privé, volledig gedecentraliseerd, ISP-bestendig en ontworpen voor 500,000+ transacties per seconde. Ongebruikte mininghardware wordt een verifieerbare AI-computemarktplaats.",
     ctaPrimary: "Ontdek het netwerk",
