@@ -400,7 +400,7 @@ a:hover{color:var(--gold)}
       <div style="position:relative;max-width:1280px;margin:0 auto;padding:88px 56px 0">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px"><span style="width:26px;height:1px;background:var(--cyan)"></span><span style="font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan)">Technology</span></div>
         <h1 style="font-family:var(--disp);font-weight:500;font-size:clamp(34px,3.8vw,54px);line-height:1.06;letter-spacing:-.015em;margin:0 0 22px;max-width:900px">A Layer-1 that is parallel, private, and <span style="background:var(--grad-b);-webkit-background-clip:text;background-clip:text;color:transparent">provable</span>.</h1>
-        <p style="color:var(--tx2);font-size:16px;line-height:1.65;max-width:760px;margin:0 0 40px">One binary, four chainspecs. A blockDAG that includes honest parallel work instead of orphaning it, transfers that are shielded by default, three virtual machines, and a verifiable compute market — with a single external audit standing between the code and mainnet.</p>
+        <p style="color:var(--tx2);font-size:16px;line-height:1.65;max-width:760px;margin:0 0 40px">One binary, four chainspecs. A DAG that includes honest parallel work instead of orphaning it, transfers that are shielded by default, three virtual machines, and a verifiable compute market — with a single external audit standing between the code and mainnet.</p>
       </div>
       <div style="position:relative;display:flex;gap:4px;padding:0 56px 0;max-width:1280px;margin:0 auto;border-bottom:1px solid transparent">
         <sc-for list="{{ techAnchors }}" as="a" hint-placeholder-count="6">
@@ -417,7 +417,7 @@ a:hover{color:var(--gold)}
             <div style="font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">01 / Consensus</div>
             <h2 style="font-family:var(--disp);font-weight:500;font-size:36px;letter-spacing:-.01em;line-height:1.1;margin:0">GhostDAG + TriStream</h2>
           </div>
-          <p style="color:var(--tx2);font-size:14.5px;line-height:1.68;margin:0">PYRAX orders a blockDAG, not a single chain. GhostDAG's k-cluster rule selects a "blue set" of well-connected blocks and orders everything relative to a selected-parent chain — so honest blocks mined in parallel are included and rewarded, not orphaned. That is what lets throughput scale without sacrificing the security of proof-of-work.</p>
+          <p style="color:var(--tx2);font-size:14.5px;line-height:1.68;margin:0">PYRAX orders a DAG, not a single chain. GhostDAG's k-cluster rule selects a "blue set" of well-connected blocks and orders everything relative to a selected-parent chain — so honest blocks mined in parallel are included and rewarded, not orphaned. That is what lets throughput scale without sacrificing the security of proof-of-work.</p>
         </div>
         <div class="rise" style="border:1px solid var(--line);border-radius:18px;overflow:hidden">
           <div style="display:grid;grid-template-columns:100px 1fr 1fr;background:var(--bg2);border-bottom:1px solid var(--line);padding:0"><span style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--tx3);padding:13px 22px">STREAM</span><span style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--tx3);padding:13px 22px">SEAL LANE</span><span style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--tx3);padding:13px 22px">HARDWARE</span></div>
@@ -1784,7 +1784,7 @@ class Component extends DCLogic {
         {k:'5 lanes',v:'TriStream seals'},{k:'18s',v:'L3 recursive proof'},{k:'100%',v:'open-core protocol'},{k:'4 networks',v:'Seed · Forge · Rise · One'}
       ],
       invariants:[
-        {idx:'01', stat:'500k+', statLabel:'TPS TARGET', title:'High throughput', desc:'A GhostDAG blockDAG accepts many blocks at once — honest parallel work is included, not orphaned. Target: 500,000+ TPS as a measured, benchmarked aggregate.'},
+        {idx:'01', stat:'500k+', statLabel:'TPS TARGET', title:'High throughput', desc:'A GhostDAG accepts many blocks at once — honest parallel work is included, not orphaned. Target: 500,000+ TPS as a measured, benchmarked aggregate.'},
         {idx:'02', stat:'ZK', statLabel:'NO TRUSTED SETUP', title:'Private by default', desc:'Every transfer is shielded by default with no-trusted-setup zero-knowledge proofs. Sender, receiver, and amount are hidden. Transparent is the explicit exception.'},
         {idx:'03', stat:'3+2', statLabel:'STREAMS · FINALITY', title:'Fully decentralized', desc:'Bootstrapless peer discovery — no company-run starter server on the critical path to joining. Three uncorrelated mining streams plus BLS proof-of-stake finality.'},
         {idx:'04', stat:'Sphinx', statLabel:'ONION MIXNET', title:'ISP-resistant', desc:'Traffic rides an onion Sphinx mixnet with fixed-size packets and cover traffic, so an on-path observer — including your ISP — sees only uniform encrypted flows.'}
@@ -1794,7 +1794,7 @@ class Component extends DCLogic {
         {n:'4 nets', l:'Seed · Forge · Rise · One'},{n:'18s', l:'L3 recursive proof'},{n:'100%', l:'open-core protocol'}
       ],
       featureTiles:[
-        {tag:'CONSENSUS', title:'GhostDAG blockDAG', desc:'A multi-parent web of blocks ordered by GhostDAG (k-cluster blue set), so honest parallel work is included, not orphaned.'},
+        {tag:'CONSENSUS', title:'GhostDAG', desc:'A multi-parent web of blocks ordered by GhostDAG (k-cluster blue set), so honest parallel work is included, not orphaned.'},
         {tag:'MINING', title:'TriStream mining', desc:'Three streams over five seal lanes — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU), and BLS proof-of-stake finality.'},
         {tag:'PRIVACY', title:'Shielded by default', desc:'Every transfer hides sender, receiver, and amount with plonky2 proofs — no trusted setup, and the circuit is default-on today.'},
         {tag:'EXECUTION', title:'Multi-VM L2 + ZK-rollup L3', desc:'EVM (revm), WASM (wasmtime), and Cairo with cross-VM calls; a recursive ZK-rollup folds thousands of proofs into one.'},

@@ -30,7 +30,7 @@ export const en = {
   tokData,
   meta: {
     titleSuffix: "PYRAX™ Network",
-    description: "PYRAX is a from-scratch Layer-1: a GhostDAG blockDAG, private by default, fully decentralized, ISP-resistant — with a verifiable AI compute marketplace. 500,000+ TPS target.",
+    description: "PYRAX is a from-scratch Layer-1: a GhostDAG, private by default, fully decentralized, ISP-resistant — with a verifiable AI compute marketplace. 500,000+ TPS target.",
   },
   nav: {
     products: "Products",
@@ -73,7 +73,7 @@ export const en = {
     title: "Four invariants, not features",
     subtitle: "Most networks bolt these on. PYRAX enforces them in its lowest-level types.",
     throughputT: "High throughput",
-    throughputD: "A GhostDAG blockDAG accepts many blocks at once — honest parallel work is included, not orphaned. Target: 500,000+ TPS as a measured, benchmarked aggregate.",
+    throughputD: "A GhostDAG accepts many blocks at once — honest parallel work is included, not orphaned. Target: 500,000+ TPS as a measured, benchmarked aggregate.",
     privacyT: "Private by default",
     privacyD: "Every transfer is shielded by default with no-trusted-setup zero-knowledge proofs. Sender, receiver, and amount are hidden. Transparent is the explicit exception.",
     decentralT: "Fully decentralized",

@@ -4,7 +4,7 @@ type LocaleDict = { [K in keyof Dict]?: Partial<Dict[K]> };
 export const tr: LocaleDict = {
   meta: {
     titleSuffix: "PYRAX™ Ağı",
-    description: "PYRAX sıfırdan inşa edilmiş bir Layer-1'dir: GhostDAG tabanlı bir blockDAG, varsayılan olarak gizli, tamamen merkeziyetsiz, ISP'ye dayanıklı — doğrulanabilir bir AI hesaplama pazarıyla birlikte. Hedef: 500,000+ TPS.",
+    description: "PYRAX sıfırdan inşa edilmiş bir Layer-1'dir: GhostDAG tabanlı bir DAG, varsayılan olarak gizli, tamamen merkeziyetsiz, ISP'ye dayanıklı — doğrulanabilir bir AI hesaplama pazarıyla birlikte. Hedef: 500,000+ TPS.",
   },
   nav: {
     products: "Ürünler",
@@ -47,7 +47,7 @@ export const tr: LocaleDict = {
     title: "Dört değişmez, özellik değil",
     subtitle: "Çoğu ağ bunları sonradan ekler. PYRAX bunları en alt düzey tiplerinde zorunlu kılar.",
     throughputT: "Yüksek verimlilik",
-    throughputD: "GhostDAG tabanlı bir blockDAG aynı anda birçok bloğu kabul eder — dürüst paralel çalışma dahil edilir, dışlanmaz. Hedef: ölçülmüş, kıyaslanmış toplam bir değer olarak 500,000+ TPS.",
+    throughputD: "GhostDAG tabanlı bir DAG aynı anda birçok bloğu kabul eder — dürüst paralel çalışma dahil edilir, dışlanmaz. Hedef: ölçülmüş, kıyaslanmış toplam bir değer olarak 500,000+ TPS.",
     privacyT: "Varsayılan olarak gizli",
     privacyD: "Her transfer, güvenilir kurulum gerektirmeyen zero-knowledge kanıtlarıyla varsayılan olarak korunur. Gönderen, alıcı ve tutar gizlenir. Şeffaflık açık bir istisnadır.",
     decentralT: "Tamamen merkeziyetsiz",
@@ -159,7 +159,7 @@ export const tr: LocaleDict = {
     tx6: 'Yönetişim',
 
     metaTitle: 'Teknoloji — PYRAX™ Ağı',
-    metaDescription: 'PYRAX nasıl çalışır: beş kulvar üzerinde üç akışla mühürlenen bir GhostDAG blockDAG, BLS proof-of-stake kesinliği, varsayılan olarak gizlilik, çok-VM\'li bir yürütme katmanı, NEURAX hesaplama pazarı, bootstrap gerektirmeyen ISP\'ye dayanıklı bir ağ ve mainnet\'e denetim kapılı bir yol.',
+    metaDescription: 'PYRAX nasıl çalışır: beş kulvar üzerinde üç akışla mühürlenen bir GhostDAG, BLS proof-of-stake kesinliği, varsayılan olarak gizlilik, çok-VM\'li bir yürütme katmanı, NEURAX hesaplama pazarı, bootstrap gerektirmeyen ISP\'ye dayanıklı bir ağ ve mainnet\'e denetim kapılı bir yol.',
 
     heroEyebrow: 'Teknoloji',
     heroTitlePre: 'Şu özelliklere sahip bir Layer-1: ',
@@ -167,12 +167,12 @@ export const tr: LocaleDict = {
     heroTitleMid: ', ',
     heroTitlePrivate: 'gizli',
     heroTitlePost: ' ve kanıtlanabilir',
-    heroLede: 'Tek binary, dört chainspec. Dürüst paralel çalışmayı dışlamak yerine dahil eden bir blockDAG, varsayılan olarak gizli transferler, üç sanal makine ve doğrulanabilir bir hesaplama pazarı — kodla mainnet arasında tek bir dış denetim duruyor.',
+    heroLede: 'Tek binary, dört chainspec. Dürüst paralel çalışmayı dışlamak yerine dahil eden bir DAG, varsayılan olarak gizli transferler, üç sanal makine ve doğrulanabilir bir hesaplama pazarı — kodla mainnet arasında tek bir dış denetim duruyor.',
 
     consensusEyebrow: '01 · Konsensüs',
     consensusTitle: 'GhostDAG + TriStream',
     consensusLede1: 'PYRAX tek bir zinciri değil, bir ',
-    consensusLedeBlockdag: 'blockDAG',
+    consensusLedeDAG: 'DAG',
     consensusLede2: ' sıralar. GhostDAG\'ın k-küme kuralı, iyi bağlantılı blokların bir "mavi kümesini" seçer ve her şeyi seçilmiş bir ana zincire göre sıralar — böylece paralel olarak kazılan dürüst bloklar dışlanmak yerine ',
     consensusLedeIncluded: 'dahil edilir ve ödüllendirilir',
     consensusLede3: '. Proof-of-work güvenliğinden ödün vermeden verimliliğin ölçeklenmesini sağlayan da budur.',
@@ -352,7 +352,7 @@ export const tr: LocaleDict = {
     techStatRecursiveProof: 'L3 özyinelemeli kanıt',
     techStatOpenCore: 'açık çekirdek protokol',
 
-    techCard1T: 'GhostDAG blockDAG',
+    techCard1T: 'GhostDAG',
     techCard1D: 'GhostDAG (k-küme mavi kümesi) tarafından sıralanan çok-ebeveynli bir blok ağı; böylece dürüst paralel çalışma dışlanmaz, dahil edilir.',
     techCard2T: 'TriStream madencilik',
     techCard2D: 'Beş mühür kulvarı üzerinde üç akış — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU) ve BLS proof-of-stake kesinliği.',
@@ -413,7 +413,7 @@ export const tr: LocaleDict = {
     industriesBody: '10 kategori · 100 sektör türü · projeksiyonlar + buildathon dApp fikirleri.',
 
     techConsensusName: 'GhostDAG + TriStream',
-    techConsensusDesc: 'GhostDAG tarafından sıralanan bir blockDAG; üç akış, beş mühür kulvarı.',
+    techConsensusDesc: 'GhostDAG tarafından sıralanan bir DAG; üç akış, beş mühür kulvarı.',
     techPrivacyName: 'Varsayılan olarak gizli',
     techPrivacyDesc: 'Güvenilir kurulum gerektirmeyen ZK kanıtlarıyla gizli transferler.',
     techVmsName: 'Çok-VM (EVM/WASM/Cairo)',
@@ -493,7 +493,7 @@ export const tr: LocaleDict = {
     fact4Label: 'açık çekirdek protokol',
 
     missionTitle: 'Misyonumuz',
-    missionPara1: 'Açık blok zincirleri yanlış bir seçim dayattı: tüm finansal hayatınızı sızdıran şeffaflık ya da sonradan eklenmiş gizlilik araçları. PYRAX bu ödünleşimi reddeder. Bir GhostDAG blockDAG paralel çalışmanın verimliliğini verir; varsayılan olarak gizli transferler sormadan gizlilik verir; çok-VM\'li bir yürütme katmanı geliştiricilerle bulundukları yerde buluşur; ve NEURAX atıl GPU\'ları gerçekten doğrulayabileceğiniz bir hesaplama pazarına dönüştürür.',
+    missionPara1: 'Açık blok zincirleri yanlış bir seçim dayattı: tüm finansal hayatınızı sızdıran şeffaflık ya da sonradan eklenmiş gizlilik araçları. PYRAX bu ödünleşimi reddeder. Bir GhostDAG paralel çalışmanın verimliliğini verir; varsayılan olarak gizli transferler sormadan gizlilik verir; çok-VM\'li bir yürütme katmanı geliştiricilerle bulundukları yerde buluşur; ve NEURAX atıl GPU\'ları gerçekten doğrulayabileceğiniz bir hesaplama pazarına dönüştürür.',
     missionPara2: 'Yol konusunda bilinçli olarak gösterişsiziz: bugün çalışan sadık bir simülasyon, kapalı bir alfa, genel bir testnet ve gerçek değer taşıyan herhangi bir şeyden önce tek bir dış denetim.',
 
     believeTitle: 'Neye inanıyoruz',
@@ -524,7 +524,7 @@ export const tr: LocaleDict = {
     abstractLabel: 'Özet',
     abstractPara1a: 'PYRAX, çoğu ağın sonradan eklediği ancak PYRAX\'ın değişmez olarak zorunlu kıldığı dört özelliğin etrafında düzenlenmiş, sıfırdan Rust ile uygulanmış bir Layer-1\'dir: ',
     abstractPara1b: 'yüksek verimlilik, varsayılan gizlilik, tam merkeziyetsizlik ve ISP düzeyinde gözetime direnç.',
-    abstractPara1c: ' Konsensüs, GhostDAG tarafından sıralanan bir blockDAG\'dir; bir TriStream modeliyle beslenir — dört mühür kulvarı boyunca iki proof-of-work ailesi artı proof-of-stake — ve BLS-birleştirmeli proof-of-stake BFT ile kesinleştirilir.',
+    abstractPara1c: ' Konsensüs, GhostDAG tarafından sıralanan bir DAG\'dir; bir TriStream modeliyle beslenir — dört mühür kulvarı boyunca iki proof-of-work ailesi artı proof-of-stake — ve BLS-birleştirmeli proof-of-stake BFT ile kesinleştirilir.',
     abstractPara2a: 'Değer transferi, Orchard tarzı bir not modeli ve güvenilir kurulum gerektirmeyen özyinelemeli zk-SNARK\'larla varsayılan olarak gizlidir. Eş katmanı bootstrap gerektirmez, trafik bir onion Sphinx mixnet üzerinden akar, yürütme çok-VM\'li bir L2 (EVM, WASM, Cairo) ve özyinelemeli bir ZK-rollup L3 aracılığıyla ölçeklenir ve Stream B\'yi kazan aynı atıl GPU\'lar ',
     abstractPara2c: ' — doğrulanabilir, zincir üstünde ödenen bir hesaplama pazarını — güçlendirir.',
 
@@ -532,7 +532,7 @@ export const tr: LocaleDict = {
     northStarsSubtitle: 'Özlemler değil, kısıtlar — temel crate\'ler bunları kodlar; böylece sonraki her katman bunlara karşı inşa edilir.',
 
     northStar1Title: 'Zincir değil, DAG',
-    northStar1Desc: 'GhostDAG tarafından sıralanan çok-ebeveynli bir blockDAG — dürüst paralel çalışma dışlanmaz, dahil edilir.',
+    northStar1Desc: 'GhostDAG tarafından sıralanan çok-ebeveynli bir DAG — dürüst paralel çalışma dışlanmaz, dahil edilir.',
     northStar2Title: 'Varsayılan olarak gizlilik',
     northStar2Desc: 'Varsayılan işlem, göndereni, alıcıyı ve tutarı güvenilir kurulum gerektirmeyen zk-SNARK\'larla gizler. Şeffaflık istisnadır.',
     northStar3Title: 'Boot node yok',
@@ -606,7 +606,7 @@ export const tr: LocaleDict = {
     problemCard3Desc: 'Çoğu ağ, şirket işletmeli bootstrap sunucularına ve ayrıcalıklı anahtarlara dayanır — tek başarısızlık ve kontrol noktaları.',
 
     solutionTitle: 'PYRAX ödünleşimi reddeder',
-    solutionBody: 'Paralel verimlilik için bir GhostDAG blockDAG, denetçi görüntüleme anahtarlarıyla varsayılan olarak gizlilik, üç sanal makine ve doğrulanabilir bir hesaplama pazarı — en alt düzey tiplerde değişmez olarak zorunlu kılınmış.',
+    solutionBody: 'Paralel verimlilik için bir GhostDAG, denetçi görüntüleme anahtarlarıyla varsayılan olarak gizlilik, üç sanal makine ve doğrulanabilir bir hesaplama pazarı — en alt düzey tiplerde değişmez olarak zorunlu kılınmış.',
     solutionCard1Title: 'Paralel',
     solutionCard1Desc: 'GhostDAG dürüst çalışmayı dışlamak yerine dahil eder.',
     solutionCard2Title: 'Gizli',

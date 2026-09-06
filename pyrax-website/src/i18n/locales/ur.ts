@@ -172,7 +172,7 @@ export const ur: LocaleDict = {
     consensusEyebrow: '01 · اتفاقِ رائے',
     consensusTitle: 'GhostDAG + TriStream',
     consensusLede1: 'PYRAX ایک ',
-    consensusLedeBlockdag: 'بلاک ڈیگ',
+    consensusLedeDAG: 'بلاک ڈیگ',
     consensusLede2: ' ترتیب دیتی ہے، ایک واحد چین نہیں۔ GhostDAG کا k-cluster اصول اچھی طرح جڑے بلاکس کا ایک "بلیو سیٹ" منتخب کرتا ہے اور ہر چیز کو ایک منتخب-پیرنٹ چین کی نسبت ترتیب دیتا ہے — چنانچہ متوازی طور پر مائن کیے گئے ایماندار بلاکس ',
     consensusLedeIncluded: 'شامل اور انعام یافتہ',
     consensusLede3: ' ہوتے ہیں، ضائع نہیں۔ یہی وہ چیز ہے جو پروف-آف-ورک کی سیکیورٹی قربان کیے بغیر تھرو پٹ کو بڑھانے دیتی ہے۔',

@@ -23,7 +23,7 @@ export const content: CategoryContent = {
     ],
     solutions: [
       {
-        feature: "GhostDAG blockDAG (500k-TPS target)",
+        feature: "GhostDAG (500k-TPS target)",
         how: "Millions of smart meters post interval reads and settle usage in parallel, so metering, billing, and wholesale reconciliation happen continuously instead of on a monthly batch.",
       },
       {
@@ -347,7 +347,7 @@ export const content: CategoryContent = {
         how: "Regulators pull tamper-proof proofs of turbidity, chlorine, and contaminant levels, so drinking-water compliance is provable rather than declared.",
       },
       {
-        feature: "GhostDAG blockDAG (500k-TPS target)",
+        feature: "GhostDAG (500k-TPS target)",
         how: "Millions of meter reads and micro-billings settle in parallel, giving even city-scale utilities continuous meter-to-cash visibility.",
       },
       {
@@ -451,7 +451,7 @@ export const content: CategoryContent = {
         how: "Trades lock collateral and payment in escrow and settle atomically on delivery, removing broker intermediation and default risk from bilateral deals.",
       },
       {
-        feature: "GhostDAG blockDAG (500k-TPS target)",
+        feature: "GhostDAG (500k-TPS target)",
         how: "High-frequency intraday and peer-to-peer energy trades clear in parallel, supporting continuous 15-minute and sub-hourly markets without a throughput ceiling.",
       },
       {

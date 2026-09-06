@@ -130,7 +130,7 @@ export const zhTW: LocaleDict = {
     consensusEyebrow: "01 · 共識",
     consensusTitle: "GhostDAG + TriStream",
     consensusLede1: "PYRAX 排序的是一個 ",
-    consensusLedeBlockdag: "區塊 DAG",
+    consensusLedeDAG: "區塊 DAG",
     consensusLede2: "，而非單一鏈。GhostDAG 的 k-cluster 規則會選出一組連結良好的區塊「藍集」，並相對於一條選定的父鏈為所有內容排序——因此並行挖出的誠實區塊會被",
     consensusLedeIncluded: "納入並獲得獎勵",
     consensusLede3: "，而非淪為孤塊。這正是能在不犧牲工作量證明安全性的前提下擴展吞吐量的關鍵。",

@@ -14,7 +14,7 @@ export const homeExtra = {
   techStatOpenCore: 'open-core protocol',
 
   // techCards (title + description)
-  techCard1T: 'GhostDAG blockDAG',
+  techCard1T: 'GhostDAG',
   techCard1D: 'A multi-parent web of blocks ordered by GhostDAG (k-cluster blue set), so honest parallel work is included, not orphaned.',
   techCard2T: 'TriStream mining',
   techCard2D: 'Three streams over five seal lanes — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU), and BLS proof-of-stake finality.',

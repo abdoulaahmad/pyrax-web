@@ -21,7 +21,7 @@ export const navPanels = {
 
   // TechnologyPanel — item names + descriptions
   techConsensusName: 'GhostDAG + TriStream',
-  techConsensusDesc: 'A blockDAG ordered by GhostDAG; three streams, five seal lanes.',
+  techConsensusDesc: 'A DAG ordered by GhostDAG; three streams, five seal lanes.',
   techPrivacyName: 'Private by default',
   techPrivacyDesc: 'Shielded transfers with no-trusted-setup ZK proofs.',
   techVmsName: 'Multi-VM (EVM/WASM/Cairo)',

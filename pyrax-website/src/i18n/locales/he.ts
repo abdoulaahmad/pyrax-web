@@ -4,7 +4,7 @@ type LocaleDict = { [K in keyof Dict]?: Partial<Dict[K]> };
 export const he: LocaleDict = {
   meta: {
     titleSuffix: "רשת PYRAX™",
-    description: "PYRAX היא Layer-1 שנבנתה מאפס: blockDAG מבוסס GhostDAG, פרטית כברירת מחדל, מבוזרת לחלוטין ועמידה בפני ספקי אינטרנט — עם שוק מחשוב AI בר-אימות. יעד: מעל 500,000 עסקאות בשנייה.",
+    description: "PYRAX היא Layer-1 שנבנתה מאפס: DAG מבוסס GhostDAG, פרטית כברירת מחדל, מבוזרת לחלוטין ועמידה בפני ספקי אינטרנט — עם שוק מחשוב AI בר-אימות. יעד: מעל 500,000 עסקאות בשנייה.",
   },
   nav: {
     products: "מוצרים",
@@ -47,7 +47,7 @@ export const he: LocaleDict = {
     title: "ארבעה קבועים, לא תכונות",
     subtitle: "רוב הרשתות מוסיפות אותם בדיעבד. PYRAX אוכפת אותם בטיפוסים ברמה הנמוכה ביותר שלה.",
     throughputT: "תפוקה גבוהה",
-    throughputD: "blockDAG מבוסס GhostDAG מקבל בלוקים רבים בבת אחת — עבודה מקבילית ישרה נכללת ואינה מיותמת. יעד: מעל 500,000 TPS כמצרף נמדד ומדוד-ביצועים.",
+    throughputD: "DAG מבוסס GhostDAG מקבל בלוקים רבים בבת אחת — עבודה מקבילית ישרה נכללת ואינה מיותמת. יעד: מעל 500,000 TPS כמצרף נמדד ומדוד-ביצועים.",
     privacyT: "פרטית כברירת מחדל",
     privacyD: "כל העברה מוגנת כברירת מחדל בהוכחות אפס-ידע ללא הגדרה מהימנה. השולח, הנמען והסכום מוסתרים. שקיפות היא החריג המפורש.",
     decentralT: "מבוזרת לחלוטין",
@@ -159,7 +159,7 @@ export const he: LocaleDict = {
     tx6: 'ממשל',
 
     metaTitle: 'טכנולוגיה — רשת PYRAX™',
-    metaDescription: 'כיצד PYRAX עובדת: blockDAG מבוסס GhostDAG החתום בשלושה זרמים על פני חמישה נתיבים, סופיות BLS proof-of-stake, פרטיות מוגנת-כברירת-מחדל, שכבת ביצוע רב-VM, שוק המחשוב NEURAX, רשת ללא-bootstrap ועמידה בפני ISP, ונתיב מותנה-ביקורת אל mainnet.',
+    metaDescription: 'כיצד PYRAX עובדת: DAG מבוסס GhostDAG החתום בשלושה זרמים על פני חמישה נתיבים, סופיות BLS proof-of-stake, פרטיות מוגנת-כברירת-מחדל, שכבת ביצוע רב-VM, שוק המחשוב NEURAX, רשת ללא-bootstrap ועמידה בפני ISP, ונתיב מותנה-ביקורת אל mainnet.',
 
     heroEyebrow: 'טכנולוגיה',
     heroTitlePre: 'Layer-1 שהיא ',
@@ -167,12 +167,12 @@ export const he: LocaleDict = {
     heroTitleMid: ', ',
     heroTitlePrivate: 'פרטית',
     heroTitlePost: ', ובת-הוכחה',
-    heroLede: 'קובץ הרצה אחד, ארבעה chainspecs. blockDAG הכולל עבודה מקבילית ישרה במקום ליתם אותה, העברות המוגנות כברירת מחדל, שלוש מכונות וירטואליות, ושוק מחשוב בר-אימות — עם ביקורת חיצונית יחידה העומדת בין הקוד ל-mainnet.',
+    heroLede: 'קובץ הרצה אחד, ארבעה chainspecs. DAG הכולל עבודה מקבילית ישרה במקום ליתם אותה, העברות המוגנות כברירת מחדל, שלוש מכונות וירטואליות, ושוק מחשוב בר-אימות — עם ביקורת חיצונית יחידה העומדת בין הקוד ל-mainnet.',
 
     consensusEyebrow: '01 · קונצנזוס',
     consensusTitle: 'GhostDAG + TriStream',
     consensusLede1: 'PYRAX מסדרת ',
-    consensusLedeBlockdag: 'blockDAG',
+    consensusLedeDAG: 'DAG',
     consensusLede2: ', ולא שרשרת בודדת. כלל ה-k-cluster של GhostDAG בוחר "קבוצה כחולה" של בלוקים מקושרים היטב ומסדר את הכול ביחס לשרשרת הורה-נבחר — כך שבלוקים ישרים שנכרו במקביל ',
     consensusLedeIncluded: 'נכללים ומתוגמלים',
     consensusLede3: ', ואינם מיותמים. זה מה שמאפשר לתפוקה לגדול מבלי להקריב את אבטחת ה-proof-of-work.',
@@ -352,7 +352,7 @@ export const he: LocaleDict = {
     techStatRecursiveProof: 'הוכחה רקורסיבית L3',
     techStatOpenCore: 'פרוטוקול open-core',
 
-    techCard1T: 'blockDAG של GhostDAG',
+    techCard1T: 'DAG של GhostDAG',
     techCard1D: 'רשת רב-הורית של בלוקים המסודרת בידי GhostDAG (קבוצה כחולה של k-cluster), כך שעבודה מקבילית ישרה נכללת, ואינה מיותמת.',
     techCard2T: 'כריית TriStream',
     techCard2D: 'שלושה זרמים על פני חמישה נתיבי חתימה — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU), וסופיות BLS proof-of-stake.',
@@ -413,7 +413,7 @@ export const he: LocaleDict = {
     industriesBody: '10 קטגוריות · 100 סוגי עסקים · תחזיות + רעיונות dApp ל-buildathon.',
 
     techConsensusName: 'GhostDAG + TriStream',
-    techConsensusDesc: 'blockDAG המסודר בידי GhostDAG; שלושה זרמים, חמישה נתיבי חתימה.',
+    techConsensusDesc: 'DAG המסודר בידי GhostDAG; שלושה זרמים, חמישה נתיבי חתימה.',
     techPrivacyName: 'פרטי כברירת מחדל',
     techPrivacyDesc: 'העברות מוגנות עם הוכחות ZK ללא הגדרה מהימנה.',
     techVmsName: 'רב-VM (EVM/WASM/Cairo)',
@@ -493,7 +493,7 @@ export const he: LocaleDict = {
     fact4Label: 'פרוטוקול open-core',
 
     missionTitle: 'המשימה שלנו',
-    missionPara1: 'בלוקצ\'יינים ציבוריים כפו בחירה שקרית: שקיפות המדליפה את כל חייכם הפיננסיים, או כלי פרטיות המהודקים בדיעבד. PYRAX דוחה את הפשרה. blockDAG של GhostDAG מעניק את התפוקה של עבודה מקבילית; העברות מוגנות-כברירת-מחדל מעניקות פרטיות ללא בקשה; שכבת ביצוע רב-VM פוגשת את המפתחים היכן שהם; ו-NEURAX הופכת GPUs בלתי-פעילים לשוק למחשוב שאתם יכולים באמת לאמת.',
+    missionPara1: 'בלוקצ\'יינים ציבוריים כפו בחירה שקרית: שקיפות המדליפה את כל חייכם הפיננסיים, או כלי פרטיות המהודקים בדיעבד. PYRAX דוחה את הפשרה. DAG של GhostDAG מעניק את התפוקה של עבודה מקבילית; העברות מוגנות-כברירת-מחדל מעניקות פרטיות ללא בקשה; שכבת ביצוע רב-VM פוגשת את המפתחים היכן שהם; ו-NEURAX הופכת GPUs בלתי-פעילים לשוק למחשוב שאתם יכולים באמת לאמת.',
     missionPara2: 'אנו מכוונים להיות לא-זוהרים לגבי הנתיב: סימולציה נאמנה הרצה היום, אלפא סגורה, testnet ציבורי, וביקורת חיצונית יחידה לפני שדבר נושא ערך אמיתי.',
 
     believeTitle: 'במה אנו מאמינים',
@@ -524,7 +524,7 @@ export const he: LocaleDict = {
     abstractLabel: 'תקציר',
     abstractPara1a: 'PYRAX היא Layer-1 מיושמת-ב-Rust, נבנתה-מאפס, המאורגנת סביב ארבע תכונות שרוב הרשתות מהדקות בדיעבד אך PYRAX אוכפת כאינווריאנטים: ',
     abstractPara1b: 'תפוקה גבוהה, פרטיות כברירת מחדל, ביזור מלא, ועמידות בפני מעקב ברמת ISP.',
-    abstractPara1c: ' הקונצנזוס הוא blockDAG המסודר בידי GhostDAG, המוזן במודל TriStream — שתי משפחות proof-of-work על פני ארבעה נתיבי חתימה בתוספת proof-of-stake — ומוסף בידי BFT מבוסס proof-of-stake מצרפי ב-BLS.',
+    abstractPara1c: ' הקונצנזוס הוא DAG המסודר בידי GhostDAG, המוזן במודל TriStream — שתי משפחות proof-of-work על פני ארבעה נתיבי חתימה בתוספת proof-of-stake — ומוסף בידי BFT מבוסס proof-of-stake מצרפי ב-BLS.',
     abstractPara2a: 'העברת הערך מוגנת כברירת מחדל עם מודל note בסגנון Orchard ו-zk-SNARKs רקורסיביים שאינם צריכים הגדרה מהימנה. שכבת העמיתים היא ללא-bootstrap, התעבורה נעה על גבי mixnet בצל של Sphinx, הביצוע גדל דרך רב-VM L2 (EVM, WASM, Cairo) ו-ZK-rollup L3 רקורסיבי, ואותם ה-GPUs הבלתי-פעילים הכורים את Stream B מפעילים את ',
     abstractPara2c: ', שוק מחשוב בר-אימות המסולק על-שרשרתית.',
 
@@ -532,7 +532,7 @@ export const he: LocaleDict = {
     northStarsSubtitle: 'אילוצים, לא שאיפות — קרייטי היסוד מקודדים אותם כך שכל שכבה מאוחרת יותר נבנית כנגדם.',
 
     northStar1Title: 'DAG, לא שרשרת',
-    northStar1Desc: 'blockDAG רב-הורי המסודר בידי GhostDAG — עבודה מקבילית ישרה נכללת, ואינה מיותמת.',
+    northStar1Desc: 'DAG רב-הורי המסודר בידי GhostDAG — עבודה מקבילית ישרה נכללת, ואינה מיותמת.',
     northStar2Title: 'פרטיות כברירת מחדל',
     northStar2Desc: 'העסקה כברירת מחדל מסתירה שולח, נמען וסכום עם zk-SNARKs ללא הגדרה מהימנה. שקופה היא היוצא מן הכלל.',
     northStar3Title: 'ללא צומת אתחול',
@@ -606,7 +606,7 @@ export const he: LocaleDict = {
     problemCard3Desc: 'רוב הרשתות נשענות על שרתי bootstrap המנוהלים בידי חברה ומפתחות מיוחסים — נקודות כשל ושליטה יחידות.',
 
     solutionTitle: 'PYRAX מסרבת לפשרה',
-    solutionBody: 'blockDAG של GhostDAG לתפוקה מקבילית, פרטיות מוגנת-כברירת-מחדל עם מפתחות צפייה למבקרים, שלוש מכונות וירטואליות, ושוק מחשוב בר-אימות — נאכפים כאינווריאנטים בטיפוסים ברמה הנמוכה ביותר.',
+    solutionBody: 'DAG של GhostDAG לתפוקה מקבילית, פרטיות מוגנת-כברירת-מחדל עם מפתחות צפייה למבקרים, שלוש מכונות וירטואליות, ושוק מחשוב בר-אימות — נאכפים כאינווריאנטים בטיפוסים ברמה הנמוכה ביותר.',
     solutionCard1Title: 'מקבילי',
     solutionCard1Desc: 'GhostDAG כולל עבודה ישרה במקום ליתם אותה.',
     solutionCard2Title: 'פרטי',

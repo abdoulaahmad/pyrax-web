@@ -4,7 +4,7 @@ type LocaleDict = { [K in keyof Dict]?: Partial<Dict[K]> };
 export const pt: LocaleDict = {
   meta: {
     titleSuffix: "PYRAX™ Network",
-    description: "A PYRAX é uma Layer-1 criada do zero: um blockDAG GhostDAG, privado por padrão, totalmente descentralizado e resistente ao ISP, com um mercado verificável de computação de IA. Meta de mais de 500,000 TPS.",
+    description: "A PYRAX é uma Layer-1 criada do zero: um GhostDAG, privado por padrão, totalmente descentralizado e resistente ao ISP, com um mercado verificável de computação de IA. Meta de mais de 500,000 TPS.",
   },
   nav: {
     products: "Produtos",
@@ -47,7 +47,7 @@ export const pt: LocaleDict = {
     title: "Quatro invariantes, não recursos",
     subtitle: "A maioria das redes acopla isso por cima. A PYRAX impõe tudo em seus tipos de nível mais baixo.",
     throughputT: "Alto rendimento",
-    throughputD: "Um blockDAG GhostDAG aceita muitos blocos de uma vez: o trabalho paralelo honesto é incluído, não descartado. Meta: mais de 500,000 TPS como um agregado medido e comparado.",
+    throughputD: "Um GhostDAG aceita muitos blocos de uma vez: o trabalho paralelo honesto é incluído, não descartado. Meta: mais de 500,000 TPS como um agregado medido e comparado.",
     privacyT: "Privado por padrão",
     privacyD: "Cada transferência é protegida por padrão com provas de conhecimento zero sem configuração confiável. Remetente, destinatário e valor ficam ocultos. A transparência é a exceção explícita.",
     decentralT: "Totalmente descentralizado",
@@ -115,7 +115,7 @@ export const pt: LocaleDict = {
 
     // Page meta
     metaTitle: "Tecnologia — PYRAX™ Network",
-    metaDescription: "Como a PYRAX funciona: um blockDAG GhostDAG selado por três fluxos em cinco pistas, finalidade por prova de participação com BLS, privacidade protegida por padrão, uma camada de execução multi-VM, o mercado de computação NEURAX, uma rede sem bootstrap e resistente ao ISP, e um caminho até a mainnet condicionado a auditoria.",
+    metaDescription: "Como a PYRAX funciona: um GhostDAG selado por três fluxos em cinco pistas, finalidade por prova de participação com BLS, privacidade protegida por padrão, uma camada de execução multi-VM, o mercado de computação NEURAX, uma rede sem bootstrap e resistente ao ISP, e um caminho até a mainnet condicionado a auditoria.",
 
     // Hero
     heroEyebrow: "Tecnologia",
@@ -124,13 +124,13 @@ export const pt: LocaleDict = {
     heroTitleMid: ", ",
     heroTitlePrivate: "privada",
     heroTitlePost: " e comprovável",
-    heroLede: "Um binário, quatro chainspecs. Um blockDAG que inclui o trabalho paralelo honesto em vez de descartá-lo, transferências protegidas por padrão, três máquinas virtuais e um mercado de computação verificável — com uma única auditoria externa entre o código e a mainnet.",
+    heroLede: "Um binário, quatro chainspecs. Um DAG que inclui o trabalho paralelo honesto em vez de descartá-lo, transferências protegidas por padrão, três máquinas virtuais e um mercado de computação verificável — com uma única auditoria externa entre o código e a mainnet.",
 
     // Consensus
     consensusEyebrow: "01 · Consenso",
     consensusTitle: "GhostDAG + TriStream",
     consensusLede1: "A PYRAX ordena um ",
-    consensusLedeBlockdag: "blockDAG",
+    consensusLedeDAG: "DAG",
     consensusLede2: ", não uma cadeia única. A regra de k-cluster do GhostDAG seleciona um \"conjunto azul\" de blocos bem conectados e ordena tudo em relação a uma cadeia de pais selecionados — de modo que blocos honestos minerados em paralelo são ",
     consensusLedeIncluded: "incluídos e recompensados",
     consensusLede3: ", não descartados. É isso que permite escalar o rendimento sem sacrificar a segurança da prova de trabalho.",
@@ -370,7 +370,7 @@ export const pt: LocaleDict = {
     techStatOpenCore: "protocolo open-core",
 
     // techCards (title + description)
-    techCard1T: "blockDAG GhostDAG",
+    techCard1T: "GhostDAG",
     techCard1D: "Uma teia de blocos multi-pai ordenada pelo GhostDAG (conjunto azul k-cluster), de modo que o trabalho paralelo honesto é incluído, não descartado.",
     techCard2T: "Mineração TriStream",
     techCard2D: "Três fluxos em cinco pistas de selagem — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU) e finalidade por prova de participação com BLS.",
@@ -440,7 +440,7 @@ export const pt: LocaleDict = {
 
     // TechnologyPanel — item names + descriptions
     techConsensusName: "GhostDAG + TriStream",
-    techConsensusDesc: "Um blockDAG ordenado pelo GhostDAG; três fluxos, cinco pistas de selagem.",
+    techConsensusDesc: "Um DAG ordenado pelo GhostDAG; três fluxos, cinco pistas de selagem.",
     techPrivacyName: "Privada por padrão",
     techPrivacyDesc: "Transferências protegidas com provas ZK sem configuração confiável.",
     techVmsName: "Multi-VM (EVM/WASM/Cairo)",
@@ -526,7 +526,7 @@ export const pt: LocaleDict = {
     fact4Label: "protocolo open-core",
 
     missionTitle: "Nossa missão",
-    missionPara1: "As blockchains públicas impuseram uma escolha falsa: transparência que vaza toda a sua vida financeira, ou ferramentas de privacidade acopladas como um paliativo. A PYRAX rejeita esse dilema. Um blockDAG GhostDAG dá o rendimento do trabalho paralelo; transferências protegidas por padrão dão privacidade sem pedir; uma camada de execução multi-VM encontra os desenvolvedores onde eles estão; e a NEURAX transforma GPUs ociosas em um mercado de computação que você pode de fato verificar.",
+    missionPara1: "As blockchains públicas impuseram uma escolha falsa: transparência que vaza toda a sua vida financeira, ou ferramentas de privacidade acopladas como um paliativo. A PYRAX rejeita esse dilema. Um GhostDAG dá o rendimento do trabalho paralelo; transferências protegidas por padrão dão privacidade sem pedir; uma camada de execução multi-VM encontra os desenvolvedores onde eles estão; e a NEURAX transforma GPUs ociosas em um mercado de computação que você pode de fato verificar.",
     missionPara2: "Somos deliberadamente sem glamour quanto ao caminho: uma simulação fiel rodando hoje, um alfa fechado, uma testnet pública e uma única auditoria externa antes que qualquer coisa carregue valor real.",
 
     believeTitle: "No que acreditamos",
@@ -557,7 +557,7 @@ export const pt: LocaleDict = {
     abstractLabel: "Resumo",
     abstractPara1a: "A PYRAX é uma Layer-1 do zero, implementada em Rust, organizada em torno de quatro propriedades que a maioria das redes acopla por cima, mas que a PYRAX impõe como invariantes: ",
     abstractPara1b: "alto rendimento, privacidade por padrão, descentralização total e resistência à vigilância no nível do ISP.",
-    abstractPara1c: " O consenso é um blockDAG ordenado pelo GhostDAG, alimentado por um modelo TriStream — duas famílias de prova de trabalho em quatro pistas de selagem mais prova de participação — e finalizado por BFT de prova de participação agregado por BLS.",
+    abstractPara1c: " O consenso é um DAG ordenado pelo GhostDAG, alimentado por um modelo TriStream — duas famílias de prova de trabalho em quatro pistas de selagem mais prova de participação — e finalizado por BFT de prova de participação agregado por BLS.",
     abstractPara2a: "A transferência de valor é protegida por padrão com um modelo de notas ao estilo Orchard e zk-SNARKs recursivos que não precisam de configuração confiável. A camada de pares é sem bootstrap, o tráfego percorre uma mixnet onion Sphinx, a execução escala por meio de um L2 multi-VM (EVM, WASM, Cairo) e um L3 ZK-rollup recursivo, e as mesmas GPUs ociosas que mineram o Stream B alimentam o ",
     abstractPara2c: ", um mercado de computação verificável liquidado na cadeia.",
 
@@ -565,7 +565,7 @@ export const pt: LocaleDict = {
     northStarsSubtitle: "Restrições, não aspirações — as crates de fundação as codificam para que cada camada posterior seja construída contra elas.",
 
     northStar1Title: "DAG, não uma cadeia",
-    northStar1Desc: "Um blockDAG multi-pai ordenado pelo GhostDAG — o trabalho paralelo honesto é incluído, não descartado.",
+    northStar1Desc: "Um DAG multi-pai ordenado pelo GhostDAG — o trabalho paralelo honesto é incluído, não descartado.",
     northStar2Title: "Privacidade por padrão",
     northStar2Desc: "A transação padrão oculta remetente, destinatário e valor com zk-SNARKs sem configuração confiável. A transparente é a exceção.",
     northStar3Title: "Sem nó de boot",
@@ -643,7 +643,7 @@ export const pt: LocaleDict = {
 
     // solution slide
     solutionTitle: "A PYRAX recusa o dilema",
-    solutionBody: "Um blockDAG GhostDAG para rendimento paralelo, privacidade protegida por padrão com chaves de visualização para auditores, três máquinas virtuais e um mercado de computação verificável — imposto como invariante nos tipos de nível mais baixo.",
+    solutionBody: "Um GhostDAG para rendimento paralelo, privacidade protegida por padrão com chaves de visualização para auditores, três máquinas virtuais e um mercado de computação verificável — imposto como invariante nos tipos de nível mais baixo.",
     solutionCard1Title: "Paralela",
     solutionCard1Desc: "O GhostDAG inclui o trabalho honesto em vez de descartá-lo.",
     solutionCard2Title: "Privada",

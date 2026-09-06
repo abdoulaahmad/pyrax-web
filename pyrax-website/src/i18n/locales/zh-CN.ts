@@ -172,7 +172,7 @@ export const zhCN: LocaleDict = {
     consensusEyebrow: '01 · 共识',
     consensusTitle: 'GhostDAG + TriStream',
     consensusLede1: 'PYRAX 排序的是一个 ',
-    consensusLedeBlockdag: '区块 DAG',
+    consensusLedeDAG: '区块 DAG',
     consensusLede2: '，而非单一链条。GhostDAG 的 k-cluster 规则选出一个由连接良好的区块组成的“蓝色集合”，并相对于选定的父链对一切进行排序——因此并行挖出的诚实区块会被 ',
     consensusLedeIncluded: '纳入并获得奖励',
     consensusLede3: '，而非沦为孤块。正是这一点让吞吐量得以扩展，同时不牺牲工作量证明的安全性。',

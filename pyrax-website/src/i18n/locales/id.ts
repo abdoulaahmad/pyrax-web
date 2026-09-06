@@ -5,7 +5,7 @@ export const id: LocaleDict = {
   meta: {
     titleSuffix: "PYRAX™ Network",
     description:
-      "PYRAX adalah Layer-1 yang dibangun dari nol: blockDAG GhostDAG, privat secara bawaan, sepenuhnya terdesentralisasi, tahan-ISP — dengan marketplace komputasi AI yang dapat diverifikasi. Target 500,000+ TPS.",
+      "PYRAX adalah Layer-1 yang dibangun dari nol: GhostDAG, privat secara bawaan, sepenuhnya terdesentralisasi, tahan-ISP — dengan marketplace komputasi AI yang dapat diverifikasi. Target 500,000+ TPS.",
   },
   nav: {
     products: "Produk",
@@ -51,7 +51,7 @@ export const id: LocaleDict = {
       "Kebanyakan jaringan menambahkannya belakangan. PYRAX menegakkannya di tipe data paling dasarnya.",
     throughputT: "Throughput tinggi",
     throughputD:
-      "BlockDAG GhostDAG menerima banyak blok sekaligus — kerja paralel yang jujur ikut disertakan, bukan menjadi orphan. Target: 500,000+ TPS sebagai agregat terukur dan ter-benchmark.",
+      "GhostDAG menerima banyak blok sekaligus — kerja paralel yang jujur ikut disertakan, bukan menjadi orphan. Target: 500,000+ TPS sebagai agregat terukur dan ter-benchmark.",
     privacyT: "Privat secara bawaan",
     privacyD:
       "Setiap transfer terlindungi secara bawaan dengan bukti zero-knowledge tanpa trusted-setup. Pengirim, penerima, dan jumlah disembunyikan. Transparan menjadi pengecualian yang eksplisit.",
@@ -170,7 +170,7 @@ export const id: LocaleDict = {
     tx6: 'Tata kelola',
 
     metaTitle: 'Teknologi — PYRAX™ Network',
-    metaDescription: 'Cara kerja PYRAX: blockDAG GhostDAG yang di-seal oleh tiga stream melalui lima lane, finalitas BLS proof-of-stake, privasi terlindungi-secara-bawaan, lapisan eksekusi multi-VM, pasar komputasi NEURAX, jaringan tanpa-bootstrap yang tahan-ISP, dan jalur menuju mainnet yang dipagari audit.',
+    metaDescription: 'Cara kerja PYRAX: GhostDAG yang di-seal oleh tiga stream melalui lima lane, finalitas BLS proof-of-stake, privasi terlindungi-secara-bawaan, lapisan eksekusi multi-VM, pasar komputasi NEURAX, jaringan tanpa-bootstrap yang tahan-ISP, dan jalur menuju mainnet yang dipagari audit.',
 
     heroEyebrow: 'Teknologi',
     heroTitlePre: 'Sebuah Layer-1 yang ',
@@ -178,12 +178,12 @@ export const id: LocaleDict = {
     heroTitleMid: ', ',
     heroTitlePrivate: 'privat',
     heroTitlePost: ', dan dapat dibuktikan',
-    heroLede: 'Satu binary, empat chainspec. Sebuah blockDAG yang menyertakan kerja paralel yang jujur alih-alih meng-orphan-nya, transfer yang terlindungi secara bawaan, tiga virtual machine, dan pasar komputasi yang dapat diverifikasi — dengan satu audit eksternal berdiri di antara kode dan mainnet.',
+    heroLede: 'Satu binary, empat chainspec. Sebuah DAG yang menyertakan kerja paralel yang jujur alih-alih meng-orphan-nya, transfer yang terlindungi secara bawaan, tiga virtual machine, dan pasar komputasi yang dapat diverifikasi — dengan satu audit eksternal berdiri di antara kode dan mainnet.',
 
     consensusEyebrow: '01 · Konsensus',
     consensusTitle: 'GhostDAG + TriStream',
     consensusLede1: 'PYRAX mengurutkan sebuah ',
-    consensusLedeBlockdag: 'blockDAG',
+    consensusLedeDAG: 'DAG',
     consensusLede2: ', bukan rantai tunggal. Aturan k-cluster GhostDAG memilih sebuah "blue set" berisi blok-blok yang terhubung dengan baik dan mengurutkan segalanya relatif terhadap rantai selected-parent — sehingga blok jujur yang ditambang secara paralel ',
     consensusLedeIncluded: 'disertakan dan diberi imbalan',
     consensusLede3: ', bukan di-orphan. Itulah yang memungkinkan throughput berskala tanpa mengorbankan keamanan proof-of-work.',
@@ -363,7 +363,7 @@ export const id: LocaleDict = {
     techStatRecursiveProof: 'Bukti rekursif L3',
     techStatOpenCore: 'protokol open-core',
 
-    techCard1T: 'BlockDAG GhostDAG',
+    techCard1T: 'GhostDAG',
     techCard1D: 'Jaring blok multi-parent yang diurutkan oleh GhostDAG (blue set k-cluster), sehingga kerja paralel yang jujur disertakan, bukan di-orphan.',
     techCard2T: 'Mining TriStream',
     techCard2D: 'Tiga stream melalui lima lane seal — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU), dan finalitas BLS proof-of-stake.',
@@ -424,7 +424,7 @@ export const id: LocaleDict = {
     industriesBody: '10 kategori · 100 jenis usaha · proyeksi + ide dApp buildathon.',
 
     techConsensusName: 'GhostDAG + TriStream',
-    techConsensusDesc: 'BlockDAG yang diurutkan oleh GhostDAG; tiga stream, lima lane seal.',
+    techConsensusDesc: 'DAG yang diurutkan oleh GhostDAG; tiga stream, lima lane seal.',
     techPrivacyName: 'Privat secara bawaan',
     techPrivacyDesc: 'Transfer terlindungi dengan bukti ZK tanpa-trusted-setup.',
     techVmsName: 'Multi-VM (EVM/WASM/Cairo)',
@@ -504,7 +504,7 @@ export const id: LocaleDict = {
     fact4Label: 'protokol open-core',
 
     missionTitle: 'Misi kami',
-    missionPara1: 'Blockchain publik memaksa pilihan palsu: transparansi yang membocorkan seluruh kehidupan finansial Anda, atau alat privasi yang ditempelkan sebagai renungan belakangan. PYRAX menolak pertukaran itu. BlockDAG GhostDAG memberi throughput dari kerja paralel; transfer terlindungi-secara-bawaan memberi privasi tanpa meminta; lapisan eksekusi multi-VM menemui pengembang di tempat mereka berada; dan NEURAX mengubah GPU menganggur menjadi pasar untuk komputasi yang benar-benar bisa Anda verifikasi.',
+    missionPara1: 'Blockchain publik memaksa pilihan palsu: transparansi yang membocorkan seluruh kehidupan finansial Anda, atau alat privasi yang ditempelkan sebagai renungan belakangan. PYRAX menolak pertukaran itu. GhostDAG memberi throughput dari kerja paralel; transfer terlindungi-secara-bawaan memberi privasi tanpa meminta; lapisan eksekusi multi-VM menemui pengembang di tempat mereka berada; dan NEURAX mengubah GPU menganggur menjadi pasar untuk komputasi yang benar-benar bisa Anda verifikasi.',
     missionPara2: 'Kami sengaja tidak glamor soal jalurnya: simulasi setia yang berjalan hari ini, alpha tertutup, testnet publik, dan satu audit eksternal sebelum apa pun membawa nilai nyata.',
 
     believeTitle: 'Apa yang kami yakini',
@@ -535,7 +535,7 @@ export const id: LocaleDict = {
     abstractLabel: 'Abstrak',
     abstractPara1a: 'PYRAX adalah Layer-1 yang diimplementasikan dengan Rust dari nol, diorganisasi di sekitar empat properti yang kebanyakan jaringan tempelkan tetapi PYRAX tegakkan sebagai invarian: ',
     abstractPara1b: 'throughput tinggi, privasi secara bawaan, desentralisasi penuh, dan resistensi terhadap pengawasan tingkat-ISP.',
-    abstractPara1c: ' Konsensus adalah blockDAG yang diurutkan oleh GhostDAG, disuplai oleh model TriStream — dua keluarga proof-of-work di empat lane seal ditambah proof-of-stake — dan difinalisasi oleh BFT proof-of-stake BLS-teragregasi.',
+    abstractPara1c: ' Konsensus adalah DAG yang diurutkan oleh GhostDAG, disuplai oleh model TriStream — dua keluarga proof-of-work di empat lane seal ditambah proof-of-stake — dan difinalisasi oleh BFT proof-of-stake BLS-teragregasi.',
     abstractPara2a: 'Transfer nilai terlindungi secara bawaan dengan model note bergaya Orchard dan zk-SNARK rekursif yang tidak membutuhkan trusted setup. Lapisan peer bersifat tanpa-bootstrap, trafik menaiki mixnet onion Sphinx, eksekusi berskala melalui L2 multi-VM (EVM, WASM, Cairo) dan L3 ZK-rollup rekursif, dan GPU menganggur yang sama yang menambang Stream B menggerakkan ',
     abstractPara2c: ', sebuah pasar komputasi yang dapat diverifikasi dan diselesaikan on-chain.',
 
@@ -543,7 +543,7 @@ export const id: LocaleDict = {
     northStarsSubtitle: 'Batasan, bukan aspirasi — crate fondasi mengkodekannya sehingga setiap lapisan berikutnya dibangun terhadapnya.',
 
     northStar1Title: 'DAG, bukan rantai',
-    northStar1Desc: 'BlockDAG multi-parent yang diurutkan oleh GhostDAG — kerja paralel yang jujur disertakan, bukan di-orphan.',
+    northStar1Desc: 'DAG multi-parent yang diurutkan oleh GhostDAG — kerja paralel yang jujur disertakan, bukan di-orphan.',
     northStar2Title: 'Privasi secara bawaan',
     northStar2Desc: 'Transaksi bawaan menyembunyikan pengirim, penerima, dan jumlah dengan zk-SNARK tanpa-trusted-setup. Transparan adalah pengecualian.',
     northStar3Title: 'Tanpa boot node',
@@ -617,7 +617,7 @@ export const id: LocaleDict = {
     problemCard3Desc: 'Kebanyakan jaringan bersandar pada server bootstrap yang dijalankan perusahaan dan kunci istimewa — titik kegagalan dan kendali tunggal.',
 
     solutionTitle: 'PYRAX menolak pertukaran itu',
-    solutionBody: 'BlockDAG GhostDAG untuk throughput paralel, privasi terlindungi-secara-bawaan dengan viewing key auditor, tiga virtual machine, dan pasar komputasi yang dapat diverifikasi — ditegakkan sebagai invarian pada tipe level-terendah.',
+    solutionBody: 'GhostDAG untuk throughput paralel, privasi terlindungi-secara-bawaan dengan viewing key auditor, tiga virtual machine, dan pasar komputasi yang dapat diverifikasi — ditegakkan sebagai invarian pada tipe level-terendah.',
     solutionCard1Title: 'Paralel',
     solutionCard1Desc: 'GhostDAG menyertakan kerja jujur alih-alih meng-orphan-nya.',
     solutionCard2Title: 'Privat',

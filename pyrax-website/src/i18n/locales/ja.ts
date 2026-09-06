@@ -166,7 +166,7 @@ export const ja: LocaleDict = {
     consensusEyebrow: '01 · コンセンサス',
     consensusTitle: 'GhostDAG + TriStream',
     consensusLede1: 'PYRAX が順序づけるのは単一のチェーンではなく ',
-    consensusLedeBlockdag: 'ブロック DAG',
+    consensusLedeDAG: 'ブロック DAG',
     consensusLede2: ' です。GhostDAG の k-クラスタールールが、よく接続されたブロックの「ブルーセット」を選び、選択された親チェーンを基準にすべてを順序づけます——だからこそ並列にマイニングされた誠実なブロックは ',
     consensusLedeIncluded: '取り込まれ、報酬を得ます',
     consensusLede3: '。オーファンにはなりません。これこそが、プルーフ・オブ・ワークの安全性を犠牲にせずにスループットをスケールさせる仕組みです。',

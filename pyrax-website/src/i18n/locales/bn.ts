@@ -5,7 +5,7 @@ export const bn: LocaleDict = {
   meta: {
     titleSuffix: "PYRAX™ Network",
     description:
-      "PYRAX হলো একদম নতুন করে তৈরি একটি Layer-1: একটি GhostDAG blockDAG, ডিফল্টভাবে ব্যক্তিগত, সম্পূর্ণ বিকেন্দ্রীভূত, ISP-প্রতিরোধী — সঙ্গে একটি যাচাইযোগ্য AI কম্পিউট মার্কেটপ্লেস। লক্ষ্য 500,000+ TPS।",
+      "PYRAX হলো একদম নতুন করে তৈরি একটি Layer-1: একটি GhostDAG, ডিফল্টভাবে ব্যক্তিগত, সম্পূর্ণ বিকেন্দ্রীভূত, ISP-প্রতিরোধী — সঙ্গে একটি যাচাইযোগ্য AI কম্পিউট মার্কেটপ্লেস। লক্ষ্য 500,000+ TPS।",
   },
   nav: {
     products: "পণ্যসমূহ",
@@ -51,7 +51,7 @@ export const bn: LocaleDict = {
       "বেশিরভাগ নেটওয়ার্ক এগুলো পরে জুড়ে দেয়। PYRAX এগুলোকে তার সর্বনিম্ন-স্তরের ডেটা টাইপে বাধ্যতামূলক করে।",
     throughputT: "উচ্চ থ্রুপুট",
     throughputD:
-      "একটি GhostDAG blockDAG একসঙ্গে বহু ব্লক গ্রহণ করে — সৎ প্যারালাল কাজ অন্তর্ভুক্ত হয়, orphan হয় না। লক্ষ্য: পরিমাপকৃত ও benchmark-কৃত সমষ্টি হিসেবে 500,000+ TPS।",
+      "একটি GhostDAG একসঙ্গে বহু ব্লক গ্রহণ করে — সৎ প্যারালাল কাজ অন্তর্ভুক্ত হয়, orphan হয় না। লক্ষ্য: পরিমাপকৃত ও benchmark-কৃত সমষ্টি হিসেবে 500,000+ TPS।",
     privacyT: "ডিফল্টভাবে ব্যক্তিগত",
     privacyD:
       "প্রতিটি লেনদেন ডিফল্টভাবে no-trusted-setup zero-knowledge প্রমাণ দিয়ে সুরক্ষিত। প্রেরক, প্রাপক এবং পরিমাণ গোপন থাকে। স্বচ্ছতা হলো সুস্পষ্ট ব্যতিক্রম।",
@@ -130,7 +130,7 @@ export const bn: LocaleDict = {
     // Page meta
     metaTitle: "প্রযুক্তি — PYRAX™ Network",
     metaDescription:
-      "PYRAX কীভাবে কাজ করে: পাঁচটি লেনে তিনটি স্ট্রিম দিয়ে সিল-করা একটি GhostDAG blockDAG, BLS proof-of-stake চূড়ান্ততা, ডিফল্টভাবে-shielded গোপনীয়তা, একটি multi-VM এক্সিকিউশন স্তর, NEURAX কম্পিউট মার্কেট, একটি bootstrapless ISP-প্রতিরোধী নেটওয়ার্ক, এবং mainnet-এর দিকে একটি অডিট-নিয়ন্ত্রিত পথ।",
+      "PYRAX কীভাবে কাজ করে: পাঁচটি লেনে তিনটি স্ট্রিম দিয়ে সিল-করা একটি GhostDAG, BLS proof-of-stake চূড়ান্ততা, ডিফল্টভাবে-shielded গোপনীয়তা, একটি multi-VM এক্সিকিউশন স্তর, NEURAX কম্পিউট মার্কেট, একটি bootstrapless ISP-প্রতিরোধী নেটওয়ার্ক, এবং mainnet-এর দিকে একটি অডিট-নিয়ন্ত্রিত পথ।",
 
     // Hero
     heroEyebrow: "প্রযুক্তি",
@@ -140,13 +140,13 @@ export const bn: LocaleDict = {
     heroTitlePrivate: "ব্যক্তিগত",
     heroTitlePost: ", এবং প্রমাণযোগ্য",
     heroLede:
-      "একটি বাইনারি, চারটি chainspec। একটি blockDAG যা সৎ প্যারালাল কাজকে orphan না করে অন্তর্ভুক্ত করে, ট্রান্সফার যা ডিফল্টভাবে shielded, তিনটি ভার্চুয়াল মেশিন, এবং একটি যাচাইযোগ্য কম্পিউট মার্কেট — কোড এবং mainnet-এর মধ্যে দাঁড়িয়ে একটি একক বাহ্যিক অডিট।",
+      "একটি বাইনারি, চারটি chainspec। একটি DAG যা সৎ প্যারালাল কাজকে orphan না করে অন্তর্ভুক্ত করে, ট্রান্সফার যা ডিফল্টভাবে shielded, তিনটি ভার্চুয়াল মেশিন, এবং একটি যাচাইযোগ্য কম্পিউট মার্কেট — কোড এবং mainnet-এর মধ্যে দাঁড়িয়ে একটি একক বাহ্যিক অডিট।",
 
     // Consensus
     consensusEyebrow: "01 · কনসেনসাস",
     consensusTitle: "GhostDAG + TriStream",
     consensusLede1: "PYRAX একটি ",
-    consensusLedeBlockdag: "blockDAG",
+    consensusLedeDAG: "DAG",
     consensusLede2:
       " সাজায়, একটিমাত্র চেইন নয়। GhostDAG-এর k-cluster নিয়ম সুসংযুক্ত ব্লকের একটি \"blue set\" নির্বাচন করে এবং একটি selected-parent chain-এর সাপেক্ষে সবকিছু সাজায় — তাই প্যারালালভাবে মাইন করা সৎ ব্লকগুলো ",
     consensusLedeIncluded: "অন্তর্ভুক্ত ও পুরস্কৃত হয়",
@@ -434,7 +434,7 @@ export const bn: LocaleDict = {
     techStatOpenCore: "open-core প্রোটোকল",
 
     // techCards (title + description)
-    techCard1T: "GhostDAG blockDAG",
+    techCard1T: "GhostDAG",
     techCard1D:
       "GhostDAG (k-cluster blue set) দ্বারা সাজানো ব্লকের একটি multi-parent জাল, তাই সৎ প্যারালাল কাজ অন্তর্ভুক্ত হয়, orphan হয় না।",
     techCard2T: "TriStream মাইনিং",
@@ -514,7 +514,7 @@ export const bn: LocaleDict = {
 
     // TechnologyPanel — item names + descriptions
     techConsensusName: "GhostDAG + TriStream",
-    techConsensusDesc: "GhostDAG দ্বারা সাজানো একটি blockDAG; তিনটি স্ট্রিম, পাঁচটি সিল লেন।",
+    techConsensusDesc: "GhostDAG দ্বারা সাজানো একটি DAG; তিনটি স্ট্রিম, পাঁচটি সিল লেন।",
     techPrivacyName: "ডিফল্টভাবে ব্যক্তিগত",
     techPrivacyDesc: "no-trusted-setup ZK প্রমাণ সহ shielded ট্রান্সফার।",
     techVmsName: "Multi-VM (EVM/WASM/Cairo)",
@@ -608,7 +608,7 @@ export const bn: LocaleDict = {
 
     missionTitle: "আমাদের mission",
     missionPara1:
-      "পাবলিক ব্লকচেইন একটি মিথ্যা পছন্দ চাপিয়ে দিয়েছে: স্বচ্ছতা যা আপনার পুরো আর্থিক জীবন ফাঁস করে, অথবা গোপনীয়তা টুল যা পরে ভাবনা হিসেবে জুড়ে দেওয়া। PYRAX এই আপস প্রত্যাখ্যান করে। একটি GhostDAG blockDAG প্যারালাল কাজের থ্রুপুট দেয়; ডিফল্টভাবে-shielded ট্রান্সফার না চেয়েই গোপনীয়তা দেয়; একটি multi-VM এক্সিকিউশন স্তর ডেভেলপারদের সেখানেই দেখা করে যেখানে তারা আছে; এবং NEURAX অলস GPU-কে এমন কম্পিউটের একটি মার্কেটে পরিণত করে যা আপনি সত্যিই যাচাই করতে পারেন।",
+      "পাবলিক ব্লকচেইন একটি মিথ্যা পছন্দ চাপিয়ে দিয়েছে: স্বচ্ছতা যা আপনার পুরো আর্থিক জীবন ফাঁস করে, অথবা গোপনীয়তা টুল যা পরে ভাবনা হিসেবে জুড়ে দেওয়া। PYRAX এই আপস প্রত্যাখ্যান করে। একটি GhostDAG প্যারালাল কাজের থ্রুপুট দেয়; ডিফল্টভাবে-shielded ট্রান্সফার না চেয়েই গোপনীয়তা দেয়; একটি multi-VM এক্সিকিউশন স্তর ডেভেলপারদের সেখানেই দেখা করে যেখানে তারা আছে; এবং NEURAX অলস GPU-কে এমন কম্পিউটের একটি মার্কেটে পরিণত করে যা আপনি সত্যিই যাচাই করতে পারেন।",
     missionPara2:
       "আমরা পথটি নিয়ে ইচ্ছাকৃতভাবে নিরাভরণ: আজ চলমান একটি বিশ্বস্ত সিমুলেশন, একটি ক্লোজড আলফা, একটি পাবলিক testnet, এবং আসল মূল্য বহনের আগে একটি একক বাহ্যিক অডিট।",
 
@@ -644,7 +644,7 @@ export const bn: LocaleDict = {
     abstractPara1b:
       "উচ্চ থ্রুপুট, ডিফল্টভাবে গোপনীয়তা, সম্পূর্ণ বিকেন্দ্রীকরণ, এবং ISP-স্তরের নজরদারির প্রতি প্রতিরোধ।",
     abstractPara1c:
-      " কনসেনসাস হলো GhostDAG দ্বারা সাজানো একটি blockDAG, একটি TriStream মডেল দ্বারা পরিচালিত — চারটি সিল লেনে দুটি proof-of-work পরিবার প্লাস proof-of-stake — এবং BLS-aggregated proof-of-stake BFT দ্বারা চূড়ান্তকৃত।",
+      " কনসেনসাস হলো GhostDAG দ্বারা সাজানো একটি DAG, একটি TriStream মডেল দ্বারা পরিচালিত — চারটি সিল লেনে দুটি proof-of-work পরিবার প্লাস proof-of-stake — এবং BLS-aggregated proof-of-stake BFT দ্বারা চূড়ান্তকৃত।",
     abstractPara2a:
       "মূল্য স্থানান্তর একটি Orchard-স্টাইল নোট মডেল এবং recursive zk-SNARK দিয়ে ডিফল্টভাবে shielded যার কোনো trusted setup প্রয়োজন নেই। পিয়ার স্তরটি bootstrapless, ট্রাফিক একটি onion Sphinx mixnet-এ চলে, এক্সিকিউশন একটি multi-VM L2 (EVM, WASM, Cairo) এবং একটি recursive ZK-rollup L3-এর মাধ্যমে স্কেল করে, এবং যে অলস GPU-গুলো Stream B মাইন করে সেগুলোই শক্তি দেয় ",
     abstractPara2c: ", একটি যাচাইযোগ্য অন-চেইন-settle-করা কম্পিউট মার্কেট।",
@@ -655,7 +655,7 @@ export const bn: LocaleDict = {
 
     northStar1Title: "DAG, একটি চেইন নয়",
     northStar1Desc:
-      "GhostDAG দ্বারা সাজানো একটি multi-parent blockDAG — সৎ প্যারালাল কাজ অন্তর্ভুক্ত হয়, orphan হয় না।",
+      "GhostDAG দ্বারা সাজানো একটি multi-parent DAG — সৎ প্যারালাল কাজ অন্তর্ভুক্ত হয়, orphan হয় না।",
     northStar2Title: "ডিফল্টভাবে গোপনীয়তা",
     northStar2Desc:
       "ডিফল্ট লেনদেন no-trusted-setup zk-SNARK দিয়ে প্রেরক, প্রাপক, এবং পরিমাণ গোপন করে। স্বচ্ছ হলো ব্যতিক্রম।",
@@ -743,7 +743,7 @@ export const bn: LocaleDict = {
     // solution slide
     solutionTitle: "PYRAX আপস প্রত্যাখ্যান করে",
     solutionBody:
-      "প্যারালাল থ্রুপুটের জন্য একটি GhostDAG blockDAG, অডিটর viewing key সহ ডিফল্টভাবে-shielded গোপনীয়তা, তিনটি ভার্চুয়াল মেশিন, এবং একটি যাচাইযোগ্য কম্পিউট মার্কেট — সর্বনিম্ন-স্তরের টাইপে invariant হিসেবে বাধ্যতামূলক।",
+      "প্যারালাল থ্রুপুটের জন্য একটি GhostDAG, অডিটর viewing key সহ ডিফল্টভাবে-shielded গোপনীয়তা, তিনটি ভার্চুয়াল মেশিন, এবং একটি যাচাইযোগ্য কম্পিউট মার্কেট — সর্বনিম্ন-স্তরের টাইপে invariant হিসেবে বাধ্যতামূলক।",
     solutionCard1Title: "প্যারালাল",
     solutionCard1Desc: "GhostDAG সৎ কাজকে orphan না করে অন্তর্ভুক্ত করে।",
     solutionCard2Title: "ব্যক্তিগত",

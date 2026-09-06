@@ -31,7 +31,7 @@ export const content: CategoryContent = {
         how: "Customer balances, counterparties, and amounts stay hidden on-chain, while per-account viewing keys give auditors and regulators read-only, auditable access without the ability to move funds.",
       },
       {
-        feature: "GhostDAG blockDAG (500k-TPS target)",
+        feature: "GhostDAG (500k-TPS target)",
         how: "Parallel block production absorbs retail payment peaks - payroll days, holidays, refunds - without the throughput ceiling or fee spikes of linear chains.",
       },
       {
@@ -91,7 +91,7 @@ export const content: CategoryContent = {
         how: "Network-layer mixing hides transaction origin and timing, so even traffic analysis cannot link a sender to a recipient corridor.",
       },
       {
-        feature: "GhostDAG blockDAG (500k-TPS target)",
+        feature: "GhostDAG (500k-TPS target)",
         how: "Parallel throughput sustains the volume of a global retail payments network - millions of small transfers per day - without congestion pricing.",
       },
     ],
@@ -195,7 +195,7 @@ export const content: CategoryContent = {
         how: "Margin, collateral, and DvP legs are escrowed and released atomically, removing the window where one side has paid but not received.",
       },
       {
-        feature: "GhostDAG blockDAG (500k-TPS target)",
+        feature: "GhostDAG (500k-TPS target)",
         how: "Parallel block production sustains exchange-grade order and settlement throughput without the latency and fee volatility of linear chains.",
       },
     ],
@@ -439,7 +439,7 @@ export const content: CategoryContent = {
     ],
     solutions: [
       {
-        feature: "GhostDAG blockDAG (500k-TPS target)",
+        feature: "GhostDAG (500k-TPS target)",
         how: "Parallel, high-throughput block production lets a neobank serve millions of daily transactions at sub-cent cost without renting a sponsor bank’s rail.",
       },
       {
@@ -503,7 +503,7 @@ export const content: CategoryContent = {
         how: "Institutional flows and counterparties stay confidential, while central banks and supervisors use viewing keys for real-time, read-only oversight of settlement.",
       },
       {
-        feature: "GhostDAG blockDAG (500k-TPS target)",
+        feature: "GhostDAG (500k-TPS target)",
         how: "Parallel throughput sustains RTGS-grade wholesale settlement volume, letting many institutions clear concurrently without a throughput ceiling.",
       },
       {

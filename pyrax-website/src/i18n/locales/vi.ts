@@ -4,7 +4,7 @@ type LocaleDict = { [K in keyof Dict]?: Partial<Dict[K]> };
 export const vi: LocaleDict = {
   meta: {
     titleSuffix: "Mạng PYRAX™",
-    description: "PYRAX là một Layer-1 được xây dựng từ đầu: một blockDAG theo GhostDAG, riêng tư theo mặc định, phi tập trung hoàn toàn, kháng ISP — cùng một thị trường điện toán AI có thể kiểm chứng. Mục tiêu 500,000+ TPS.",
+    description: "PYRAX là một Layer-1 được xây dựng từ đầu: một DAG theo GhostDAG, riêng tư theo mặc định, phi tập trung hoàn toàn, kháng ISP — cùng một thị trường điện toán AI có thể kiểm chứng. Mục tiêu 500,000+ TPS.",
   },
   nav: {
     products: "Sản phẩm",
@@ -47,7 +47,7 @@ export const vi: LocaleDict = {
     title: "Bốn bất biến, không phải tính năng",
     subtitle: "Hầu hết các mạng chỉ gắn thêm chúng vào. PYRAX thực thi chúng ngay trong các kiểu dữ liệu cấp thấp nhất.",
     throughputT: "Thông lượng cao",
-    throughputD: "Một blockDAG theo GhostDAG chấp nhận nhiều khối cùng lúc — công việc song song trung thực được đưa vào, chứ không bị bỏ mồ côi. Mục tiêu: 500,000+ TPS ở dạng tổng hợp đã được đo lường và đánh giá hiệu năng.",
+    throughputD: "Một DAG theo GhostDAG chấp nhận nhiều khối cùng lúc — công việc song song trung thực được đưa vào, chứ không bị bỏ mồ côi. Mục tiêu: 500,000+ TPS ở dạng tổng hợp đã được đo lường và đánh giá hiệu năng.",
     privacyT: "Riêng tư theo mặc định",
     privacyD: "Mọi giao dịch chuyển tiền đều được che chắn theo mặc định bằng các bằng chứng zero-knowledge không cần thiết lập tin cậy. Người gửi, người nhận và số tiền đều được ẩn đi. Giao dịch minh bạch là ngoại lệ được chỉ định rõ.",
     decentralT: "Phi tập trung hoàn toàn",
@@ -159,7 +159,7 @@ export const vi: LocaleDict = {
     tx6: 'Quản trị',
 
     metaTitle: 'Công nghệ — Mạng PYRAX™',
-    metaDescription: 'Cách PYRAX hoạt động: một blockDAG theo GhostDAG được niêm phong bởi ba luồng qua năm làn, tính chung cuộc proof-of-stake bằng BLS, quyền riêng tư che chắn theo mặc định, một tầng thực thi đa máy ảo, thị trường điện toán NEURAX, một mạng lưới không cần bootstrap và kháng ISP, cùng một lộ trình tới mainnet có cổng kiểm toán.',
+    metaDescription: 'Cách PYRAX hoạt động: một DAG theo GhostDAG được niêm phong bởi ba luồng qua năm làn, tính chung cuộc proof-of-stake bằng BLS, quyền riêng tư che chắn theo mặc định, một tầng thực thi đa máy ảo, thị trường điện toán NEURAX, một mạng lưới không cần bootstrap và kháng ISP, cùng một lộ trình tới mainnet có cổng kiểm toán.',
 
     heroEyebrow: 'Công nghệ',
     heroTitlePre: 'Một Layer-1 vừa ',
@@ -167,12 +167,12 @@ export const vi: LocaleDict = {
     heroTitleMid: ', ',
     heroTitlePrivate: 'riêng tư',
     heroTitlePost: ', vừa có thể chứng minh',
-    heroLede: 'Một binary, bốn chainspec. Một blockDAG đưa vào công việc song song trung thực thay vì bỏ mồ côi nó, các giao dịch chuyển tiền được che chắn theo mặc định, ba máy ảo, và một thị trường điện toán có thể kiểm chứng — với một cuộc kiểm toán bên ngoài duy nhất đứng giữa mã nguồn và mainnet.',
+    heroLede: 'Một binary, bốn chainspec. Một DAG đưa vào công việc song song trung thực thay vì bỏ mồ côi nó, các giao dịch chuyển tiền được che chắn theo mặc định, ba máy ảo, và một thị trường điện toán có thể kiểm chứng — với một cuộc kiểm toán bên ngoài duy nhất đứng giữa mã nguồn và mainnet.',
 
     consensusEyebrow: '01 · Đồng thuận',
     consensusTitle: 'GhostDAG + TriStream',
     consensusLede1: 'PYRAX sắp xếp một ',
-    consensusLedeBlockdag: 'blockDAG',
+    consensusLedeDAG: 'DAG',
     consensusLede2: ', không phải một chuỗi đơn lẻ. Quy tắc k-cluster của GhostDAG chọn ra một "tập xanh" gồm các khối kết nối tốt và sắp xếp mọi thứ theo một chuỗi cha được chọn — nên các khối trung thực được đào song song đều được ',
     consensusLedeIncluded: 'đưa vào và tưởng thưởng',
     consensusLede3: ', chứ không bị bỏ mồ côi. Đó là điều cho phép thông lượng mở rộng mà không hy sinh tính bảo mật của proof-of-work.',
@@ -352,7 +352,7 @@ export const vi: LocaleDict = {
     techStatRecursiveProof: 'Bằng chứng đệ quy L3',
     techStatOpenCore: 'giao thức open-core',
 
-    techCard1T: 'blockDAG GhostDAG',
+    techCard1T: 'GhostDAG',
     techCard1D: 'Một mạng lưới khối đa cha được sắp xếp bởi GhostDAG (tập xanh k-cluster), nên công việc song song trung thực được đưa vào, không bị bỏ mồ côi.',
     techCard2T: 'Đào TriStream',
     techCard2D: 'Ba luồng qua năm làn niêm phong — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU), và tính chung cuộc proof-of-stake bằng BLS.',
@@ -413,7 +413,7 @@ export const vi: LocaleDict = {
     industriesBody: '10 danh mục · 100 loại hình doanh nghiệp · dự báo + ý tưởng dApp cho buildathon.',
 
     techConsensusName: 'GhostDAG + TriStream',
-    techConsensusDesc: 'Một blockDAG được sắp xếp bởi GhostDAG; ba luồng, năm làn niêm phong.',
+    techConsensusDesc: 'Một DAG được sắp xếp bởi GhostDAG; ba luồng, năm làn niêm phong.',
     techPrivacyName: 'Riêng tư theo mặc định',
     techPrivacyDesc: 'Giao dịch che chắn với các bằng chứng ZK không cần thiết lập tin cậy.',
     techVmsName: 'Đa máy ảo (EVM/WASM/Cairo)',
@@ -493,7 +493,7 @@ export const vi: LocaleDict = {
     fact4Label: 'giao thức open-core',
 
     missionTitle: 'Sứ mệnh của chúng tôi',
-    missionPara1: 'Các blockchain công khai buộc người ta chọn một lựa chọn sai lầm: minh bạch làm rò rỉ toàn bộ đời sống tài chính của bạn, hay các công cụ riêng tư gắn thêm như một suy nghĩ muộn màng. PYRAX bác bỏ sự đánh đổi đó. Một blockDAG GhostDAG mang lại thông lượng của công việc song song; các giao dịch chuyển tiền che chắn theo mặc định mang lại quyền riêng tư mà không phải yêu cầu; một tầng thực thi đa máy ảo đón nhà phát triển ở đúng nơi họ đang đứng; và NEURAX biến GPU nhàn rỗi thành một thị trường điện toán mà bạn thực sự có thể kiểm chứng.',
+    missionPara1: 'Các blockchain công khai buộc người ta chọn một lựa chọn sai lầm: minh bạch làm rò rỉ toàn bộ đời sống tài chính của bạn, hay các công cụ riêng tư gắn thêm như một suy nghĩ muộn màng. PYRAX bác bỏ sự đánh đổi đó. Một GhostDAG mang lại thông lượng của công việc song song; các giao dịch chuyển tiền che chắn theo mặc định mang lại quyền riêng tư mà không phải yêu cầu; một tầng thực thi đa máy ảo đón nhà phát triển ở đúng nơi họ đang đứng; và NEURAX biến GPU nhàn rỗi thành một thị trường điện toán mà bạn thực sự có thể kiểm chứng.',
     missionPara2: 'Chúng tôi cố tình không màu mè về con đường: một mô phỏng trung thực chạy hôm nay, một alpha đóng, một testnet công khai, và một cuộc kiểm toán bên ngoài duy nhất trước khi bất cứ thứ gì mang giá trị thật.',
 
     believeTitle: 'Điều chúng tôi tin',
@@ -524,7 +524,7 @@ export const vi: LocaleDict = {
     abstractLabel: 'Tóm tắt',
     abstractPara1a: 'PYRAX là một Layer-1 được triển khai bằng Rust từ đầu, tổ chức quanh bốn thuộc tính mà hầu hết các mạng chỉ gắn thêm nhưng PYRAX thực thi như những bất biến: ',
     abstractPara1b: 'thông lượng cao, riêng tư theo mặc định, phi tập trung hoàn toàn, và kháng giám sát ở cấp độ ISP.',
-    abstractPara1c: ' Đồng thuận là một blockDAG được sắp xếp bởi GhostDAG, được nuôi bởi một mô hình TriStream — hai họ proof-of-work qua bốn làn niêm phong cộng với proof-of-stake — và được làm chung cuộc bằng BFT proof-of-stake tổng hợp bằng BLS.',
+    abstractPara1c: ' Đồng thuận là một DAG được sắp xếp bởi GhostDAG, được nuôi bởi một mô hình TriStream — hai họ proof-of-work qua bốn làn niêm phong cộng với proof-of-stake — và được làm chung cuộc bằng BFT proof-of-stake tổng hợp bằng BLS.',
     abstractPara2a: 'Việc chuyển giá trị được che chắn theo mặc định với một mô hình note kiểu Orchard và các zk-SNARK đệ quy không cần thiết lập tin cậy. Tầng peer không cần bootstrap, lưu lượng đi qua một mixnet Sphinx kiểu onion, thực thi mở rộng qua một L2 đa máy ảo (EVM, WASM, Cairo) và một L3 ZK-rollup đệ quy, và chính những GPU nhàn rỗi đào Stream B cấp năng lượng cho ',
     abstractPara2c: ', một thị trường điện toán có thể kiểm chứng, thanh toán on-chain.',
 
@@ -532,7 +532,7 @@ export const vi: LocaleDict = {
     northStarsSubtitle: 'Là ràng buộc, không phải khát vọng — các crate nền tảng mã hóa chúng để mọi tầng về sau đều được xây dựng dựa trên chúng.',
 
     northStar1Title: 'DAG, không phải chuỗi',
-    northStar1Desc: 'Một blockDAG đa cha được sắp xếp bởi GhostDAG — công việc song song trung thực được đưa vào, không bị bỏ mồ côi.',
+    northStar1Desc: 'Một DAG đa cha được sắp xếp bởi GhostDAG — công việc song song trung thực được đưa vào, không bị bỏ mồ côi.',
     northStar2Title: 'Riêng tư theo mặc định',
     northStar2Desc: 'Giao dịch mặc định ẩn người gửi, người nhận và số tiền bằng zk-SNARK không cần thiết lập tin cậy. Minh bạch là ngoại lệ.',
     northStar3Title: 'Không có boot node',
@@ -606,7 +606,7 @@ export const vi: LocaleDict = {
     problemCard3Desc: 'Hầu hết các mạng dựa vào máy chủ bootstrap do công ty vận hành và các khóa đặc quyền — những điểm lỗi và kiểm soát duy nhất.',
 
     solutionTitle: 'PYRAX từ chối sự đánh đổi',
-    solutionBody: 'Một blockDAG GhostDAG cho thông lượng song song, quyền riêng tư che chắn theo mặc định với viewing key cho kiểm toán viên, ba máy ảo, và một thị trường điện toán có thể kiểm chứng — được thực thi như những bất biến trong các kiểu dữ liệu cấp thấp nhất.',
+    solutionBody: 'Một GhostDAG cho thông lượng song song, quyền riêng tư che chắn theo mặc định với viewing key cho kiểm toán viên, ba máy ảo, và một thị trường điện toán có thể kiểm chứng — được thực thi như những bất biến trong các kiểu dữ liệu cấp thấp nhất.',
     solutionCard1Title: 'Song song',
     solutionCard1Desc: 'GhostDAG đưa công việc trung thực vào thay vì bỏ mồ côi nó.',
     solutionCard2Title: 'Riêng tư',

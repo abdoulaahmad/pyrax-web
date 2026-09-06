@@ -4,7 +4,7 @@ type LocaleDict = { [K in keyof Dict]?: Partial<Dict[K]> };
 export const pl: LocaleDict = {
   meta: {
     titleSuffix: "Sieć PYRAX™",
-    description: "PYRAX to zbudowany od podstaw Layer-1: blockDAG oparty na GhostDAG, prywatny domyślnie, w pełni zdecentralizowany, odporny na ISP — z weryfikowalnym rynkiem obliczeń AI. Docelowa wydajność 500,000+ TPS.",
+    description: "PYRAX to zbudowany od podstaw Layer-1: DAG oparty na GhostDAG, prywatny domyślnie, w pełni zdecentralizowany, odporny na ISP — z weryfikowalnym rynkiem obliczeń AI. Docelowa wydajność 500,000+ TPS.",
   },
   nav: {
     products: "Produkty",
@@ -47,7 +47,7 @@ export const pl: LocaleDict = {
     title: "Cztery niezmienniki, nie funkcje",
     subtitle: "Większość sieci dodaje to później. PYRAX egzekwuje je w swoich najniższych typach.",
     throughputT: "Wysoka przepustowość",
-    throughputD: "blockDAG oparty na GhostDAG akceptuje wiele bloków naraz — uczciwa praca równoległa jest włączana, a nie porzucana. Cel: 500,000+ TPS jako zmierzony, przetestowany wskaźnik zbiorczy.",
+    throughputD: "DAG oparty na GhostDAG akceptuje wiele bloków naraz — uczciwa praca równoległa jest włączana, a nie porzucana. Cel: 500,000+ TPS jako zmierzony, przetestowany wskaźnik zbiorczy.",
     privacyT: "Prywatny domyślnie",
     privacyD: "Każdy transfer jest domyślnie chroniony dowodami zero-knowledge bez zaufanej konfiguracji. Nadawca, odbiorca i kwota są ukryte. Przejrzystość to jawny wyjątek.",
     decentralT: "W pełni zdecentralizowany",
@@ -159,7 +159,7 @@ export const pl: LocaleDict = {
     tx6: 'Zarządzanie',
 
     metaTitle: 'Technologia — Sieć PYRAX™',
-    metaDescription: 'Jak działa PYRAX: blockDAG oparty na GhostDAG uszczelniany trzema strumieniami na pięciu torach, finalność BLS proof-of-stake, prywatność chroniona domyślnie, wielomaszynowa warstwa wykonawcza, rynek obliczeń NEURAX, sieć bez bootstrapu odporna na ISP oraz ścieżka do mainnetu strzeżona audytem.',
+    metaDescription: 'Jak działa PYRAX: DAG oparty na GhostDAG uszczelniany trzema strumieniami na pięciu torach, finalność BLS proof-of-stake, prywatność chroniona domyślnie, wielomaszynowa warstwa wykonawcza, rynek obliczeń NEURAX, sieć bez bootstrapu odporna na ISP oraz ścieżka do mainnetu strzeżona audytem.',
 
     heroEyebrow: 'Technologia',
     heroTitlePre: 'Layer-1, który jest ',
@@ -167,12 +167,12 @@ export const pl: LocaleDict = {
     heroTitleMid: ', ',
     heroTitlePrivate: 'prywatny',
     heroTitlePost: ' i dowodliwy',
-    heroLede: 'Jeden plik binarny, cztery chainspecy. blockDAG, który włącza uczciwą pracę równoległą zamiast ją porzucać, transfery domyślnie chronione, trzy maszyny wirtualne oraz weryfikowalny rynek obliczeń — z jednym zewnętrznym audytem stojącym pomiędzy kodem a mainnetem.',
+    heroLede: 'Jeden plik binarny, cztery chainspecy. DAG, który włącza uczciwą pracę równoległą zamiast ją porzucać, transfery domyślnie chronione, trzy maszyny wirtualne oraz weryfikowalny rynek obliczeń — z jednym zewnętrznym audytem stojącym pomiędzy kodem a mainnetem.',
 
     consensusEyebrow: '01 · Konsensus',
     consensusTitle: 'GhostDAG + TriStream',
     consensusLede1: 'PYRAX porządkuje ',
-    consensusLedeBlockdag: 'blockDAG',
+    consensusLedeDAG: 'DAG',
     consensusLede2: ', a nie pojedynczy łańcuch. Reguła k-klastrów GhostDAG wybiera „niebieski zbiór” dobrze połączonych bloków i porządkuje wszystko względem wybranego łańcucha rodzicielskiego — więc uczciwe bloki wykopane równolegle są ',
     consensusLedeIncluded: 'włączane i nagradzane',
     consensusLede3: ', a nie porzucane. To właśnie pozwala skalować przepustowość bez poświęcania bezpieczeństwa proof-of-work.',
@@ -352,7 +352,7 @@ export const pl: LocaleDict = {
     techStatRecursiveProof: 'Rekurencyjny dowód L3',
     techStatOpenCore: 'protokół open-core',
 
-    techCard1T: 'blockDAG GhostDAG',
+    techCard1T: 'GhostDAG',
     techCard1D: 'Wielorodzicielska sieć bloków uporządkowana przez GhostDAG (niebieski zbiór k-klastra), więc uczciwa praca równoległa jest włączana, a nie porzucana.',
     techCard2T: 'Kopanie TriStream',
     techCard2D: 'Trzy strumienie na pięciu torach uszczelniania — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU) oraz finalność BLS proof-of-stake.',
@@ -413,7 +413,7 @@ export const pl: LocaleDict = {
     industriesBody: '10 kategorii · 100 typów firm · prognozy + pomysły na dApp na buildathon.',
 
     techConsensusName: 'GhostDAG + TriStream',
-    techConsensusDesc: 'blockDAG uporządkowany przez GhostDAG; trzy strumienie, pięć torów uszczelniania.',
+    techConsensusDesc: 'DAG uporządkowany przez GhostDAG; trzy strumienie, pięć torów uszczelniania.',
     techPrivacyName: 'Prywatny domyślnie',
     techPrivacyDesc: 'Chronione transfery z dowodami ZK bez zaufanej konfiguracji.',
     techVmsName: 'Wielomaszynowy (EVM/WASM/Cairo)',
@@ -493,7 +493,7 @@ export const pl: LocaleDict = {
     fact4Label: 'protokół open-core',
 
     missionTitle: 'Nasza misja',
-    missionPara1: 'Publiczne blockchainy wymusiły fałszywy wybór: przejrzystość, która ujawnia całe Twoje życie finansowe, albo narzędzia prywatności doklejone po fakcie. PYRAX odrzuca ten kompromis. blockDAG GhostDAG daje przepustowość pracy równoległej; chronione domyślnie transfery dają prywatność bez pytania; wielomaszynowa warstwa wykonawcza spotyka deweloperów tam, gdzie są; a NEURAX zamienia bezczynne GPU w rynek obliczeń, który naprawdę można zweryfikować.',
+    missionPara1: 'Publiczne blockchainy wymusiły fałszywy wybór: przejrzystość, która ujawnia całe Twoje życie finansowe, albo narzędzia prywatności doklejone po fakcie. PYRAX odrzuca ten kompromis. GhostDAG daje przepustowość pracy równoległej; chronione domyślnie transfery dają prywatność bez pytania; wielomaszynowa warstwa wykonawcza spotyka deweloperów tam, gdzie są; a NEURAX zamienia bezczynne GPU w rynek obliczeń, który naprawdę można zweryfikować.',
     missionPara2: 'Celowo jesteśmy pozbawieni blichtru co do ścieżki: wierna symulacja działająca dziś, zamknięta alfa, publiczny testnet i jeden zewnętrzny audyt zanim cokolwiek zaniesie prawdziwą wartość.',
 
     believeTitle: 'W co wierzymy',
@@ -524,7 +524,7 @@ export const pl: LocaleDict = {
     abstractLabel: 'Streszczenie',
     abstractPara1a: 'PYRAX to zbudowany od podstaw, zaimplementowany w Rust Layer-1 zorganizowany wokół czterech właściwości, które większość sieci doszywa, ale PYRAX egzekwuje jako niezmienniki: ',
     abstractPara1b: 'wysoka przepustowość, prywatność domyślna, pełna decentralizacja i odporność na inwigilację na poziomie ISP.',
-    abstractPara1c: ' Konsensus to blockDAG uporządkowany przez GhostDAG, zasilany modelem TriStream — dwie rodziny proof-of-work na czterech torach uszczelniania plus proof-of-stake — i finalizowany przez BFT proof-of-stake agregowany przez BLS.',
+    abstractPara1c: ' Konsensus to DAG uporządkowany przez GhostDAG, zasilany modelem TriStream — dwie rodziny proof-of-work na czterech torach uszczelniania plus proof-of-stake — i finalizowany przez BFT proof-of-stake agregowany przez BLS.',
     abstractPara2a: 'Transfer wartości jest domyślnie chroniony modelem not w stylu Orchard i rekurencyjnymi zk-SNARK, które nie wymagają zaufanej konfiguracji. Warstwa węzłów jest bez bootstrapu, ruch przechodzi przez onion mixnet Sphinx, wykonanie skaluje się przez wielomaszynowe L2 (EVM, WASM, Cairo) i rekurencyjny ZK-rollup L3, a te same bezczynne GPU, które kopią Stream B, zasilają ',
     abstractPara2c: ', weryfikowalny, rozliczany on-chain rynek obliczeń.',
 
@@ -532,7 +532,7 @@ export const pl: LocaleDict = {
     northStarsSubtitle: 'Ograniczenia, nie aspiracje — fundamentalne crate’y je kodują, aby każda późniejsza warstwa była budowana względem nich.',
 
     northStar1Title: 'DAG, nie łańcuch',
-    northStar1Desc: 'Wielorodzicielski blockDAG uporządkowany przez GhostDAG — uczciwa praca równoległa jest włączana, a nie porzucana.',
+    northStar1Desc: 'Wielorodzicielski DAG uporządkowany przez GhostDAG — uczciwa praca równoległa jest włączana, a nie porzucana.',
     northStar2Title: 'Prywatność domyślna',
     northStar2Desc: 'Domyślna transakcja ukrywa nadawcę, odbiorcę i kwotę dzięki zk-SNARK bez zaufanej konfiguracji. Przejrzysta to wyjątek.',
     northStar3Title: 'Brak węzła startowego',
@@ -606,7 +606,7 @@ export const pl: LocaleDict = {
     problemCard3Desc: 'Większość sieci opiera się na serwerach bootstrap prowadzonych przez firmy i uprzywilejowanych kluczach — pojedynczych punktach awarii i kontroli.',
 
     solutionTitle: 'PYRAX odrzuca kompromis',
-    solutionBody: 'blockDAG GhostDAG dla równoległej przepustowości, chroniona domyślnie prywatność z kluczami podglądu dla audytorów, trzy maszyny wirtualne i weryfikowalny rynek obliczeń — egzekwowane jako niezmienniki w typach najniższego poziomu.',
+    solutionBody: 'GhostDAG dla równoległej przepustowości, chroniona domyślnie prywatność z kluczami podglądu dla audytorów, trzy maszyny wirtualne i weryfikowalny rynek obliczeń — egzekwowane jako niezmienniki w typach najniższego poziomu.',
     solutionCard1Title: 'Równoległy',
     solutionCard1Desc: 'GhostDAG włącza uczciwą pracę zamiast ją porzucać.',
     solutionCard2Title: 'Prywatny',

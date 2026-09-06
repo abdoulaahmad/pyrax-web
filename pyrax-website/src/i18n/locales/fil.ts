@@ -80,7 +80,7 @@ export const fil: LocaleDict = {
     tx6: 'Governance',
 
     metaTitle: 'Teknolohiya — PYRAX™ Network',
-    metaDescription: 'Paano gumagana ang PYRAX: isang GhostDAG blockDAG na sini-seal ng tatlong stream sa limang lane, BLS proof-of-stake finality, shielded-by-default na privacy, isang multi-VM execution layer, ang NEURAX compute market, isang bootstrapless na ISP-resistant na network, at isang audit-gated na landas patungong mainnet.',
+    metaDescription: 'Paano gumagana ang PYRAX: isang GhostDAG na sini-seal ng tatlong stream sa limang lane, BLS proof-of-stake finality, shielded-by-default na privacy, isang multi-VM execution layer, ang NEURAX compute market, isang bootstrapless na ISP-resistant na network, at isang audit-gated na landas patungong mainnet.',
 
     heroEyebrow: 'Teknolohiya',
     heroTitlePre: 'Isang Layer-1 na ',
@@ -88,12 +88,12 @@ export const fil: LocaleDict = {
     heroTitleMid: ', ',
     heroTitlePrivate: 'pribado',
     heroTitlePost: ', at provable',
-    heroLede: 'Isang binary, apat na chainspec. Isang blockDAG na nagsasama ng tapat na parallel na trabaho sa halip na i-orphan ito, mga transfer na shielded bilang default, tatlong virtual machine, at isang verifiable na compute market — na may iisang panlabas na audit na nakatayo sa pagitan ng code at mainnet.',
+    heroLede: 'Isang binary, apat na chainspec. Isang DAG na nagsasama ng tapat na parallel na trabaho sa halip na i-orphan ito, mga transfer na shielded bilang default, tatlong virtual machine, at isang verifiable na compute market — na may iisang panlabas na audit na nakatayo sa pagitan ng code at mainnet.',
 
     consensusEyebrow: '01 · Consensus',
     consensusTitle: 'GhostDAG + TriStream',
     consensusLede1: 'Nag-o-order ang PYRAX ng isang ',
-    consensusLedeBlockdag: 'blockDAG',
+    consensusLedeDAG: 'DAG',
     consensusLede2: ', hindi iisang chain. Pinipili ng k-cluster rule ng GhostDAG ang isang "blue set" ng mahusay na nakakonektang mga block at ino-order ang lahat kaugnay ng isang selected-parent chain — kaya ang mga tapat na block na minahan nang parallel ay ',
     consensusLedeIncluded: 'isinasama at ginagantimpalaan',
     consensusLede3: ', hindi na-oorphan. Iyon ang nagpapahintulot sa throughput na mag-scale nang hindi isinasakripisyo ang seguridad ng proof-of-work.',
@@ -273,7 +273,7 @@ export const fil: LocaleDict = {
     techStatRecursiveProof: 'L3 recursive proof',
     techStatOpenCore: 'open-core na protocol',
 
-    techCard1T: 'GhostDAG blockDAG',
+    techCard1T: 'GhostDAG',
     techCard1D: 'Isang multi-parent na web ng mga block na ino-order ng GhostDAG (k-cluster blue set), kaya ang tapat na parallel na trabaho ay isinasama, hindi na-oorphan.',
     techCard2T: 'TriStream mining',
     techCard2D: 'Tatlong stream sa limang seal lane — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU), at BLS proof-of-stake finality.',
@@ -334,7 +334,7 @@ export const fil: LocaleDict = {
     industriesBody: '10 kategorya · 100 uri ng negosyo · mga projection + buildathon dApp na ideya.',
 
     techConsensusName: 'GhostDAG + TriStream',
-    techConsensusDesc: 'Isang blockDAG na ino-order ng GhostDAG; tatlong stream, limang seal lane.',
+    techConsensusDesc: 'Isang DAG na ino-order ng GhostDAG; tatlong stream, limang seal lane.',
     techPrivacyName: 'Pribado bilang default',
     techPrivacyDesc: 'Shielded transfers na may no-trusted-setup ZK proofs.',
     techVmsName: 'Multi-VM (EVM/WASM/Cairo)',
@@ -414,7 +414,7 @@ export const fil: LocaleDict = {
     fact4Label: 'open-core na protocol',
 
     missionTitle: 'Ang aming misyon',
-    missionPara1: 'Ang mga pampublikong blockchain ay nagpilit ng isang maling pagpipilian: transparency na naglalantad ng iyong buong buhay pinansyal, o mga privacy tool na idinagdag lang bilang huling-huli. Tinatanggihan ng PYRAX ang trade-off na ito. Ang isang GhostDAG blockDAG ay nagbibigay ng throughput ng parallel na trabaho; ang shielded-by-default na transfers ay nagbibigay ng privacy nang hindi humihingi; ang isang multi-VM execution layer ay sumasalubong sa mga developer kung nasaan sila; at ginagawa ng NEURAX ang idle na GPU sa isang market para sa compute na maaari mong talagang i-verify.',
+    missionPara1: 'Ang mga pampublikong blockchain ay nagpilit ng isang maling pagpipilian: transparency na naglalantad ng iyong buong buhay pinansyal, o mga privacy tool na idinagdag lang bilang huling-huli. Tinatanggihan ng PYRAX ang trade-off na ito. Ang isang GhostDAG ay nagbibigay ng throughput ng parallel na trabaho; ang shielded-by-default na transfers ay nagbibigay ng privacy nang hindi humihingi; ang isang multi-VM execution layer ay sumasalubong sa mga developer kung nasaan sila; at ginagawa ng NEURAX ang idle na GPU sa isang market para sa compute na maaari mong talagang i-verify.',
     missionPara2: 'Sinadya naming maging walang gilas tungkol sa landas: isang tapat na simulasyon na tumatakbo ngayon, isang saradong alpha, isang pampublikong testnet, at isang panlabas na audit bago magdala ng tunay na halaga ang anuman.',
 
     believeTitle: 'Ang aming pinaniniwalaan',
@@ -445,7 +445,7 @@ export const fil: LocaleDict = {
     abstractLabel: 'Abstract',
     abstractPara1a: 'Ang PYRAX ay isang from-scratch, Rust-implemented na Layer-1 na inayos sa apat na katangiang idinadagdag lang ng karamihan ng network ngunit ipinatutupad ng PYRAX bilang mga invariant: ',
     abstractPara1b: 'mataas na throughput, privacy bilang default, ganap na desentralisasyon, at resistensya sa ISP-level na surveillance.',
-    abstractPara1c: ' Ang consensus ay isang blockDAG na ino-order ng GhostDAG, pinapakain ng isang TriStream model — dalawang proof-of-work na pamilya sa apat na seal lane kasama ang proof-of-stake — at fina-finalize ng BLS-aggregated proof-of-stake BFT.',
+    abstractPara1c: ' Ang consensus ay isang DAG na ino-order ng GhostDAG, pinapakain ng isang TriStream model — dalawang proof-of-work na pamilya sa apat na seal lane kasama ang proof-of-stake — at fina-finalize ng BLS-aggregated proof-of-stake BFT.',
     abstractPara2a: 'Ang paglilipat ng halaga ay shielded bilang default gamit ang Orchard-style na note model at recursive zk-SNARKs na hindi nangangailangan ng trusted setup. Ang peer layer ay bootstrapless, sumasakay ang traffic sa isang onion Sphinx mixnet, ang execution ay nag-a-scale sa pamamagitan ng isang multi-VM L2 (EVM, WASM, Cairo) at isang recursive ZK-rollup L3, at ang parehong idle na GPU na nagmimina ng Stream B ang nagpapagana sa ',
     abstractPara2c: ', isang verifiable na on-chain-settled na compute market.',
 
@@ -453,7 +453,7 @@ export const fil: LocaleDict = {
     northStarsSubtitle: 'Mga hadlang, hindi mga mithiin — ini-encode ito ng mga foundation crate kaya ang bawat susunod na layer ay ginawa laban sa kanila.',
 
     northStar1Title: 'DAG, hindi isang chain',
-    northStar1Desc: 'Isang multi-parent na blockDAG na ino-order ng GhostDAG — ang tapat na parallel na trabaho ay isinasama, hindi na-oorphan.',
+    northStar1Desc: 'Isang multi-parent na DAG na ino-order ng GhostDAG — ang tapat na parallel na trabaho ay isinasama, hindi na-oorphan.',
     northStar2Title: 'Privacy bilang default',
     northStar2Desc: 'Ang default na transaksyon ay nagtatago ng nagpadala, tumanggap, at halaga gamit ang no-trusted-setup na zk-SNARKs. Ang transparent ang eksepsiyon.',
     northStar3Title: 'Walang boot node',
@@ -527,7 +527,7 @@ export const fil: LocaleDict = {
     problemCard3Desc: 'Karamihan sa mga network ay umaasa sa bootstrap server na pinapatakbo ng kompanya at privileged keys — mga solong punto ng pagkabigo at kontrol.',
 
     solutionTitle: 'Tinatanggihan ng PYRAX ang trade-off',
-    solutionBody: 'Isang GhostDAG blockDAG para sa parallel na throughput, shielded-by-default na privacy na may auditor viewing keys, tatlong virtual machine, at isang verifiable na compute market — ipinatutupad bilang mga invariant sa pinakamababang antas ng mga uri.',
+    solutionBody: 'Isang GhostDAG para sa parallel na throughput, shielded-by-default na privacy na may auditor viewing keys, tatlong virtual machine, at isang verifiable na compute market — ipinatutupad bilang mga invariant sa pinakamababang antas ng mga uri.',
     solutionCard1Title: 'Parallel',
     solutionCard1Desc: 'Isinasama ng GhostDAG ang tapat na trabaho sa halip na i-orphan ito.',
     solutionCard2Title: 'Pribado',
@@ -657,7 +657,7 @@ export const fil: LocaleDict = {
   meta: {
     titleSuffix: "PYRAX™ Network",
     description:
-      "Ang PYRAX ay isang Layer-1 na ginawa mula sa simula: isang GhostDAG blockDAG, pribado bilang default, ganap na desentralisado, ISP-resistant — na may verifiable na AI compute marketplace. Target na 500,000+ TPS.",
+      "Ang PYRAX ay isang Layer-1 na ginawa mula sa simula: isang GhostDAG, pribado bilang default, ganap na desentralisado, ISP-resistant — na may verifiable na AI compute marketplace. Target na 500,000+ TPS.",
   },
   nav: {
     products: "Mga Produkto",
@@ -703,7 +703,7 @@ export const fil: LocaleDict = {
       "Karamihan sa mga network ay idinadagdag lang ito. Ipinatutupad ng PYRAX ang mga ito sa pinakamababang antas ng mga uri ng data nito.",
     throughputT: "Mataas na throughput",
     throughputD:
-      "Tumatanggap ang GhostDAG blockDAG ng maraming block nang sabay-sabay — ang tapat na parallel na trabaho ay isinasama, hindi na-oorphan. Target: 500,000+ TPS bilang sinukat at benchmarked na aggregate.",
+      "Tumatanggap ang GhostDAG ng maraming block nang sabay-sabay — ang tapat na parallel na trabaho ay isinasama, hindi na-oorphan. Target: 500,000+ TPS bilang sinukat at benchmarked na aggregate.",
     privacyT: "Pribado bilang default",
     privacyD:
       "Ang bawat transfer ay shielded bilang default gamit ang no-trusted-setup na zero-knowledge proofs. Ang nagpadala, tumanggap, at halaga ay nakatago. Ang transparent ay ang eksplisitong eksepsiyon.",

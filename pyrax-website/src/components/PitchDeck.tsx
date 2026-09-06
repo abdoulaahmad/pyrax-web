@@ -84,7 +84,7 @@ const SLIDES: Slide[] = [
       <motion.div variants={stagger} initial="hidden" animate="show" className="mx-auto max-w-4xl">
         <Kicker>{t("pitch.kickerSolution", "The solution")}</Kicker>
         <Title>{t("pitch.solutionTitle", "PYRAX refuses the trade-off")}</Title>
-        <motion.p variants={item} className="mt-4 max-w-2xl text-lg text-muted">{t("pitch.solutionBody", "A GhostDAG blockDAG for parallel throughput, shielded-by-default privacy with auditor viewing keys, three virtual machines, and a verifiable compute market — enforced as invariants in the lowest-level types.")}</motion.p>
+        <motion.p variants={item} className="mt-4 max-w-2xl text-lg text-muted">{t("pitch.solutionBody", "A GhostDAG for parallel throughput, shielded-by-default privacy with auditor viewing keys, three virtual machines, and a verifiable compute market — enforced as invariants in the lowest-level types.")}</motion.p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { t: t("pitch.solutionCard1Title", "Parallel"), d: t("pitch.solutionCard1Desc", "GhostDAG includes honest work instead of orphaning it."), c: "#f68a24" },

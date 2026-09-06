@@ -4,7 +4,7 @@ type LocaleDict = { [K in keyof Dict]?: Partial<Dict[K]> };
 export const nl: LocaleDict = {
   meta: {
     titleSuffix: "PYRAX™ Netwerk",
-    description: "PYRAX is een volledig nieuw opgebouwde Layer-1: een GhostDAG-blockDAG, standaard privé, volledig gedecentraliseerd, ISP-bestendig — met een verifieerbare AI-computemarktplaats. Doel: 500,000+ TPS.",
+    description: "PYRAX is een volledig nieuw opgebouwde Layer-1: een GhostDAG, standaard privé, volledig gedecentraliseerd, ISP-bestendig — met een verifieerbare AI-computemarktplaats. Doel: 500,000+ TPS.",
   },
   nav: {
     products: "Producten",
@@ -47,7 +47,7 @@ export const nl: LocaleDict = {
     title: "Vier invarianten, geen functies",
     subtitle: "De meeste netwerken schroeven deze er achteraf op. PYRAX verankert ze in zijn laagste types.",
     throughputT: "Hoge doorvoer",
-    throughputD: "Een GhostDAG-blockDAG accepteert veel blokken tegelijk — eerlijk parallel werk wordt opgenomen, niet verweesd. Doel: 500,000+ TPS als een gemeten, gebenchmarkt totaal.",
+    throughputD: "Een GhostDAG accepteert veel blokken tegelijk — eerlijk parallel werk wordt opgenomen, niet verweesd. Doel: 500,000+ TPS als een gemeten, gebenchmarkt totaal.",
     privacyT: "Standaard privé",
     privacyD: "Elke overdracht wordt standaard afgeschermd met zero-knowledge-bewijzen zonder trusted setup. Verzender, ontvanger en bedrag blijven verborgen. Transparant is de expliciete uitzondering.",
     decentralT: "Volledig gedecentraliseerd",
@@ -159,7 +159,7 @@ export const nl: LocaleDict = {
     tx6: 'Governance',
 
     metaTitle: 'Technologie — PYRAX™ Netwerk',
-    metaDescription: 'Hoe PYRAX werkt: een GhostDAG-blockDAG verzegeld door drie streams over vijf lanes, BLS proof-of-stake-finaliteit, standaard afgeschermde privacy, een multi-VM-uitvoeringslaag, de NEURAX-computemarkt, een bootstrapless ISP-bestendig netwerk en een door audit bewaakt pad naar mainnet.',
+    metaDescription: 'Hoe PYRAX werkt: een GhostDAG verzegeld door drie streams over vijf lanes, BLS proof-of-stake-finaliteit, standaard afgeschermde privacy, een multi-VM-uitvoeringslaag, de NEURAX-computemarkt, een bootstrapless ISP-bestendig netwerk en een door audit bewaakt pad naar mainnet.',
 
     heroEyebrow: 'Technologie',
     heroTitlePre: 'Een Layer-1 die ',
@@ -167,12 +167,12 @@ export const nl: LocaleDict = {
     heroTitleMid: ', ',
     heroTitlePrivate: 'privé',
     heroTitlePost: ' en bewijsbaar is',
-    heroLede: 'Eén binary, vier chainspecs. Een blockDAG die eerlijk parallel werk opneemt in plaats van het te verwezen, overdrachten die standaard afgeschermd zijn, drie virtuele machines en een verifieerbare computemarkt — met één externe audit tussen de code en mainnet.',
+    heroLede: 'Eén binary, vier chainspecs. Een DAG die eerlijk parallel werk opneemt in plaats van het te verwezen, overdrachten die standaard afgeschermd zijn, drie virtuele machines en een verifieerbare computemarkt — met één externe audit tussen de code en mainnet.',
 
     consensusEyebrow: '01 · Consensus',
     consensusTitle: 'GhostDAG + TriStream',
     consensusLede1: 'PYRAX ordent een ',
-    consensusLedeBlockdag: 'blockDAG',
+    consensusLedeDAG: 'DAG',
     consensusLede2: ', geen enkele keten. De k-clusterregel van GhostDAG selecteert een "blauwe set" van goed verbonden blokken en ordent alles ten opzichte van een geselecteerde-ouderketen — zodat eerlijke blokken die parallel gemined worden ',
     consensusLedeIncluded: 'opgenomen en beloond',
     consensusLede3: ' worden, niet verweesd. Dat is wat de doorvoer laat opschalen zonder de veiligheid van proof-of-work op te offeren.',
@@ -352,7 +352,7 @@ export const nl: LocaleDict = {
     techStatRecursiveProof: 'L3 recursief bewijs',
     techStatOpenCore: 'open-core-protocol',
 
-    techCard1T: 'GhostDAG-blockDAG',
+    techCard1T: 'GhostDAG',
     techCard1D: 'Een web van blokken met meerdere ouders, geordend door GhostDAG (k-cluster blauwe set), zodat eerlijk parallel werk wordt opgenomen, niet verweesd.',
     techCard2T: 'TriStream-mining',
     techCard2D: 'Drie streams over vijf seal lanes — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU) en BLS proof-of-stake-finaliteit.',
@@ -413,7 +413,7 @@ export const nl: LocaleDict = {
     industriesBody: '10 categorieën · 100 bedrijfstypen · prognoses + buildathon-dApp-ideeën.',
 
     techConsensusName: 'GhostDAG + TriStream',
-    techConsensusDesc: 'Een blockDAG geordend door GhostDAG; drie streams, vijf seal lanes.',
+    techConsensusDesc: 'Een DAG geordend door GhostDAG; drie streams, vijf seal lanes.',
     techPrivacyName: 'Standaard privé',
     techPrivacyDesc: 'Afgeschermde overdrachten met ZK-bewijzen zonder trusted setup.',
     techVmsName: 'Multi-VM (EVM/WASM/Cairo)',
@@ -493,7 +493,7 @@ export const nl: LocaleDict = {
     fact4Label: 'open-core-protocol',
 
     missionTitle: 'Onze missie',
-    missionPara1: 'Publieke blockchains dwongen een valse keuze af: transparantie die je hele financiële leven lekt, of privacytools die er achteraf op geschroefd worden. PYRAX verwerpt die afweging. Een GhostDAG-blockDAG levert de doorvoer van parallel werk; standaard afgeschermde overdrachten geven privacy zonder erom te vragen; een multi-VM-uitvoeringslaag komt ontwikkelaars tegemoet waar ze zijn; en NEURAX maakt van ongebruikte GPUs een markt voor compute die je daadwerkelijk kunt verifiëren.',
+    missionPara1: 'Publieke blockchains dwongen een valse keuze af: transparantie die je hele financiële leven lekt, of privacytools die er achteraf op geschroefd worden. PYRAX verwerpt die afweging. Een GhostDAG levert de doorvoer van parallel werk; standaard afgeschermde overdrachten geven privacy zonder erom te vragen; een multi-VM-uitvoeringslaag komt ontwikkelaars tegemoet waar ze zijn; en NEURAX maakt van ongebruikte GPUs een markt voor compute die je daadwerkelijk kunt verifiëren.',
     missionPara2: 'We zijn bewust onopgesmukt over het pad: een getrouwe simulatie die vandaag draait, een gesloten alpha, een publiek testnet en één externe audit voordat iets echte waarde draagt.',
 
     believeTitle: 'Waar we in geloven',
@@ -524,7 +524,7 @@ export const nl: LocaleDict = {
     abstractLabel: 'Samenvatting',
     abstractPara1a: 'PYRAX is een volledig nieuw opgebouwde, in Rust geïmplementeerde Layer-1, georganiseerd rond vier eigenschappen die de meeste netwerken erop schroeven maar die PYRAX als invarianten afdwingt: ',
     abstractPara1b: 'hoge doorvoer, standaard privacy, volledige decentralisatie en bestendigheid tegen surveillance op ISP-niveau.',
-    abstractPara1c: ' De consensus is een blockDAG geordend door GhostDAG, gevoed door een TriStream-model — twee proof-of-work-families over vier seal lanes plus proof-of-stake — en gefinaliseerd door BLS-geaggregeerde proof-of-stake-BFT.',
+    abstractPara1c: ' De consensus is een DAG geordend door GhostDAG, gevoed door een TriStream-model — twee proof-of-work-families over vier seal lanes plus proof-of-stake — en gefinaliseerd door BLS-geaggregeerde proof-of-stake-BFT.',
     abstractPara2a: 'Waardeoverdracht is standaard afgeschermd met een note-model in Orchard-stijl en recursieve zk-SNARKs die geen trusted setup nodig hebben. De peer-laag is bootstrapless, verkeer loopt over een onion Sphinx-mixnet, uitvoering schaalt via een multi-VM L2 (EVM, WASM, Cairo) en een recursieve ZK-rollup L3, en dezelfde ongebruikte GPUs die Stream B minen, voeden ',
     abstractPara2c: ', een verifieerbare, on-chain afgerekende computemarkt.',
 
@@ -532,7 +532,7 @@ export const nl: LocaleDict = {
     northStarsSubtitle: 'Beperkingen, geen aspiraties — de foundation-crates coderen ze zodat elke latere laag ertegen wordt gebouwd.',
 
     northStar1Title: 'DAG, geen keten',
-    northStar1Desc: 'Een blockDAG met meerdere ouders geordend door GhostDAG — eerlijk parallel werk wordt opgenomen, niet verweesd.',
+    northStar1Desc: 'Een DAG met meerdere ouders geordend door GhostDAG — eerlijk parallel werk wordt opgenomen, niet verweesd.',
     northStar2Title: 'Standaard privacy',
     northStar2Desc: 'De standaardtransactie verbergt verzender, ontvanger en bedrag met zk-SNARKs zonder trusted setup. Transparant is de uitzondering.',
     northStar3Title: 'Geen boot node',
@@ -606,7 +606,7 @@ export const nl: LocaleDict = {
     problemCard3Desc: 'De meeste netwerken leunen op door het bedrijf beheerde bootstrap-servers en bevoorrechte keys — single points of failure en control.',
 
     solutionTitle: 'PYRAX weigert de afweging',
-    solutionBody: 'Een GhostDAG-blockDAG voor parallelle doorvoer, standaard afgeschermde privacy met viewing keys voor auditors, drie virtuele machines en een verifieerbare computemarkt — afgedwongen als invarianten in de types op het laagste niveau.',
+    solutionBody: 'Een GhostDAG voor parallelle doorvoer, standaard afgeschermde privacy met viewing keys voor auditors, drie virtuele machines en een verifieerbare computemarkt — afgedwongen als invarianten in de types op het laagste niveau.',
     solutionCard1Title: 'Parallel',
     solutionCard1Desc: 'GhostDAG neemt eerlijk werk op in plaats van het te verwezen.',
     solutionCard2Title: 'Privé',

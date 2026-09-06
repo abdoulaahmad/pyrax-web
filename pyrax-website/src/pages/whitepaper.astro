@@ -12,7 +12,7 @@ const TECH = "/whitepaper/pyrax-whitepaper-v4-technical.md";
 const PLAIN = "/whitepaper/pyrax-whitepaper-v4-plain-english.md";
 
 const northStars = [
-  { n: "01", t: t("wpPage.northStar1Title", "DAG, not a chain"), d: t("wpPage.northStar1Desc", "A multi-parent blockDAG ordered by GhostDAG — honest parallel work is included, not orphaned."), c: "#f68a24" },
+  { n: "01", t: t("wpPage.northStar1Title", "DAG, not a chain"), d: t("wpPage.northStar1Desc", "A multi-parent DAG ordered by GhostDAG — honest parallel work is included, not orphaned."), c: "#f68a24" },
   { n: "02", t: t("wpPage.northStar2Title", "Privacy by default"), d: t("wpPage.northStar2Desc", "The default transaction hides sender, receiver, and amount with no-trusted-setup zk-SNARKs. Transparent is the exception."), c: "#7c5cff" },
   { n: "03", t: t("wpPage.northStar3Title", "No boot node"), d: t("wpPage.northStar3Desc", "Peer discovery is bootstrapless — mDNS, Kademlia, peer exchange, and a signed seed list. No project server to join."), c: "#34d399" },
   { n: "04", t: t("wpPage.northStar4Title", "ISP-resistance"), d: t("wpPage.northStar4Desc", "Traffic and services ride an onion Sphinx mixnet with fixed-size packets — an observer sees only uniform encrypted flows."), c: "#5cbace" },
@@ -23,7 +23,7 @@ const toc = [
   t("wpPage.toc1", "Design Goals — Five North Stars"), t("wpPage.toc2", "Architecture Overview"), t("wpPage.toc3", "Performance & Scalability"), t("wpPage.toc4", "Consensus: GhostDAG + TriStream + BLS PoS"), t("wpPage.toc5", "Privacy: Shielded by Default"), t("wpPage.toc6", "Execution: Multi-VM L2"), t("wpPage.toc7", "L3 — Recursive ZK Rollup"), t("wpPage.toc8", "Networking: Bootstrapless"), t("wpPage.toc9", "Metadata Privacy & Anonymous Services"), t("wpPage.toc10", "State, Storage & Proofs"), t("wpPage.toc11", "NEURAX — Verifiable Compute"), t("wpPage.toc12", "Crucible — Zero-Fee Mining"), t("wpPage.toc13", "NOVA — Autonomous Operations"), t("wpPage.toc14", "Tokenomics"), t("wpPage.toc15", "Governance & the DAO"), t("wpPage.toc16", "The Four Networks"), t("wpPage.toc17", "Wallet, Apps, CLI & SDK"), t("wpPage.toc18", "RPC Surface"), t("wpPage.toc19", "Cryptographic Primitives"),
 ];
 ---
-<Site title="Whitepaper v4 — PYRAX™ Network" description="The PYRAX v4 whitepaper: a from-scratch Rust Layer-1 with a GhostDAG blockDAG, TriStream consensus, BLS proof-of-stake finality, shielded-by-default privacy, a multi-VM execution layer, and the NEURAX compute market. Technical and plain-English editions." lang={lang}>
+<Site title="Whitepaper v4 — PYRAX™ Network" description="The PYRAX v4 whitepaper: a from-scratch Rust Layer-1 with a GhostDAG, TriStream consensus, BLS proof-of-stake finality, shielded-by-default privacy, a multi-VM execution layer, and the NEURAX compute market. Technical and plain-English editions." lang={lang}>
   <section class="relative overflow-hidden border-b border-line">
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20">
@@ -41,7 +41,7 @@ const toc = [
   <section class="mx-auto max-w-4xl px-6 py-16">
     <div data-reveal class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-8">
       <div class="eyebrow text-faint">{t("wpPage.abstractLabel", "Abstract")}</div>
-      <p class="mt-4 text-muted">{t("wpPage.abstractPara1a", "PYRAX is a from-scratch, Rust-implemented Layer-1 organized around four properties most networks bolt on but PYRAX enforces as invariants: ")}<span class="text-ink">{t("wpPage.abstractPara1b", "high throughput, privacy by default, full decentralization, and resistance to ISP-level surveillance.")}</span>{t("wpPage.abstractPara1c", " Consensus is a blockDAG ordered by GhostDAG, fed by a TriStream model — two proof-of-work families across four seal lanes plus proof-of-stake — and finalized by BLS-aggregated proof-of-stake BFT.")}</p>
+      <p class="mt-4 text-muted">{t("wpPage.abstractPara1a", "PYRAX is a from-scratch, Rust-implemented Layer-1 organized around four properties most networks bolt on but PYRAX enforces as invariants: ")}<span class="text-ink">{t("wpPage.abstractPara1b", "high throughput, privacy by default, full decentralization, and resistance to ISP-level surveillance.")}</span>{t("wpPage.abstractPara1c", " Consensus is a DAG ordered by GhostDAG, fed by a TriStream model — two proof-of-work families across four seal lanes plus proof-of-stake — and finalized by BLS-aggregated proof-of-stake BFT.")}</p>
       <p class="mt-3 text-muted">{t("wpPage.abstractPara2a", "Value transfer is shielded by default with an Orchard-style note model and recursive zk-SNARKs that need no trusted setup. The peer layer is bootstrapless, traffic rides an onion Sphinx mixnet, execution scales through a multi-VM L2 (EVM, WASM, Cairo) and a recursive ZK-rollup L3, and the same idle GPUs that mine Stream B power ")}<span class="text-ink">NEURAX</span>{t("wpPage.abstractPara2c", ", a verifiable on-chain-settled compute market.")}</p>
     </div>
   </section>

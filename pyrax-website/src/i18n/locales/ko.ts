@@ -172,7 +172,7 @@ export const ko: LocaleDict = {
     consensusEyebrow: '01 · 합의',
     consensusTitle: 'GhostDAG + TriStream',
     consensusLede1: 'PYRAX는 단일 체인이 아니라 ',
-    consensusLedeBlockdag: '블록 DAG',
+    consensusLedeDAG: '블록 DAG',
     consensusLede2: '를 정렬합니다. GhostDAG의 k-클러스터 규칙은 잘 연결된 블록의 "블루 세트"를 선택하고 모든 것을 선택된 부모 체인을 기준으로 정렬합니다——따라서 병렬로 채굴된 정직한 블록은 고아가 되지 않고 ',
     consensusLedeIncluded: '포함되어 보상받습니다',
     consensusLede3: '. 이것이 바로 작업 증명의 보안을 희생하지 않으면서 처리량을 확장할 수 있게 하는 원리입니다.',

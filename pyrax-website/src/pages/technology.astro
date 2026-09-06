@@ -34,14 +34,14 @@ const vms = [
 
 const txTypes = [t("techPage.tx1", "Shielded"), t("techPage.tx2", "Transparent"), t("techPage.tx3", "Ethereum"), t("techPage.tx4", "Escrow"), t("techPage.tx5", "Stake"), t("techPage.tx6", "Governance")];
 ---
-<Site title={t("techPage.metaTitle", "Technology — PYRAX™ Network")} description={t("techPage.metaDescription", "How PYRAX works: a GhostDAG blockDAG sealed by three streams over five lanes, BLS proof-of-stake finality, shielded-by-default privacy, a multi-VM execution layer, the NEURAX compute market, a bootstrapless ISP-resistant network, and an audit-gated path to mainnet.")} lang={lang}>
+<Site title={t("techPage.metaTitle", "Technology — PYRAX™ Network")} description={t("techPage.metaDescription", "How PYRAX works: a GhostDAG sealed by three streams over five lanes, BLS proof-of-stake finality, shielded-by-default privacy, a multi-VM execution layer, the NEURAX compute market, a bootstrapless ISP-resistant network, and an audit-gated path to mainnet.")} lang={lang}>
   <!-- HERO -->
   <section class="relative overflow-hidden border-b border-line">
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20">
       <div class="eyebrow eyebrow-rule text-[color:var(--color-bolt-bright)]">{t("techPage.heroEyebrow", "Technology")}</div>
       <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">{t("techPage.heroTitlePre", "A Layer-1 that is ")}<span class="flame-text">{t("techPage.heroTitleParallel", "parallel")}</span>{t("techPage.heroTitleMid", ", ")}<span class="water-text">{t("techPage.heroTitlePrivate", "private")}</span>{t("techPage.heroTitlePost", ", and provable")}</h1>
-      <p class="mt-5 max-w-2xl text-lg text-muted">{t("techPage.heroLede", "One binary, four chainspecs. A blockDAG that includes honest parallel work instead of orphaning it, transfers that are shielded by default, three virtual machines, and a verifiable compute market — with a single external audit standing between the code and mainnet.")}</p>
+      <p class="mt-5 max-w-2xl text-lg text-muted">{t("techPage.heroLede", "One binary, four chainspecs. A DAG that includes honest parallel work instead of orphaning it, transfers that are shielded by default, three virtual machines, and a verifiable compute market — with a single external audit standing between the code and mainnet.")}</p>
     </div>
   </section>
 
@@ -58,7 +58,7 @@ const txTypes = [t("techPage.tx1", "Shielded"), t("techPage.tx2", "Transparent")
       <div data-reveal class="max-w-3xl">
         <div class="eyebrow text-[color:var(--color-brand)]">{t("techPage.consensusEyebrow", "01 · Consensus")}</div>
         <h2 class="mt-2 font-display text-3xl font-extrabold">{t("techPage.consensusTitle", "GhostDAG + TriStream")}</h2>
-        <p class="mt-3 text-muted">{t("techPage.consensusLede1", "PYRAX orders a ")}<span class="text-ink">{t("techPage.consensusLedeBlockdag", "blockDAG")}</span>{t("techPage.consensusLede2", ", not a single chain. GhostDAG's k-cluster rule selects a \"blue set\" of well-connected blocks and orders everything relative to a selected-parent chain — so honest blocks mined in parallel are ")}<span class="text-ink">{t("techPage.consensusLedeIncluded", "included and rewarded")}</span>{t("techPage.consensusLede3", ", not orphaned. That is what lets throughput scale without sacrificing the security of proof-of-work.")}</p>
+        <p class="mt-3 text-muted">{t("techPage.consensusLede1", "PYRAX orders a ")}<span class="text-ink">{t("techPage.consensusLedeDAG", "DAG")}</span>{t("techPage.consensusLede2", ", not a single chain. GhostDAG's k-cluster rule selects a \"blue set\" of well-connected blocks and orders everything relative to a selected-parent chain — so honest blocks mined in parallel are ")}<span class="text-ink">{t("techPage.consensusLedeIncluded", "included and rewarded")}</span>{t("techPage.consensusLede3", ", not orphaned. That is what lets throughput scale without sacrificing the security of proof-of-work.")}</p>
       </div>
 
       <div class="mt-8 grid gap-6 lg:grid-cols-[1.1fr_1fr]">

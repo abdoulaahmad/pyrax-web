@@ -31,7 +31,7 @@ export const content: CategoryContent = {
         how: "Each item ships with an on-chain certificate proving authenticity and origin, so shoppers verify a listing is genuine before buying and the cert follows the product into resale.",
       },
       {
-        feature: "GhostDAG blockDAG (500k-TPS target)",
+        feature: "GhostDAG (500k-TPS target)",
         how: "Parallel throughput absorbs flash-sale and holiday peaks - millions of orders per hour - without congestion pricing or checkout timeouts.",
       },
       {

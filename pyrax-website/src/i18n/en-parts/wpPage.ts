@@ -15,7 +15,7 @@ export const wpPage = {
   abstractLabel: 'Abstract',
   abstractPara1a: 'PYRAX is a from-scratch, Rust-implemented Layer-1 organized around four properties most networks bolt on but PYRAX enforces as invariants: ',
   abstractPara1b: 'high throughput, privacy by default, full decentralization, and resistance to ISP-level surveillance.',
-  abstractPara1c: ' Consensus is a blockDAG ordered by GhostDAG, fed by a TriStream model — two proof-of-work families across four seal lanes plus proof-of-stake — and finalized by BLS-aggregated proof-of-stake BFT.',
+  abstractPara1c: ' Consensus is a DAG ordered by GhostDAG, fed by a TriStream model — two proof-of-work families across four seal lanes plus proof-of-stake — and finalized by BLS-aggregated proof-of-stake BFT.',
   abstractPara2a: 'Value transfer is shielded by default with an Orchard-style note model and recursive zk-SNARKs that need no trusted setup. The peer layer is bootstrapless, traffic rides an onion Sphinx mixnet, execution scales through a multi-VM L2 (EVM, WASM, Cairo) and a recursive ZK-rollup L3, and the same idle GPUs that mine Stream B power ',
   abstractPara2c: ', a verifiable on-chain-settled compute market.',
 
@@ -23,7 +23,7 @@ export const wpPage = {
   northStarsSubtitle: 'Constraints, not aspirations — the foundation crates encode them so every later layer is built against them.',
 
   northStar1Title: 'DAG, not a chain',
-  northStar1Desc: 'A multi-parent blockDAG ordered by GhostDAG — honest parallel work is included, not orphaned.',
+  northStar1Desc: 'A multi-parent DAG ordered by GhostDAG — honest parallel work is included, not orphaned.',
   northStar2Title: 'Privacy by default',
   northStar2Desc: 'The default transaction hides sender, receiver, and amount with no-trusted-setup zk-SNARKs. Transparent is the exception.',
   northStar3Title: 'No boot node',

@@ -33,7 +33,7 @@ export const pitch = {
 
   // solution slide
   solutionTitle: 'PYRAX refuses the trade-off',
-  solutionBody: 'A GhostDAG blockDAG for parallel throughput, shielded-by-default privacy with auditor viewing keys, three virtual machines, and a verifiable compute market — enforced as invariants in the lowest-level types.',
+  solutionBody: 'A GhostDAG for parallel throughput, shielded-by-default privacy with auditor viewing keys, three virtual machines, and a verifiable compute market — enforced as invariants in the lowest-level types.',
   solutionCard1Title: 'Parallel',
   solutionCard1Desc: 'GhostDAG includes honest work instead of orphaning it.',
   solutionCard2Title: 'Private',

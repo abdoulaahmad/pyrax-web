@@ -241,7 +241,7 @@ function IndustriesPanel({ t, L }: any) {
 
 function TechnologyPanel({ t, L }: any) {
   const items = [
-    { icon: "layers", name: t("navPanels.techConsensusName", "GhostDAG + TriStream"), desc: t("navPanels.techConsensusDesc", "A blockDAG ordered by GhostDAG; three streams, five seal lanes."), href: L("/technology#consensus") },
+    { icon: "layers", name: t("navPanels.techConsensusName", "GhostDAG + TriStream"), desc: t("navPanels.techConsensusDesc", "A DAG ordered by GhostDAG; three streams, five seal lanes."), href: L("/technology#consensus") },
     { icon: "lock", name: t("navPanels.techPrivacyName", "Private by default"), desc: t("navPanels.techPrivacyDesc", "Shielded transfers with no-trusted-setup ZK proofs."), href: L("/technology#privacy") },
     { icon: "chip", name: t("navPanels.techVmsName", "Multi-VM (EVM/WASM/Cairo)"), desc: t("navPanels.techVmsDesc", "Three virtual machines, cross-VM calls, one chain."), href: L("/technology#vms") },
     { icon: "chip", name: t("navPanels.techNeuraxName", "NEURAX compute market"), desc: t("navPanels.techNeuraxDesc", "Verifiable, on-chain-settled AI & GPU compute."), href: L("/technology#neurax") },

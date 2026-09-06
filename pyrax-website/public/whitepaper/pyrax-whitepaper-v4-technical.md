@@ -11,7 +11,7 @@
 PYRAX is a from-scratch, Rust-implemented Layer-1 protocol organized around four properties most
 networks bolt on but PYRAX enforces as invariants in its lowest-level types: **high throughput**,
 **privacy by default**, **full decentralization**, and **resistance to network-level (ISP)
-surveillance**. Consensus is not a linear chain but a **blockDAG** ordered by **GhostDAG** (k-cluster
+surveillance**. Consensus is not a linear chain but a **DAG** ordered by **GhostDAG** (k-cluster
 blue-set selection), fed by a **TriStream** model — two independent proof-of-work families across four
 seal lanes plus proof-of-stake — and finalized by **BLS-aggregated proof-of-stake BFT**. Value transfer
 is **shielded by default** using an Orchard-style note-commitment / nullifier model with recursive
@@ -38,7 +38,7 @@ gated behind external audit before mainnet.
 
 | # | Property | What it means concretely |
 |---|----------|--------------------------|
-| 1 | **DAG, not a chain** | A multi-parent blockDAG ordered by GhostDAG. Blocks reference many tips, so honest parallel work is *included*, not orphaned — high throughput, fast confirmations. |
+| 1 | **DAG, not a chain** | A multi-parent DAG ordered by GhostDAG. Blocks reference many tips, so honest parallel work is *included*, not orphaned — high throughput, fast confirmations. |
 | 2 | **Privacy by default (shielded)** | The default transaction hides sender, receiver, and amount via no-trusted-setup zk-SNARKs over note commitments and nullifiers. Transparent transfers are the explicit exception. |
 | 3 | **100% decentralized, no boot node** | Peer discovery is bootstrapless: mDNS, Kademlia DHT, peer exchange, and a signed community seed list. No project-run server on the critical path to joining. |
 | 4 | **Metadata privacy / ISP-resistance** | Node traffic and the file/media services ride an onion Sphinx mixnet with fixed-size packets, so an on-path observer sees only uniform padded encrypted flows. |
@@ -51,7 +51,7 @@ so every later layer is built against them.
 
 ## 2. Architecture Overview
 
-PYRAX is layered. **L1** is a GhostDAG blockDAG with shielded-by-default state. **L2** provides three
+PYRAX is layered. **L1** is a GhostDAG with shielded-by-default state. **L2** provides three
 anchored execution environments. **L3** is a recursive ZK-rollup that settles to L1. Two cross-cutting
 transports — a bootstrapless libp2p mesh and an onion mixnet over it — carry all traffic; the
 application tier (wallet, node/miner/AI app, anonymous file drop, media streaming, NEURAX) sits on top.
@@ -65,9 +65,9 @@ application tier (wallet, node/miner/AI app, anonymous file drop, media streamin
  ├───────────────────────────────────────────────────────────────────────────────────────────────┤
  │ L2 — EVM (revm) · WASM (wasmtime) · Cairo (cairo-vm)  — cross-VM, EIP-150 63/64, precompiles     │
  ├───────────────────────────────────────────────────────────────────────────────────────────────┤
- │ L1 — PYRAX GhostDAG blockDAG (Rust)                                                              │
+ │ L1 — PYRAX GhostDAG (Rust)                                                              │
  │   • Shielded-by-default tx (Poseidon note tree depth 32 + nullifier set + plonky2 proof)         │
- │   • GhostDAG ordering (blue set / k-cluster, k=16) over a multi-parent blockDAG                  │
+ │   • GhostDAG ordering (blue set / k-cluster, k=16) over a multi-parent DAG                  │
  │   • TriStream: A(BLAKE3+SHA-256d) · B(kHeavyHash-GPU + Argon2id-CPU) · C(BLS PoS finality)       │
  │   • Merkle-Patricia state (redb+LZ4) with getProof; EIP-1559 fee market                         │
  └───────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -126,10 +126,10 @@ The number is reached **progressively** and each step is gated by reproducible `
 
 ## 4. Consensus: GhostDAG + TriStream + BLS PoS Finality
 
-### 4.1 Why a blockDAG
+### 4.1 Why a DAG
 
 A linear chain forces one parent per block, so concurrent honest blocks become orphans — wasted work
-that lowers effective honest hashpower. PYRAX uses a **blockDAG**: a block may reference many current
+that lowers effective honest hashpower. PYRAX uses a **DAG**: a block may reference many current
 tips. Concurrent honest blocks are absorbed, raising throughput. The cost — "which block came first" is
 no longer structural — is solved by GhostDAG computing a total order.
 
@@ -632,7 +632,7 @@ KDF is not memory-hard (weaker than the desktop wallet's scrypt).
 
 ## 21. Implementation Status & Roadmap
 
-**What is real, tested code today:** the GhostDAG blockDAG; the 5-lane TriStream with per-lane DAA; BLS
+**What is real, tested code today:** the GhostDAG; the 5-lane TriStream with per-lane DAA; BLS
 PoS finality with real staking + slashing; the Merkle-Patricia state with `eth_getProof` and fast-sync;
 the three VMs with cross-VM calls, precompiles, and the 6 tx envelopes; the plonky2 shielded-transfer
 prover (default-on, pinned digests); the L3 validity circuit + recursion + on-L1 verifier; the

@@ -25,7 +25,7 @@ export const companyPage = {
   fact4Label: 'open-core protocol',
 
   missionTitle: 'Our mission',
-  missionPara1: 'Public blockchains forced a false choice: transparency that leaks your whole financial life, or privacy tools bolted on as an afterthought. PYRAX rejects the trade-off. A GhostDAG blockDAG gives the throughput of parallel work; shielded-by-default transfers give privacy without asking; a multi-VM execution layer meets developers where they are; and NEURAX turns idle GPUs into a market for compute you can actually verify.',
+  missionPara1: 'Public blockchains forced a false choice: transparency that leaks your whole financial life, or privacy tools bolted on as an afterthought. PYRAX rejects the trade-off. A GhostDAG gives the throughput of parallel work; shielded-by-default transfers give privacy without asking; a multi-VM execution layer meets developers where they are; and NEURAX turns idle GPUs into a market for compute you can actually verify.',
   missionPara2: 'We are deliberately unglamorous about the path: a faithful simulation running today, a closed alpha, a public testnet, and a single external audit before anything carries real value.',
 
   believeTitle: 'What we believe',

@@ -5,7 +5,7 @@ import type { CategoryContent } from "./types";
 export const content: CategoryContent = {
   "video-games": {
     overview:
-      "Video games are the largest entertainment sector on earth, spanning mobile, console, and PC across free-to-play, premium, and live-service models. The industry is racing toward player-owned economies and interoperable assets, but legacy chains cannot handle the transaction volume of a live game loop. PYRAX's GhostDAG blockDAG targets 500k TPS with negligible fees, making truly on-chain gameplay, items, and micro-transactions viable for the first time.",
+      "Video games are the largest entertainment sector on earth, spanning mobile, console, and PC across free-to-play, premium, and live-service models. The industry is racing toward player-owned economies and interoperable assets, but legacy chains cannot handle the transaction volume of a live game loop. PYRAX's GhostDAG targets 500k TPS with negligible fees, making truly on-chain gameplay, items, and micro-transactions viable for the first time.",
     marketSize: "$187.7B (2024)",
     projection: "$282.3B by 2030 · ~7.1% CAGR",
     source: "Newzoo Global Games Market Report, 2024",
@@ -23,7 +23,7 @@ export const content: CategoryContent = {
     ],
     solutions: [
       {
-        feature: "GhostDAG 500k-TPS blockDAG",
+        feature: "GhostDAG 500k-TPS DAG",
         how: "Sustains the transaction rate of a live game loop, so inventory changes, crafting, and in-match micro-transactions settle on-chain with negligible fees instead of a publisher ledger.",
       },
       {
@@ -131,7 +131,7 @@ export const content: CategoryContent = {
         how: "Land parcels, avatars, and wearables mint as portable assets users own across worlds, so identity and property are never trapped in one platform.",
       },
       {
-        feature: "GhostDAG 500k-TPS blockDAG",
+        feature: "GhostDAG 500k-TPS DAG",
         how: "Handles the constant stream of in-world micro-actions and trades at negligible fees, so a bustling world stays responsive instead of grinding on gas.",
       },
       {
@@ -161,7 +161,7 @@ export const content: CategoryContent = {
 
   "in-game-economies": {
     overview:
-      "In-game economies now rival small nations in volume, moving currencies, resources, and tradable items among millions of players daily. Running these economies on-chain demands extreme throughput and near-zero fees, which legacy chains cannot deliver. PYRAX's GhostDAG blockDAG is built for exactly this: real-time economies with micro-transactions at negligible cost and instant settlement.",
+      "In-game economies now rival small nations in volume, moving currencies, resources, and tradable items among millions of players daily. Running these economies on-chain demands extreme throughput and near-zero fees, which legacy chains cannot deliver. PYRAX's GhostDAG is built for exactly this: real-time economies with micro-transactions at negligible cost and instant settlement.",
     marketSize: "$96.8B (2024)",
     projection: "$174.6B by 2030 · ~10.4% CAGR",
     source: "Statista Digital Market Insights, 2024",
@@ -179,7 +179,7 @@ export const content: CategoryContent = {
     ],
     solutions: [
       {
-        feature: "GhostDAG 500k-TPS blockDAG",
+        feature: "GhostDAG 500k-TPS DAG",
         how: "Powers real-time economies where every trade, drop, and micro-transaction settles on-chain with negligible fees, no bundling hacks required.",
       },
       {

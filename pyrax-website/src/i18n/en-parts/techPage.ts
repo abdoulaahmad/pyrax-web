@@ -33,7 +33,7 @@ export const techPage = {
 
   // Page meta
   metaTitle: "Technology — PYRAX™ Network",
-  metaDescription: "How PYRAX works: a GhostDAG blockDAG sealed by three streams over five lanes, BLS proof-of-stake finality, shielded-by-default privacy, a multi-VM execution layer, the NEURAX compute market, a bootstrapless ISP-resistant network, and an audit-gated path to mainnet.",
+  metaDescription: "How PYRAX works: a GhostDAG sealed by three streams over five lanes, BLS proof-of-stake finality, shielded-by-default privacy, a multi-VM execution layer, the NEURAX compute market, a bootstrapless ISP-resistant network, and an audit-gated path to mainnet.",
 
   // Hero
   heroEyebrow: "Technology",
@@ -42,13 +42,13 @@ export const techPage = {
   heroTitleMid: ", ",
   heroTitlePrivate: "private",
   heroTitlePost: ", and provable",
-  heroLede: "One binary, four chainspecs. A blockDAG that includes honest parallel work instead of orphaning it, transfers that are shielded by default, three virtual machines, and a verifiable compute market — with a single external audit standing between the code and mainnet.",
+  heroLede: "One binary, four chainspecs. A DAG that includes honest parallel work instead of orphaning it, transfers that are shielded by default, three virtual machines, and a verifiable compute market — with a single external audit standing between the code and mainnet.",
 
   // Consensus
   consensusEyebrow: "01 · Consensus",
   consensusTitle: "GhostDAG + TriStream",
   consensusLede1: "PYRAX orders a ",
-  consensusLedeBlockdag: "blockDAG",
+  consensusLedeDAG: "DAG",
   consensusLede2: ", not a single chain. GhostDAG's k-cluster rule selects a \"blue set\" of well-connected blocks and orders everything relative to a selected-parent chain — so honest blocks mined in parallel are ",
   consensusLedeIncluded: "included and rewarded",
   consensusLede3: ", not orphaned. That is what lets throughput scale without sacrificing the security of proof-of-work.",
