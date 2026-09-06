@@ -72,7 +72,7 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
 
   return (
     <>
-      <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled || open ? "border-b border-[color:var(--color-line)] bg-[rgba(5,6,9,0.82)] backdrop-blur-xl" : "border-b border-transparent"}`} onMouseLeave={leave}>
+      <header className={`fixed inset-x-0 top-0 z-50 border-b border-[color:var(--color-line)] bg-[rgba(5,6,9,0.96)] backdrop-blur-xl transition-shadow duration-300 ${scrolled || open ? "shadow-[0_12px_32px_rgba(0,0,0,0.28)]" : ""}`} onMouseLeave={leave}>
         <nav className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:px-6">
           {/* logo */}
           <a href={L("/")} className="flex shrink-0 items-center" aria-label="PYRAX Network — home">
@@ -82,7 +82,7 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
           {/* desktop top-level */}
           <div className="ml-3 hidden items-center lg:flex">
             {topItems.map((it) => (
-              <button key={it.key} onMouseEnter={() => enter(it.key)} onFocus={() => enter(it.key)}
+              <button key={it.key} onPointerEnter={() => enter(it.key)} onFocus={() => enter(it.key)} onClick={() => setOpen(open === it.key ? null : it.key)} aria-expanded={open === it.key}
                 className={`relative rounded-lg px-3.5 py-2 text-sm font-medium transition ${open === it.key ? "text-ink" : "text-muted hover:text-ink"}`}>
                 {it.label}
                 {open === it.key && <motion.span layoutId="navpill" className="absolute inset-0 -z-10 rounded-lg bg-[rgba(255,255,255,0.05)]" transition={{ type: "spring", stiffness: 500, damping: 40 }} />}
@@ -97,7 +97,7 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
             {/* network selector */}
             <div className="relative hidden sm:block">
               <button onClick={() => setNetOpen((v) => !v)} className="flex items-center gap-2 rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-[color:#34405a] hover:text-ink">
-                <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full" style={{ background: selected?.online ? "#34d399" : "#fb6f73", boxShadow: selected?.online ? "0 0 8px #34d399" : "none" }} />{selected?.online && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34d399] opacity-60" />}</span>
+                <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full" style={{ background: selected?.simulated ? "#5cbace" : selected?.online ? "#34d399" : "#fb6f73", boxShadow: selected?.online || selected?.simulated ? "0 0 8px currentColor" : "none" }} /></span>
                 {selected?.name || "PYRAX Seed"}
                 <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" {...P}><path d="m6 9 6 6 6-6"/></svg>
               </button>
@@ -108,10 +108,10 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
                     <div className="px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wider text-faint">{t("footer.selectNetwork")}</div>
                     {(net?.networks || NETWORKS).map((n: any) => (
                       <button key={n.chainId} onClick={() => pickNet(n.chainId)} className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-[rgba(255,255,255,0.04)] ${n.chainId === net?.selected ? "bg-[rgba(255,255,255,0.03)]" : ""}`}>
-                        <span className="relative flex h-2.5 w-2.5 shrink-0"><span className="absolute inline-flex h-full w-full rounded-full" style={{ background: n.online ? "#34d399" : "#fb6f73", boxShadow: n.online ? "0 0 7px #34d399" : "none" }} />{n.online && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34d399] opacity-60" />}</span>
+                        <span className="relative flex h-2.5 w-2.5 shrink-0"><span className="absolute inline-flex h-full w-full rounded-full" style={{ background: n.simulated ? "#5cbace" : n.online ? "#34d399" : "#fb6f73", boxShadow: n.online || n.simulated ? "0 0 7px currentColor" : "none" }} /></span>
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-2 text-sm font-semibold text-ink">{n.name}<span className="shrink-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[0.55rem] font-bold" style={{ color: n.color, background: `${n.color}1a` }}>{STAGE[n.key] || n.mode}</span></span>
-                          <span className="block truncate text-[0.68rem] text-faint">{n.online ? `#${Number(n.height || 0).toLocaleString()} · ${n.peers ?? 0} peers` : "offline"}</span>
+                          <span className="block truncate text-[0.68rem] text-faint">{n.online || n.simulated ? `#${Number(n.height || 0).toLocaleString()} · ${n.peers ?? 0} peers${n.simulated ? " · simulated" : ""}` : "offline"}</span>
                         </span>
                       </button>
                     ))}

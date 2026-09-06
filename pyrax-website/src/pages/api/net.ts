@@ -19,6 +19,20 @@ installProcessHooks();
 // bursts collapse to one upstream fetch.
 const limiter = new RateLimiter({ ratePerSec: 3, burst: 12 });
 
+const simulatedSeedStats = () => {
+  const elapsed = Math.max(0, Date.now() - Date.UTC(2026, 0, 1));
+  const height = Math.floor(elapsed / 5_000);
+  const wave = Math.sin(Date.now() / 18_000);
+  return {
+    online: false,
+    simulated: true,
+    height,
+    finalized: Math.max(0, height - 2),
+    peers: 12 + Math.round(wave * 3),
+    tps: 2_400 + Math.round(wave * 320),
+  };
+};
+
 // `withErrorReport` reports any UNEXPECTED throw to Sentinel (scrubbed + deduped) and returns a clean
 // 500 — a visitor never sees a stack. Expected results the handler returns pass through untouched.
 export const GET: APIRoute = withErrorReport("GET /api/net", async ({ request }) => {
@@ -33,11 +47,19 @@ export const GET: APIRoute = withErrorReport("GET /api/net", async ({ request })
   const selected = cookieChainId(request.headers.get("cookie")) ?? (await teamDefaultChain());
   const stats = await allNetworkStats();
   const byChain = new Map(stats.map((s) => [s.chainId, s]));
-  const networks = NETWORKS.map((n) => ({
-    ...(byChain.get(n.chainId) || { online: false }),
-    key: n.key, chainId: n.chainId, name: n.name, short: n.short, mode: n.mode, color: n.color,
-    blockTime: n.blockTime, role: n.role,
-  }));
+  const networks = NETWORKS.map((n) => {
+    const liveStats = byChain.get(n.chainId);
+    const resolvedStats = liveStats?.online
+      ? liveStats
+      : n.mode === "Simulated"
+        ? simulatedSeedStats()
+        : liveStats || { online: false };
+    return {
+      ...resolvedStats,
+      key: n.key, chainId: n.chainId, name: n.name, short: n.short, mode: n.mode, color: n.color,
+      blockTime: n.blockTime, role: n.role,
+    };
+  });
   return new Response(JSON.stringify({ ok: true, selected, targetTps: TARGET_TPS, networks }), {
     headers: { "content-type": "application/json", "cache-control": "no-store" },
   });
