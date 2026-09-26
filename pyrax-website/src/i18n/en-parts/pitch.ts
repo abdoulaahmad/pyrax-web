@@ -16,6 +16,8 @@ export const pitch = {
   kickerSolution: 'The solution',
   kickerTechnology: 'The technology',
   kickerMarket: 'Why now',
+  kickerCompliance: 'The moat',
+  kickerCompute: 'The wedge',
   kickerNeurax: 'The wedge',
   kickerTraction: 'Traction',
   kickerTokenomics: 'Tokenomics',
@@ -33,7 +35,7 @@ export const pitch = {
 
   // solution slide
   solutionTitle: 'PYRAX refuses the trade-off',
-  solutionBody: 'A GhostDAG for parallel throughput, shielded-by-default privacy with auditor viewing keys, three virtual machines, and a verifiable compute market — enforced as invariants in the lowest-level types.',
+  solutionBody: 'A GhostDAG for parallel throughput, shielded-by-default privacy with auditor viewing keys, three virtual machines, and a bootstrapless onion mixnet — enforced as invariants in the lowest-level types.',
   solutionCard1Title: 'Parallel',
   solutionCard1Desc: 'GhostDAG includes honest work instead of orphaning it.',
   solutionCard2Title: 'Private',
@@ -51,8 +53,8 @@ export const pitch = {
   techCard2Desc: 'Orchard-style notes and recursive zk-SNARKs with no trusted setup; viewing keys for oversight.',
   techCard3Title: 'Multi-VM L2 + ZK-rollup L3',
   techCard3Desc: 'EVM, WASM, and Cairo with cross-VM calls; thousands of proofs fold into one.',
-  techCard4Title: 'NEURAX compute market',
-  techCard4Desc: 'Idle GPUs run verifiable AI jobs, settled on-chain, priced at a fixed 8 PYRX per compute unit.',
+  techCard4Title: 'Sphinx onion mixnet',
+  techCard4Desc: 'Bootstrapless peer routing and uniform packet encryption ensure zero network-level metadata leakage.',
   techFootnotePre: '51%-resistance across ',
   techFootnoteEmph: 'three uncorrelated resources',
   techFootnotePost: ' at once — ASIC + GPU/CPU hashpower and a staked supermajority — with finality that makes reverting a slashable offense.',
@@ -71,13 +73,29 @@ export const pitch = {
   marketRef4Label: 'Business types PYRAX maps directly',
   marketRef4Source: 'This site',
 
-  // neurax slide
-  neuraxTitle: 'NEURAX — verifiable compute',
+  // compliance slide
+  complianceTitle: 'Enterprise privacy & compliance',
+  complianceBody: 'Shielded pools hide amounts, senders, and receivers by default — while cryptographic viewing keys enable selective, read-only disclosure for audits and regulatory oversight without compromising spending keys.',
+  complianceTile1Label: 'zero-setup SNARK circuits',
+  complianceTile2Label: 'default-on shielded transfers',
+  complianceTile3Label: 'selective cryptographic compliance',
+  complianceTile4Label: 'amount, sender & receiver hidden',
+  complianceFooter: 'True financial privacy built for enterprises: confidential operations on-chain without failing compliance, tax, or AML audits.',
+
+  // compute / neurax slide (retained for i18n compatibility)
+  computeTitle: 'PYRAX Compute — verifiable compute',
+  neuraxTitle: 'PYRAX Compute — verifiable compute',
+  computeBody: 'The same GPUs that secure the chain run paid AI and compute jobs. A four-rung verification ladder replaces blind trust — and the demand is exploding.',
   neuraxBody: 'The same GPUs that secure the chain run paid AI and compute jobs. A four-rung verification ladder replaces blind trust — and the demand is exploding.',
+  computeTile1Label: 'per compute unit (fixed)',
   neuraxTile1Label: 'per compute unit (fixed)',
+  computeTile2Label: 'bootstrap compute pool',
   neuraxTile2Label: 'bootstrap compute pool',
+  computeTile3Label: 'verification ladder',
   neuraxTile3Label: 'verification ladder',
+  computeTile4Label: 'local-first baseline GPU',
   neuraxTile4Label: 'local-first baseline GPU',
+  computeFooter: 'A crypto-economic AI-compute network that pays providers in the same token that secures consensus — a self-reinforcing flywheel.',
   neuraxFooter: 'A crypto-economic AI-compute network that pays providers in the same token that secures consensus — a self-reinforcing flywheel.',
 
   // traction slide
@@ -112,7 +130,7 @@ export const pitch = {
   askUseOfFunds: 'Use of funds',
   askFund1: 'External audit + mainnet genesis ceremony',
   askFund2: 'Ecosystem, liquidity & buildathon grants',
-  askFund3: 'NEURAX compute buildout and provider incentives',
+  askFund3: 'Developer grants, privacy tooling & ecosystem incubation',
   askFund4: 'Core protocol, apps, and global team',
   askEmailButton: 'invest@pyrax.org',
   askLiveButton: 'See it live',

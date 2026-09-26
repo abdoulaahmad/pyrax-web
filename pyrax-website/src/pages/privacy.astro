@@ -1,9 +1,9 @@
 ---
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Site from "../layouts/Site.astro";
-import { DEFAULT_LOCALE } from "../i18n/config";
+import { DEFAULT_LOCALE, resolveLocale } from "../i18n/config";
 
-const lang = DEFAULT_LOCALE;
+const lang = resolveLocale(Astro.url, Astro.cookies);
 const UPDATED = "2 July 2026";
 const CONTACT = "privacy@pyrax.org";
 

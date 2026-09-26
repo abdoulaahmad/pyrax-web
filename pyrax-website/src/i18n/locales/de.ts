@@ -70,7 +70,7 @@ export const de: LocaleDict = {
     community: "Community",
     resources: "Ressourcen",
     rights: "Alle Rechte vorbehalten.",
-    openCore: "Offenes Protokoll unter Apache-2.0. Apps, Wallet, NEURAX und Dienste sind proprietär. PYRAX™ ist eine Marke.",
+    openCore: "Offenes Protokoll unter Apache-2.0. Apps, Wallet, PYRAX Compute und Dienste sind proprietär. PYRAX™ ist eine Marke.",
     selectLanguage: "Sprache",
     selectNetwork: "Netzwerk",
   },
@@ -86,7 +86,7 @@ export const de: LocaleDict = {
     subConsensus: "Konsens",
     subPrivacy: "Privatsphäre",
     subVms: "Virtuelle Maschinen",
-    subNeurax: "NEURAX",
+    subCompute: "PYRAX Compute",
     subNetwork: "Netzwerk",
     subSecurity: "Sicherheit",
 
@@ -115,7 +115,7 @@ export const de: LocaleDict = {
 
     // Page meta
     metaTitle: "Technologie — PYRAX™ Network",
-    metaDescription: "Wie PYRAX funktioniert: ein GhostDAG, versiegelt durch drei Streams über fünf Lanes, BLS-Proof-of-Stake-Finalität, standardmäßig geschützte Privatsphäre, eine Multi-VM-Ausführungsebene, der NEURAX-Rechenmarkt, ein bootstrap-freies, ISP-resistentes Netzwerk und ein auditpflichtiger Weg zum Mainnet.",
+    metaDescription: "Wie PYRAX funktioniert: ein GhostDAG, versiegelt durch drei Streams über fünf Lanes, BLS-Proof-of-Stake-Finalität, standardmäßig geschützte Privatsphäre, eine Multi-VM-Ausführungsebene, der PYRAX Compute-Rechenmarkt, ein bootstrap-freies, ISP-resistentes Netzwerk und ein auditpflichtiger Weg zum Mainnet.",
 
     // Hero
     heroEyebrow: "Technologie",
@@ -180,21 +180,21 @@ export const de: LocaleDict = {
     txTypesTitle: "Sechs Transaktionstypen, ein Ledger",
     txTypesBody: "Escrow (Lock / Refund / Release / Drip / Split), Stake (Bond / Unbond / Withdraw / Slash) und Governance (Propose / Vote) sind erstklassige Transaktionsarten – keine nachträglich aufgesetzten Verträge.",
 
-    // NEURAX
-    neuraxEyebrow: "04 · NEURAX",
-    neuraxTitle: "Verifizierbare KI & GPU-Rechenleistung",
-    neuraxLede1: "Dieselben GPUs, die Stream B minen, führen bezahlte KI- und Rechenaufträge aus, finanziert über on-chain Escrow und zu einem festen Preis von ",
-    neuraxLedePrice: "8 PYRX pro Recheneinheit",
-    neuraxLede2: ". Statt dem Wort eines Anbieters zu vertrauen, erklimmen Ergebnisse eine vierstufige Verifikationsleiter.",
-    neuraxLadder1: "Redundante Neuausführung über unabhängige Anbieter hinweg",
-    neuraxLadder2: "Fraud Proofs, die den einzelnen abweichenden Schritt festnageln",
-    neuraxLadder3: "Interaktiver Disput – ein Bisektionsspiel bis zu diesem Schritt",
-    neuraxLadder4: "TEE-Attestierung für hardwareversiegelte Ausführung",
-    neuraxStat1Label: "pro Recheneinheit (1 Referenz-GPU-Stunde)",
-    neuraxStat2Label: "KI-Rechenpool · Budget ~70M/Monat",
-    neuraxStat3Label: "ein on-chain ComputeReceipt pro verifiziertem Auftrag",
-    neuraxStat4Label: "local-first-Baseline; ShardedExecutor bündelt GPUs",
-    neuraxCta: "KI- & Rechen-Anwendungsfälle erkunden →",
+    // PYRAX Compute
+    computeEyebrow: "04 · PYRAX Compute",
+    computeTitle: "Verifizierbare KI & GPU-Rechenleistung",
+    computeLede1: "Dieselben GPUs, die Stream B minen, führen bezahlte KI- und Rechenaufträge aus, finanziert über on-chain Escrow und zu einem festen Preis von ",
+    computeLedePrice: "8 PYRX pro Recheneinheit",
+    computeLede2: ". Statt dem Wort eines Anbieters zu vertrauen, erklimmen Ergebnisse eine vierstufige Verifikationsleiter.",
+    computeLadder1: "Redundante Neuausführung über unabhängige Anbieter hinweg",
+    computeLadder2: "Fraud Proofs, die den einzelnen abweichenden Schritt festnageln",
+    computeLadder3: "Interaktiver Disput – ein Bisektionsspiel bis zu diesem Schritt",
+    computeLadder4: "TEE-Attestierung für hardwareversiegelte Ausführung",
+    computeStat1Label: "pro Recheneinheit (1 Referenz-GPU-Stunde)",
+    computeStat2Label: "KI-Rechenpool · Budget ~70M/Monat",
+    computeStat3Label: "ein on-chain ComputeReceipt pro verifiziertem Auftrag",
+    computeStat4Label: "local-first-Baseline; ShardedExecutor bündelt GPUs",
+    computeCta: "KI- & Rechen-Anwendungsfälle erkunden →",
 
     // Network
     networkEyebrow: "05 · Netzwerk",
@@ -266,11 +266,11 @@ export const de: LocaleDict = {
     quorum: "Quorum",
     pass: "Annahme",
     frozenForever: "Für immer eingefroren:",
-    computeTitle: "NEURAX-Rechenleistung",
+    computeTitle: "PYRAX Compute-Rechenleistung",
     price: "Preis",
     poolBudget: "Pool-Budget",
     jobCap: "Auftragsobergrenze",
-    neuraxLink: "Wie NEURAX funktioniert →",
+    computeLink: "Wie PYRAX Compute funktioniert →",
     ctaWhitepaper: "Das vollständige Whitepaper lesen →",
     ctaExplorer: "Explorer öffnen",
   },
@@ -301,7 +301,7 @@ export const de: LocaleDict = {
 
     roadmap1P: "Jetzt",
     roadmap1Title: "PYRAX Seed ist live",
-    roadmap1Body: "Eine getreue Simulation des vollständigen Protokolls – GhostDAG, geschützter Pool, Multi-VM-Verträge, NEURAX – läuft heute als dauerhafte Entwickler-Sandbox.",
+    roadmap1Body: "Eine getreue Simulation des vollständigen Protokolls – GhostDAG, geschützter Pool, Multi-VM-Verträge, PYRAX Compute – läuft heute als dauerhafte Entwickler-Sandbox.",
     roadmap2P: "Als Nächstes",
     roadmap2Title: "PYRAX Forge · geschlossene Alpha",
     roadmap2Body: "Der Production-Konsenspfad (echter 5-Lane-TriStream + BLS-Finalität) öffnet sich für eingeladene Tester mit geseedeten Validatoren.",
@@ -341,7 +341,7 @@ export const de: LocaleDict = {
     path4Title: "Eine geschützte dApp bauen",
     path4Desc: "Nutzen Sie geschützte Überweisungen und Viewing Keys, sodass Ihre Nutzer standardmäßig privat sind und Ihre Auditoren dennoch einen nur lesenden Beweis haben.",
     path5Title: "Verifizierbare Rechenleistung kaufen",
-    path5Desc: "Hinterlegen Sie einen NEURAX-Auftrag im Escrow, erhalten Sie ein ComputeReceipt und zahlen Sie pro Recheneinheit – KI-Inferenz und -Training mit Beweis statt Vertrauen.",
+    path5Desc: "Hinterlegen Sie einen PYRAX Compute-Auftrag im Escrow, erhalten Sie ein ComputeReceipt und zahlen Sie pro Recheneinheit – KI-Inferenz und -Training mit Beweis statt Vertrauen.",
     path6Title: "Einen Node betreiben",
     path6Desc: "Treten Sie dem Mesh mit einem Inferno-Node bei, minen Sie einen Stream oder staken Sie zum Validieren – kein Bootstrap-Server erforderlich.",
     pathsTitle: "Wählen Sie Ihren Weg",
@@ -390,15 +390,15 @@ export const de: LocaleDict = {
     readWhitepaper: "Whitepaper lesen →",
     learnMore: "Mehr erfahren →",
 
-    // NEURAX section
-    neuraxHeading: "Ungenutzte GPUs werden zu einem verifizierbaren Rechenmarkt",
-    neuraxParagraph: "Dieselbe Hardware, die Stream B minet, führt bezahlte KI- und Rechenaufträge aus, on-chain abgerechnet und zu einem festen Preis von 8 PYRX pro Recheneinheit. Eine vierstufige Verifikationsleiter – Redundanz, Fraud Proofs, interaktiver Disput und TEE-Attestierung – ersetzt blindes Vertrauen durch kryptografischen Beweis.",
-    neuraxHowItWorks: "Wie NEURAX funktioniert",
-    neuraxIndustries: "KI- & Rechen-Branchen →",
-    neuraxTile1L: "pro Recheneinheit (1 RTX-4090-Stunde)",
-    neuraxTile2L: "PYRX KI-Rechenpool",
-    neuraxTile3L: "Verifikationsleiter",
-    neuraxTile4L: "local-first-Baseline-GPU",
+    // PYRAX Compute section
+    computeHeading: "Ungenutzte GPUs werden zu einem verifizierbaren Rechenmarkt",
+    computeParagraph: "Dieselbe Hardware, die Stream B minet, führt bezahlte KI- und Rechenaufträge aus, on-chain abgerechnet und zu einem festen Preis von 8 PYRX pro Recheneinheit. Eine vierstufige Verifikationsleiter – Redundanz, Fraud Proofs, interaktiver Disput und TEE-Attestierung – ersetzt blindes Vertrauen durch kryptografischen Beweis.",
+    computeHowItWorks: "Wie PYRAX Compute funktioniert",
+    computeIndustries: "KI- & Rechen-Branchen →",
+    computeTile1L: "pro Recheneinheit (1 RTX-4090-Stunde)",
+    computeTile2L: "PYRX KI-Rechenpool",
+    computeTile3L: "Verifikationsleiter",
+    computeTile4L: "local-first-Baseline-GPU",
 
     // industries teaser
     businessTypes: "Geschäftstypen",
@@ -445,8 +445,8 @@ export const de: LocaleDict = {
     techPrivacyDesc: "Geschützte Überweisungen mit ZK-Beweisen ohne Trusted Setup.",
     techVmsName: "Multi-VM (EVM/WASM/Cairo)",
     techVmsDesc: "Drei virtuelle Maschinen, VM-übergreifende Aufrufe, eine Kette.",
-    techNeuraxName: "NEURAX-Rechenmarkt",
-    techNeuraxDesc: "Verifizierbare, on-chain abgerechnete KI- & GPU-Rechenleistung.",
+    techComputeName: "PYRAX Compute-Rechenmarkt",
+    techComputeDesc: "Verifizierbare, on-chain abgerechnete KI- & GPU-Rechenleistung.",
     techSecurityName: "Sicherheit & Audits",
     techSecurityDesc: "Formale Invarianten, Bedrohungsmodell, externes Audit-Gate.",
     techWhitepaperName: "Whitepaper v4",
@@ -526,7 +526,7 @@ export const de: LocaleDict = {
     fact4Label: "Open-core-Protokoll",
 
     missionTitle: "Unsere Mission",
-    missionPara1: "Öffentliche Blockchains erzwangen eine falsche Wahl: Transparenz, die Ihr gesamtes Finanzleben preisgibt, oder Privatsphäre-Werkzeuge, die nachträglich aufgesetzt wurden. PYRAX weist diesen Kompromiss zurück. Ein GhostDAG liefert den Durchsatz paralleler Arbeit; standardmäßig geschützte Überweisungen liefern Privatsphäre, ohne danach zu fragen; eine Multi-VM-Ausführungsebene holt Entwickler dort ab, wo sie sind; und NEURAX verwandelt ungenutzte GPUs in einen Markt für Rechenleistung, die man tatsächlich verifizieren kann.",
+    missionPara1: "Öffentliche Blockchains erzwangen eine falsche Wahl: Transparenz, die Ihr gesamtes Finanzleben preisgibt, oder Privatsphäre-Werkzeuge, die nachträglich aufgesetzt wurden. PYRAX weist diesen Kompromiss zurück. Ein GhostDAG liefert den Durchsatz paralleler Arbeit; standardmäßig geschützte Überweisungen liefern Privatsphäre, ohne danach zu fragen; eine Multi-VM-Ausführungsebene holt Entwickler dort ab, wo sie sind; und PYRAX Compute verwandelt ungenutzte GPUs in einen Markt für Rechenleistung, die man tatsächlich verifizieren kann.",
     missionPara2: "Wir sind bewusst unglamourös in Bezug auf den Weg: eine getreue Simulation, die heute läuft, eine geschlossene Alpha, ein öffentliches Testnet und ein einziges externes Audit, bevor irgendetwas echten Wert trägt.",
 
     believeTitle: "Woran wir glauben",
@@ -585,7 +585,7 @@ export const de: LocaleDict = {
     toc8: "Netzwerk: Bootstrap-frei",
     toc9: "Metadaten-Privatsphäre & Anonyme Dienste",
     toc10: "Zustand, Speicherung & Beweise",
-    toc11: "NEURAX — Verifizierbare Rechenleistung",
+    toc11: "PYRAX Compute — Verifizierbare Rechenleistung",
     toc12: "Crucible — Gebührenfreies Mining",
     toc13: "NOVA — Autonomer Betrieb",
     toc14: "Tokenomics",
@@ -626,7 +626,7 @@ export const de: LocaleDict = {
     kickerSolution: "Die Lösung",
     kickerTechnology: "Die Technologie",
     kickerMarket: "Warum jetzt",
-    kickerNeurax: "Der Hebel",
+    kickerCompute: "Der Hebel",
     kickerTraction: "Traktion",
     kickerTokenomics: "Tokenomics",
     kickerRoadmap: "Roadmap",
@@ -661,7 +661,7 @@ export const de: LocaleDict = {
     techCard2Desc: "Orchard-artige Notes und rekursive zk-SNARKs ohne Trusted Setup; Viewing Keys für die Aufsicht.",
     techCard3Title: "Multi-VM-L2 + ZK-Rollup-L3",
     techCard3Desc: "EVM, WASM und Cairo mit VM-übergreifenden Aufrufen; Tausende Beweise falten sich zu einem.",
-    techCard4Title: "NEURAX-Rechenmarkt",
+    techCard4Title: "PYRAX Compute-Rechenmarkt",
     techCard4Desc: "Ungenutzte GPUs führen verifizierbare KI-Aufträge aus, on-chain abgerechnet, zu einem festen Preis von 8 PYRX pro Recheneinheit.",
     techFootnotePre: "51 %-Resistenz über ",
     techFootnoteEmph: "drei unkorrelierte Ressourcen",
@@ -681,14 +681,14 @@ export const de: LocaleDict = {
     marketRef4Label: "Geschäftstypen, die PYRAX direkt abbildet",
     marketRef4Source: "Diese Website",
 
-    // neurax slide
-    neuraxTitle: "NEURAX — verifizierbare Rechenleistung",
-    neuraxBody: "Dieselben GPUs, die die Kette sichern, führen bezahlte KI- und Rechenaufträge aus. Eine vierstufige Verifikationsleiter ersetzt blindes Vertrauen – und die Nachfrage explodiert.",
-    neuraxTile1Label: "pro Recheneinheit (fest)",
-    neuraxTile2Label: "Bootstrap-Rechenpool",
-    neuraxTile3Label: "Verifikationsleiter",
-    neuraxTile4Label: "local-first-Baseline-GPU",
-    neuraxFooter: "Ein krypto-ökonomisches KI-Rechennetzwerk, das Anbieter im selben Token bezahlt, der den Konsens sichert – ein sich selbst verstärkendes Schwungrad.",
+    // PYRAX Compute slide
+    computeTitle: "PYRAX Compute — verifizierbare Rechenleistung",
+    computeBody: "Dieselben GPUs, die die Kette sichern, führen bezahlte KI- und Rechenaufträge aus. Eine vierstufige Verifikationsleiter ersetzt blindes Vertrauen – und die Nachfrage explodiert.",
+    computeTile1Label: "pro Recheneinheit (fest)",
+    computeTile2Label: "Bootstrap-Rechenpool",
+    computeTile3Label: "Verifikationsleiter",
+    computeTile4Label: "local-first-Baseline-GPU",
+    computeFooter: "Ein krypto-ökonomisches KI-Rechennetzwerk, das Anbieter im selben Token bezahlt, der den Konsens sichert – ein sich selbst verstärkendes Schwungrad.",
 
     // traction slide
     tractionTitle: "Gebaut, nicht geplant",
@@ -722,7 +722,7 @@ export const de: LocaleDict = {
     askUseOfFunds: "Mittelverwendung",
     askFund1: "Externes Audit + Mainnet-Genesis-Zeremonie",
     askFund2: "Ökosystem-, Liquiditäts- & Buildathon-Zuschüsse",
-    askFund3: "NEURAX-Rechenaufbau und Anbieter-Anreize",
+    askFund3: "PYRAX Compute-Rechenaufbau und Anbieter-Anreize",
     askFund4: "Kernprotokoll, Apps und globales Team",
     askEmailButton: "invest@pyrax.org",
     askLiveButton: "Live ansehen",
@@ -742,7 +742,7 @@ export const de: LocaleDict = {
     alloc2Label: "Ökosystem & Liquidität",
     alloc2Note: "40 % beim TGE + 60 % linear über 24 Monate",
     alloc3Label: "KI-Rechenpool",
-    alloc3Note: "Über 48 Monate gestreamt; finanziert NEURAX-Auszahlungen",
+    alloc3Note: "Über 48 Monate gestreamt; finanziert PYRAX Compute-Auszahlungen",
     alloc4Label: "Team & Berater",
     alloc4Note: "12-Monats-Cliff, dann 36 Monate linear",
     alloc5Label: "DAO-Treasury & Reserve",
@@ -786,3 +786,5 @@ export const de: LocaleDict = {
     computeTransition: "Bootstrap aus dem 4B-Pool → umsatzfinanziert, wenn die Abdeckung steigt → Nichtverbrauchtes geht an die DAO zurück",
   },
 };
+
+

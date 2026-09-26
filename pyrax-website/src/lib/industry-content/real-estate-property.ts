@@ -39,7 +39,7 @@ export const content: CategoryContent = {
         how: "Once the block seals, the sale is irreversible in seconds - no rescission window, no clawback, no multi-day funding limbo between deposit and recording.",
       },
       {
-        feature: "NEURAX verifiable AVM valuation",
+        feature: "PYRAX Compute verifiable AVM valuation",
         how: "An automated valuation model runs with a cryptographic proof of its inputs and output, so a listing or appraisal price can be shown to a buyer or lender as fair and reproducible.",
       },
     ],
@@ -47,7 +47,7 @@ export const content: CategoryContent = {
       { name: "AtomicClose", desc: "One-transaction home closing that swaps buyer funds, seller payoff, and the title token atomically, retiring the standalone escrow company.", tags: ["Escrow", "Finality"] },
       { name: "DeedProof", desc: "Title-verification widget that proves current ownership from an eth_getProof inclusion proof, embeddable in any listing or lender portal.", tags: ["eth_getProof", "EVM"] },
       { name: "QuietOffer", desc: "Shielded offer-and-acceptance flow where bid amounts and buyer identity stay private until the deal is signed, with a recorder viewing key.", tags: ["Shielded", "ZK"] },
-      { name: "FairPrice", desc: "NEURAX AVM that returns a home valuation plus a verifiable compute proof of the comps and model used.", tags: ["NEURAX", "ZK"] },
+      { name: "FairPrice", desc: "PYRAX Compute AVM that returns a home valuation plus a verifiable compute proof of the comps and model used.", tags: ["Compute", "ZK"] },
       { name: "TitleGuard", desc: "On-chain title-insurance contract that reads the deed proof directly and only underwrites clean chains of ownership.", tags: ["EVM", "eth_getProof"] },
       { name: "DepositLock", desc: "Programmable earnest-money escrow that auto-releases to the seller on close or refunds the buyer on a failed contingency.", tags: ["Escrow", "EVM"] },
       { name: "AgentSplit", desc: "Commission-splitter contract that fans the closing proceeds across listing, buyer, and brokerage the instant the deed transfers.", tags: ["EVM", "Finality"] },
@@ -195,7 +195,7 @@ export const content: CategoryContent = {
         how: "Secondary trades of tokenized units settle in seconds with irreversible finality, giving investors real liquidity instead of redemption queues.",
       },
       {
-        feature: "NEURAX verifiable analytics",
+        feature: "PYRAX Compute verifiable analytics",
         how: "Portfolio risk, NAV, and stress-test models run with verifiable compute, so the reported net asset value can be proven to reflect the stated methodology.",
       },
     ],
@@ -203,7 +203,7 @@ export const content: CategoryContent = {
       { name: "REITMint", desc: "Tokenized REIT unit issuer with programmable transfer rules and an on-chain, shielded holder register.", tags: ["RWA", "EVM"] },
       { name: "YieldStream", desc: "Distribution engine that streams rental income to unit-holders pro rata on the contract's schedule.", tags: ["EVM", "Finality"] },
       { name: "UnitSwap", desc: "Secondary marketplace where tokenized fund units trade with instant settlement and compliance gating.", tags: ["RWA", "Finality"] },
-      { name: "NAVProof", desc: "NEURAX net-asset-value calculator that publishes a verifiable proof of the valuation methodology each period.", tags: ["NEURAX", "ZK"] },
+      { name: "NAVProof", desc: "PYRAX Compute net-asset-value calculator that publishes a verifiable proof of the valuation methodology each period.", tags: ["Compute", "ZK"] },
       { name: "PositionPrivate", desc: "Shielded investor portfolio where holdings and returns are hidden but a regulator viewing key covers the whole fund.", tags: ["Shielded", "Gov"] },
       { name: "AccreditGate", desc: "Selective-disclosure accreditation check that lets investors prove eligibility without exposing full financials.", tags: ["Shielded", "Cairo"] },
       { name: "FundBridge", desc: "Cross-border subscription contract that onboards global LPs with shielded KYC and atomic capital calls.", tags: ["RWA", "Escrow"] },
@@ -247,14 +247,14 @@ export const content: CategoryContent = {
         how: "The lien position is verifiable by inclusion proof against chain state, so buyers of the loan or the MBS can confirm collateral and seniority without trusting a servicer's records.",
       },
       {
-        feature: "NEURAX verifiable underwriting",
+        feature: "PYRAX Compute verifiable underwriting",
         how: "Credit-decision and affordability models run with verifiable compute, so an approval or denial can be proven consistent and non-discriminatory to a regulator.",
       },
     ],
     dapps: [
       { name: "FundAtomic", desc: "Closing rail that disburses loan proceeds and records the lien on the title token in a single atomic transaction.", tags: ["Escrow", "eth_getProof"] },
       { name: "ServiceStream", desc: "Programmable servicing contract that meters P&I and escrow and produces a live, transfer-ready loan ledger.", tags: ["EVM", "Finality"] },
-      { name: "UnderwriteProof", desc: "NEURAX underwriting engine that attaches a verifiable proof to each credit decision for fair-lending audits.", tags: ["NEURAX", "ZK"] },
+      { name: "UnderwriteProof", desc: "PYRAX Compute underwriting engine that attaches a verifiable proof to each credit decision for fair-lending audits.", tags: ["Compute", "ZK"] },
       { name: "LienVerify", desc: "Collateral-check widget that proves lien position and seniority from an eth_getProof inclusion proof.", tags: ["eth_getProof", "EVM"] },
       { name: "MBSForge", desc: "Securitization studio that pools tokenized loans into tradeable MBS tranches with on-chain performance data.", tags: ["RWA", "WASM"] },
       { name: "BorrowerVault", desc: "Shielded borrower financial profile shared with lenders through scoped, revocable viewing keys.", tags: ["Shielded", "Cairo"] },
@@ -473,7 +473,7 @@ export const content: CategoryContent = {
 
   "proptech": {
     overview:
-      "PropTech digitizes buildings and real-estate operations with IoT, smart-building systems, and data platforms, but that telemetry sits in vendor silos with no trusted, cross-party record. PYRAX anchors building and device data on-chain as tamper-proof state, runs verifiable analytics through NEURAX, and lets owners monetize shielded data with viewing-key access - turning building intelligence into a shared, provable layer.",
+      "PropTech digitizes buildings and real-estate operations with IoT, smart-building systems, and data platforms, but that telemetry sits in vendor silos with no trusted, cross-party record. PYRAX anchors building and device data on-chain as tamper-proof state, runs verifiable analytics through PYRAX Compute, and lets owners monetize shielded data with viewing-key access - turning building intelligence into a shared, provable layer.",
     marketSize: "$40.2B (2024)",
     projection: "$133.1B by 2032 · ~16.1% CAGR",
     source: "Fortune Business Insights, 2024",
@@ -495,7 +495,7 @@ export const content: CategoryContent = {
         how: "Sensor, meter, and BMS telemetry is anchored on-chain as tamper-proof state, giving every stakeholder - owner, tenant, insurer, regulator - one verifiable record instead of vendor exports.",
       },
       {
-        feature: "NEURAX verifiable AI/compute",
+        feature: "PYRAX Compute verifiable AI/compute",
         how: "Energy-optimization, occupancy, and valuation models run with cryptographic proofs of inputs and outputs, so an ESG figure or a savings claim can be independently verified.",
       },
       {
@@ -513,13 +513,14 @@ export const content: CategoryContent = {
     ],
     dapps: [
       { name: "BuildingChain", desc: "Anchors BMS, meter, and sensor telemetry on-chain as a tamper-proof, multi-stakeholder building record.", tags: ["IoT", "eth_getProof"] },
-      { name: "ESGProof", desc: "NEURAX engine that computes energy and emissions metrics with a verifiable proof for ESG reporting.", tags: ["NEURAX", "ZK"] },
+      { name: "ESGProof", desc: "PYRAX Compute engine that computes energy and emissions metrics with a verifiable proof for ESG reporting.", tags: ["Compute", "ZK"] },
       { name: "DataMarket", desc: "Metered marketplace where owners sell shielded building-data streams via viewing keys and per-query pricing.", tags: ["Shielded", "EVM"] },
       { name: "OccupancyOracle", desc: "On-chain occupancy oracle feeding verifiable people-counts into leases, valuations, and HVAC control.", tags: ["IoT", "Finality"] },
       { name: "SmartLease", desc: "PropTech lease contract that ties rent, CAM, and green covenants to live on-chain building telemetry.", tags: ["EVM", "IoT"] },
-      { name: "ValuAI", desc: "NEURAX valuation model that returns a building price with a proof of the data and method used.", tags: ["NEURAX", "ZK"] },
+      { name: "ValuAI", desc: "PYRAX Compute valuation model that returns a building price with a proof of the data and method used.", tags: ["Compute", "ZK"] },
       { name: "AccessGrant", desc: "Viewing-key manager that issues scoped, revocable data access to insurers, lenders, and auditors.", tags: ["Shielded", "Cairo"] },
       { name: "DevicePay", desc: "Machine-to-machine payments where building devices settle for energy and services autonomously on-chain.", tags: ["IoT", "WASM"] },
     ],
   },
 };
+

@@ -81,7 +81,7 @@ export const bn: LocaleDict = {
     resources: "রিসোর্স",
     rights: "সর্বস্বত্ব সংরক্ষিত।",
     openCore:
-      "Apache-2.0-এর অধীনে উন্মুক্ত প্রোটোকল। অ্যাপ, ওয়ালেট, NEURAX ও সেবাসমূহ proprietary। PYRAX™ একটি ট্রেডমার্ক।",
+      "Apache-2.0-এর অধীনে উন্মুক্ত প্রোটোকল। অ্যাপ, ওয়ালেট, PYRAX Compute ও সেবাসমূহ proprietary। PYRAX™ একটি ট্রেডমার্ক।",
     selectLanguage: "ভাষা",
     selectNetwork: "নেটওয়ার্ক",
   },
@@ -97,7 +97,7 @@ export const bn: LocaleDict = {
     subConsensus: "কনসেনসাস",
     subPrivacy: "গোপনীয়তা",
     subVms: "ভার্চুয়াল মেশিন",
-    subNeurax: "NEURAX",
+    subCompute: "PYRAX Compute",
     subNetwork: "নেটওয়ার্ক",
     subSecurity: "নিরাপত্তা",
 
@@ -130,7 +130,7 @@ export const bn: LocaleDict = {
     // Page meta
     metaTitle: "প্রযুক্তি — PYRAX™ Network",
     metaDescription:
-      "PYRAX কীভাবে কাজ করে: পাঁচটি লেনে তিনটি স্ট্রিম দিয়ে সিল-করা একটি GhostDAG, BLS proof-of-stake চূড়ান্ততা, ডিফল্টভাবে-shielded গোপনীয়তা, একটি multi-VM এক্সিকিউশন স্তর, NEURAX কম্পিউট মার্কেট, একটি bootstrapless ISP-প্রতিরোধী নেটওয়ার্ক, এবং mainnet-এর দিকে একটি অডিট-নিয়ন্ত্রিত পথ।",
+      "PYRAX কীভাবে কাজ করে: পাঁচটি লেনে তিনটি স্ট্রিম দিয়ে সিল-করা একটি GhostDAG, BLS proof-of-stake চূড়ান্ততা, ডিফল্টভাবে-shielded গোপনীয়তা, একটি multi-VM এক্সিকিউশন স্তর, PYRAX Compute কম্পিউট মার্কেট, একটি bootstrapless ISP-প্রতিরোধী নেটওয়ার্ক, এবং mainnet-এর দিকে একটি অডিট-নিয়ন্ত্রিত পথ।",
 
     // Hero
     heroEyebrow: "প্রযুক্তি",
@@ -208,23 +208,23 @@ export const bn: LocaleDict = {
     txTypesBody:
       "Escrow (Lock / Refund / Release / Drip / Split), Stake (Bond / Unbond / Withdraw / Slash), এবং Governance (Propose / Vote) হলো প্রথম-শ্রেণির লেনদেন প্রকার — জুড়ে-দেওয়া কন্ট্রাক্ট নয়।",
 
-    // NEURAX
-    neuraxEyebrow: "04 · NEURAX",
-    neuraxTitle: "যাচাইযোগ্য AI ও GPU কম্পিউট",
-    neuraxLede1:
+    // PYRAX Compute
+    computeEyebrow: "04 · PYRAX Compute",
+    computeTitle: "যাচাইযোগ্য AI ও GPU কম্পিউট",
+    computeLede1:
       "যে GPU-গুলো Stream B মাইন করে সেগুলোই পেইড AI ও কম্পিউট জব চালায়, অন-চেইন escrow দ্বারা অর্থায়িত এবং একটি নির্দিষ্ট মূল্যে দামযুক্ত ",
-    neuraxLedePrice: "8 PYRX প্রতি compute unit",
-    neuraxLede2:
+    computeLedePrice: "8 PYRX প্রতি compute unit",
+    computeLede2:
       "। কোনো প্রদানকারীর কথায় বিশ্বাস করার বদলে, ফলাফলগুলো একটি চার-ধাপের যাচাই সিঁড়ি বেয়ে ওঠে।",
-    neuraxLadder1: "স্বাধীন প্রদানকারীদের জুড়ে অতিরিক্ত পুনঃ-এক্সিকিউশন",
-    neuraxLadder2: "Fraud proof যা একক ভিন্ন ধাপটিকে নির্দিষ্ট করে",
-    neuraxLadder3: "ইন্টারঅ্যাক্টিভ বিরোধ — সেই ধাপ পর্যন্ত একটি bisection গেম",
-    neuraxLadder4: "হার্ডওয়্যার-সিল-করা এক্সিকিউশনের জন্য TEE attestation",
-    neuraxStat1Label: "প্রতি compute unit (1 reference-GPU-hour)",
-    neuraxStat2Label: "AI-compute pool · ~70M/month বাজেট",
-    neuraxStat3Label: "প্রতি যাচাইকৃত জবে একটি অন-চেইন ComputeReceipt",
-    neuraxStat4Label: "local-first বেসলাইন; ShardedExecutor GPU pool করে",
-    neuraxCta: "AI ও কম্পিউট ব্যবহারের ক্ষেত্র অন্বেষণ করুন →",
+    computeLadder1: "স্বাধীন প্রদানকারীদের জুড়ে অতিরিক্ত পুনঃ-এক্সিকিউশন",
+    computeLadder2: "Fraud proof যা একক ভিন্ন ধাপটিকে নির্দিষ্ট করে",
+    computeLadder3: "ইন্টারঅ্যাক্টিভ বিরোধ — সেই ধাপ পর্যন্ত একটি bisection গেম",
+    computeLadder4: "হার্ডওয়্যার-সিল-করা এক্সিকিউশনের জন্য TEE attestation",
+    computeStat1Label: "প্রতি compute unit (1 reference-GPU-hour)",
+    computeStat2Label: "AI-compute pool · ~70M/month বাজেট",
+    computeStat3Label: "প্রতি যাচাইকৃত জবে একটি অন-চেইন ComputeReceipt",
+    computeStat4Label: "local-first বেসলাইন; ShardedExecutor GPU pool করে",
+    computeCta: "AI ও কম্পিউট ব্যবহারের ক্ষেত্র অন্বেষণ করুন →",
 
     // Network
     networkEyebrow: "05 · নেটওয়ার্ক",
@@ -309,11 +309,11 @@ export const bn: LocaleDict = {
     quorum: "Quorum",
     pass: "Pass",
     frozenForever: "চিরতরে হিমায়িত:",
-    computeTitle: "NEURAX কম্পিউট",
+    computeTitle: "PYRAX Compute কম্পিউট",
     price: "মূল্য",
     poolBudget: "Pool বাজেট",
     jobCap: "জব ক্যাপ",
-    neuraxLink: "NEURAX কীভাবে কাজ করে →",
+    computeLink: "PYRAX Compute কীভাবে কাজ করে →",
     ctaWhitepaper: "সম্পূর্ণ whitepaper পড়ুন →",
     ctaExplorer: "explorer খুলুন",
   },
@@ -352,7 +352,7 @@ export const bn: LocaleDict = {
     roadmap1P: "এখন",
     roadmap1Title: "PYRAX Seed লাইভ",
     roadmap1Body:
-      "সম্পূর্ণ প্রোটোকলের একটি বিশ্বস্ত সিমুলেশন — GhostDAG, shielded pool, multi-VM কন্ট্রাক্ট, NEURAX — আজ একটি স্থায়ী ডেভেলপার sandbox হিসেবে চলছে।",
+      "সম্পূর্ণ প্রোটোকলের একটি বিশ্বস্ত সিমুলেশন — GhostDAG, shielded pool, multi-VM কন্ট্রাক্ট, PYRAX Compute — আজ একটি স্থায়ী ডেভেলপার sandbox হিসেবে চলছে।",
     roadmap2P: "পরবর্তী",
     roadmap2Title: "PYRAX Forge · ক্লোজড আলফা",
     roadmap2Body:
@@ -403,7 +403,7 @@ export const bn: LocaleDict = {
       "shielded ট্রান্সফার এবং viewing key ব্যবহার করুন যাতে আপনার ব্যবহারকারীরা ডিফল্টভাবে ব্যক্তিগত থাকে এবং আপনার অডিটরদের এখনও শুধু-পঠনযোগ্য প্রমাণ থাকে।",
     path5Title: "যাচাইযোগ্য কম্পিউট কিনুন",
     path5Desc:
-      "একটি NEURAX জব escrow করুন, একটি ComputeReceipt পান, এবং প্রতি compute unit-এ পরিশোধ করুন — বিশ্বাস নয়, প্রমাণ সহ AI inference ও training।",
+      "একটি PYRAX Compute জব escrow করুন, একটি ComputeReceipt পান, এবং প্রতি compute unit-এ পরিশোধ করুন — বিশ্বাস নয়, প্রমাণ সহ AI inference ও training।",
     path6Title: "একটি নোড চালান",
     path6Desc:
       "একটি Inferno নোড দিয়ে mesh-এ যোগ দিন, একটি স্ট্রিম মাইন করুন, অথবা validate করতে stake করুন — কোনো bootstrap সার্ভার প্রয়োজন নেই।",
@@ -461,16 +461,16 @@ export const bn: LocaleDict = {
     readWhitepaper: "whitepaper পড়ুন →",
     learnMore: "আরও জানুন →",
 
-    // NEURAX section
-    neuraxHeading: "অলস GPU একটি যাচাইযোগ্য কম্পিউট মার্কেটে পরিণত হয়",
-    neuraxParagraph:
+    // PYRAX Compute section
+    computeHeading: "অলস GPU একটি যাচাইযোগ্য কম্পিউট মার্কেটে পরিণত হয়",
+    computeParagraph:
       "যে হার্ডওয়্যার Stream B মাইন করে সেটিই পেইড AI ও কম্পিউট জব চালায়, অন-চেইনে settle এবং একটি নির্দিষ্ট 8 PYRX প্রতি compute unit-এ দামযুক্ত। একটি চার-ধাপের যাচাই সিঁড়ি — redundancy, fraud proof, ইন্টারঅ্যাক্টিভ বিরোধ, এবং TEE attestation — অন্ধ বিশ্বাসের বদলে ক্রিপ্টোগ্রাফিক প্রমাণ দেয়।",
-    neuraxHowItWorks: "NEURAX কীভাবে কাজ করে",
-    neuraxIndustries: "AI ও কম্পিউট শিল্পখাত →",
-    neuraxTile1L: "প্রতি compute unit (1 RTX-4090-hour)",
-    neuraxTile2L: "PYRX AI-compute pool",
-    neuraxTile3L: "যাচাই সিঁড়ি",
-    neuraxTile4L: "local-first বেসলাইন GPU",
+    computeHowItWorks: "PYRAX Compute কীভাবে কাজ করে",
+    computeIndustries: "AI ও কম্পিউট শিল্পখাত →",
+    computeTile1L: "প্রতি compute unit (1 RTX-4090-hour)",
+    computeTile2L: "PYRX AI-compute pool",
+    computeTile3L: "যাচাই সিঁড়ি",
+    computeTile4L: "local-first বেসলাইন GPU",
 
     // industries teaser
     businessTypes: "ব্যবসার ধরন",
@@ -519,8 +519,8 @@ export const bn: LocaleDict = {
     techPrivacyDesc: "no-trusted-setup ZK প্রমাণ সহ shielded ট্রান্সফার।",
     techVmsName: "Multi-VM (EVM/WASM/Cairo)",
     techVmsDesc: "তিনটি ভার্চুয়াল মেশিন, cross-VM কল, একটি চেইন।",
-    techNeuraxName: "NEURAX কম্পিউট মার্কেট",
-    techNeuraxDesc: "যাচাইযোগ্য, অন-চেইন-settle-করা AI ও GPU কম্পিউট।",
+    techComputeName: "PYRAX Compute কম্পিউট মার্কেট",
+    techComputeDesc: "যাচাইযোগ্য, অন-চেইন-settle-করা AI ও GPU কম্পিউট।",
     techSecurityName: "নিরাপত্তা ও অডিট",
     techSecurityDesc: "আনুষ্ঠানিক invariant, threat model, বাহ্যিক অডিট গেট।",
     techWhitepaperName: "Whitepaper v4",
@@ -608,7 +608,7 @@ export const bn: LocaleDict = {
 
     missionTitle: "আমাদের mission",
     missionPara1:
-      "পাবলিক ব্লকচেইন একটি মিথ্যা পছন্দ চাপিয়ে দিয়েছে: স্বচ্ছতা যা আপনার পুরো আর্থিক জীবন ফাঁস করে, অথবা গোপনীয়তা টুল যা পরে ভাবনা হিসেবে জুড়ে দেওয়া। PYRAX এই আপস প্রত্যাখ্যান করে। একটি GhostDAG প্যারালাল কাজের থ্রুপুট দেয়; ডিফল্টভাবে-shielded ট্রান্সফার না চেয়েই গোপনীয়তা দেয়; একটি multi-VM এক্সিকিউশন স্তর ডেভেলপারদের সেখানেই দেখা করে যেখানে তারা আছে; এবং NEURAX অলস GPU-কে এমন কম্পিউটের একটি মার্কেটে পরিণত করে যা আপনি সত্যিই যাচাই করতে পারেন।",
+      "পাবলিক ব্লকচেইন একটি মিথ্যা পছন্দ চাপিয়ে দিয়েছে: স্বচ্ছতা যা আপনার পুরো আর্থিক জীবন ফাঁস করে, অথবা গোপনীয়তা টুল যা পরে ভাবনা হিসেবে জুড়ে দেওয়া। PYRAX এই আপস প্রত্যাখ্যান করে। একটি GhostDAG প্যারালাল কাজের থ্রুপুট দেয়; ডিফল্টভাবে-shielded ট্রান্সফার না চেয়েই গোপনীয়তা দেয়; একটি multi-VM এক্সিকিউশন স্তর ডেভেলপারদের সেখানেই দেখা করে যেখানে তারা আছে; এবং PYRAX Compute অলস GPU-কে এমন কম্পিউটের একটি মার্কেটে পরিণত করে যা আপনি সত্যিই যাচাই করতে পারেন।",
     missionPara2:
       "আমরা পথটি নিয়ে ইচ্ছাকৃতভাবে নিরাভরণ: আজ চলমান একটি বিশ্বস্ত সিমুলেশন, একটি ক্লোজড আলফা, একটি পাবলিক testnet, এবং আসল মূল্য বহনের আগে একটি একক বাহ্যিক অডিট।",
 
@@ -679,7 +679,7 @@ export const bn: LocaleDict = {
     toc8: "Networking: Bootstrapless",
     toc9: "Metadata Privacy & Anonymous Services",
     toc10: "State, Storage & Proofs",
-    toc11: "NEURAX — Verifiable Compute",
+    toc11: "PYRAX Compute — Verifiable Compute",
     toc12: "Crucible — Zero-Fee Mining",
     toc13: "NOVA — Autonomous Operations",
     toc14: "Tokenomics",
@@ -722,7 +722,7 @@ export const bn: LocaleDict = {
     kickerSolution: "সমাধান",
     kickerTechnology: "প্রযুক্তি",
     kickerMarket: "এখনই কেন",
-    kickerNeurax: "wedge",
+    kickerCompute: "wedge",
     kickerTraction: "Traction",
     kickerTokenomics: "টোকেনোমিক্স",
     kickerRoadmap: "রোডম্যাপ",
@@ -764,7 +764,7 @@ export const bn: LocaleDict = {
     techCard3Title: "Multi-VM L2 + ZK-rollup L3",
     techCard3Desc:
       "EVM, WASM, এবং Cairo cross-VM কল সহ; হাজার হাজার প্রমাণ একটিতে ভাঁজ হয়।",
-    techCard4Title: "NEURAX কম্পিউট মার্কেট",
+    techCard4Title: "PYRAX Compute কম্পিউট মার্কেট",
     techCard4Desc:
       "অলস GPU যাচাইযোগ্য AI জব চালায়, অন-চেইনে settle, একটি নির্দিষ্ট 8 PYRX প্রতি compute unit-এ দামযুক্ত।",
     techFootnotePre: "51%-প্রতিরোধ ",
@@ -787,15 +787,15 @@ export const bn: LocaleDict = {
     marketRef4Label: "PYRAX যে ব্যবসার ধরন সরাসরি ম্যাপ করে",
     marketRef4Source: "এই সাইট",
 
-    // neurax slide
-    neuraxTitle: "NEURAX — যাচাইযোগ্য কম্পিউট",
-    neuraxBody:
+    // PYRAX Compute slide
+    computeTitle: "PYRAX Compute — যাচাইযোগ্য কম্পিউট",
+    computeBody:
       "যে GPU-গুলো চেইন সুরক্ষিত করে সেগুলোই পেইড AI ও কম্পিউট জব চালায়। একটি চার-ধাপের যাচাই সিঁড়ি অন্ধ বিশ্বাস প্রতিস্থাপন করে — এবং চাহিদা বিস্ফোরিত হচ্ছে।",
-    neuraxTile1Label: "প্রতি compute unit (নির্দিষ্ট)",
-    neuraxTile2Label: "bootstrap কম্পিউট pool",
-    neuraxTile3Label: "যাচাই সিঁড়ি",
-    neuraxTile4Label: "local-first বেসলাইন GPU",
-    neuraxFooter:
+    computeTile1Label: "প্রতি compute unit (নির্দিষ্ট)",
+    computeTile2Label: "bootstrap কম্পিউট pool",
+    computeTile3Label: "যাচাই সিঁড়ি",
+    computeTile4Label: "local-first বেসলাইন GPU",
+    computeFooter:
       "একটি ক্রিপ্টো-অর্থনৈতিক AI-compute নেটওয়ার্ক যা প্রদানকারীদের সেই একই টোকেনে পরিশোধ করে যা কনসেনসাস সুরক্ষিত করে — একটি স্ব-শক্তিশালীকারী flywheel।",
 
     // traction slide
@@ -833,7 +833,7 @@ export const bn: LocaleDict = {
     askUseOfFunds: "তহবিলের ব্যবহার",
     askFund1: "বাহ্যিক অডিট + mainnet genesis ceremony",
     askFund2: "Ecosystem, liquidity ও buildathon grant",
-    askFund3: "NEURAX কম্পিউট বিল্ডআউট এবং প্রদানকারী incentive",
+    askFund3: "PYRAX Compute কম্পিউট বিল্ডআউট এবং প্রদানকারী incentive",
     askFund4: "কোর প্রোটোকল, অ্যাপ, এবং গ্লোবাল টিম",
     askEmailButton: "invest@pyrax.org",
     askLiveButton: "লাইভ দেখুন",
@@ -853,7 +853,7 @@ export const bn: LocaleDict = {
     alloc2Label: "Ecosystem ও liquidity",
     alloc2Note: "TGE-তে 40% + 24 মাসে 60% linear",
     alloc3Label: "AI-Compute pool",
-    alloc3Note: "48 মাসে stream করা; NEURAX payout-এ অর্থায়ন করে",
+    alloc3Note: "48 মাসে stream করা; PYRAX Compute payout-এ অর্থায়ন করে",
     alloc4Label: "টিম ও উপদেষ্টা",
     alloc4Note: "12-month cliff, তারপর 36-month linear",
     alloc5Label: "DAO treasury ও reserve",
@@ -900,3 +900,5 @@ export const bn: LocaleDict = {
       "4B pool থেকে bootstrap → coverage বাড়ার সাথে revenue-funded → অব্যয়িত DAO-তে ফেরে",
   },
 };
+
+

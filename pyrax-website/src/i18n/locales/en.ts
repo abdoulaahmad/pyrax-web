@@ -30,7 +30,7 @@ export const en = {
   tokData,
   meta: {
     titleSuffix: "PYRAX™ Network",
-    description: "PYRAX is a from-scratch Layer-1: a GhostDAG, private by default, fully decentralized, ISP-resistant — with a verifiable AI compute marketplace. 500,000+ TPS target.",
+    description: "PYRAX is a from-scratch Layer-1: a GhostDAG, private by default, fully decentralized, ISP-resistant — with a verifiable GPU compute marketplace. 500,000+ TPS target.",
   },
   nav: {
     products: "Products",
@@ -54,7 +54,7 @@ export const en = {
   hero: {
     eyebrow: "The private, high-throughput Layer-1",
     title: "The blockchain built like the future demands.",
-    subtitle: "PYRAX replaces the single chain with a GhostDAG web of blocks — private by default, fully decentralized, ISP-resistant, and engineered for 500,000+ transactions per second. Idle mining hardware becomes a verifiable AI compute marketplace.",
+    subtitle: "PYRAX replaces the single chain with a GhostDAG web of blocks — private by default, fully decentralized, ISP-resistant, and engineered for 500,000+ transactions per second. Idle hardware becomes a verifiable GPU compute marketplace.",
     ctaPrimary: "Explore the network",
     ctaSecondary: "Read the whitepaper",
     liveOn: "Live on",
@@ -96,7 +96,7 @@ export const en = {
     community: "Community",
     resources: "Resources",
     rights: "All rights reserved.",
-    openCore: "Open protocol under Apache-2.0. Apps, wallet, NEURAX & services proprietary. PYRAX™ is a trademark.",
+    openCore: "Open protocol under Apache-2.0. Apps, wallet, PYRAX Compute & services proprietary. PYRAX™ is a trademark.",
     selectLanguage: "Language",
     selectNetwork: "Network",
   },
@@ -110,3 +110,5 @@ export const en = {
 };
 
 export type Dict = typeof en;
+
+

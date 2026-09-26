@@ -1,12 +1,12 @@
 ---
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Site from "../layouts/Site.astro";
-import { DEFAULT_LOCALE, localizePath } from "../i18n/config";
+import { DEFAULT_LOCALE, localizePath, resolveLocale } from "../i18n/config";
 import { useT } from "../i18n";
 import { TOKEN, ALLOCATIONS, GENESIS, EMISSIONS, FEES, STAKING, GOVERNANCE, COMPUTE, fmt } from "../lib/tokenomics";
 import { DOMAINS } from "../lib/endpoints";
 
-const lang = DEFAULT_LOCALE;
+const lang = resolveLocale(Astro.url, Astro.cookies);
 const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 
@@ -33,7 +33,7 @@ const feeLabel = (l: string) => t(`tokData.${FEE_KEY[l] ?? l}`, l);
 const emKeys = ["emInitialSubsidy", "emHalving", "emCap", "emToCap", "emSplit"];
 const emVals = [EMISSIONS.initialSubsidy, EMISSIONS.halving, EMISSIONS.cap, EMISSIONS.toCap, EMISSIONS.split];
 ---
-<Site title="PYRX Tokenomics — PYRAX™ Network" description="The complete PYRX tokenomics: a 50B hard cap enforced in consensus, a 75% premine + 25% mined over ~26 years, a consensus-frozen EIP-1559 fee split, staking, governance, and the NEURAX compute economy." lang={lang}>
+<Site title="PYRX Tokenomics — PYRAX™ Network" description="The complete PYRX tokenomics: a 50B hard cap enforced in consensus, a 75% premine + 25% mined over ~26 years, a consensus-frozen EIP-1559 fee split, staking, governance, and deflationary fee burns." lang={lang}>
   <!-- HERO -->
   <section class="relative overflow-hidden border-b border-line">
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
@@ -155,8 +155,8 @@ const emVals = [EMISSIONS.initialSubsidy, EMISSIONS.halving, EMISSIONS.cap, EMIS
     <div class="mx-auto max-w-7xl px-6 py-20">
       <div data-reveal class="mx-auto mb-14 max-w-2xl text-center">
         <div class="eyebrow text-[color:var(--color-brand)]">{t("tokenPage.participate", "Put PYRX to work")}</div>
-        <h2 class="mt-3 font-display text-3xl font-extrabold sm:text-4xl">{t("tokenPage.participateTitle", "Staking, governance & compute")}</h2>
-        <p class="mx-auto mt-3 max-w-xl text-muted">{t("tokenPage.participateBody", "Three ways the token is used: secure finality by staking, steer the protocol by voting, and turn idle GPUs into verifiable compute.")}</p>
+        <h2 class="mt-3 font-display text-3xl font-extrabold sm:text-4xl">{t("tokenPage.participateTitle", "Staking, governance & fee burns")}</h2>
+        <p class="mx-auto mt-3 max-w-xl text-muted">{t("tokenPage.participateBody", "Three pillars of token utility: secure finality by staking, steer the protocol by voting, and permanent supply reduction through continuous fee burns.")}</p>
       </div>
 
       <div class="grid gap-6 lg:grid-cols-3">
@@ -207,19 +207,19 @@ const emVals = [EMISSIONS.initialSubsidy, EMISSIONS.halving, EMISSIONS.cap, EMIS
           </div>
         </div>
 
-        <!-- NEURAX -->
-        <div data-reveal data-reveal-delay="2" class="group relative flex flex-col overflow-hidden rounded-[1.75rem] border border-line bg-[radial-gradient(130%_120%_at_100%_0%,rgba(124,92,255,0.16),transparent_58%)] p-7 transition hover:border-[color:#4b3d80]">
+        <!-- DEFLATIONARY BURNS -->
+        <div data-reveal data-reveal-delay="2" class="group relative flex flex-col overflow-hidden rounded-[1.75rem] border border-line bg-[radial-gradient(130%_120%_at_100%_0%,rgba(251,111,115,0.16),transparent_58%)] p-7 transition hover:border-[color:var(--color-negative)]">
           <div class="flex items-center gap-3">
-            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-line text-[color:#7c5cff]"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M10 2v3M14 2v3M10 19v3M14 19v3M2 10h3M2 14h3M19 10h3M19 14h3"/></svg></span>
-            <h3 class="font-display text-xl font-extrabold">{t("tokenPage.computeTitle", "NEURAX compute")}</h3>
+            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-line text-[color:var(--color-negative)]"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></span>
+            <h3 class="font-display text-xl font-extrabold">{t("tokenPage.burnTitle", "Deflationary fee burns")}</h3>
           </div>
           <div class="mt-7 space-y-3">
-            <div class="flex items-center justify-between gap-3 rounded-2xl border border-line bg-[rgba(9,11,18,0.55)] px-4 py-3"><span class="text-[0.62rem] font-semibold uppercase tracking-wider text-faint">{t("tokenPage.price", "Price")}</span><span class="font-mono text-lg font-extrabold text-[color:#a78bff]">{t("tokData.computePerCu", COMPUTE.perCu)}</span></div>
-            <div class="flex items-center justify-between gap-3 rounded-2xl border border-line bg-[rgba(9,11,18,0.55)] px-4 py-3"><span class="shrink-0 text-[0.62rem] font-semibold uppercase tracking-wider text-faint">{t("tokenPage.poolBudget", "Pool budget")}</span><span class="text-right font-mono text-xs font-bold text-ink">{t("tokData.computePoolBudget", COMPUTE.poolBudget)}</span></div>
-            <div class="flex items-center justify-between gap-3 rounded-2xl border border-line bg-[rgba(9,11,18,0.55)] px-4 py-3"><span class="shrink-0 text-[0.62rem] font-semibold uppercase tracking-wider text-faint">{t("tokenPage.jobCap", "Job cap")}</span><span class="text-right font-mono text-xs font-bold text-ink">{t("tokData.computeDrawdownCap", COMPUTE.drawdownCap)}</span></div>
+            <div class="flex items-center justify-between gap-3 rounded-2xl border border-line bg-[rgba(9,11,18,0.55)] px-4 py-3"><span class="text-[0.62rem] font-semibold uppercase tracking-wider text-faint">{t("tokenPage.burnBase", "Base fee burn")}</span><span class="font-mono text-lg font-extrabold text-[color:var(--color-negative)]">25%</span></div>
+            <div class="flex items-center justify-between gap-3 rounded-2xl border border-line bg-[rgba(9,11,18,0.55)] px-4 py-3"><span class="shrink-0 text-[0.62rem] font-semibold uppercase tracking-wider text-faint">{t("tokenPage.burnShielded", "Shielded burn")}</span><span class="text-right font-mono text-xs font-bold text-ink">100 Ash / tx</span></div>
+            <div class="flex items-center justify-between gap-3 rounded-2xl border border-line bg-[rgba(9,11,18,0.55)] px-4 py-3"><span class="shrink-0 text-[0.62rem] font-semibold uppercase tracking-wider text-faint">{t("tokenPage.burnEnforcement", "Enforcement")}</span><span class="text-right font-mono text-xs font-bold text-ink">Consensus frozen</span></div>
           </div>
-          <p class="mt-6 flex-1 text-xs leading-relaxed text-muted">{t("tokData.computeCu", COMPUTE.cu)}. {t("tokData.computeTransition", COMPUTE.transition)}.</p>
-          <a href={L("/technology#neurax")} class="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-[color:#a78bff] transition hover:gap-2">{t("tokenPage.neuraxLink", "How NEURAX works →")}</a>
+          <p class="mt-6 flex-1 text-xs leading-relaxed text-muted">{t("tokData.burnBody", "Every EIP-1559 transaction permanently burns 25% of its base fee, while every private transaction burns a flat 100 Ash anti-DoS fee directly from the circulating supply.")}</p>
+          <a href={L("/whitepaper")} class="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--color-negative)] transition hover:gap-2">{t("tokenPage.burnLink", "EIP-1559 fee split in whitepaper →")}</a>
         </div>
       </div>
     </div>

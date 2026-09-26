@@ -2,7 +2,7 @@
 //
 // Best-effort server-side error reporting for the marketing site (pyrax-website, Astro SSR).
 // When an SSR API route hits an UNEXPECTED 5xx, or the Node process emits an unhandledRejection,
-// this module POSTs a scrubbed, deduped summary to the NEURAX Sentinel ingest so the on-call sees
+// this module POSTs a scrubbed, deduped summary to the NOVA Sentinel ingest so the on-call sees
 // it. It is a mirror of the node-app `electron/main/error-reporter.ts` design, adapted to the
 // SERVER-SIDE trust boundary: this process is OPERATED by us, so the secret stays on the server and
 // we use the agent-secret ingest path (NOT the distributed app-key gateway).

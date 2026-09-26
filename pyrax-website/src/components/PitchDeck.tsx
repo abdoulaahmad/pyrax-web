@@ -113,7 +113,7 @@ const SLIDES: Slide[] = [
             { t: t("pitch.techCard1Title", "GhostDAG + TriStream"), d: t("pitch.techCard1Desc", "Three streams over five seal lanes — ASIC, GPU, CPU — plus BLS proof-of-stake finality.") },
             { t: t("pitch.techCard2Title", "Shielded by default"), d: t("pitch.techCard2Desc", "Orchard-style notes and recursive zk-SNARKs with no trusted setup; viewing keys for oversight.") },
             { t: t("pitch.techCard3Title", "Multi-VM L2 + ZK-rollup L3"), d: t("pitch.techCard3Desc", "EVM, WASM, and Cairo with cross-VM calls; thousands of proofs fold into one.") },
-            { t: t("pitch.techCard4Title", "NEURAX compute market"), d: t("pitch.techCard4Desc", "Idle GPUs run verifiable AI jobs, settled on-chain, priced at a fixed 8 PYRX per compute unit.") },
+            { t: t("pitch.techCard4Title", "Sphinx onion mixnet"), d: t("pitch.techCard4Desc", "Bootstrapless peer routing and uniform packet encryption ensure zero network-level metadata leakage.") },
           ].map((x) => (
             <motion.div key={x.t} variants={item} className="rounded-2xl border border-line bg-[color:var(--color-surface)] p-5">
               <h3 className="font-bold text-ink">{x.t}</h3>
@@ -150,26 +150,26 @@ const SLIDES: Slide[] = [
     ),
   },
   {
-    id: "neurax", label: "NEURAX",
+    id: "compliance", label: "Compliance",
     render: (t) => (
       <motion.div variants={stagger} initial="hidden" animate="show" className="mx-auto max-w-4xl">
-        <Kicker>{t("pitch.kickerNeurax", "The wedge")}</Kicker>
-        <Title>{t("pitch.neuraxTitle", "NEURAX — verifiable compute")}</Title>
-        <motion.p variants={item} className="mt-4 max-w-2xl text-muted">{t("pitch.neuraxBody", "The same GPUs that secure the chain run paid AI and compute jobs. A four-rung verification ladder replaces blind trust — and the demand is exploding.")}</motion.p>
+        <Kicker>{t("pitch.kickerCompliance", "The moat")}</Kicker>
+        <Title>{t("pitch.complianceTitle", "Enterprise privacy & compliance")}</Title>
+        <motion.p variants={item} className="mt-4 max-w-2xl text-muted">{t("pitch.complianceBody", "Shielded pools hide amounts, senders, and receivers by default — while cryptographic viewing keys enable selective, read-only disclosure for audits and regulatory oversight without compromising spending keys.")}</motion.p>
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { n: "8 PYRX", l: t("pitch.neuraxTile1Label", "per compute unit (fixed)") },
-            { n: "4B PYRX", l: t("pitch.neuraxTile2Label", "bootstrap compute pool") },
-            { n: "4-rung", l: t("pitch.neuraxTile3Label", "verification ladder") },
-            { n: "RTX 3060", l: t("pitch.neuraxTile4Label", "local-first baseline GPU") },
+            { n: "Plonky2", l: t("pitch.complianceTile1Label", "zero-setup SNARK circuits") },
+            { n: "100%", l: t("pitch.complianceTile2Label", "default-on shielded transfers") },
+            { n: "Audit Keys", l: t("pitch.complianceTile3Label", "selective cryptographic compliance") },
+            { n: "0-Leak", l: t("pitch.complianceTile4Label", "amount, sender & receiver hidden") },
           ].map((x) => (
-            <motion.div key={x.l} variants={item} className="rounded-3xl border border-line bg-[rgba(124,92,255,0.06)] p-6">
-              <div className="font-mono text-2xl font-extrabold text-[color:#7c5cff]">{x.n}</div>
+            <motion.div key={x.l} variants={item} className="rounded-3xl border border-line bg-[rgba(92,186,206,0.06)] p-6">
+              <div className="font-mono text-2xl font-extrabold text-[color:#5cbace]">{x.n}</div>
               <div className="mt-1 text-xs text-muted">{x.l}</div>
             </motion.div>
           ))}
         </div>
-        <motion.p variants={item} className="mt-4 text-sm text-faint">{t("pitch.neuraxFooter", "A crypto-economic AI-compute network that pays providers in the same token that secures consensus — a self-reinforcing flywheel.")}</motion.p>
+        <motion.p variants={item} className="mt-4 text-sm text-faint">{t("pitch.complianceFooter", "True financial privacy built for enterprises: confidential operations on-chain without failing compliance, tax, or AML audits.")}</motion.p>
       </motion.div>
     ),
   },
@@ -267,7 +267,7 @@ const SLIDES: Slide[] = [
           <motion.div variants={item} className="rounded-3xl border border-line bg-[color:var(--color-surface)] p-7">
             <div className="eyebrow text-faint">{t("pitch.askUseOfFunds", "Use of funds")}</div>
             <ul className="mt-3 space-y-2 text-sm text-muted">
-              {[t("pitch.askFund1", "External audit + mainnet genesis ceremony"), t("pitch.askFund2", "Ecosystem, liquidity & buildathon grants"), t("pitch.askFund3", "NEURAX compute buildout and provider incentives"), t("pitch.askFund4", "Core protocol, apps, and global team")].map((u) => (
+              {[t("pitch.askFund1", "External audit + mainnet genesis ceremony"), t("pitch.askFund2", "Ecosystem, liquidity & buildathon grants"), t("pitch.askFund3", "Developer grants, privacy tooling & ecosystem incubation"), t("pitch.askFund4", "Core protocol, apps, and global team")].map((u) => (
                 <li key={u} className="flex gap-2"><span className="text-[color:var(--color-brand)]">→</span>{u}</li>
               ))}
             </ul>

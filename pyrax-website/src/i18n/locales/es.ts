@@ -70,7 +70,7 @@ export const es: LocaleDict = {
     community: "Comunidad",
     resources: "Recursos",
     rights: "Todos los derechos reservados.",
-    openCore: "Protocolo abierto bajo Apache-2.0. Las apps, la cartera, NEURAX y los servicios son propietarios. PYRAX™ es una marca registrada.",
+    openCore: "Protocolo abierto bajo Apache-2.0. Las apps, la cartera, PYRAX Compute y los servicios son propietarios. PYRAX™ es una marca registrada.",
     selectLanguage: "Idioma",
     selectNetwork: "Red",
   },
@@ -86,7 +86,7 @@ export const es: LocaleDict = {
     subConsensus: "Consenso",
     subPrivacy: "Privacidad",
     subVms: "Máquinas virtuales",
-    subNeurax: "NEURAX",
+    subCompute: "PYRAX Compute",
     subNetwork: "Red",
     subSecurity: "Seguridad",
 
@@ -115,7 +115,7 @@ export const es: LocaleDict = {
 
     // Page meta
     metaTitle: "Tecnología — PYRAX™ Network",
-    metaDescription: "Cómo funciona PYRAX: un GhostDAG sellado por tres flujos sobre cinco carriles, finalidad por prueba de participación con BLS, privacidad protegida por defecto, una capa de ejecución multi-VM, el mercado de cómputo NEURAX, una red sin bootstrap y resistente al ISP, y una ruta hacia mainnet controlada por auditoría.",
+    metaDescription: "Cómo funciona PYRAX: un GhostDAG sellado por tres flujos sobre cinco carriles, finalidad por prueba de participación con BLS, privacidad protegida por defecto, una capa de ejecución multi-VM, el mercado de cómputo PYRAX Compute, una red sin bootstrap y resistente al ISP, y una ruta hacia mainnet controlada por auditoría.",
 
     // Hero
     heroEyebrow: "Tecnología",
@@ -180,21 +180,21 @@ export const es: LocaleDict = {
     txTypesTitle: "Seis tipos de transacción, un solo libro mayor",
     txTypesBody: "Custodia (Lock / Refund / Release / Drip / Split), Staking (Bond / Unbond / Withdraw / Slash) y Gobernanza (Propose / Vote) son tipos de transacción de primera clase, no contratos añadidos por encima.",
 
-    // NEURAX
-    neuraxEyebrow: "04 · NEURAX",
-    neuraxTitle: "IA verificable y cómputo GPU",
-    neuraxLede1: "Las mismas GPUs que minan Stream B ejecutan trabajos pagados de IA y cómputo, financiados por custodia en la cadena y con un precio fijo de ",
-    neuraxLedePrice: "8 PYRX por unidad de cómputo",
-    neuraxLede2: ". En lugar de confiar en la palabra de un proveedor, los resultados suben una escalera de verificación de cuatro peldaños.",
-    neuraxLadder1: "Re-ejecución redundante en proveedores independientes",
-    neuraxLadder2: "Pruebas de fraude que fijan el único paso divergente",
-    neuraxLadder3: "Disputa interactiva: un juego de bisección hasta ese paso",
-    neuraxLadder4: "Atestación TEE para ejecución sellada por hardware",
-    neuraxStat1Label: "por unidad de cómputo (1 hora de GPU de referencia)",
-    neuraxStat2Label: "pool de cómputo de IA · presupuesto de ~70M/mes",
-    neuraxStat3Label: "un ComputeReceipt en la cadena por trabajo verificado",
-    neuraxStat4Label: "base local-first; ShardedExecutor agrupa GPUs",
-    neuraxCta: "Explora los casos de uso de IA y cómputo →",
+    // PYRAX Compute
+    computeEyebrow: "04 · PYRAX Compute",
+    computeTitle: "IA verificable y cómputo GPU",
+    computeLede1: "Las mismas GPUs que minan Stream B ejecutan trabajos pagados de IA y cómputo, financiados por custodia en la cadena y con un precio fijo de ",
+    computeLedePrice: "8 PYRX por unidad de cómputo",
+    computeLede2: ". En lugar de confiar en la palabra de un proveedor, los resultados suben una escalera de verificación de cuatro peldaños.",
+    computeLadder1: "Re-ejecución redundante en proveedores independientes",
+    computeLadder2: "Pruebas de fraude que fijan el único paso divergente",
+    computeLadder3: "Disputa interactiva: un juego de bisección hasta ese paso",
+    computeLadder4: "Atestación TEE para ejecución sellada por hardware",
+    computeStat1Label: "por unidad de cómputo (1 hora de GPU de referencia)",
+    computeStat2Label: "pool de cómputo de IA · presupuesto de ~70M/mes",
+    computeStat3Label: "un ComputeReceipt en la cadena por trabajo verificado",
+    computeStat4Label: "base local-first; ShardedExecutor agrupa GPUs",
+    computeCta: "Explora los casos de uso de IA y cómputo →",
 
     // Network
     networkEyebrow: "05 · Red",
@@ -266,11 +266,11 @@ export const es: LocaleDict = {
     quorum: 'Quórum',
     pass: 'Aprobación',
     frozenForever: 'Congelado para siempre:',
-    computeTitle: 'Cómputo NEURAX',
+    computeTitle: 'Cómputo PYRAX Compute',
     price: 'Precio',
     poolBudget: 'Presupuesto del pool',
     jobCap: 'Tope por trabajo',
-    neuraxLink: 'Cómo funciona NEURAX →',
+    computeLink: 'Cómo funciona PYRAX Compute →',
     ctaWhitepaper: 'Lee el whitepaper completo →',
     ctaExplorer: 'Abre el explorador',
   },
@@ -301,7 +301,7 @@ export const es: LocaleDict = {
 
     roadmap1P: 'Ahora',
     roadmap1Title: 'PYRAX Seed está en vivo',
-    roadmap1Body: 'Una simulación fiel de todo el protocolo —GhostDAG, pool protegido, contratos multi-VM, NEURAX— corriendo hoy como un sandbox permanente para desarrolladores.',
+    roadmap1Body: 'Una simulación fiel de todo el protocolo —GhostDAG, pool protegido, contratos multi-VM, PYRAX Compute— corriendo hoy como un sandbox permanente para desarrolladores.',
     roadmap2P: 'Siguiente',
     roadmap2Title: 'PYRAX Forge · alfa cerrada',
     roadmap2Body: 'La ruta de consenso de producción (TriStream real de 5 carriles + finalidad BLS) se abre a testers invitados con validadores sembrados.',
@@ -341,7 +341,7 @@ export const es: LocaleDict = {
     path4Title: 'Construye una dApp protegida',
     path4Desc: 'Usa transferencias protegidas y claves de visualización para que tus usuarios sean privados por defecto y tus auditores sigan teniendo prueba de solo lectura.',
     path5Title: 'Compra cómputo verificable',
-    path5Desc: 'Deposita en custodia un trabajo NEURAX, obtén un ComputeReceipt y paga por unidad de cómputo: inferencia y entrenamiento de IA con prueba, no con confianza.',
+    path5Desc: 'Deposita en custodia un trabajo PYRAX Compute, obtén un ComputeReceipt y paga por unidad de cómputo: inferencia y entrenamiento de IA con prueba, no con confianza.',
     path6Title: 'Ejecuta un nodo',
     path6Desc: 'Únete a la malla con un nodo Inferno, mina un flujo o haz staking para validar: sin servidor de bootstrap requerido.',
     pathsTitle: 'Elige tu camino',
@@ -390,15 +390,15 @@ export const es: LocaleDict = {
     readWhitepaper: 'Lee el whitepaper →',
     learnMore: 'Saber más →',
 
-    // NEURAX section
-    neuraxHeading: 'Las GPUs inactivas se convierten en un mercado de cómputo verificable',
-    neuraxParagraph: 'El mismo hardware que mina Stream B ejecuta trabajos pagados de IA y cómputo, liquidados en la cadena y con un precio fijo de 8 PYRX por unidad de cómputo. Una escalera de verificación de cuatro peldaños —redundancia, pruebas de fraude, disputa interactiva y atestación TEE— sustituye la confianza ciega por prueba criptográfica.',
-    neuraxHowItWorks: 'Cómo funciona NEURAX',
-    neuraxIndustries: 'Industrias de IA y cómputo →',
-    neuraxTile1L: 'por unidad de cómputo (1 hora de RTX-4090)',
-    neuraxTile2L: 'pool de cómputo de IA en PYRX',
-    neuraxTile3L: 'escalera de verificación',
-    neuraxTile4L: 'GPU base local-first',
+    // PYRAX Compute section
+    computeHeading: 'Las GPUs inactivas se convierten en un mercado de cómputo verificable',
+    computeParagraph: 'El mismo hardware que mina Stream B ejecuta trabajos pagados de IA y cómputo, liquidados en la cadena y con un precio fijo de 8 PYRX por unidad de cómputo. Una escalera de verificación de cuatro peldaños —redundancia, pruebas de fraude, disputa interactiva y atestación TEE— sustituye la confianza ciega por prueba criptográfica.',
+    computeHowItWorks: 'Cómo funciona PYRAX Compute',
+    computeIndustries: 'Industrias de IA y cómputo →',
+    computeTile1L: 'por unidad de cómputo (1 hora de RTX-4090)',
+    computeTile2L: 'pool de cómputo de IA en PYRX',
+    computeTile3L: 'escalera de verificación',
+    computeTile4L: 'GPU base local-first',
 
     // industries teaser
     businessTypes: 'tipos de negocio',
@@ -445,8 +445,8 @@ export const es: LocaleDict = {
     techPrivacyDesc: 'Transferencias protegidas con pruebas ZK sin configuración de confianza.',
     techVmsName: 'Multi-VM (EVM/WASM/Cairo)',
     techVmsDesc: 'Tres máquinas virtuales, llamadas cross-VM, una cadena.',
-    techNeuraxName: 'Mercado de cómputo NEURAX',
-    techNeuraxDesc: 'IA y cómputo GPU verificables y liquidados en la cadena.',
+    techComputeName: 'Mercado de cómputo PYRAX Compute',
+    techComputeDesc: 'IA y cómputo GPU verificables y liquidados en la cadena.',
     techSecurityName: 'Seguridad y auditorías',
     techSecurityDesc: 'Invariantes formales, modelo de amenazas, control de auditoría externa.',
     techWhitepaperName: 'Whitepaper v4',
@@ -526,7 +526,7 @@ export const es: LocaleDict = {
     fact4Label: 'protocolo open-core',
 
     missionTitle: 'Nuestra misión',
-    missionPara1: 'Las blockchains públicas forzaron una falsa elección: transparencia que filtra toda tu vida financiera, o herramientas de privacidad añadidas por encima como una ocurrencia tardía. PYRAX rechaza el compromiso. Un GhostDAG aporta el rendimiento del trabajo paralelo; las transferencias protegidas por defecto dan privacidad sin pedirla; una capa de ejecución multi-VM sale al encuentro de los desarrolladores donde están; y NEURAX convierte las GPUs inactivas en un mercado de cómputo que realmente puedes verificar.',
+    missionPara1: 'Las blockchains públicas forzaron una falsa elección: transparencia que filtra toda tu vida financiera, o herramientas de privacidad añadidas por encima como una ocurrencia tardía. PYRAX rechaza el compromiso. Un GhostDAG aporta el rendimiento del trabajo paralelo; las transferencias protegidas por defecto dan privacidad sin pedirla; una capa de ejecución multi-VM sale al encuentro de los desarrolladores donde están; y PYRAX Compute convierte las GPUs inactivas en un mercado de cómputo que realmente puedes verificar.',
     missionPara2: 'Somos deliberadamente poco glamurosos sobre el camino: una simulación fiel corriendo hoy, una alfa cerrada, una testnet pública y una única auditoría externa antes de que nada porte valor real.',
 
     believeTitle: 'En qué creemos',
@@ -585,7 +585,7 @@ export const es: LocaleDict = {
     toc8: 'Red: Sin bootstrap',
     toc9: 'Privacidad de metadatos y servicios anónimos',
     toc10: 'Estado, almacenamiento y pruebas',
-    toc11: 'NEURAX — Cómputo verificable',
+    toc11: 'PYRAX Compute — Cómputo verificable',
     toc12: 'Crucible — Minería sin tarifas',
     toc13: 'NOVA — Operaciones autónomas',
     toc14: 'Tokenomics',
@@ -626,7 +626,7 @@ export const es: LocaleDict = {
     kickerSolution: 'La solución',
     kickerTechnology: 'La tecnología',
     kickerMarket: 'Por qué ahora',
-    kickerNeurax: 'La palanca',
+    kickerCompute: 'La palanca',
     kickerTraction: 'Tracción',
     kickerTokenomics: 'Tokenomics',
     kickerRoadmap: 'Hoja de ruta',
@@ -661,7 +661,7 @@ export const es: LocaleDict = {
     techCard2Desc: 'Notas estilo Orchard y zk-SNARKs recursivos sin configuración de confianza; claves de visualización para la supervisión.',
     techCard3Title: 'Multi-VM L2 + ZK-rollup L3',
     techCard3Desc: 'EVM, WASM y Cairo con llamadas cross-VM; miles de pruebas se pliegan en una.',
-    techCard4Title: 'Mercado de cómputo NEURAX',
+    techCard4Title: 'Mercado de cómputo PYRAX Compute',
     techCard4Desc: 'Las GPUs inactivas ejecutan trabajos de IA verificables, liquidados en la cadena, con un precio fijo de 8 PYRX por unidad de cómputo.',
     techFootnotePre: 'Resistencia al 51 % en ',
     techFootnoteEmph: 'tres recursos no correlacionados',
@@ -681,14 +681,14 @@ export const es: LocaleDict = {
     marketRef4Label: 'Tipos de negocio que PYRAX mapea directamente',
     marketRef4Source: 'Este sitio',
 
-    // neurax slide
-    neuraxTitle: 'NEURAX — cómputo verificable',
-    neuraxBody: 'Las mismas GPUs que aseguran la cadena ejecutan trabajos pagados de IA y cómputo. Una escalera de verificación de cuatro peldaños sustituye la confianza ciega, y la demanda está explotando.',
-    neuraxTile1Label: 'por unidad de cómputo (fijo)',
-    neuraxTile2Label: 'pool de cómputo de arranque',
-    neuraxTile3Label: 'escalera de verificación',
-    neuraxTile4Label: 'GPU base local-first',
-    neuraxFooter: 'Una red de cómputo de IA cripto-económica que paga a los proveedores en el mismo token que asegura el consenso: un volante autorreforzante.',
+    // PYRAX Compute slide
+    computeTitle: 'PYRAX Compute — cómputo verificable',
+    computeBody: 'Las mismas GPUs que aseguran la cadena ejecutan trabajos pagados de IA y cómputo. Una escalera de verificación de cuatro peldaños sustituye la confianza ciega, y la demanda está explotando.',
+    computeTile1Label: 'por unidad de cómputo (fijo)',
+    computeTile2Label: 'pool de cómputo de arranque',
+    computeTile3Label: 'escalera de verificación',
+    computeTile4Label: 'GPU base local-first',
+    computeFooter: 'Una red de cómputo de IA cripto-económica que paga a los proveedores en el mismo token que asegura el consenso: un volante autorreforzante.',
 
     // traction slide
     tractionTitle: 'Construido, no planeado',
@@ -722,7 +722,7 @@ export const es: LocaleDict = {
     askUseOfFunds: 'Uso de los fondos',
     askFund1: 'Auditoría externa + ceremonia de génesis de mainnet',
     askFund2: 'Subvenciones de ecosistema, liquidez y buildathon',
-    askFund3: 'Despliegue de cómputo NEURAX e incentivos a proveedores',
+    askFund3: 'Despliegue de cómputo PYRAX Compute e incentivos a proveedores',
     askFund4: 'Protocolo base, apps y equipo global',
     askEmailButton: 'invest@pyrax.org',
     askLiveButton: 'Míralo en vivo',
@@ -742,7 +742,7 @@ export const es: LocaleDict = {
     alloc2Label: 'Ecosistema y liquidez',
     alloc2Note: '40% en el TGE + 60% lineal durante 24 meses',
     alloc3Label: 'Pool de cómputo de IA',
-    alloc3Note: 'Distribuido durante 48 meses; financia los pagos de NEURAX',
+    alloc3Note: 'Distribuido durante 48 meses; financia los pagos de PYRAX Compute',
     alloc4Label: 'Equipo y asesores',
     alloc4Note: 'Cliff de 12 meses, luego 36 meses lineal',
     alloc5Label: 'Tesorería y reserva de la DAO',
@@ -786,3 +786,5 @@ export const es: LocaleDict = {
     computeTransition: 'Arranque desde el pool de 4B → financiado por ingresos a medida que sube la cobertura → lo no gastado vuelve a la DAO',
   },
 };
+
+

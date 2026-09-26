@@ -70,7 +70,7 @@ export const zhTW: LocaleDict = {
     community: "社群",
     resources: "資源",
     rights: "保留一切權利。",
-    openCore: "協議依 Apache-2.0 開源。應用程式、錢包、NEURAX 及各項服務為專有軟體。PYRAX™ 為註冊商標。",
+    openCore: "協議依 Apache-2.0 開源。應用程式、錢包、PYRAX Compute 及各項服務為專有軟體。PYRAX™ 為註冊商標。",
     selectLanguage: "語言",
     selectNetwork: "網路",
   },
@@ -86,7 +86,7 @@ export const zhTW: LocaleDict = {
     subConsensus: "共識",
     subPrivacy: "隱私",
     subVms: "虛擬機",
-    subNeurax: "NEURAX",
+    subCompute: "PYRAX Compute",
     subNetwork: "網路",
     subSecurity: "安全",
 
@@ -115,7 +115,7 @@ export const zhTW: LocaleDict = {
 
     // Page meta
     metaTitle: "技術 — PYRAX™ 網路",
-    metaDescription: "PYRAX 的運作原理：由三條串流跨五條封印通道封印的 GhostDAG 區塊 DAG、BLS 權益證明最終性、預設屏蔽的隱私、多虛擬機執行層、NEURAX 算力市場、無需引導且抗 ISP 審查的網路，以及一條以審計為門控通往主網的路徑。",
+    metaDescription: "PYRAX 的運作原理：由三條串流跨五條封印通道封印的 GhostDAG 區塊 DAG、BLS 權益證明最終性、預設屏蔽的隱私、多虛擬機執行層、PYRAX Compute 算力市場、無需引導且抗 ISP 審查的網路，以及一條以審計為門控通往主網的路徑。",
 
     // Hero
     heroEyebrow: "技術",
@@ -180,21 +180,21 @@ export const zhTW: LocaleDict = {
     txTypesTitle: "六種交易類型，同一本帳本",
     txTypesBody: "託管（Lock／Refund／Release／Drip／Split）、質押（Bond／Unbond／Withdraw／Slash）與治理（Propose／Vote）皆為一等交易種類——而非外掛的合約。",
 
-    // NEURAX
-    neuraxEyebrow: "04 · NEURAX",
-    neuraxTitle: "可驗證的 AI 與 GPU 算力",
-    neuraxLede1: "為 Stream B 挖礦的那些 GPU，同時執行由鏈上託管資助的付費 AI 與算力工作，定價固定為每算力單位 ",
-    neuraxLedePrice: "8 PYRX",
-    neuraxLede2: "。與其信任供應者的一面之詞，結果需攀爬一道四階驗證階梯。",
-    neuraxLadder1: "在獨立供應者之間進行冗餘重執行",
-    neuraxLadder2: "鎖定單一分歧步驟的詐欺證明",
-    neuraxLadder3: "互動式爭議——針對該步驟的二分博弈",
-    neuraxLadder4: "用於硬體封印執行的 TEE 認證",
-    neuraxStat1Label: "每算力單位（1 個參考 GPU 小時）",
-    neuraxStat2Label: "AI 算力池 · 每月約 70M 預算",
-    neuraxStat3Label: "每個已驗證工作對應一份鏈上 ComputeReceipt",
-    neuraxStat4Label: "本地優先為基準；ShardedExecutor 池化 GPU",
-    neuraxCta: "探索 AI 與算力應用案例 →",
+    // PYRAX Compute
+    computeEyebrow: "04 · PYRAX Compute",
+    computeTitle: "可驗證的 AI 與 GPU 算力",
+    computeLede1: "為 Stream B 挖礦的那些 GPU，同時執行由鏈上託管資助的付費 AI 與算力工作，定價固定為每算力單位 ",
+    computeLedePrice: "8 PYRX",
+    computeLede2: "。與其信任供應者的一面之詞，結果需攀爬一道四階驗證階梯。",
+    computeLadder1: "在獨立供應者之間進行冗餘重執行",
+    computeLadder2: "鎖定單一分歧步驟的詐欺證明",
+    computeLadder3: "互動式爭議——針對該步驟的二分博弈",
+    computeLadder4: "用於硬體封印執行的 TEE 認證",
+    computeStat1Label: "每算力單位（1 個參考 GPU 小時）",
+    computeStat2Label: "AI 算力池 · 每月約 70M 預算",
+    computeStat3Label: "每個已驗證工作對應一份鏈上 ComputeReceipt",
+    computeStat4Label: "本地優先為基準；ShardedExecutor 池化 GPU",
+    computeCta: "探索 AI 與算力應用案例 →",
 
     // Network
     networkEyebrow: "05 · 網路",
@@ -266,11 +266,11 @@ export const zhTW: LocaleDict = {
     quorum: "法定人數",
     pass: "通過門檻",
     frozenForever: "永久凍結：",
-    computeTitle: "NEURAX 算力",
+    computeTitle: "PYRAX Compute 算力",
     price: "價格",
     poolBudget: "資金池預算",
     jobCap: "單一工作上限",
-    neuraxLink: "NEURAX 的運作原理 →",
+    computeLink: "PYRAX Compute 的運作原理 →",
     ctaWhitepaper: "閱讀完整白皮書 →",
     ctaExplorer: "開啟區塊瀏覽器",
   },
@@ -301,7 +301,7 @@ export const zhTW: LocaleDict = {
 
     roadmap1P: "現在",
     roadmap1Title: "PYRAX Seed 已上線",
-    roadmap1Body: "對完整協議的忠實模擬——GhostDAG、屏蔽池、多 VM 合約、NEURAX——今日即以永久開發者沙盒之姿運行。",
+    roadmap1Body: "對完整協議的忠實模擬——GhostDAG、屏蔽池、多 VM 合約、PYRAX Compute——今日即以永久開發者沙盒之姿運行。",
     roadmap2P: "接下來",
     roadmap2Title: "PYRAX Forge · 封閉式 alpha",
     roadmap2Body: "正式共識路徑（真正的五通道 TriStream + BLS 最終性）向受邀測試者開放，並帶有植入的驗證者。",
@@ -341,7 +341,7 @@ export const zhTW: LocaleDict = {
     path4Title: "打造屏蔽 dApp",
     path4Desc: "運用屏蔽轉帳與檢視金鑰，讓你的使用者預設保有隱私，而你的審計員仍握有唯讀的證明。",
     path5Title: "購買可驗證算力",
-    path5Desc: "託管一個 NEURAX 工作、取得一份 ComputeReceipt，並按算力單位付費——AI 推論與訓練，靠證明而非信任。",
+    path5Desc: "託管一個 PYRAX Compute 工作、取得一份 ComputeReceipt，並按算力單位付費——AI 推論與訓練，靠證明而非信任。",
     path6Title: "執行節點",
     path6Desc: "以一個 Inferno 節點加入網狀網路、挖某條串流，或質押以擔任驗證——無需引導伺服器。",
     pathsTitle: "選擇你的路徑",
@@ -390,15 +390,15 @@ export const zhTW: LocaleDict = {
     readWhitepaper: "閱讀白皮書 →",
     learnMore: "深入了解 →",
 
-    // NEURAX section
-    neuraxHeading: "閒置 GPU 化為可驗證的算力市場",
-    neuraxParagraph: "為 Stream B 挖礦的那套硬體，同時執行付費的 AI 與算力工作，於鏈上結算並定價為固定的每算力單位 8 PYRX。一道四階驗證階梯——冗餘、詐欺證明、互動式爭議與 TEE 認證——以密碼學證明取代盲目信任。",
-    neuraxHowItWorks: "NEURAX 的運作原理",
-    neuraxIndustries: "AI 與算力產業 →",
-    neuraxTile1L: "每算力單位（1 個 RTX-4090 小時）",
-    neuraxTile2L: "PYRX AI 算力池",
-    neuraxTile3L: "驗證階梯",
-    neuraxTile4L: "本地優先基準 GPU",
+    // PYRAX Compute section
+    computeHeading: "閒置 GPU 化為可驗證的算力市場",
+    computeParagraph: "為 Stream B 挖礦的那套硬體，同時執行付費的 AI 與算力工作，於鏈上結算並定價為固定的每算力單位 8 PYRX。一道四階驗證階梯——冗餘、詐欺證明、互動式爭議與 TEE 認證——以密碼學證明取代盲目信任。",
+    computeHowItWorks: "PYRAX Compute 的運作原理",
+    computeIndustries: "AI 與算力產業 →",
+    computeTile1L: "每算力單位（1 個 RTX-4090 小時）",
+    computeTile2L: "PYRX AI 算力池",
+    computeTile3L: "驗證階梯",
+    computeTile4L: "本地優先基準 GPU",
 
     // industries teaser
     businessTypes: "種商業型態",
@@ -445,8 +445,8 @@ export const zhTW: LocaleDict = {
     techPrivacyDesc: "採用無需可信設定 ZK 證明的屏蔽轉帳。",
     techVmsName: "多 VM（EVM／WASM／Cairo）",
     techVmsDesc: "三種虛擬機、跨 VM 呼叫、同一條鏈。",
-    techNeuraxName: "NEURAX 算力市場",
-    techNeuraxDesc: "可驗證、於鏈上結算的 AI 與 GPU 算力。",
+    techComputeName: "PYRAX Compute 算力市場",
+    techComputeDesc: "可驗證、於鏈上結算的 AI 與 GPU 算力。",
     techSecurityName: "安全與審計",
     techSecurityDesc: "形式化不變量、威脅模型、外部審計門控。",
     techWhitepaperName: "白皮書 v4",
@@ -526,7 +526,7 @@ export const zhTW: LocaleDict = {
     fact4Label: "開放核心協議",
 
     missionTitle: "我們的使命",
-    missionPara1: "公有區塊鏈強加了一個假二選一：透明得洩漏你的整段財務生活，或是把隱私工具當作事後補丁外掛上去。PYRAX 拒絕這種取捨。一個 GhostDAG 區塊 DAG 帶來並行工作的吞吐量；預設屏蔽的轉帳無需開口便給予隱私；一個多 VM 執行層在開發者所在之處與其相會；而 NEURAX 將閒置的 GPU 化為一個你真能驗證的算力市場。",
+    missionPara1: "公有區塊鏈強加了一個假二選一：透明得洩漏你的整段財務生活，或是把隱私工具當作事後補丁外掛上去。PYRAX 拒絕這種取捨。一個 GhostDAG 區塊 DAG 帶來並行工作的吞吐量；預設屏蔽的轉帳無需開口便給予隱私；一個多 VM 執行層在開發者所在之處與其相會；而 PYRAX Compute 將閒置的 GPU 化為一個你真能驗證的算力市場。",
     missionPara2: "我們對這條路徑刻意保持樸實：一個今日即在運行的忠實模擬、一次封閉式 alpha、一個公開測試網，以及在任何東西承載真實價值之前的一次外部審計。",
 
     believeTitle: "我們所相信的",
@@ -585,7 +585,7 @@ export const zhTW: LocaleDict = {
     toc8: "網路：無需引導",
     toc9: "中繼資料隱私與匿名服務",
     toc10: "狀態、儲存與證明",
-    toc11: "NEURAX——可驗證算力",
+    toc11: "PYRAX Compute——可驗證算力",
     toc12: "Crucible——零費用挖礦",
     toc13: "NOVA——自主營運",
     toc14: "代幣經濟學",
@@ -626,7 +626,7 @@ export const zhTW: LocaleDict = {
     kickerSolution: "解決方案",
     kickerTechnology: "技術",
     kickerMarket: "為何是現在",
-    kickerNeurax: "切入點",
+    kickerCompute: "切入點",
     kickerTraction: "進展",
     kickerTokenomics: "代幣經濟學",
     kickerRoadmap: "路線圖",
@@ -661,7 +661,7 @@ export const zhTW: LocaleDict = {
     techCard2Desc: "Orchard 風格的票據與無需可信設定的遞迴 zk-SNARK；供監督用的檢視金鑰。",
     techCard3Title: "多 VM L2 + ZK-rollup L3",
     techCard3Desc: "EVM、WASM 與 Cairo，具跨 VM 呼叫；數千個證明摺疊成一個。",
-    techCard4Title: "NEURAX 算力市場",
+    techCard4Title: "PYRAX Compute 算力市場",
     techCard4Desc: "閒置 GPU 執行可驗證的 AI 工作，於鏈上結算，定價固定為每算力單位 8 PYRX。",
     techFootnotePre: "跨",
     techFootnoteEmph: "三種互不相關的資源",
@@ -681,14 +681,14 @@ export const zhTW: LocaleDict = {
     marketRef4Label: "PYRAX 直接對應的商業型態",
     marketRef4Source: "本站",
 
-    // neurax slide
-    neuraxTitle: "NEURAX——可驗證算力",
-    neuraxBody: "為鏈提供安全保障的那些 GPU，同時執行付費的 AI 與算力工作。一道四階驗證階梯取代盲目信任——而需求正在爆發。",
-    neuraxTile1Label: "每算力單位（固定）",
-    neuraxTile2Label: "引導算力池",
-    neuraxTile3Label: "驗證階梯",
-    neuraxTile4Label: "本地優先基準 GPU",
-    neuraxFooter: "一個以與保障共識相同的代幣支付供應者的加密經濟 AI 算力網路——一個自我強化的飛輪。",
+    // PYRAX Compute slide
+    computeTitle: "PYRAX Compute——可驗證算力",
+    computeBody: "為鏈提供安全保障的那些 GPU，同時執行付費的 AI 與算力工作。一道四階驗證階梯取代盲目信任——而需求正在爆發。",
+    computeTile1Label: "每算力單位（固定）",
+    computeTile2Label: "引導算力池",
+    computeTile3Label: "驗證階梯",
+    computeTile4Label: "本地優先基準 GPU",
+    computeFooter: "一個以與保障共識相同的代幣支付供應者的加密經濟 AI 算力網路——一個自我強化的飛輪。",
 
     // traction slide
     tractionTitle: "已打造，而非僅止於規劃",
@@ -722,7 +722,7 @@ export const zhTW: LocaleDict = {
     askUseOfFunds: "資金用途",
     askFund1: "外部審計 + 主網創世儀式",
     askFund2: "生態系、流動性與黑客松補助",
-    askFund3: "NEURAX 算力建設與供應者激勵",
+    askFund3: "PYRAX Compute 算力建設與供應者激勵",
     askFund4: "核心協議、應用程式與全球團隊",
     askEmailButton: "invest@pyrax.org",
     askLiveButton: "親眼見證",
@@ -742,7 +742,7 @@ export const zhTW: LocaleDict = {
     alloc2Label: "生態系與流動性",
     alloc2Note: "TGE 釋出 40% + 24 個月內線性釋出 60%",
     alloc3Label: "AI 算力池",
-    alloc3Note: "於 48 個月間串流釋出；資助 NEURAX 支付",
+    alloc3Note: "於 48 個月間串流釋出；資助 PYRAX Compute 支付",
     alloc4Label: "團隊與顧問",
     alloc4Note: "12 個月懸崖期，接著 36 個月線性歸屬",
     alloc5Label: "DAO 金庫與儲備",
@@ -786,3 +786,5 @@ export const zhTW: LocaleDict = {
     computeTransition: "自 4B 池引導 → 隨覆蓋率上升轉為營收資助 → 未動用者退回 DAO",
   },
 };
+
+

@@ -46,12 +46,12 @@ export const content: CategoryContent = {
     dapps: [
       { name: "MeterMint", desc: "Attested smart-meter oracle that signs and posts interval reads on-chain so every kilowatt-hour is authenticated at the source.", tags: ["IoT", "eth_getProof"] },
       { name: "PrepaidWatt", desc: "Prepaid electricity contract where households top up and meters draw down per-second via M2M micro-payments, cutting off cleanly at zero.", tags: ["M2M", "EVM"] },
-      { name: "LossHunter", desc: "Non-technical-loss detector that reconciles attested feeder and meter data to flag theft and tampering with a verifiable evidence trail.", tags: ["IoT", "NEURAX"] },
+      { name: "LossHunter", desc: "Non-technical-loss detector that reconciles attested feeder and meter data to flag theft and tampering with a verifiable evidence trail.", tags: ["IoT", "PYRAX Compute"] },
       { name: "SettleGrid", desc: "Wholesale settlement rail that clears generator-to-retailer energy purchases with BLS instant finality, retiring monthly netting.", tags: ["Finality", "Escrow"] },
       { name: "OutageProof", desc: "Reliability-index registry that timestamps outages and restorations so SAIDI/SAIFI reports are provable to regulators.", tags: ["eth_getProof", "WASM"] },
       { name: "TariffChain", desc: "Programmable time-of-use tariff engine that applies transparent, on-chain pricing rules to every metered interval.", tags: ["EVM", "M2M"] },
       { name: "MixLedger", desc: "Real-time generation-mix ledger that proves the carbon intensity behind each delivered kilowatt-hour.", tags: ["eth_getProof", "Carbon"] },
-      { name: "GridForecast", desc: "NEURAX-backed demand forecaster whose load predictions ship with a verifiable-compute proof for grid planners.", tags: ["NEURAX", "Forecast"] },
+      { name: "GridForecast", desc: "PYRAX Compute-backed demand forecaster whose load predictions ship with a verifiable-compute proof for grid planners.", tags: ["Compute", "Forecast"] },
     ],
   },
 
@@ -143,17 +143,17 @@ export const content: CategoryContent = {
         how: "Forward carbon purchases lock funds in escrow and release against verified issuance, removing counterparty and delivery risk from long-dated offset deals.",
       },
       {
-        feature: "NEURAX verifiable AI/compute",
+        feature: "PYRAX Compute verifiable AI/compute",
         how: "Satellite and sensor-based MRV models run with cryptographic proofs, so a forest-carbon or soil-carbon estimate is reproducible and defensible to a verifier.",
       },
     ],
     dapps: [
       { name: "TonneOnce", desc: "Registry that mints one double-spend-proof credit per verified tonne and burns it on retirement so it can never be claimed twice.", tags: ["Tokenized", "Carbon"] },
-      { name: "MRVProof", desc: "Anchors satellite and sensor MRV data on-chain so the science behind each credit is verifiable to buyers.", tags: ["eth_getProof", "NEURAX"] },
+      { name: "MRVProof", desc: "Anchors satellite and sensor MRV data on-chain so the science behind each credit is verifiable to buyers.", tags: ["eth_getProof", "PYRAX Compute"] },
       { name: "ShieldTrade", desc: "Shielded carbon exchange where institutional positions stay private but regulators hold viewing keys.", tags: ["Shielded", "ViewingKey"] },
       { name: "ForwardCO2", desc: "Forward-offset escrow that releases payment to project developers only against verified, retired issuance.", tags: ["Escrow", "EVM"] },
       { name: "RetireProof", desc: "Public retirement ledger giving corporates a tamper-proof claim to the exact credits they have retired.", tags: ["Carbon", "eth_getProof"] },
-      { name: "NatureVault", desc: "Nature-based-project tokenizer that streams issuance to landowners as verified sequestration is proven over time.", tags: ["Tokenized", "NEURAX"] },
+      { name: "NatureVault", desc: "Nature-based-project tokenizer that streams issuance to landowners as verified sequestration is proven over time.", tags: ["Tokenized", "PYRAX Compute"] },
       { name: "DoubleGuard", desc: "Cross-registry corresponding-adjustment tracker that blocks the same tonne from being sold in two jurisdictions.", tags: ["Carbon", "WASM"] },
       { name: "ScopeOffset", desc: "Auto-retirement contract that matches a company's attested emissions to credits and retires them on a schedule.", tags: ["ESG", "Escrow"] },
     ],
@@ -259,13 +259,13 @@ export const content: CategoryContent = {
       { name: "FleetFuel", desc: "Fleet charging escrow that pre-funds and draws per-session, delivering one reconciled statement across all networks.", tags: ["Escrow", "EVM"] },
       { name: "V2Gmarket", desc: "Vehicle-to-grid marketplace where parked EVs sell stored energy back to the grid via micro-payments.", tags: ["M2M", "Grid"] },
       { name: "PriceBeacon", desc: "Dynamic charging-tariff contract that streams live per-station pricing and applies it transparently per session.", tags: ["EVM", "M2M"] },
-      { name: "ChargeForecast", desc: "NEURAX charger-utilization forecaster with verifiable-compute proofs for siting and load planning.", tags: ["NEURAX", "Forecast"] },
+      { name: "ChargeForecast", desc: "PYRAX Compute charger-utilization forecaster with verifiable-compute proofs for siting and load planning.", tags: ["Compute", "Forecast"] },
     ],
   },
 
   "grid-management": {
     overview:
-      "Grid management balances supply and demand across increasingly decentralized, renewable-heavy networks, coordinating millions of distributed resources in real time. PYRAX gives grid operators a coordination layer where demand-response signals, DER dispatch, and settlement clear with machine-to-machine micro-payments and BLS instant finality, backed by NEURAX forecasts that ship with verifiable-compute proofs.",
+      "Grid management balances supply and demand across increasingly decentralized, renewable-heavy networks, coordinating millions of distributed resources in real time. PYRAX gives grid operators a coordination layer where demand-response signals, DER dispatch, and settlement clear with machine-to-machine micro-payments and BLS instant finality, backed by PYRAX Compute forecasts that ship with verifiable-compute proofs.",
     marketSize: "$7.5B (2024)",
     projection: "$24B by 2030 · ~21.4% CAGR",
     source: "MarketsandMarkets, 2024",
@@ -295,7 +295,7 @@ export const content: CategoryContent = {
         how: "Each responding asset signs its metered response, so operators verify delivered flexibility cryptographically instead of trusting estimated baselines.",
       },
       {
-        feature: "NEURAX verifiable forecasting",
+        feature: "PYRAX Compute verifiable forecasting",
         how: "Load, generation, and congestion forecasts run with cryptographic proofs, so an operator can audit exactly why the model dispatched a resource.",
       },
       {
@@ -307,7 +307,7 @@ export const content: CategoryContent = {
       { name: "FlexMarket", desc: "Demand-response market where DERs bid flexibility and get paid per-event against attested, metered delivery.", tags: ["DemandResponse", "M2M"] },
       { name: "VPPconductor", desc: "Virtual-power-plant orchestrator that dispatches thousands of batteries and EVs and settles them in real time.", tags: ["M2M", "Grid"] },
       { name: "BaselineProof", desc: "Attested-baseline oracle that records device response so demand-response payments settle without dispute.", tags: ["IoT", "eth_getProof"] },
-      { name: "CongestionCast", desc: "NEURAX congestion forecaster whose predictions carry verifiable-compute proofs for dispatch decisions.", tags: ["NEURAX", "Forecast"] },
+      { name: "CongestionCast", desc: "PYRAX Compute congestion forecaster whose predictions carry verifiable-compute proofs for dispatch decisions.", tags: ["Compute", "Forecast"] },
       { name: "FreqGuard", desc: "Frequency-response contract that pays fast batteries for sub-second grid stabilization with instant finality.", tags: ["Finality", "M2M"] },
       { name: "DERegister", desc: "Distributed-resource registry attesting each asset's capacity and location for market participation.", tags: ["IoT", "WASM"] },
       { name: "PeakShave", desc: "Automated peak-shaving contract that curtails and rewards enrolled loads during system peaks.", tags: ["DemandResponse", "EVM"] },
@@ -351,14 +351,14 @@ export const content: CategoryContent = {
         how: "Millions of meter reads and micro-billings settle in parallel, giving even city-scale utilities continuous meter-to-cash visibility.",
       },
       {
-        feature: "NEURAX verifiable leak detection",
+        feature: "PYRAX Compute verifiable leak detection",
         how: "District-metered-area anomaly models run with verifiable proofs, so a flagged leak can be justified and prioritized with an auditable evidence trail.",
       },
     ],
     dapps: [
       { name: "FlowProof", desc: "Attested water-meter oracle that signs flow and quality reads so consumption and leaks are authenticated at the source.", tags: ["IoT", "eth_getProof"] },
       { name: "DropPay", desc: "Prepaid and pay-as-you-go water billing where meters draw down per-liter via M2M micro-payments.", tags: ["M2M", "EVM"] },
-      { name: "LeakHunter", desc: "NEURAX leak detector that reconciles district-meter data to localize losses with a verifiable evidence trail.", tags: ["NEURAX", "IoT"] },
+      { name: "LeakHunter", desc: "PYRAX Compute leak detector that reconciles district-meter data to localize losses with a verifiable evidence trail.", tags: ["Compute", "IoT"] },
       { name: "QualityLedger", desc: "Drinking-water-quality registry that anchors turbidity and contaminant reads for tamper-proof compliance.", tags: ["eth_getProof", "ESG"] },
       { name: "KioskWater", desc: "Community water-kiosk dApp letting rural users tap and pay for verified potable water instantly.", tags: ["M2M", "IoT"] },
       { name: "NRWtrack", desc: "Non-revenue-water dashboard reconciling attested input and billed volumes to quantify and target losses.", tags: ["IoT", "WASM"] },
@@ -410,11 +410,11 @@ export const content: CategoryContent = {
     dapps: [
       { name: "MatPassport", desc: "Double-spend-proof material passport tracing recovered material from bin to remanufacture for verifiable recycled content.", tags: ["Tokenized", "eth_getProof"] },
       { name: "DepositBack", desc: "Deposit-return scheme paying citizens per attested returned item via M2M micro-payments.", tags: ["M2M", "IoT"] },
-      { name: "BinSense", desc: "Smart-bin oracle signing fill, weight, and contamination data so collection is optimized and authenticated.", tags: ["IoT", "NEURAX"] },
+      { name: "BinSense", desc: "Smart-bin oracle signing fill, weight, and contamination data so collection is optimized and authenticated.", tags: ["IoT", "PYRAX Compute"] },
       { name: "EPRproof", desc: "Extended-producer-responsibility ledger anchoring collection and recycling volumes for tamper-proof reporting.", tags: ["eth_getProof", "ESG"] },
       { name: "ScrapMarket", desc: "Recovered-material exchange that settles trades against attested weight and grade with automated escrow.", tags: ["Escrow", "Tokenized"] },
       { name: "PayThrow", desc: "Pay-as-you-throw billing that charges households per attested kilo of residual waste.", tags: ["M2M", "IoT"] },
-      { name: "SortScore", desc: "NEURAX sorting-quality model whose contamination scores carry verifiable-compute proofs.", tags: ["NEURAX", "WASM"] },
+      { name: "SortScore", desc: "PYRAX Compute sorting-quality model whose contamination scores carry verifiable-compute proofs.", tags: ["Compute", "WASM"] },
       { name: "CircularClaim", desc: "Circular-economy claim verifier that proves a product's recycled content from passport provenance.", tags: ["Tokenized", "ESG"] },
     ],
   },
@@ -467,7 +467,7 @@ export const content: CategoryContent = {
       { name: "MarginVault", desc: "Collateral-and-margin escrow that marks positions to market and manages calls automatically.", tags: ["Escrow", "Finality"] },
       { name: "SurveilKey", desc: "Regulator surveillance console that reads shielded market flows through scoped viewing keys.", tags: ["ViewingKey", "Shielded"] },
       { name: "StructNote", desc: "Structured-product factory issuing swaps, caps, and collars as auditable multi-VM contracts.", tags: ["Cairo", "EVM"] },
-      { name: "PriceForecast", desc: "NEURAX price forecaster delivering verifiable-compute signals for trading and risk desks.", tags: ["NEURAX", "Forecast"] },
+      { name: "PriceForecast", desc: "PYRAX Compute price forecaster delivering verifiable-compute signals for trading and risk desks.", tags: ["Compute", "Forecast"] },
     ],
   },
 
@@ -507,7 +507,7 @@ export const content: CategoryContent = {
         how: "Metrics flow from attested meters and sensors rather than manual entry, so Scope-1 and Scope-2 data is authentic from the point of measurement.",
       },
       {
-        feature: "NEURAX verifiable AI/compute",
+        feature: "PYRAX Compute verifiable AI/compute",
         how: "Scope-3 and estimation models run with cryptographic proofs, so a supply-chain emissions estimate is reproducible and defensible under assurance.",
       },
     ],
@@ -515,11 +515,12 @@ export const content: CategoryContent = {
       { name: "ProofReport", desc: "ESG disclosure builder that anchors every metric on-chain with an eth_getProof audit trail for assurers.", tags: ["eth_getProof", "ESG"] },
       { name: "ScopeVault", desc: "Shielded emissions ledger keeping Scope-1/2/3 data private with scoped viewing keys for auditors.", tags: ["Shielded", "ViewingKey"] },
       { name: "Scope3Chain", desc: "Supplier data-sharing network passing attested Scope-3 metrics up the value chain verifiably.", tags: ["eth_getProof", "SupplyChain"] },
-      { name: "GreenGuard", desc: "Greenwashing detector that cross-checks marketing claims against tamper-proof on-chain evidence.", tags: ["ESG", "NEURAX"] },
+      { name: "GreenGuard", desc: "Greenwashing detector that cross-checks marketing claims against tamper-proof on-chain evidence.", tags: ["ESG", "PYRAX Compute"] },
       { name: "AssureKey", desc: "Assurance console giving external auditors read-only viewing-key access to shielded ESG records.", tags: ["ViewingKey", "Shielded"] },
       { name: "OffsetLedger", desc: "Report-linked retirement registry proving that claimed carbon credits were retired exactly once.", tags: ["Tokenized", "Carbon"] },
       { name: "TaxonomyTag", desc: "EU-Taxonomy alignment tagger anchoring activity classifications with verifiable evidence.", tags: ["WASM", "eth_getProof"] },
-      { name: "MetricSense", desc: "NEURAX Scope-3 estimator whose supply-chain emissions estimates carry verifiable-compute proofs.", tags: ["NEURAX", "Forecast"] },
+      { name: "MetricSense", desc: "PYRAX Compute Scope-3 estimator whose supply-chain emissions estimates carry verifiable-compute proofs.", tags: ["Compute", "Forecast"] },
     ],
   },
 };
+

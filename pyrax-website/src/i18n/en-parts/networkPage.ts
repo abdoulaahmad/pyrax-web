@@ -30,7 +30,7 @@ export const networkPage = {
 
   roadmap1P: 'Now',
   roadmap1Title: 'PYRAX Seed is live',
-  roadmap1Body: 'A faithful simulation of the full protocol — GhostDAG, shielded pool, multi-VM contracts, NEURAX — running today as a permanent developer sandbox.',
+  roadmap1Body: 'A faithful simulation of the full protocol — GhostDAG, shielded pool, multi-VM contracts, PYRAX Compute — running today as a permanent developer sandbox.',
   roadmap2P: 'Next',
   roadmap2Title: 'PYRAX Forge · closed alpha',
   roadmap2Body: 'The production consensus path (real 5-lane TriStream + BLS finality) opens to invited testers with seeded validators.',

@@ -4,7 +4,7 @@
 // Privacy stance is load-bearing: PYRAX is shielded-by-default (ZK). Protected health information (PHI),
 // genomic data, and clinical records NEVER touch the chain in the clear — only cryptographic commitments,
 // proofs, and consent receipts are on-chain. Regulators and auditors read via scoped viewing keys; private
-// data is trained/inferred on via NEURAX compute-to-data without ever leaving its custodian. All copy below
+// data is trained/inferred on via PYRAX Compute compute-to-data without ever leaving its custodian. All copy below
 // is written to that standard.
 import type { CategoryContent } from "./types";
 
@@ -57,7 +57,7 @@ export const content: CategoryContent = {
       { name: "TriageProof", desc: "Tamper-evident ED triage and hand-off log using eth_getProof for malpractice-grade timelines.", tags: ["eth_getProof", "audit", "provenance"] },
       { name: "PriorAuthFlow", desc: "Prior-authorization contract that verifies payer criteria against shielded clinical commitments and instantly approves or routes for review.", tags: ["escrow", "WASM", "claims"] },
       { name: "BedNet", desc: "Regional capacity and transfer coordination where bed availability is shared as commitments and settled with BLS instant finality.", tags: ["finality", "coordination", "provenance"] },
-      { name: "CareGraphAI", desc: "NEURAX compute-to-data readmission-risk model trained across hospitals without any facility exporting its patient records.", tags: ["NEURAX", "compute-to-data", "AI"] },
+      { name: "CareGraphAI", desc: "PYRAX Compute compute-to-data readmission-risk model trained across hospitals without any facility exporting its patient records.", tags: ["Compute", "compute-to-data", "AI"] },
     ],
   },
 
@@ -167,7 +167,7 @@ export const content: CategoryContent = {
 
   "clinical-trials": {
     overview:
-      "Clinical trials are slow, costly, and dogged by data-integrity and enrollment problems, while participant privacy and site payments add operational drag. PYRAX brings tamper-evident data capture, milestone-based escrow for site and CRO payments, and NEURAX compute-to-data so sponsors can analyze patient-level data across sites without ever centralizing it.",
+      "Clinical trials are slow, costly, and dogged by data-integrity and enrollment problems, while participant privacy and site payments add operational drag. PYRAX brings tamper-evident data capture, milestone-based escrow for site and CRO payments, and PYRAX Compute compute-to-data so sponsors can analyze patient-level data across sites without ever centralizing it.",
     marketSize: "$59.9B clinical trials market (2024)",
     projection: "$99.6B by 2032 · ~6.5% CAGR",
     source: "Grand View Research, 2024",
@@ -193,7 +193,7 @@ export const content: CategoryContent = {
         how: "Site, investigator, and CRO payments release automatically from escrow when enrollment or visit milestones are cryptographically verified.",
       },
       {
-        feature: "NEURAX compute-to-data analytics",
+        feature: "PYRAX Compute compute-to-data analytics",
         how: "Sponsors train and run statistical models across sites' private patient data in place, receiving verifiable results without any site exporting identifiable records.",
       },
       {
@@ -208,7 +208,7 @@ export const content: CategoryContent = {
     dapps: [
       { name: "TrialLedger", desc: "eCRF capture where each entry is a commitment, giving 21 CFR Part 11-grade tamper evidence.", tags: ["integrity", "eth_getProof", "audit"] },
       { name: "MilestonePay", desc: "Escrow contract auto-releasing site and CRO payments on verified enrollment and visit milestones.", tags: ["escrow", "EVM", "payments"] },
-      { name: "CohortAI", desc: "NEURAX cross-site model training on private patient data with verifiable results and zero data movement.", tags: ["NEURAX", "compute-to-data", "AI"] },
+      { name: "CohortAI", desc: "PYRAX Compute cross-site model training on private patient data with verifiable results and zero data movement.", tags: ["Compute", "compute-to-data", "AI"] },
       { name: "eConsentChain", desc: "Digital informed-consent with revocable, shielded participant consent receipts.", tags: ["consent", "ZK", "patient"] },
       { name: "MonitorKey", desc: "Remote-monitoring portal for CRAs and IRBs reading integrity metrics via scoped viewing keys.", tags: ["viewing-keys", "compliance", "audit"] },
       { name: "RecruitMatch", desc: "Privacy-preserving eligibility matcher that screens patients against protocols using ZK proofs, never exposing identities.", tags: ["ZK", "recruitment", "consent"] },
@@ -314,7 +314,7 @@ export const content: CategoryContent = {
       { name: "ConsultVault", desc: "Patient-owned telehealth record store issuing consent-gated viewing keys to follow-up providers.", tags: ["viewing-keys", "consent", "patient"] },
       { name: "PayClinician", desc: "Cross-border clinician payout contract settling with BLS instant finality.", tags: ["finality", "payments", "EVM"] },
       { name: "eRxTrace", desc: "Tamper-evident e-prescription log with provenance to combat telehealth prescription fraud.", tags: ["provenance", "eth_getProof", "safety"] },
-      { name: "TriageBotAI", desc: "NEURAX symptom-triage assistant running inference on private inputs without logging identifiable data.", tags: ["NEURAX", "AI", "privacy"] },
+      { name: "TriageBotAI", desc: "PYRAX Compute symptom-triage assistant running inference on private inputs without logging identifiable data.", tags: ["Compute", "AI", "privacy"] },
       { name: "SessionSeal", desc: "Post-consult attestation proving a session occurred, its duration, and consent, without content disclosure.", tags: ["ZK", "attestation", "audit"] },
       { name: "GlobalConsult", desc: "Cross-jurisdiction consult marketplace matching patients to licensed clinicians with escrowed fees.", tags: ["escrow", "credential", "marketplace"] },
       { name: "ContinuityKey", desc: "One-tap grant handing a PCP scoped access to a patient's telehealth history for care continuity.", tags: ["viewing-keys", "consent", "interoperability"] },
@@ -323,7 +323,7 @@ export const content: CategoryContent = {
 
   "medical-devices": {
     overview:
-      "Connected medical devices multiply attack surface and recall complexity while device data feeds critical care decisions. PYRAX gives every device a hardware-attested identity, anchors device provenance and firmware integrity on-chain, and lets device data drive smart contracts and NEURAX models without leaking patient-identifiable readings.",
+      "Connected medical devices multiply attack surface and recall complexity while device data feeds critical care decisions. PYRAX gives every device a hardware-attested identity, anchors device provenance and firmware integrity on-chain, and lets device data drive smart contracts and PYRAX Compute models without leaking patient-identifiable readings.",
     marketSize: "$570B medical devices market (2024)",
     projection: "$887B by 2032 · ~5.8% CAGR",
     source: "Precedence Research, 2024",
@@ -357,7 +357,7 @@ export const content: CategoryContent = {
         how: "EVM/WASM/Cairo contracts trigger alerts, maintenance escrow, or supply reorders directly from verified device attestations.",
       },
       {
-        feature: "NEURAX compute-to-data",
+        feature: "PYRAX Compute compute-to-data",
         how: "Predictive-maintenance and safety-signal models train across device fleets and patient data in place, returning verifiable insights without centralizing readings.",
       },
     ],
@@ -366,7 +366,7 @@ export const content: CategoryContent = {
       { name: "FirmProof", desc: "Firmware-integrity monitor that flags any device whose attested hash drifts from the approved build.", tags: ["attestation", "security", "provenance"] },
       { name: "FieldFix", desc: "Recall and field-safety targeting engine locating affected serials and sites via eth_getProof.", tags: ["eth_getProof", "recall", "provenance"] },
       { name: "MaintEscrow", desc: "Predictive-maintenance contract escrowing service payment against verified device-health attestations.", tags: ["escrow", "IoT", "EVM"] },
-      { name: "FleetHealthAI", desc: "NEURAX failure-prediction model trained across a hospital device fleet without exporting telemetry.", tags: ["NEURAX", "compute-to-data", "AI"] },
+      { name: "FleetHealthAI", desc: "PYRAX Compute failure-prediction model trained across a hospital device fleet without exporting telemetry.", tags: ["Compute", "compute-to-data", "AI"] },
       { name: "PumpGuard", desc: "Infusion-pump safety layer verifying dose-command provenance before administration.", tags: ["attestation", "safety", "provenance"] },
       { name: "ImplantPass", desc: "Patient-held implant passport with device provenance, MRI-safety data, and consent-gated access.", tags: ["provenance", "consent", "patient"] },
       { name: "SupplyReorder", desc: "Consumable auto-reorder contract triggered by attested usage telemetry with instant finality.", tags: ["finality", "IoT", "supply"] },
@@ -375,7 +375,7 @@ export const content: CategoryContent = {
 
   "genomics": {
     overview:
-      "Genomic data is the most personal, immutable, and re-identifiable data a person owns — yet research demands it be pooled at scale. PYRAX resolves the tension with NEURAX compute-to-data, so models train on private genomes in place, patients hold cryptographic consent over every use, and results are verifiable while raw sequence never leaves its custodian.",
+      "Genomic data is the most personal, immutable, and re-identifiable data a person owns — yet research demands it be pooled at scale. PYRAX resolves the tension with PYRAX Compute compute-to-data, so models train on private genomes in place, patients hold cryptographic consent over every use, and results are verifiable while raw sequence never leaves its custodian.",
     marketSize: "$32.4B genomics market (2024)",
     projection: "$94.7B by 2030 · ~19.6% CAGR",
     source: "Grand View Research, 2024",
@@ -393,7 +393,7 @@ export const content: CategoryContent = {
     ],
     solutions: [
       {
-        feature: "NEURAX compute-to-data",
+        feature: "PYRAX Compute compute-to-data",
         how: "GWAS, polygenic-risk, and variant-effect models train and infer directly on private genomes at each biobank, returning verifiable results without the sequence ever moving.",
       },
       {
@@ -414,10 +414,10 @@ export const content: CategoryContent = {
       },
     ],
     dapps: [
-      { name: "GenomeVault", desc: "Custodian-held genome store exposing only commitments; all use flows through NEURAX compute-to-data.", tags: ["NEURAX", "compute-to-data", "ZK"] },
+      { name: "GenomeVault", desc: "Custodian-held genome store exposing only commitments; all use flows through PYRAX Compute compute-to-data.", tags: ["Compute", "compute-to-data", "ZK"] },
       { name: "ConsentGene", desc: "Dynamic genomic-consent wallet granting and revoking per-study, per-purpose access.", tags: ["consent", "revocable", "patient"] },
-      { name: "FederatedGWAS", desc: "Cross-biobank association study running in place with verifiable pooled statistics and no raw-data exchange.", tags: ["NEURAX", "federated", "AI"] },
-      { name: "RiskScoreAI", desc: "Polygenic-risk inference a patient runs on their own genome, receiving results without exposing SNPs.", tags: ["NEURAX", "privacy", "inference"] },
+      { name: "FederatedGWAS", desc: "Cross-biobank association study running in place with verifiable pooled statistics and no raw-data exchange.", tags: ["Compute", "federated", "AI"] },
+      { name: "RiskScoreAI", desc: "Polygenic-risk inference a patient runs on their own genome, receiving results without exposing SNPs.", tags: ["Compute", "privacy", "inference"] },
       { name: "LineageProof", desc: "Result-provenance explorer showing exactly which data and consents produced each finding via eth_getProof.", tags: ["eth_getProof", "provenance", "audit"] },
       { name: "DataDividend", desc: "Escrow contract returning value to participants when their genomic data contributes to a funded study.", tags: ["escrow", "incentives", "EVM"] },
       { name: "VariantRegistry", desc: "Shielded pathogenic-variant registry letting labs share evidence commitments without exposing patients.", tags: ["ZK", "commitment", "research"] },
@@ -427,7 +427,7 @@ export const content: CategoryContent = {
 
   "biotech-research": {
     overview:
-      "Biotech R&D is capital-intensive, IP-sensitive, and increasingly collaborative across institutions that cannot freely share data. PYRAX protects research IP with tamper-evident provenance, funds and coordinates consortia through escrow and multi-VM contracts, and enables cross-lab AI via NEURAX compute-to-data — so collaboration never means surrendering a lab's crown-jewel datasets.",
+      "Biotech R&D is capital-intensive, IP-sensitive, and increasingly collaborative across institutions that cannot freely share data. PYRAX protects research IP with tamper-evident provenance, funds and coordinates consortia through escrow and multi-VM contracts, and enables cross-lab AI via PYRAX Compute compute-to-data — so collaboration never means surrendering a lab's crown-jewel datasets.",
     marketSize: "$1.55T biotechnology market (2023)",
     projection: "$3.88T by 2030 · ~13.9% CAGR",
     source: "Grand View Research, 2024",
@@ -449,7 +449,7 @@ export const content: CategoryContent = {
         how: "Experimental results and lab-notebook entries are timestamped commitments, giving cryptographic proof of invention priority and data integrity for patents and disputes.",
       },
       {
-        feature: "NEURAX compute-to-data collaboration",
+        feature: "PYRAX Compute compute-to-data collaboration",
         how: "Partner labs jointly train models across each other's private datasets in place, so a consortium gets combined power without any lab exposing its proprietary data.",
       },
       {
@@ -467,13 +467,13 @@ export const content: CategoryContent = {
     ],
     dapps: [
       { name: "LabNotarize", desc: "Tamper-evident electronic lab notebook committing every result for provable invention priority.", tags: ["eth_getProof", "provenance", "IP"] },
-      { name: "ConsortiumAI", desc: "NEURAX cross-lab model training that pools statistical power without moving any proprietary dataset.", tags: ["NEURAX", "compute-to-data", "AI"] },
+      { name: "ConsortiumAI", desc: "PYRAX Compute cross-lab model training that pools statistical power without moving any proprietary dataset.", tags: ["Compute", "compute-to-data", "AI"] },
       { name: "GrantEscrow", desc: "Milestone-gated funding contract releasing consortium capital on verified research deliverables.", tags: ["escrow", "funding", "EVM"] },
       { name: "ReproProof", desc: "Reproducibility registry publishing method and data commitments so results can be independently verified.", tags: ["integrity", "commitment", "transparency"] },
       { name: "LicenseFlow", desc: "IP-licensing and royalty-split contract automating cross-institution data-use agreements.", tags: ["EVM", "royalties", "licensing"] },
       { name: "AssayVault", desc: "Shielded assay-data exchange where labs trade result commitments without exposing raw screens.", tags: ["ZK", "commitment", "collaboration"] },
       { name: "PriorArtChain", desc: "Timestamped disclosure registry establishing defensible prior art for patent strategy.", tags: ["provenance", "IP", "audit"] },
-      { name: "BioMarketAI", desc: "NEURAX target-discovery marketplace where sponsors run inference against private compound and omics libraries.", tags: ["NEURAX", "marketplace", "inference"] },
+      { name: "BioMarketAI", desc: "PYRAX Compute target-discovery marketplace where sponsors run inference against private compound and omics libraries.", tags: ["Compute", "marketplace", "inference"] },
     ],
   },
 
@@ -524,8 +524,9 @@ export const content: CategoryContent = {
       { name: "PeerCircle", desc: "Pseudonymous peer-support community with shielded membership and revocable participation.", tags: ["anonymity", "ZK", "community"] },
       { name: "MoodVault", desc: "Patient-owned mood and journaling record held off-chain as commitments, shared only via viewing keys.", tags: ["viewing-keys", "consent", "patient"] },
       { name: "SessionPay", desc: "Escrow settlement for pseudonymous clinicians that never links payment to a therapy record.", tags: ["escrow", "anonymity", "payments"] },
-      { name: "WellnessAI", desc: "NEURAX on-device support model running inference on private inputs with nothing identifiable logged.", tags: ["NEURAX", "AI", "privacy"] },
+      { name: "WellnessAI", desc: "PYRAX Compute on-device support model running inference on private inputs with nothing identifiable logged.", tags: ["Compute", "AI", "privacy"] },
       { name: "AccessKey", desc: "Selective-disclosure tool sharing scoped behavioral-health records with a new provider under revocable consent.", tags: ["viewing-keys", "consent", "revocable"] },
     ],
   },
 };
+

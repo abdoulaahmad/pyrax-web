@@ -4,7 +4,8 @@ export const techPage = {
   subConsensus: "Consensus",
   subPrivacy: "Privacy",
   subVms: "Virtual machines",
-  subNeurax: "NEURAX",
+  subCompute: "PYRAX Compute",
+  subNeurax: "PYRAX Compute",
   subNetwork: "Network",
   subSecurity: "Security",
 
@@ -33,7 +34,7 @@ export const techPage = {
 
   // Page meta
   metaTitle: "Technology — PYRAX™ Network",
-  metaDescription: "How PYRAX works: a GhostDAG sealed by three streams over five lanes, BLS proof-of-stake finality, shielded-by-default privacy, a multi-VM execution layer, the NEURAX compute market, a bootstrapless ISP-resistant network, and an audit-gated path to mainnet.",
+  metaDescription: "How PYRAX works: a GhostDAG sealed by three streams over five lanes, BLS proof-of-stake finality, shielded-by-default privacy, a multi-VM execution layer, a bootstrapless ISP-resistant network, and an audit-gated path to mainnet.",
 
   // Hero
   heroEyebrow: "Technology",
@@ -42,7 +43,7 @@ export const techPage = {
   heroTitleMid: ", ",
   heroTitlePrivate: "private",
   heroTitlePost: ", and provable",
-  heroLede: "One binary, four chainspecs. A DAG that includes honest parallel work instead of orphaning it, transfers that are shielded by default, three virtual machines, and a verifiable compute market — with a single external audit standing between the code and mainnet.",
+  heroLede: "One binary, four chainspecs. A DAG that includes honest parallel work instead of orphaning it, transfers that are shielded by default, three virtual machines, and an onion Sphinx mixnet — with a single external audit standing between the code and mainnet.",
 
   // Consensus
   consensusEyebrow: "01 · Consensus",
@@ -98,24 +99,38 @@ export const techPage = {
   txTypesTitle: "Six transaction types, one ledger",
   txTypesBody: "Escrow (Lock / Refund / Release / Drip / Split), Stake (Bond / Unbond / Withdraw / Slash), and Governance (Propose / Vote) are first-class transaction kinds — not bolted-on contracts.",
 
-  // NEURAX
-  neuraxEyebrow: "04 · NEURAX",
+  // PYRAX Compute (retained for i18n dictionary compatibility)
+  computeEyebrow: "04 · PYRAX Compute",
+  neuraxEyebrow: "04 · PYRAX Compute",
+  computeTitle: "Verifiable AI & GPU compute",
   neuraxTitle: "Verifiable AI & GPU compute",
+  computeLede1: "The same GPUs that mine Stream B run paid AI and compute jobs, funded by on-chain escrow and priced at a fixed ",
   neuraxLede1: "The same GPUs that mine Stream B run paid AI and compute jobs, funded by on-chain escrow and priced at a fixed ",
+  computeLedePrice: "8 PYRX per compute unit",
   neuraxLedePrice: "8 PYRX per compute unit",
+  computeLede2: ". Instead of trusting a provider's word, results climb a four-rung verification ladder.",
   neuraxLede2: ". Instead of trusting a provider's word, results climb a four-rung verification ladder.",
+  computeLadder1: "Redundant re-execution across independent providers",
   neuraxLadder1: "Redundant re-execution across independent providers",
+  computeLadder2: "Fraud proofs that pin the single divergent step",
   neuraxLadder2: "Fraud proofs that pin the single divergent step",
+  computeLadder3: "Interactive dispute — a bisection game to that step",
   neuraxLadder3: "Interactive dispute — a bisection game to that step",
+  computeLadder4: "TEE attestation for hardware-sealed execution",
   neuraxLadder4: "TEE attestation for hardware-sealed execution",
+  computeStat1Label: "per compute unit (1 reference-GPU-hour)",
   neuraxStat1Label: "per compute unit (1 reference-GPU-hour)",
+  computeStat2Label: "AI-compute pool · ~70M/month budget",
   neuraxStat2Label: "AI-compute pool · ~70M/month budget",
+  computeStat3Label: "one on-chain ComputeReceipt per verified job",
   neuraxStat3Label: "one on-chain ComputeReceipt per verified job",
+  computeStat4Label: "local-first baseline; ShardedExecutor pools GPUs",
   neuraxStat4Label: "local-first baseline; ShardedExecutor pools GPUs",
+  computeCta: "Explore AI & compute use cases →",
   neuraxCta: "Explore AI & compute use cases →",
 
   // Network
-  networkEyebrow: "05 · Network",
+  networkEyebrow: "04 · Network",
   networkTitle: "Bootstrapless & ISP-resistant",
   networkLede: "There is no company-run starter server that can be seized or blocked. Peers discover each other through a decentralized mesh, and traffic can ride an onion Sphinx mixnet so an on-path observer — including an ISP — sees only uniform, encrypted flows.",
   networkCard1Title: "No bootstrap authority",
@@ -126,7 +141,7 @@ export const techPage = {
   networkCard3Desc: "A pull-based want/have engine moves files and media over the mixnet with reply-route loop guards and bounded reassembly.",
 
   // Security
-  securityEyebrow: "06 · Security",
+  securityEyebrow: "05 · Security",
   securityTitle: "Audit-gated to mainnet",
   securityLede: "PYRAX is open-core: the protocol, node, and SDK are public. The supply cap is enforced in consensus, the fee split is frozen, and a single external audit of consensus, ZK, and the bridge stands between the code and PYRAX One.",
   securityCard1Title: "Formal invariants",

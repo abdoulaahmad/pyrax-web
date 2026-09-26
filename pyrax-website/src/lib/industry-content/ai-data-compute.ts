@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 // Industry content for the "ai-data-compute" category (10 business types) — PYRAX's flagship category,
-// home turf for NEURAX (the verifiable AI/GPU compute marketplace). Filled by content pass.
+// home turf for PYRAX Compute (the verifiable AI/GPU compute marketplace). Filled by content pass.
 import type { CategoryContent } from "./types";
 
 export const content: CategoryContent = {
   "ai-inference": {
     overview:
-      "AI inference is the runtime side of AI — serving trained models to answer prompts, score data, and drive agents — and it is now the dominant, recurring cost of production AI. PYRAX turns inference into a verifiable, pay-per-use market through NEURAX: jobs are priced in compute units at a fixed 8 PYRX/CU, funded by on-chain escrow, and settled against a single ComputeReceipt whose result is checked by a 4-rung verification ladder rather than trusted blindly.",
+      "AI inference is the runtime side of AI — serving trained models to answer prompts, score data, and drive agents — and it is now the dominant, recurring cost of production AI. PYRAX turns inference into a verifiable, pay-per-use market through PYRAX Compute: jobs are priced in compute units at a fixed 8 PYRX/CU, funded by on-chain escrow, and settled against a single ComputeReceipt whose result is checked by a 4-rung verification ladder rather than trusted blindly.",
     marketSize: "$76B (2024)",
     projection: "$255B by 2030 · ~22% CAGR",
     source: "Grand View Research, 2024",
@@ -24,7 +24,7 @@ export const content: CategoryContent = {
     ],
     solutions: [
       {
-        feature: "NEURAX verifiable inference (pay-per-CU)",
+        feature: "PYRAX Compute verifiable inference (pay-per-CU)",
         how: "Each request becomes a metered job priced at a fixed 8 PYRX/CU and bound to a ComputeReceipt that records the model, inputs digest, and output, so you pay only for the work actually performed.",
       },
       {
@@ -45,20 +45,20 @@ export const content: CategoryContent = {
       },
     ],
     dapps: [
-      { name: "ProofServe", desc: "Verifiable inference gateway that returns each completion alongside a ComputeReceipt and a caller-selected verification rung.", tags: ["NEURAX", "ComputeReceipt"] },
-      { name: "EscrowInfer", desc: "Pay-per-CU API where callers escrow PYRX per request and funds release only when the result verifies.", tags: ["NEURAX", "Escrow"] },
-      { name: "PrivatePrompt", desc: "Shielded inference relay that hides prompts and outputs on-chain while issuing viewing keys to compliance reviewers.", tags: ["Shielded", "NEURAX"] },
-      { name: "ZKOracle", desc: "ZK-proven model oracle that feeds smart contracts scores it can prove were produced by a specified model.", tags: ["ZK", "NEURAX"] },
-      { name: "RouterMesh", desc: "Trust-tier router that spreads inference across independent workers and re-executes a sample for redundant verification.", tags: ["NEURAX", "Scheduler"] },
-      { name: "AgentLedger", desc: "Autonomous-agent runtime whose every tool call and model step is metered and receipted for auditable spend.", tags: ["NEURAX", "EVM"] },
-      { name: "EdgeServe", desc: "Consumer-GPU inference pool that lets home RTX operators earn PYRX for served CUs with VRAM-aware scheduling.", tags: ["NEURAX", "Edge"] },
+      { name: "ProofServe", desc: "Verifiable inference gateway that returns each completion alongside a ComputeReceipt and a caller-selected verification rung.", tags: ["Compute", "ComputeReceipt"] },
+      { name: "EscrowInfer", desc: "Pay-per-CU API where callers escrow PYRX per request and funds release only when the result verifies.", tags: ["Compute", "Escrow"] },
+      { name: "PrivatePrompt", desc: "Shielded inference relay that hides prompts and outputs on-chain while issuing viewing keys to compliance reviewers.", tags: ["Shielded", "PYRAX Compute"] },
+      { name: "ZKOracle", desc: "ZK-proven model oracle that feeds smart contracts scores it can prove were produced by a specified model.", tags: ["ZK", "PYRAX Compute"] },
+      { name: "RouterMesh", desc: "Trust-tier router that spreads inference across independent workers and re-executes a sample for redundant verification.", tags: ["Compute", "Scheduler"] },
+      { name: "AgentLedger", desc: "Autonomous-agent runtime whose every tool call and model step is metered and receipted for auditable spend.", tags: ["Compute", "EVM"] },
+      { name: "EdgeServe", desc: "Consumer-GPU inference pool that lets home RTX operators earn PYRX for served CUs with VRAM-aware scheduling.", tags: ["Compute", "Edge"] },
       { name: "FairDecline", desc: "On-chain decision endpoint that attaches a verifiable receipt to model outputs so a disputed answer can be reproduced.", tags: ["ComputeReceipt", "ZK"] },
     ],
   },
 
   "decentralized-compute": {
     overview:
-      "Decentralized compute pools idle GPUs and servers from many operators into an open, permissionless supercomputer, breaking the hyperscaler bottleneck for AI and rendering workloads. PYRAX is the settlement and trust layer NEURAX runs on: buyers escrow PYRX, workers are matched by VRAM and trust tier, and every job settles against a ComputeReceipt whose output is validated by the 4-rung ladder — so payment follows proven work, not promises.",
+      "Decentralized compute pools idle GPUs and servers from many operators into an open, permissionless supercomputer, breaking the hyperscaler bottleneck for AI and rendering workloads. PYRAX is the settlement and trust layer PYRAX Compute runs on: buyers escrow PYRX, workers are matched by VRAM and trust tier, and every job settles against a ComputeReceipt whose output is validated by the 4-rung ladder — so payment follows proven work, not promises.",
     marketSize: "$9.4B (2024)",
     projection: "$100B+ by 2032 · ~28% CAGR",
     source: "Grand View Research / Precedence, 2024",
@@ -76,7 +76,7 @@ export const content: CategoryContent = {
     ],
     solutions: [
       {
-        feature: "NEURAX compute marketplace",
+        feature: "PYRAX Compute compute marketplace",
         how: "Buyers post jobs and the network matches workers, meters usage in compute units at a fixed 8 PYRX/CU, and settles peer-to-peer with no cloud middleman taking margin.",
       },
       {
@@ -97,20 +97,20 @@ export const content: CategoryContent = {
       },
     ],
     dapps: [
-      { name: "GPUMarket", desc: "Open order book where buyers escrow PYRX for GPU-hours and NEURAX matches them to available workers by VRAM and price.", tags: ["NEURAX", "Escrow"] },
-      { name: "ShardPool", desc: "Cohort scheduler that runs a single oversized model across many consumer GPUs via the ShardedExecutor.", tags: ["NEURAX", "Scheduler"] },
+      { name: "GPUMarket", desc: "Open order book where buyers escrow PYRX for GPU-hours and PYRAX Compute matches them to available workers by VRAM and price.", tags: ["Compute", "Escrow"] },
+      { name: "ShardPool", desc: "Cohort scheduler that runs a single oversized model across many consumer GPUs via the ShardedExecutor.", tags: ["Compute", "Scheduler"] },
       { name: "ProofOfWorkload", desc: "Job runner that returns a ComputeReceipt with a chosen verification rung so buyers can trust results from unknown workers.", tags: ["ComputeReceipt", "ZK"] },
-      { name: "IdleYield", desc: "One-click worker client that lets home and studio GPUs earn PYRX for verified CUs when otherwise idle.", tags: ["NEURAX", "Edge"] },
-      { name: "RenderSwarm", desc: "Distributed 3D/render farm that shards frames across the pool and settles per completed frame.", tags: ["NEURAX", "Escrow"] },
+      { name: "IdleYield", desc: "One-click worker client that lets home and studio GPUs earn PYRX for verified CUs when otherwise idle.", tags: ["Compute", "Edge"] },
+      { name: "RenderSwarm", desc: "Distributed 3D/render farm that shards frames across the pool and settles per completed frame.", tags: ["Compute", "Escrow"] },
       { name: "TierBid", desc: "Reverse-auction contract where workers bid on jobs and stake into their trust tier for priority placement.", tags: ["EVM", "Scheduler"] },
-      { name: "BurstCloud", desc: "Autoscaling backend that overflows spiky AI demand from a private cluster into the NEURAX market with capped spend.", tags: ["NEURAX", "WASM"] },
+      { name: "BurstCloud", desc: "Autoscaling backend that overflows spiky AI demand from a private cluster into the PYRAX Compute market with capped spend.", tags: ["Compute", "WASM"] },
       { name: "SlashGuard", desc: "Dispute contract that re-executes a challenged job on independent workers and slashes the escrow of a proven-faulty provider.", tags: ["Escrow", "ZK"] },
     ],
   },
 
   "data-marketplaces": {
     overview:
-      "Data marketplaces let organizations buy, sell, and license datasets — from training corpora to real-time feeds — but the core paradox is that a buyer must inspect data to value it, and once seen it is copied for free. PYRAX resolves this with compute-to-data: NEURAX runs the buyer's model against the seller's private dataset in place, and only a verified ComputeReceipt and payment cross the wire, so value is exchanged without the raw data ever leaving the owner.",
+      "Data marketplaces let organizations buy, sell, and license datasets — from training corpora to real-time feeds — but the core paradox is that a buyer must inspect data to value it, and once seen it is copied for free. PYRAX resolves this with compute-to-data: PYRAX Compute runs the buyer's model against the seller's private dataset in place, and only a verified ComputeReceipt and payment cross the wire, so value is exchanged without the raw data ever leaving the owner.",
     marketSize: "$1.1B (2024)",
     projection: "$16.3B by 2033 · ~35% CAGR",
     source: "Precedence Research, 2024",
@@ -128,7 +128,7 @@ export const content: CategoryContent = {
     ],
     solutions: [
       {
-        feature: "Compute-to-data via NEURAX",
+        feature: "Compute-to-data via PYRAX Compute",
         how: "Buyers submit a training or query job that executes against the seller's dataset in place; the data never moves, and only the receipted result and payment are exchanged.",
       },
       {
@@ -149,11 +149,11 @@ export const content: CategoryContent = {
       },
     ],
     dapps: [
-      { name: "DataInPlace", desc: "Compute-to-data marketplace where buyers run models against private datasets that never leave the seller's node.", tags: ["Compute-to-data", "NEURAX"] },
+      { name: "DataInPlace", desc: "Compute-to-data marketplace where buyers run models against private datasets that never leave the seller's node.", tags: ["Compute-to-data", "PYRAX Compute"] },
       { name: "ProvenanceVault", desc: "Content-addressed registry that binds every dataset to an immutable hash and a verifiable lineage trail.", tags: ["Storage", "ComputeReceipt"] },
       { name: "RoyaltySplit", desc: "Contract that pays every upstream contributor their share automatically on each licensed access.", tags: ["EVM", "Escrow"] },
       { name: "ShieldLicense", desc: "Private licensing rail where purchases are shielded and each grant issues a scoped viewing key for auditors.", tags: ["Shielded", "Gov"] },
-      { name: "FeedEscrow", desc: "Streaming-data subscription that escrows PYRX and meters delivery of real-time feeds per verified batch.", tags: ["Escrow", "NEURAX"] },
+      { name: "FeedEscrow", desc: "Streaming-data subscription that escrows PYRX and meters delivery of real-time feeds per verified batch.", tags: ["Escrow", "PYRAX Compute"] },
       { name: "TrainReceipt", desc: "Training broker that returns a ComputeReceipt proving a model was fit on the exact licensed corpus.", tags: ["ComputeReceipt", "Compute-to-data"] },
       { name: "ConsentledData", desc: "Individual-consent marketplace letting people license their personal data with revocable, viewing-key-scoped access.", tags: ["Shielded", "Cairo"] },
       { name: "LineageProof", desc: "Provenance verifier that uses eth_getProof to attest a dataset's version and terms to any consumer.", tags: ["ZK", "Storage"] },
@@ -162,7 +162,7 @@ export const content: CategoryContent = {
 
   "machine-learning-ops": {
     overview:
-      "ML Ops covers the pipeline that takes models from training to production — data prep, distributed training, versioning, evaluation, and deployment — and its central weakness is reproducibility: teams and regulators struggle to prove which data, code, and compute produced a given model. PYRAX makes the whole pipeline attestable: NEURAX runs training and eval jobs against a ComputeReceipt, content-addressed storage pins the exact inputs, and eth_getProof makes every artifact and metric independently verifiable.",
+      "ML Ops covers the pipeline that takes models from training to production — data prep, distributed training, versioning, evaluation, and deployment — and its central weakness is reproducibility: teams and regulators struggle to prove which data, code, and compute produced a given model. PYRAX makes the whole pipeline attestable: PYRAX Compute runs training and eval jobs against a ComputeReceipt, content-addressed storage pins the exact inputs, and eth_getProof makes every artifact and metric independently verifiable.",
     marketSize: "$3.4B (2024)",
     projection: "$39B by 2034 · ~28% CAGR",
     source: "MarketsandMarkets, 2024",
@@ -180,7 +180,7 @@ export const content: CategoryContent = {
     ],
     solutions: [
       {
-        feature: "NEURAX distributed training jobs",
+        feature: "PYRAX Compute distributed training jobs",
         how: "Training runs are metered in compute units at 8 PYRX/CU and can shard across a ShardedExecutor cohort, giving teams cluster-scale compute without a hyperscaler contract.",
       },
       {
@@ -201,20 +201,20 @@ export const content: CategoryContent = {
       },
     ],
     dapps: [
-      { name: "RepoTrain", desc: "Distributed training service that returns a ComputeReceipt pinning data, config, and code for a fully reproducible run.", tags: ["NEURAX", "ComputeReceipt"] },
+      { name: "RepoTrain", desc: "Distributed training service that returns a ComputeReceipt pinning data, config, and code for a fully reproducible run.", tags: ["Compute", "ComputeReceipt"] },
       { name: "ModelRegistry", desc: "Content-addressed registry of checkpoints and datasets with immutable, verifiable lineage.", tags: ["Storage", "EVM"] },
-      { name: "EvalProof", desc: "Benchmark harness that re-executes evaluations on independent workers and publishes verifiable scores.", tags: ["ZK", "NEURAX"] },
+      { name: "EvalProof", desc: "Benchmark harness that re-executes evaluations on independent workers and publishes verifiable scores.", tags: ["ZK", "PYRAX Compute"] },
       { name: "DriftWatch", desc: "Monitoring dApp that anchors production metrics on-chain and proves when a model has drifted from its baseline.", tags: ["ComputeReceipt", "WASM"] },
-      { name: "ShardTrainer", desc: "Cohort trainer that fans a large training job across pooled consumer GPUs via the ShardedExecutor.", tags: ["NEURAX", "Scheduler"] },
+      { name: "ShardTrainer", desc: "Cohort trainer that fans a large training job across pooled consumer GPUs via the ShardedExecutor.", tags: ["Compute", "Scheduler"] },
       { name: "AuditCard", desc: "Model-card contract whose every claim is backed by an eth_getProof-verifiable artifact for regulators.", tags: ["Gov", "ZK"] },
-      { name: "PipelineEscrow", desc: "CI/CD for models where each stage escrows PYRX and pays workers on a verified receipt.", tags: ["Escrow", "NEURAX"] },
+      { name: "PipelineEscrow", desc: "CI/CD for models where each stage escrows PYRX and pays workers on a verified receipt.", tags: ["Escrow", "PYRAX Compute"] },
       { name: "PrivateFineTune", desc: "Compute-to-data fine-tuning that adapts a base model on private corpora without moving the data.", tags: ["Compute-to-data", "Shielded"] },
     ],
   },
 
   "iot-devices": {
     overview:
-      "IoT connects tens of billions of sensors, meters, vehicles, and machines that generate telemetry and increasingly transact autonomously, but they lack strong identity and a native way to pay for services in tiny amounts. PYRAX gives every device a cryptographic machine identity, BLS-final micro-payments for pay-per-use data and compute, and tamper-proof logs — so devices can prove who they are, buy inference from NEURAX, and sell verified data without a human in the loop.",
+      "IoT connects tens of billions of sensors, meters, vehicles, and machines that generate telemetry and increasingly transact autonomously, but they lack strong identity and a native way to pay for services in tiny amounts. PYRAX gives every device a cryptographic machine identity, BLS-final micro-payments for pay-per-use data and compute, and tamper-proof logs — so devices can prove who they are, buy inference from PYRAX Compute, and sell verified data without a human in the loop.",
     marketSize: "$714B (2024)",
     projection: "$3.35T by 2033 · ~18% CAGR",
     source: "Precedence Research, 2024",
@@ -244,7 +244,7 @@ export const content: CategoryContent = {
         how: "Signed sensor data is anchored on-chain so readings are immutable and time-ordered, giving warranties, insurers, and regulators an unfalsifiable record.",
       },
       {
-        feature: "Edge inference via NEURAX",
+        feature: "Edge inference via PYRAX Compute",
         how: "Devices buy inference from nearby consumer-GPU workers with escrow and a ComputeReceipt, keeping raw telemetry local while paying only for verified results.",
       },
       {
@@ -256,7 +256,7 @@ export const content: CategoryContent = {
       { name: "DeviceID", desc: "Machine-identity registry giving each device a keypair, attestation, and revocation path on-chain.", tags: ["Identity", "EVM"] },
       { name: "MicroMeter", desc: "Pay-per-reading rail where sensors sell data in sub-cent PYRX micro-payments with instant finality.", tags: ["Finality", "IoT"] },
       { name: "TamperLog", desc: "Immutable telemetry anchor that time-stamps signed sensor data for warranties and audits.", tags: ["Storage", "Gov"] },
-      { name: "EdgeInfer", desc: "On-device inference broker that buys NEURAX compute from nearby workers with escrow and receipts.", tags: ["NEURAX", "Edge"] },
+      { name: "EdgeInfer", desc: "On-device inference broker that buys PYRAX Compute compute from nearby workers with escrow and receipts.", tags: ["Compute", "Edge"] },
       { name: "FleetPay", desc: "Autonomous-vehicle and drone wallet that pays for charging, tolls, and airspace per use.", tags: ["Finality", "IoT"] },
       { name: "ShieldTelemetry", desc: "Privacy-preserving telemetry stream with viewing-key access for operators and regulators.", tags: ["Shielded", "IoT"] },
       { name: "GridMachine", desc: "M2M energy market where smart meters and batteries trade kilowatts with signed, finalized settlement.", tags: ["Finality", "EVM"] },
@@ -266,7 +266,7 @@ export const content: CategoryContent = {
 
   "cybersecurity": {
     overview:
-      "Cybersecurity defends systems, data, and identities against a threat landscape where attackers increasingly weaponize AI, and where defenders' own logs and detection models are prime targets for tampering. PYRAX hardens the defensive stack: tamper-proof logs give an append-only, cryptographically-anchored audit trail, NEURAX runs threat-detection models with verifiable ComputeReceipts, and eth_getProof makes security state independently attestable — so evidence and defenses can be trusted even after a breach.",
+      "Cybersecurity defends systems, data, and identities against a threat landscape where attackers increasingly weaponize AI, and where defenders' own logs and detection models are prime targets for tampering. PYRAX hardens the defensive stack: tamper-proof logs give an append-only, cryptographically-anchored audit trail, PYRAX Compute runs threat-detection models with verifiable ComputeReceipts, and eth_getProof makes security state independently attestable — so evidence and defenses can be trusted even after a breach.",
     marketSize: "$193B (2024)",
     projection: "$562B by 2032 · ~14% CAGR",
     source: "Fortune Business Insights, 2024",
@@ -288,7 +288,7 @@ export const content: CategoryContent = {
         how: "Security events are anchored on-chain with instant finality, so an intruder cannot alter or delete the record without detection, preserving a forensic chain of custody.",
       },
       {
-        feature: "NEURAX verifiable threat detection",
+        feature: "PYRAX Compute verifiable threat detection",
         how: "Detection and triage models run as receipted jobs, so every alert or clear can be reproduced and proven to have used the sanctioned model and rules.",
       },
       {
@@ -306,19 +306,19 @@ export const content: CategoryContent = {
     ],
     dapps: [
       { name: "ImmutaLog", desc: "Append-only SIEM sink that anchors security events on-chain for tamper-evident forensics.", tags: ["Storage", "Gov"] },
-      { name: "ProofSOC", desc: "Detection pipeline that attaches a ComputeReceipt to every alert so triage decisions are reproducible.", tags: ["NEURAX", "ComputeReceipt"] },
+      { name: "ProofSOC", desc: "Detection pipeline that attaches a ComputeReceipt to every alert so triage decisions are reproducible.", tags: ["Compute", "ComputeReceipt"] },
       { name: "PostureProof", desc: "Continuous-compliance dApp that proves patch level and config via eth_getProof to auditors and insurers.", tags: ["ZK", "Gov"] },
       { name: "ThreatShare", desc: "Shielded threat-intelligence exchange with viewing-key-scoped disclosure between members.", tags: ["Shielded", "EVM"] },
       { name: "KeyRevoke", desc: "Instant-finality revocation registry that ejects a compromised identity network-wide in one block.", tags: ["Identity", "Finality"] },
       { name: "HoneyLedger", desc: "Decoy-and-deception network that immutably records attacker interactions for analysis.", tags: ["Storage", "IoT"] },
       { name: "BountyEscrow", desc: "Bug-bounty escrow that pays researchers on a verified, reproducible proof-of-vulnerability.", tags: ["Escrow", "ComputeReceipt"] },
-      { name: "AIWatch", desc: "Verifiable anomaly detector for on-chain and off-chain activity that proves each flag with a receipt.", tags: ["NEURAX", "ZK"] },
+      { name: "AIWatch", desc: "Verifiable anomaly detector for on-chain and off-chain activity that proves each flag with a receipt.", tags: ["Compute", "ZK"] },
     ],
   },
 
   "cloud-storage": {
     overview:
-      "Cloud and storage underpins every digital workload, but the dominant model concentrates data in a few providers, creating lock-in, egress fees, and single points of failure and censorship. PYRAX pairs with decentralized storage to make data content-addressed and encrypted, provably retrievable, and monetizable per byte: NEURAX runs compute-to-data next to the bytes, escrow settles storage and retrieval per proof, and eth_getProof lets anyone verify a file's integrity and availability.",
+      "Cloud and storage underpins every digital workload, but the dominant model concentrates data in a few providers, creating lock-in, egress fees, and single points of failure and censorship. PYRAX pairs with decentralized storage to make data content-addressed and encrypted, provably retrievable, and monetizable per byte: PYRAX Compute runs compute-to-data next to the bytes, escrow settles storage and retrieval per proof, and eth_getProof lets anyone verify a file's integrity and availability.",
     marketSize: "$91B (2024)",
     projection: "$472B by 2032 · ~23% CAGR",
     source: "Fortune Business Insights, 2024",
@@ -348,7 +348,7 @@ export const content: CategoryContent = {
         how: "Storage and retrieval settle in metered PYRX against proofs of service, replacing surprise egress bills with transparent, pay-for-what-you-use pricing.",
       },
       {
-        feature: "Compute-to-data via NEURAX",
+        feature: "Compute-to-data via PYRAX Compute",
         how: "Analytics and inference run where the data lives, so large datasets are queried in place — no egress, and results come back with a ComputeReceipt.",
       },
       {
@@ -359,7 +359,7 @@ export const content: CategoryContent = {
     dapps: [
       { name: "PinProof", desc: "Content-addressed storage layer that anchors each file's hash and proves retrievability via eth_getProof.", tags: ["Storage", "ZK"] },
       { name: "MeteredBucket", desc: "Pay-per-byte object store that escrows PYRX and settles storage and retrieval against proofs of service.", tags: ["Escrow", "Storage"] },
-      { name: "QueryInPlace", desc: "Compute-to-data warehouse that runs analytics next to the bytes and returns receipted results.", tags: ["Compute-to-data", "NEURAX"] },
+      { name: "QueryInPlace", desc: "Compute-to-data warehouse that runs analytics next to the bytes and returns receipted results.", tags: ["Compute-to-data", "PYRAX Compute"] },
       { name: "ShieldDrive", desc: "Encrypted personal drive with viewing-key sharing and immutable access logs.", tags: ["Shielded", "Gov"] },
       { name: "ReplicaMarket", desc: "Redundancy market where independent nodes bid to hold and prove replicas of critical data.", tags: ["Storage", "Escrow"] },
       { name: "SovereignVault", desc: "Jurisdiction-aware storage that keeps regulated data in-region with provable placement.", tags: ["Gov", "Storage"] },
@@ -370,7 +370,7 @@ export const content: CategoryContent = {
 
   "scientific-computing": {
     overview:
-      "Scientific computing powers simulation, genomics, climate modeling, and drug discovery — HPC workloads that are compute-starved, expensive, and increasingly demand reproducibility and secure collaboration on sensitive data. PYRAX opens supercomputer-class capacity through NEURAX's pooled GPUs and ShardedExecutor, binds every run to a ComputeReceipt for reproducibility, and uses compute-to-data so institutions can jointly analyze private cohorts without ever sharing the raw data.",
+      "Scientific computing powers simulation, genomics, climate modeling, and drug discovery — HPC workloads that are compute-starved, expensive, and increasingly demand reproducibility and secure collaboration on sensitive data. PYRAX opens supercomputer-class capacity through PYRAX Compute's pooled GPUs and ShardedExecutor, binds every run to a ComputeReceipt for reproducibility, and uses compute-to-data so institutions can jointly analyze private cohorts without ever sharing the raw data.",
     marketSize: "$54B (2024)",
     projection: "$132B by 2032 · ~11% CAGR",
     source: "MarketsandMarkets, 2024",
@@ -388,7 +388,7 @@ export const content: CategoryContent = {
     ],
     solutions: [
       {
-        feature: "NEURAX pooled HPC + ShardedExecutor",
+        feature: "PYRAX Compute pooled HPC + ShardedExecutor",
         how: "Large simulations shard across cohorts of consumer and datacenter GPUs, giving labs elastic, supercomputer-class capacity billed at 8 PYRX/CU without a cluster allocation.",
       },
       {
@@ -409,20 +409,20 @@ export const content: CategoryContent = {
       },
     ],
     dapps: [
-      { name: "SimGrid", desc: "Elastic HPC broker that shards simulations across pooled GPUs and bills per verified CU.", tags: ["NEURAX", "Scheduler"] },
+      { name: "SimGrid", desc: "Elastic HPC broker that shards simulations across pooled GPUs and bills per verified CU.", tags: ["Compute", "Scheduler"] },
       { name: "ReproPaper", desc: "Reproducibility registry pairing each publication with a ComputeReceipt and content-addressed artifact.", tags: ["ComputeReceipt", "Storage"] },
       { name: "FedGenome", desc: "Federated genomics platform that runs models across hospitals' private cohorts via compute-to-data.", tags: ["Compute-to-data", "Shielded"] },
       { name: "GrantLedger", desc: "Grant-management dApp that escrows funds per run and produces an auditable compute-spend trail.", tags: ["Escrow", "Gov"] },
-      { name: "MolSearch", desc: "Distributed drug-discovery screen that fans docking jobs across the NEURAX pool.", tags: ["NEURAX", "Scheduler"] },
+      { name: "MolSearch", desc: "Distributed drug-discovery screen that fans docking jobs across the PYRAX Compute pool.", tags: ["Compute", "Scheduler"] },
       { name: "ClimateProof", desc: "Climate-model runner that publishes ZK-verifiable results others can trust without re-running.", tags: ["ZK", "ComputeReceipt"] },
-      { name: "PeerCompute", desc: "Idle-cluster sharing network where research groups trade unused GPU-hours peer-to-peer.", tags: ["NEURAX", "Escrow"] },
+      { name: "PeerCompute", desc: "Idle-cluster sharing network where research groups trade unused GPU-hours peer-to-peer.", tags: ["Compute", "Escrow"] },
       { name: "DataCite", desc: "Content-addressed dataset citation service giving every corpus an immutable, verifiable reference.", tags: ["Storage", "EVM"] },
     ],
   },
 
   "edge-computing": {
     overview:
-      "Edge computing pushes processing to where data is produced — factories, vehicles, retail, telco towers — to cut latency and bandwidth, but it fragments trust across thousands of unmanaged nodes that must coordinate, pay each other, and prove their work. PYRAX is the coordination layer: NEURAX's local-first runtime turns consumer-GPU edge nodes into verifiable workers, machine identity and BLS finality secure and settle their interactions, and ComputeReceipts prove each edge job ran as specified.",
+      "Edge computing pushes processing to where data is produced — factories, vehicles, retail, telco towers — to cut latency and bandwidth, but it fragments trust across thousands of unmanaged nodes that must coordinate, pay each other, and prove their work. PYRAX is the coordination layer: PYRAX Compute's local-first runtime turns consumer-GPU edge nodes into verifiable workers, machine identity and BLS finality secure and settle their interactions, and ComputeReceipts prove each edge job ran as specified.",
     marketSize: "$16.5B (2024)",
     projection: "$156B by 2030 · ~37% CAGR",
     source: "Grand View Research, 2024",
@@ -440,7 +440,7 @@ export const content: CategoryContent = {
     ],
     solutions: [
       {
-        feature: "NEURAX local-first runtime",
+        feature: "PYRAX Compute local-first runtime",
         how: "The RTX 3060-baseline runtime turns any edge box into a verifiable worker, so inference runs on-site at low latency while still being metered and receipted.",
       },
       {
@@ -461,20 +461,20 @@ export const content: CategoryContent = {
       },
     ],
     dapps: [
-      { name: "EdgeWorker", desc: "Local-first NEURAX client that turns an on-site GPU box into a metered, receipted inference node.", tags: ["NEURAX", "Edge"] },
+      { name: "EdgeWorker", desc: "Local-first PYRAX Compute client that turns an on-site GPU box into a metered, receipted inference node.", tags: ["Compute", "Edge"] },
       { name: "NodeMesh", desc: "Peer market where edge nodes buy and sell spare cycles with instant-finality micro-payments.", tags: ["Edge", "Finality"] },
-      { name: "FactoryVision", desc: "On-premises defect-detection dApp that runs vision models locally and receipts each inspection.", tags: ["NEURAX", "ComputeReceipt"] },
+      { name: "FactoryVision", desc: "On-premises defect-detection dApp that runs vision models locally and receipts each inspection.", tags: ["Compute", "ComputeReceipt"] },
       { name: "TowerCompute", desc: "Telco-edge compute market that places latency-critical AI at the nearest tower node.", tags: ["Edge", "Scheduler"] },
       { name: "PrivacyCam", desc: "Edge camera pipeline that processes faces/plates locally and only shares shielded, viewing-key-scoped results.", tags: ["Shielded", "Edge"] },
       { name: "AutoCoord", desc: "Vehicle-to-infrastructure coordinator that settles right-of-way and services with signed finality.", tags: ["Identity", "Finality"] },
-      { name: "RetailEdge", desc: "In-store analytics node that runs inventory and footfall models on-prem with receipted spend.", tags: ["NEURAX", "IoT"] },
+      { name: "RetailEdge", desc: "In-store analytics node that runs inventory and footfall models on-prem with receipted spend.", tags: ["Compute", "IoT"] },
       { name: "FailoverGrid", desc: "Resilience mesh that reroutes edge workloads to healthy nodes and proves each handoff.", tags: ["Edge", "ComputeReceipt"] },
     ],
   },
 
   "synthetic-data": {
     overview:
-      "Synthetic data generates artificial datasets that mirror the statistics of real data without exposing real individuals, and it is fast becoming essential as real-world training data grows scarce and privacy-constrained. PYRAX makes synthetic data trustworthy and monetizable: NEURAX runs generation as a receipted compute job, compute-to-data lets generators learn from private source data without copying it, and eth_getProof anchors provenance so buyers can prove a synthetic set's origin, quality, and privacy guarantees.",
+      "Synthetic data generates artificial datasets that mirror the statistics of real data without exposing real individuals, and it is fast becoming essential as real-world training data grows scarce and privacy-constrained. PYRAX makes synthetic data trustworthy and monetizable: PYRAX Compute runs generation as a receipted compute job, compute-to-data lets generators learn from private source data without copying it, and eth_getProof anchors provenance so buyers can prove a synthetic set's origin, quality, and privacy guarantees.",
     marketSize: "$0.4B (2024)",
     projection: "$8.9B by 2030 · ~61% CAGR",
     source: "MarketsandMarkets, 2024",
@@ -496,8 +496,8 @@ export const content: CategoryContent = {
         how: "Generators learn a distribution by running against private source data in place, so real records are never copied out and the synthetic output carries no raw personal data.",
       },
       {
-        feature: "NEURAX receipted generation jobs",
-        how: "Each synthetic dataset is produced as a metered NEURAX job bound to a ComputeReceipt, so its exact model, config, and source-in-place run are recorded and reproducible.",
+        feature: "PYRAX Compute receipted generation jobs",
+        how: "Each synthetic dataset is produced as a metered PYRAX Compute job bound to a ComputeReceipt, so its exact model, config, and source-in-place run are recorded and reproducible.",
       },
       {
         feature: "eth_getProof provenance & guarantees",
@@ -513,14 +513,15 @@ export const content: CategoryContent = {
       },
     ],
     dapps: [
-      { name: "SynthForge", desc: "Compute-to-data generator that learns from private sources in place and receipts every synthetic set.", tags: ["Compute-to-data", "NEURAX"] },
+      { name: "SynthForge", desc: "Compute-to-data generator that learns from private sources in place and receipts every synthetic set.", tags: ["Compute-to-data", "PYRAX Compute"] },
       { name: "FidelityProof", desc: "Quality oracle that re-executes fidelity and leakage checks and publishes verifiable scores.", tags: ["ZK", "ComputeReceipt"] },
       { name: "SynthMarket", desc: "Marketplace for verified synthetic datasets with escrow settlement and provenance proofs.", tags: ["Escrow", "Storage"] },
       { name: "PrivacyBudget", desc: "Differential-privacy manager that tracks and proves the epsilon spent generating each dataset.", tags: ["Shielded", "Gov"] },
       { name: "SourceRoyalty", desc: "Contract that pays real-data contributors a royalty each time synthetic derivatives are licensed.", tags: ["EVM", "Compute-to-data"] },
-      { name: "BiasAudit", desc: "Verifiable fairness auditor that proves a synthetic set's bias profile to buyers and regulators.", tags: ["NEURAX", "ZK"] },
+      { name: "BiasAudit", desc: "Verifiable fairness auditor that proves a synthetic set's bias profile to buyers and regulators.", tags: ["Compute", "ZK"] },
       { name: "EdgeSynth", desc: "On-device synthetic generation for edge nodes that keeps sensitive source data fully local.", tags: ["Edge", "Shielded"] },
-      { name: "TwinGen", desc: "Digital-twin data factory that generates simulation datasets with receipted, reproducible runs.", tags: ["NEURAX", "ComputeReceipt"] },
+      { name: "TwinGen", desc: "Digital-twin data factory that generates simulation datasets with receipted, reproducible runs.", tags: ["Compute", "ComputeReceipt"] },
     ],
   },
 };
+

@@ -1,10 +1,10 @@
 ---
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Site from "../layouts/Site.astro";
-import { DEFAULT_LOCALE, localizePath } from "../i18n/config";
+import { DEFAULT_LOCALE, localizePath, resolveLocale } from "../i18n/config";
 import { useT } from "../i18n";
 
-const lang = DEFAULT_LOCALE;
+const lang = resolveLocale(Astro.url, Astro.cookies);
 const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 
@@ -20,20 +20,30 @@ const northStars = [
 ];
 
 const toc = [
-  t("wpPage.toc1", "Design Goals — Five North Stars"), t("wpPage.toc2", "Architecture Overview"), t("wpPage.toc3", "Performance & Scalability"), t("wpPage.toc4", "Consensus: GhostDAG + TriStream + BLS PoS"), t("wpPage.toc5", "Privacy: Shielded by Default"), t("wpPage.toc6", "Execution: Multi-VM L2"), t("wpPage.toc7", "L3 — Recursive ZK Rollup"), t("wpPage.toc8", "Networking: Bootstrapless"), t("wpPage.toc9", "Metadata Privacy & Anonymous Services"), t("wpPage.toc10", "State, Storage & Proofs"), t("wpPage.toc11", "NEURAX — Verifiable Compute"), t("wpPage.toc12", "Crucible — Zero-Fee Mining"), t("wpPage.toc13", "NOVA — Autonomous Operations"), t("wpPage.toc14", "Tokenomics"), t("wpPage.toc15", "Governance & the DAO"), t("wpPage.toc16", "The Four Networks"), t("wpPage.toc17", "Wallet, Apps, CLI & SDK"), t("wpPage.toc18", "RPC Surface"), t("wpPage.toc19", "Cryptographic Primitives"),
+  t("wpPage.toc1", "Design Goals — Five North Stars"), t("wpPage.toc2", "Architecture Overview"), t("wpPage.toc3", "Performance & Scalability"), t("wpPage.toc4", "Consensus: GhostDAG + TriStream + BLS PoS"), t("wpPage.toc5", "Privacy: Shielded by Default"), t("wpPage.toc6", "Execution: Multi-VM L2"), t("wpPage.toc7", "L3 — Recursive ZK Rollup"), t("wpPage.toc8", "Networking: Bootstrapless"), t("wpPage.toc9", "Metadata Privacy & Anonymous Services"), t("wpPage.toc10", "State, Storage & Proofs"), t("wpPage.toc11", "PYRAX Compute — Verifiable Market"), t("wpPage.toc12", "Crucible — Zero-Fee Mining"), t("wpPage.toc13", "NOVA — Autonomous Operations"), t("wpPage.toc14", "Tokenomics"), t("wpPage.toc15", "Governance & the DAO"), t("wpPage.toc16", "The Four Networks"), t("wpPage.toc17", "Wallet, Apps, CLI & SDK"), t("wpPage.toc18", "RPC Surface"), t("wpPage.toc19", "Cryptographic Primitives"),
 ];
 ---
-<Site title="Whitepaper v4 — PYRAX™ Network" description="The PYRAX v4 whitepaper: a from-scratch Rust Layer-1 with a GhostDAG, TriStream consensus, BLS proof-of-stake finality, shielded-by-default privacy, a multi-VM execution layer, and the NEURAX compute market. Technical and plain-English editions." lang={lang}>
+<Site title="Whitepaper v4 — PYRAX™ Network" description="The PYRAX v4 whitepaper: a from-scratch Rust Layer-1 with a GhostDAG, TriStream consensus, BLS proof-of-stake finality, shielded-by-default privacy, a multi-VM execution layer, and the PYRAX Compute market. Technical and plain-English editions." lang={lang}>
   <section class="relative overflow-hidden border-b border-line">
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20">
       <div class="flex items-center gap-2 eyebrow eyebrow-rule text-[color:var(--color-gold)]">{t("wpPage.eyebrow", "Whitepaper")} <span class="rounded-full border border-line px-2 py-0.5 text-faint">{t("wpPage.eyebrowVersion", "v4")}</span></div>
       <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold uppercase sm:text-6xl">{t("wpPage.headingPre", "A system that is ")}<span class="flame-text">{t("wpPage.headingWord", "built")}</span>{t("wpPage.headingPost", ", not merely designed")}</h1>
       <p class="mt-5 max-w-3xl text-lg text-muted">{t("wpPage.subtitle", "v4 specifies PYRAX as it is implemented today — one binary across four chainspecs, a faithful simulation on real primitives, with the production consensus path wired end-to-end and honest about what remains gated behind external audit.")}</p>
-      <div class="mt-8 flex flex-wrap gap-3">
-        <a href={TECH} download class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">{t("wpPage.downloadTechnical", "Download technical paper")}</a>
-        <a href={PLAIN} download class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("wpPage.downloadPlain", "Plain-English edition")}</a>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <button type="button" disabled class="cursor-not-allowed inline-flex items-center justify-center gap-2 rounded-full border border-line bg-[rgba(255,255,255,0.03)] px-6 py-3 text-sm font-semibold text-muted opacity-80">
+          <span>{t("wpPage.downloadTechnical", "Download technical paper")}</span>
+          <span class="rounded-full border border-[color:var(--color-brand)] bg-[rgba(246,138,36,0.12)] px-2 py-0.5 text-[0.7rem] font-semibold text-[color:var(--color-brand)]">{t("wpPage.statusUnderRevision", "Under revision")}</span>
+        </button>
+        <button type="button" disabled class="cursor-not-allowed inline-flex items-center justify-center gap-2 rounded-full border border-line bg-[rgba(255,255,255,0.03)] px-6 py-3 text-sm font-semibold text-muted opacity-80">
+          <span>{t("wpPage.downloadPlain", "Plain-English edition")}</span>
+          <span class="rounded-full border border-line bg-[rgba(255,255,255,0.06)] px-2 py-0.5 text-[0.7rem] font-semibold text-faint">{t("wpPage.statusComingSoon", "Coming soon")}</span>
+        </button>
       </div>
+      <p class="mt-4 flex items-center gap-2 text-xs text-faint">
+        <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-[color:var(--color-brand)]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        {t("wpPage.downloadsPausedBanner", "Whitepaper downloads are temporarily paused while v4 is undergoing formal revisions. You can explore the system overview and section outline below.")}
+      </p>
     </div>
   </section>
 
@@ -42,7 +52,7 @@ const toc = [
     <div data-reveal class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-8">
       <div class="eyebrow text-faint">{t("wpPage.abstractLabel", "Abstract")}</div>
       <p class="mt-4 text-muted">{t("wpPage.abstractPara1a", "PYRAX is a from-scratch, Rust-implemented Layer-1 organized around four properties most networks bolt on but PYRAX enforces as invariants: ")}<span class="text-ink">{t("wpPage.abstractPara1b", "high throughput, privacy by default, full decentralization, and resistance to ISP-level surveillance.")}</span>{t("wpPage.abstractPara1c", " Consensus is a DAG ordered by GhostDAG, fed by a TriStream model — two proof-of-work families across four seal lanes plus proof-of-stake — and finalized by BLS-aggregated proof-of-stake BFT.")}</p>
-      <p class="mt-3 text-muted">{t("wpPage.abstractPara2a", "Value transfer is shielded by default with an Orchard-style note model and recursive zk-SNARKs that need no trusted setup. The peer layer is bootstrapless, traffic rides an onion Sphinx mixnet, execution scales through a multi-VM L2 (EVM, WASM, Cairo) and a recursive ZK-rollup L3, and the same idle GPUs that mine Stream B power ")}<span class="text-ink">NEURAX</span>{t("wpPage.abstractPara2c", ", a verifiable on-chain-settled compute market.")}</p>
+      <p class="mt-3 text-muted">{t("wpPage.abstractPara2a", "Value transfer is shielded by default with an Orchard-style note model and recursive zk-SNARKs that need no trusted setup. The peer layer is bootstrapless, traffic rides an onion Sphinx mixnet, execution scales through a multi-VM L2 (EVM, WASM, Cairo) and a recursive ZK-rollup L3, and the same idle GPUs that mine Stream B power ")}<span class="text-ink">PYRAX Compute</span>{t("wpPage.abstractPara2c", ", a verifiable on-chain-settled compute market.")}</p>
     </div>
   </section>
 
@@ -69,14 +79,26 @@ const toc = [
         <h2 class="font-display text-2xl font-extrabold">{t("wpPage.editionsTitle", "Two editions")}</h2>
         <p class="mt-3 text-muted">{t("wpPage.editionsBody", "The technical paper is the full specification. The plain-English edition explains the same system without the mathematics — start there if PYRAX is new to you.")}</p>
         <div class="mt-6 space-y-3">
-          <a href={TECH} download class="flex items-center justify-between rounded-2xl border border-line bg-[color:var(--color-surface)] p-4 transition hover:border-[color:#34405a]">
-            <span><span class="block font-bold text-ink">{t("wpPage.editionTechnicalTitle", "Technical paper")}</span><span class="text-xs text-faint">{t("wpPage.editionTechnicalCaption", "19 sections · full specification · PDF")}</span></span>
-            <svg viewBox="0 0 24 24" class="h-5 w-5 text-[color:var(--color-brand)]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
-          </a>
-          <a href={PLAIN} download class="flex items-center justify-between rounded-2xl border border-line bg-[color:var(--color-surface)] p-4 transition hover:border-[color:#34405a]">
-            <span><span class="block font-bold text-ink">{t("wpPage.editionPlainTitle", "Plain-English edition")}</span><span class="text-xs text-faint">{t("wpPage.editionPlainCaption", "the same system, no equations · PDF")}</span></span>
-            <svg viewBox="0 0 24 24" class="h-5 w-5 text-[color:var(--color-brand)]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
-          </a>
+          <div class="flex items-center justify-between rounded-2xl border border-line bg-[color:var(--color-surface)] p-4 opacity-80">
+            <span>
+              <span class="flex items-center gap-2 font-bold text-ink">
+                {t("wpPage.editionTechnicalTitle", "Technical paper")}
+                <span class="rounded-full border border-[color:var(--color-brand)] bg-[rgba(246,138,36,0.12)] px-2 py-0.5 text-[0.68rem] font-semibold text-[color:var(--color-brand)]">{t("wpPage.statusUnderRevision", "Under revision")}</span>
+              </span>
+              <span class="text-xs text-faint">{t("wpPage.editionTechnicalDisabledCaption", "19 sections · full specification · downloads paused for revision")}</span>
+            </span>
+            <span class="rounded-full border border-line px-2.5 py-1 text-xs text-faint">{t("wpPage.statusComingSoon", "Coming soon")}</span>
+          </div>
+          <div class="flex items-center justify-between rounded-2xl border border-line bg-[color:var(--color-surface)] p-4 opacity-80">
+            <span>
+              <span class="flex items-center gap-2 font-bold text-ink">
+                {t("wpPage.editionPlainTitle", "Plain-English edition")}
+                <span class="rounded-full border border-[color:var(--color-brand)] bg-[rgba(246,138,36,0.12)] px-2 py-0.5 text-[0.68rem] font-semibold text-[color:var(--color-brand)]">{t("wpPage.statusUnderRevision", "Under revision")}</span>
+              </span>
+              <span class="text-xs text-faint">{t("wpPage.editionPlainDisabledCaption", "the same system, no equations · downloads paused for revision")}</span>
+            </span>
+            <span class="rounded-full border border-line px-2.5 py-1 text-xs text-faint">{t("wpPage.statusComingSoon", "Coming soon")}</span>
+          </div>
         </div>
         <a href={L("/technology")} class="mt-6 inline-flex text-sm font-semibold text-[color:var(--color-brand)]">{t("wpPage.technologyLink", "Prefer the interactive tour? See Technology →")}</a>
       </div>

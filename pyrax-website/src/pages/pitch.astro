@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Site from "../layouts/Site.astro";
 import PitchDeck from "../components/PitchDeck.tsx";
-import { DEFAULT_LOCALE } from "../i18n/config";
+import { DEFAULT_LOCALE, resolveLocale } from "../i18n/config";
 
-const lang = DEFAULT_LOCALE;
+const lang = resolveLocale(Astro.url, Astro.cookies);
 ---
-<Site title="Investor Pitch — PYRAX™ Network" description="An interactive, animated investor deck: the problem, the technology, the market, NEURAX, traction, tokenomics, the roadmap, and the ask. Navigate with arrow keys, clicks, or swipe." lang={lang}>
+<Site title="Investor Pitch — PYRAX™ Network" description="An interactive, animated investor deck: the problem, the technology, the market, compliance, traction, tokenomics, the roadmap, and the ask. Navigate with arrow keys, clicks, or swipe." lang={lang}>
   <PitchDeck client:load lang={lang} />
 </Site>

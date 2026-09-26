@@ -20,3 +20,4 @@ export interface IndustryContent {
 }
 
 export type CategoryContent = Record<string, IndustryContent>; // keyed by business slug
+

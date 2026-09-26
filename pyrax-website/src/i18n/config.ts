@@ -56,12 +56,37 @@ export function parsePath(pathname: string): { lang: string; rest: string } {
 }
 
 /**
- * Build an internal href. Internationalization is temporarily served at plain, locale-free URLs
- * (no `/en/…` prefix) until the multi-locale routing is re-enabled. The `lang` argument is retained
- * for call-site compatibility and future re-activation, but ignored — the path is returned as-is.
+ * Resolves the active locale from the URL query string (?lang=...), a persistent cookie (pyrax_lang),
+ * or falls back to DEFAULT_LOCALE ("en").
  */
-export function localizePath(_lang: string, path: string): string {
+export function resolveLocale(url: URL, cookies?: any): string {
+  const param = url.searchParams.get("lang");
+  if (param && isLocale(param)) {
+    try {
+      cookies?.set?.("pyrax_lang", param, { path: "/", maxAge: 31536000, sameSite: "lax" });
+    } catch {}
+    return param;
+  }
+  const cookieVal = cookies?.get?.("pyrax_lang")?.value;
+  if (cookieVal && isLocale(cookieVal)) {
+    return cookieVal;
+  }
+  return DEFAULT_LOCALE;
+}
+
+/**
+ * Build an internal href. When viewing in a non-default language, preserves the ?lang=...
+ * query parameter across links so users remain in their selected language.
+ */
+export function localizePath(lang: string, path: string): string {
   const p = path.startsWith("/") ? path : "/" + path;
+  if (lang && lang !== DEFAULT_LOCALE && isLocale(lang)) {
+    const [base, hash] = p.split("#");
+    const [pathname, search] = base.split("?");
+    const params = new URLSearchParams(search || "");
+    params.set("lang", lang);
+    return `${pathname}?${params.toString()}${hash ? "#" + hash : ""}`;
+  }
   return p;
 }
 

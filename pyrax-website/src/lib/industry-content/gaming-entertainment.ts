@@ -35,7 +35,7 @@ export const content: CategoryContent = {
         how: "Every skin or item resale routes an enforced royalty split back to the studio and original creators, turning a gray secondary market into a first-party revenue stream.",
       },
       {
-        feature: "NEURAX verifiable compute",
+        feature: "PYRAX Compute verifiable compute",
         how: "AI anti-cheat and matchmaking run as verifiable compute jobs, so bans and rankings are backed by attestable evidence rather than an opaque server-side call.",
       },
       {
@@ -46,7 +46,7 @@ export const content: CategoryContent = {
     dapps: [
       { name: "SkinVault", desc: "Cross-title skin wallet where cosmetics mint as portable NFTs and follow the player between games.", tags: ["nft", "interoperability"] },
       { name: "LoopMint", desc: "On-chain crafting and loot engine that mints items mid-match at GhostDAG speed with sub-cent fees.", tags: ["gaming", "high-tps"] },
-      { name: "FairPlay Attest", desc: "NEURAX-backed anti-cheat that publishes verifiable evidence for every ban and ranking decision.", tags: ["neurax", "anti-cheat"] },
+      { name: "FairPlay Attest", desc: "PYRAX Compute-backed anti-cheat that publishes verifiable evidence for every ban and ranking decision.", tags: ["Compute", "anti-cheat"] },
       { name: "RoyaltyForge", desc: "Studio SDK that enforces creator royalty splits on every item resale across marketplaces.", tags: ["royalties", "sdk"] },
       { name: "PassChain", desc: "Battle-pass and progression system where unlocks are player-owned assets with instant finality.", tags: ["live-service", "nft"] },
       { name: "GuildTreasury", desc: "On-chain escrow for guild banks and shared inventories with multi-sig payout rules.", tags: ["escrow", "social"] },
@@ -91,7 +91,7 @@ export const content: CategoryContent = {
         how: "Bracket seeding, map vetoes, and side selection draw from verifiable on-chain randomness, removing accusations of rigged draws.",
       },
       {
-        feature: "NEURAX verifiable compute",
+        feature: "PYRAX Compute verifiable compute",
         how: "AI match-integrity analysis flags suspicious play with attestable evidence, giving leagues an auditable basis for anti-corruption rulings.",
       },
     ],
@@ -100,7 +100,7 @@ export const content: CategoryContent = {
       { name: "OrgSplit", desc: "Revenue-share contract distributing sponsorship and winnings across players, coaches, and staff.", tags: ["revenue-split", "teams"] },
       { name: "BracketProof", desc: "Provably-fair seeding and map-veto engine using verifiable on-chain randomness.", tags: ["randomness", "integrity"] },
       { name: "FanPass", desc: "Team fan tokens and season passes with resale royalties flowing back to the org.", tags: ["fan-tokens", "royalties"] },
-      { name: "MatchAttest", desc: "NEURAX integrity monitor publishing verifiable evidence for anti-fix rulings.", tags: ["neurax", "anti-cheat"] },
+      { name: "MatchAttest", desc: "PYRAX Compute integrity monitor publishing verifiable evidence for anti-fix rulings.", tags: ["Compute", "anti-cheat"] },
       { name: "PickemPool", desc: "Community prediction pools settled by provably-fair outcomes with instant payouts.", tags: ["prediction", "escrow"] },
       { name: "TransferLedger", desc: "Player-transfer registry with escrowed buyout fees and transparent contract terms.", tags: ["contracts", "transparency"] },
       { name: "SponsorFlow", desc: "Milestone-based sponsor payout streams that release funds as engagement KPIs are hit.", tags: ["sponsorship", "automation"] },
@@ -195,7 +195,7 @@ export const content: CategoryContent = {
         how: "Loot drops, gacha pulls, and reward crates draw from verifiable on-chain randomness, so players can confirm the advertised odds are honest.",
       },
       {
-        feature: "NEURAX verifiable compute",
+        feature: "PYRAX Compute verifiable compute",
         how: "AI economy-health monitoring detects gold-farming and duplication rings with attestable evidence, keeping the ledger trustworthy.",
       },
     ],
@@ -203,7 +203,7 @@ export const content: CategoryContent = {
       { name: "GoldMint", desc: "On-chain game currency with transparent sinks, faucets, and real cash-out.", tags: ["tokens", "economy"] },
       { name: "DropProof", desc: "Provably-fair loot and gacha engine that publishes verifiable drop odds.", tags: ["randomness", "loot"] },
       { name: "TradePost", desc: "High-frequency item marketplace with instant finality and sub-cent fees.", tags: ["marketplace", "high-tps"] },
-      { name: "EconWatch", desc: "NEURAX-backed economy monitor flagging duplication and gold-farming rings.", tags: ["neurax", "anti-fraud"] },
+      { name: "EconWatch", desc: "PYRAX Compute-backed economy monitor flagging duplication and gold-farming rings.", tags: ["Compute", "anti-fraud"] },
       { name: "ResourceForge", desc: "Craftable, tradable resource tokens that persist across a studio's game portfolio.", tags: ["assets", "crafting"] },
       { name: "CashOut", desc: "Player-owned currency bridge letting earnings settle to spendable value.", tags: ["cash-out", "wallet"] },
       { name: "SinkDash", desc: "Transparent economy dashboard exposing faucets and sinks to build player trust.", tags: ["analytics", "transparency"] },
@@ -523,3 +523,4 @@ export const content: CategoryContent = {
     ],
   },
 };
+

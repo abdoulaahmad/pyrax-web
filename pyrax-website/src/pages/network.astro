@@ -1,13 +1,13 @@
 ---
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Site from "../layouts/Site.astro";
-import { DEFAULT_LOCALE, localizePath } from "../i18n/config";
+import { DEFAULT_LOCALE, localizePath, resolveLocale } from "../i18n/config";
 import { useT } from "../i18n";
 import { NETWORKS } from "../lib/networks";
 import { allNetworkStats } from "../server/chain";
 import { DOMAINS } from "../lib/endpoints";
 
-const lang = DEFAULT_LOCALE;
+const lang = resolveLocale(Astro.url, Astro.cookies);
 const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 
@@ -24,7 +24,7 @@ const roles: Record<string, string> = {
 };
 
 const roadmap = [
-  { p: t("networkPage.roadmap1P", "Now"), t: t("networkPage.roadmap1Title", "PYRAX Seed is live"), d: t("networkPage.roadmap1Body", "A faithful simulation of the full protocol — GhostDAG, shielded pool, multi-VM contracts, NEURAX — running today as a permanent developer sandbox."), done: true },
+  { p: t("networkPage.roadmap1P", "Now"), t: t("networkPage.roadmap1Title", "PYRAX Seed is live"), d: t("networkPage.roadmap1Body", "A faithful simulation of the full protocol — GhostDAG, shielded pool, multi-VM contracts, PYRAX Compute — running today as a permanent developer sandbox."), done: true },
   { p: t("networkPage.roadmap2P", "Next"), t: t("networkPage.roadmap2Title", "PYRAX Forge · closed alpha"), d: t("networkPage.roadmap2Body", "The production consensus path (real 5-lane TriStream + BLS finality) opens to invited testers with seeded validators."), done: false },
   { p: t("networkPage.roadmap3P", "Then"), t: t("networkPage.roadmap3Title", "PYRAX Rise · public testnet"), d: t("networkPage.roadmap3Body", "Open, incentivized testnet with the emission ramp — the audit-facing rehearsal, load-tested in the open."), done: false },
   { p: t("networkPage.roadmap4P", "Gate"), t: t("networkPage.roadmap4Title", "External audit"), d: t("networkPage.roadmap4Body", "A single independent audit of consensus, the ZK circuits, and the bridge. Nothing reaches mainnet before it clears."), done: false },

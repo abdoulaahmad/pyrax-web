@@ -35,7 +35,7 @@ export const content: CategoryContent = {
         how: "Any buyer can generate a cryptographic proof of the mint transaction, original creator address, and full ownership chain, making counterfeit and copy-minted collections trivially distinguishable from the authentic work.",
       },
       {
-        feature: "NEURAX authenticity attestation",
+        feature: "PYRAX Compute authenticity attestation",
         how: "Verifiable AI checks a submitted image against the artist's on-chain catalog to flag copy-mints and deepfaked derivatives, and attaches a signed authenticity attestation that travels with the token.",
       },
       {
@@ -46,7 +46,7 @@ export const content: CategoryContent = {
     dapps: [
       { name: "RoyaltyForever", desc: "NFT minting studio whose contracts enforce the creator's royalty on every future resale, on-chain, with no way for a marketplace to strip it.", tags: ["EVM", "Royalties"] },
       { name: "ProofOfMint", desc: "Provenance explorer that produces a shareable eth_getProof certificate of original authorship and full ownership history for any token.", tags: ["Provenance", "eth_getProof"] },
-      { name: "GenuineGuard", desc: "NEURAX authenticity scanner that flags copy-mints and deepfaked derivatives before they list and attests originals.", tags: ["NEURAX", "Authenticity"] },
+      { name: "GenuineGuard", desc: "PYRAX Compute authenticity scanner that flags copy-mints and deepfaked derivatives before they list and attests originals.", tags: ["Compute", "Authenticity"] },
       { name: "DirectDrop", desc: "Artist-owned drop platform that sells editions fan-to-artist with instant finality and zero platform commission.", tags: ["Finality", "Direct-pay"] },
       { name: "TipCanvas", desc: "Micro-tipping overlay for process reels and sketches, settling sub-cent appreciation payments via GhostDAG.", tags: ["Micro-tips", "GhostDAG"] },
       { name: "SplitStudio", desc: "Collaborative mint contract that auto-splits primary and royalty income across every co-creator by set share.", tags: ["EVM", "Royalties"] },
@@ -143,7 +143,7 @@ export const content: CategoryContent = {
         how: "Per-article and per-minute micropayments let readers pay a few cents for a single story instead of a full subscription, reviving pay-per-read journalism at scale.",
       },
       {
-        feature: "NEURAX authenticity attestation vs deepfakes",
+        feature: "PYRAX Compute authenticity attestation vs deepfakes",
         how: "Verifiable AI attests that a photo, video, or quote is the newsroom's original capture, and flags synthetic or manipulated media, giving readers a cryptographic basis to trust what they see.",
       },
     ],
@@ -152,7 +152,7 @@ export const content: CategoryContent = {
       { name: "PermaStory", desc: "Censorship-resistant publishing that commits each article's hash on-chain so it cannot be silently deleted or edited.", tags: ["Publishing", "Provenance"] },
       { name: "PayPerRead", desc: "Micro-payment paywall charging a few cents per article via GhostDAG instead of forcing a full subscription.", tags: ["Micro-tips", "GhostDAG"] },
       { name: "ReporterFund", desc: "Direct reader-to-journalist funding with instant finality that no payment processor can freeze.", tags: ["Finality", "Direct-pay"] },
-      { name: "TruthAttest", desc: "NEURAX attestation service that signs original newsroom media and flags deepfaked or altered versions.", tags: ["NEURAX", "Authenticity"] },
+      { name: "TruthAttest", desc: "PYRAX Compute attestation service that signs original newsroom media and flags deepfaked or altered versions.", tags: ["Compute", "Authenticity"] },
       { name: "AnonTip", desc: "Encrypted tip line where sources carry files anonymously and reporters reply through a shielded reply route.", tags: ["Mixnet", "Shielded"] },
       { name: "CorrectionLog", desc: "On-chain revision history that proves exactly what changed in a story and when, restoring editorial transparency.", tags: ["Provenance", "eth_getProof"] },
       { name: "NewsCoop", desc: "Reader-owned newsroom cooperative that governs funding and editorial priorities through transparent on-chain votes.", tags: ["Gov", "EVM"] },
@@ -213,7 +213,7 @@ export const content: CategoryContent = {
 
   "photography": {
     overview:
-      "Photographers create the images that fill stock libraries, editorial pages, and ad campaigns, yet stock platforms pay pennies per download, strip metadata, and give creators no way to prove authorship or catch unlicensed use. PYRAX timestamps every capture with verifiable provenance, sells and licenses directly with instant finality, enforces resale royalties in the license contract, and uses NEURAX to distinguish authentic photographs from AI-generated fakes.",
+      "Photographers create the images that fill stock libraries, editorial pages, and ad campaigns, yet stock platforms pay pennies per download, strip metadata, and give creators no way to prove authorship or catch unlicensed use. PYRAX timestamps every capture with verifiable provenance, sells and licenses directly with instant finality, enforces resale royalties in the license contract, and uses PYRAX Compute to distinguish authentic photographs from AI-generated fakes.",
     marketSize: "$4.6B (2024)",
     projection: "$6.4B by 2030 · ~5.7% CAGR",
     source: "Grand View Research, 2024",
@@ -247,7 +247,7 @@ export const content: CategoryContent = {
         how: "Limited-edition prints and collectible captures carry royalty logic that pays the photographer on every secondary sale.",
       },
       {
-        feature: "NEURAX authenticity attestation vs deepfakes",
+        feature: "PYRAX Compute authenticity attestation vs deepfakes",
         how: "Verifiable AI attests that an image is a genuine camera capture rather than a synthetic generation, giving editorial and evidentiary buyers a trustworthy real-vs-AI signal.",
       },
     ],
@@ -255,9 +255,9 @@ export const content: CategoryContent = {
       { name: "ShutterProof", desc: "On-capture provenance registry that timestamps each photo with a verifiable authorship proof.", tags: ["Provenance", "eth_getProof"] },
       { name: "LicenseLens", desc: "Programmable license marketplace for editorial, commercial, and exclusive rights with automatic expiry.", tags: ["Licensing", "EVM"] },
       { name: "DirectStock", desc: "Photographer-owned stock library selling licenses directly with instant finality and no platform cut.", tags: ["Finality", "Direct-pay"] },
-      { name: "RealFrame", desc: "NEURAX real-vs-AI attestation that certifies an image is a genuine camera capture for editorial buyers.", tags: ["NEURAX", "Authenticity"] },
+      { name: "RealFrame", desc: "PYRAX Compute real-vs-AI attestation that certifies an image is a genuine camera capture for editorial buyers.", tags: ["Compute", "Authenticity"] },
       { name: "PrintEditions", desc: "Limited-edition print NFTs with enforced resale royalties for the photographer.", tags: ["EVM", "Royalties"] },
-      { name: "UseWatch", desc: "Unlicensed-use detector that pairs a NEURAX image match with an on-chain ownership proof to support takedowns.", tags: ["NEURAX", "Provenance"] },
+      { name: "UseWatch", desc: "Unlicensed-use detector that pairs a PYRAX Compute image match with an on-chain ownership proof to support takedowns.", tags: ["Compute", "Provenance"] },
       { name: "AssignEscrow", desc: "Escrow-backed commissioned shoots that release payment on client acceptance of delivered images.", tags: ["Escrow", "EVM"] },
       { name: "MetaKeep", desc: "Permanent on-chain metadata vault so caption, credit, and rights information can never be stripped.", tags: ["Provenance", "WASM"] },
     ],
@@ -308,7 +308,7 @@ export const content: CategoryContent = {
       { name: "AdEscrow", desc: "Budget escrow that pays publishers only on proof of genuine, human-verified delivery.", tags: ["Escrow", "Proof-of-delivery"] },
       { name: "DirectPlacement", desc: "Advertiser-to-publisher marketplace that settles instantly and cuts out the ad-tech middle layer.", tags: ["Finality", "Direct-pay"] },
       { name: "PrivateReach", desc: "Shielded audience matching that targets consented attributes without building a user profile.", tags: ["Shielded", "ZK"] },
-      { name: "ClickTruth", desc: "Fraud-proof click accounting with NEURAX bot detection and verifiable, disputable evidence.", tags: ["NEURAX", "Verifiable"] },
+      { name: "ClickTruth", desc: "Fraud-proof click accounting with PYRAX Compute bot detection and verifiable, disputable evidence.", tags: ["Compute", "Verifiable"] },
       { name: "MicroSpot", desc: "Per-impression micropayment rail that settles billions of tiny publisher payouts via GhostDAG.", tags: ["Micro-tips", "GhostDAG"] },
       { name: "BrandSafe", desc: "On-chain brand-safety and placement contract that enforces context rules before an ad renders.", tags: ["EVM", "Gov"] },
       { name: "OptInVault", desc: "User-controlled consent vault that grants and revokes ad permissions with shielded, revocable keys.", tags: ["Shielded", "Consent"] },
@@ -351,14 +351,14 @@ export const content: CategoryContent = {
         how: "Content licensing, exclusivity windows, and whitelisting terms are encoded on-chain, so the brand's usage rights and the creator's boundaries are enforceable and auditable.",
       },
       {
-        feature: "NEURAX authenticity + fraud scoring",
+        feature: "PYRAX Compute authenticity + fraud scoring",
         how: "Verifiable AI scores an influencer's audience for bot inflation and flags manipulated metrics before a brand commits budget.",
       },
     ],
     dapps: [
       { name: "DealEscrow", desc: "Campaign escrow that releases payment automatically on proof the agreed content went live.", tags: ["Escrow", "Proof-of-delivery"] },
       { name: "InstantPaid", desc: "Same-second creator payout on verified delivery, retiring net-90 terms.", tags: ["Finality", "Direct-pay"] },
-      { name: "RealReach", desc: "NEURAX audience-authenticity scoring that flags bought followers before a deal is signed.", tags: ["NEURAX", "Fraud"] },
+      { name: "RealReach", desc: "PYRAX Compute audience-authenticity scoring that flags bought followers before a deal is signed.", tags: ["Compute", "Fraud"] },
       { name: "RightsClip", desc: "Programmable usage-rights and whitelisting contracts encoded on-chain for every collaboration.", tags: ["Licensing", "EVM"] },
       { name: "ProofROI", desc: "Verifiable, surveillance-free engagement attribution so brands can trust campaign numbers.", tags: ["Verifiable", "Privacy"] },
       { name: "MatchMarket", desc: "Direct brand-creator marketplace with on-chain reputation and no agency take rate.", tags: ["Direct-pay", "Reputation"] },
@@ -403,7 +403,7 @@ export const content: CategoryContent = {
         how: "A physical item is bound to its on-chain twin via a tamper-evident chip or seal, so ownership transfers, insurance, and authenticity stay synchronized across the physical and digital sides.",
       },
       {
-        feature: "NEURAX authenticity attestation",
+        feature: "PYRAX Compute authenticity attestation",
         how: "Verifiable AI grades and authenticates item images against known genuine references, attaching a signed attestation that travels with the collectible.",
       },
     ],
@@ -411,7 +411,7 @@ export const content: CategoryContent = {
       { name: "ChainOfCustody", desc: "Provenance registry giving every collectible a verifiable issuance-to-owner history via eth_getProof.", tags: ["Provenance", "eth_getProof"] },
       { name: "IssuerRoyalty", desc: "Collectible contracts that pay the original issuer and creator on every secondary sale.", tags: ["EVM", "Royalties"] },
       { name: "PhygitalTwin", desc: "Physical-to-digital binding that keeps a chipped item and its on-chain twin in lockstep.", tags: ["Phygital", "WASM"] },
-      { name: "GradeProof", desc: "NEURAX-assisted grading and authentication with a signed, portable attestation.", tags: ["NEURAX", "Authenticity"] },
+      { name: "GradeProof", desc: "PYRAX Compute-assisted grading and authentication with a signed, portable attestation.", tags: ["Compute", "Authenticity"] },
       { name: "DropVault", desc: "Limited-edition drop platform with fair, verifiable allocation and instant settlement.", tags: ["Finality", "Drops"] },
       { name: "FractionCard", desc: "Fractional ownership of high-value collectibles with on-chain shares and royalty pass-through.", tags: ["EVM", "Fractional"] },
       { name: "SwapDesk", desc: "Atomic collectible-for-collectible swaps that settle both legs in one irreversible transaction.", tags: ["Escrow", "Finality"] },
@@ -467,7 +467,7 @@ export const content: CategoryContent = {
       { name: "DealGuarantee", desc: "Escrow for advances and minimum guarantees that release on verifiable milestones.", tags: ["Escrow", "EVM"] },
       { name: "BrandVault", desc: "Trademark and character-license marketplace with programmable usage rules for merchandise.", tags: ["Licensing", "Cairo"] },
       { name: "PatentPool", desc: "Standards-essential patent pool that distributes pooled royalties transparently to members.", tags: ["EVM", "Royalties"] },
-      { name: "InfringeProof", desc: "NEURAX infringement detector that pairs a match with an on-chain ownership proof for enforcement.", tags: ["NEURAX", "Provenance"] },
+      { name: "InfringeProof", desc: "PYRAX Compute infringement detector that pairs a match with an on-chain ownership proof for enforcement.", tags: ["Compute", "Provenance"] },
     ],
   },
 
@@ -507,7 +507,7 @@ export const content: CategoryContent = {
         how: "Episodes are distributed through anonymous file carriage and cannot be delisted by a single platform, so a show survives deplatforming and exclusivity lock-in.",
       },
       {
-        feature: "NEURAX creator tools + authenticity",
+        feature: "PYRAX Compute creator tools + authenticity",
         how: "Verifiable AI powers transcription, clip generation, and voice-authenticity attestation that proves an episode is the host's real voice, not a synthetic clone.",
       },
     ],
@@ -517,9 +517,10 @@ export const content: CategoryContent = {
       { name: "TrueDownloads", desc: "Verifiable, surveillance-free play counts so advertisers and hosts can trust ad reach.", tags: ["Verifiable", "Privacy"] },
       { name: "OpenFeed", desc: "Censorship-resistant episode carriage that survives deplatforming and exclusivity lock-in.", tags: ["Carriage", "Publishing"] },
       { name: "DynAd", desc: "Programmable dynamic ad-insertion marketplace paying hosts per verified impression.", tags: ["EVM", "Verifiable"] },
-      { name: "VoiceProof", desc: "NEURAX voice-authenticity attestation that certifies an episode is the host's real voice, not a clone.", tags: ["NEURAX", "Authenticity"] },
-      { name: "ClipCoin", desc: "AI clip generator that mints shareable, monetizable episode highlights with royalty pass-through.", tags: ["NEURAX", "Royalties"] },
+      { name: "VoiceProof", desc: "PYRAX Compute voice-authenticity attestation that certifies an episode is the host's real voice, not a clone.", tags: ["Compute", "Authenticity"] },
+      { name: "ClipCoin", desc: "AI clip generator that mints shareable, monetizable episode highlights with royalty pass-through.", tags: ["Compute", "Royalties"] },
       { name: "PatronCast", desc: "Shielded patronage tiers that let listeners fund sensitive shows privately.", tags: ["Shielded", "EVM"] },
     ],
   },
 };
+

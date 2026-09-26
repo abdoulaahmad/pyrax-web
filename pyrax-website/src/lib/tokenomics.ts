@@ -22,8 +22,7 @@ export const TOKEN = {
 export const ALLOCATIONS: { label: string; amount: number; pct: number; color: string; note: string }[] = [
   { label: "Public distribution", amount: 25_000_000_000, pct: 50, color: "#f68a24", note: "Genesis event — sold + 25% utility bonus" },
   { label: "Mining emissions", amount: 12_500_000_000, pct: 25, color: "#5cbace", note: "Minted to coinbase over ~26 yr; the only inflation" },
-  { label: "Ecosystem & liquidity", amount: 5_000_000_000, pct: 10, color: "#34d399", note: "40% at TGE + 60% linear over 24 months" },
-  { label: "AI-Compute pool", amount: 4_000_000_000, pct: 8, color: "#7c5cff", note: "Streamed over 48 months; funds NEURAX payouts" },
+  { label: "Ecosystem & developer grants", amount: 9_000_000_000, pct: 18, color: "#34d399", note: "Funds ecosystem development, developer grants, bug bounties & liquidity" },
   { label: "Team & advisors", amount: 2_500_000_000, pct: 5, color: "#f5a623", note: "12-month cliff, then 36-month linear" },
   { label: "DAO treasury & reserve", amount: 1_000_000_000, pct: 2, color: "#fed23c", note: "10% liquid at TGE; accrues fee share ongoing" },
 ];

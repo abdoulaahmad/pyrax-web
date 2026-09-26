@@ -179,7 +179,7 @@ export const CATEGORIES: IndustryCategory[] = [
   {
     slug: "ai-data-compute", name: "AI, Data & Compute", tagline: "Verifiable compute, owned data",
     icon: "chip", color: "#fed23c",
-    blurb: "NEURAX turns idle GPUs into a verifiable compute marketplace, data becomes a private asset, and AI results come with cryptographic proof.",
+    blurb: "PYRAX Compute turns global GPUs into a verifiable compute marketplace, data becomes a private asset, and AI results come with cryptographic proof.",
     businesses: [
       { slug: "ai-inference", name: "AI Inference", hook: "Pay-per-CU inference with verified, private results." },
       { slug: "decentralized-compute", name: "Decentralized Compute", hook: "Rent idle GPUs; proofs replace blind trust." },

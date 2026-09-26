@@ -32,3 +32,4 @@ export function contentFor(category: string, business: string): IndustryContent 
   return BY_CATEGORY[category]?.[business] ?? null;
 }
 export type { IndustryContent };
+

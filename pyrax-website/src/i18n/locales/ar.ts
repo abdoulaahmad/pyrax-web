@@ -70,7 +70,7 @@ export const ar: LocaleDict = {
     community: "المجتمع",
     resources: "الموارد",
     rights: "جميع الحقوق محفوظة.",
-    openCore: "بروتوكول مفتوح بموجب Apache-2.0. التطبيقات والمحفظة وNEURAX والخدمات مملوكة حصريًا. PYRAX™ علامة تجارية.",
+    openCore: "بروتوكول مفتوح بموجب Apache-2.0. التطبيقات والمحفظة وPYRAX Compute والخدمات مملوكة حصريًا. PYRAX™ علامة تجارية.",
     selectLanguage: "اللغة",
     selectNetwork: "الشبكة",
   },
@@ -86,7 +86,7 @@ export const ar: LocaleDict = {
     subConsensus: "الإجماع",
     subPrivacy: "الخصوصية",
     subVms: "الأجهزة الافتراضية",
-    subNeurax: "NEURAX",
+    subCompute: "PYRAX Compute",
     subNetwork: "الشبكة",
     subSecurity: "الأمان",
 
@@ -115,7 +115,7 @@ export const ar: LocaleDict = {
 
     // Page meta
     metaTitle: "التقنية — شبكة PYRAX™",
-    metaDescription: "كيف تعمل PYRAX: بنية DAG قائمة على GhostDAG مختومة بثلاثة تدفّقات عبر خمس ممرّات، ونهائية إثبات حصة عبر BLS، وخصوصية محميّة افتراضيًا، وطبقة تنفيذ متعدّدة الأجهزة الافتراضية، وسوق حوسبة NEURAX، وشبكة دون إقلاع مقاومة لمزوّدي خدمة الإنترنت، ومسار إلى الشبكة الرئيسية مشروط بالتدقيق.",
+    metaDescription: "كيف تعمل PYRAX: بنية DAG قائمة على GhostDAG مختومة بثلاثة تدفّقات عبر خمس ممرّات، ونهائية إثبات حصة عبر BLS، وخصوصية محميّة افتراضيًا، وطبقة تنفيذ متعدّدة الأجهزة الافتراضية، وسوق حوسبة PYRAX Compute، وشبكة دون إقلاع مقاومة لمزوّدي خدمة الإنترنت، ومسار إلى الشبكة الرئيسية مشروط بالتدقيق.",
 
     // Hero
     heroEyebrow: "التقنية",
@@ -180,21 +180,21 @@ export const ar: LocaleDict = {
     txTypesTitle: "ستة أنواع معاملات، ودفتر واحد",
     txTypesBody: "الضمان (قفل / استرداد / إطلاق / صرف / تقسيم)، والرهن (ربط / فكّ / سحب / حرق)، والحوكمة (اقتراح / تصويت) أنواع معاملات من الدرجة الأولى — لا عقود مُلحَقة.",
 
-    // NEURAX
-    neuraxEyebrow: "04 · NEURAX",
-    neuraxTitle: "ذكاء اصطناعي وحوسبة GPU قابلان للتحقق",
-    neuraxLede1: "بطاقات GPU نفسها التي تعدّن Stream B تشغّل مهام ذكاء اصطناعي وحوسبة مدفوعة، مموَّلة بضمان على السلسلة ومسعَّرة بسعر ثابت قدره ",
-    neuraxLedePrice: "8 PYRX لكل وحدة حوسبة",
-    neuraxLede2: ". وبدلًا من الوثوق بكلام المزوّد، تصعد النتائج سلّم تحقّق من أربع درجات.",
-    neuraxLadder1: "إعادة تنفيذ مكرّرة عبر مزوّدين مستقلّين",
-    neuraxLadder2: "إثباتات احتيال تحدّد الخطوة المتباينة الواحدة",
-    neuraxLadder3: "نزاع تفاعلي — لعبة تنصيف وصولًا إلى تلك الخطوة",
-    neuraxLadder4: "شهادة TEE لتنفيذ مختوم بالعتاد",
-    neuraxStat1Label: "لكل وحدة حوسبة (ساعة GPU مرجعية واحدة)",
-    neuraxStat2Label: "مجمّع حوسبة الذكاء الاصطناعي · ميزانية ~70M/شهر",
-    neuraxStat3Label: "ComputeReceipt واحد على السلسلة لكل مهمة مُتحقَّق منها",
-    neuraxStat4Label: "أساس محلّي أولًا؛ يجمّع ShardedExecutor بطاقات GPU",
-    neuraxCta: "استكشف حالات استخدام الذكاء الاصطناعي والحوسبة →",
+    // PYRAX Compute
+    computeEyebrow: "04 · PYRAX Compute",
+    computeTitle: "ذكاء اصطناعي وحوسبة GPU قابلان للتحقق",
+    computeLede1: "بطاقات GPU نفسها التي تعدّن Stream B تشغّل مهام ذكاء اصطناعي وحوسبة مدفوعة، مموَّلة بضمان على السلسلة ومسعَّرة بسعر ثابت قدره ",
+    computeLedePrice: "8 PYRX لكل وحدة حوسبة",
+    computeLede2: ". وبدلًا من الوثوق بكلام المزوّد، تصعد النتائج سلّم تحقّق من أربع درجات.",
+    computeLadder1: "إعادة تنفيذ مكرّرة عبر مزوّدين مستقلّين",
+    computeLadder2: "إثباتات احتيال تحدّد الخطوة المتباينة الواحدة",
+    computeLadder3: "نزاع تفاعلي — لعبة تنصيف وصولًا إلى تلك الخطوة",
+    computeLadder4: "شهادة TEE لتنفيذ مختوم بالعتاد",
+    computeStat1Label: "لكل وحدة حوسبة (ساعة GPU مرجعية واحدة)",
+    computeStat2Label: "مجمّع حوسبة الذكاء الاصطناعي · ميزانية ~70M/شهر",
+    computeStat3Label: "ComputeReceipt واحد على السلسلة لكل مهمة مُتحقَّق منها",
+    computeStat4Label: "أساس محلّي أولًا؛ يجمّع ShardedExecutor بطاقات GPU",
+    computeCta: "استكشف حالات استخدام الذكاء الاصطناعي والحوسبة →",
 
     // Network
     networkEyebrow: "05 · الشبكة",
@@ -266,11 +266,11 @@ export const ar: LocaleDict = {
     quorum: "النِّصاب",
     pass: "الإقرار",
     frozenForever: "مجمَّدة إلى الأبد:",
-    computeTitle: "حوسبة NEURAX",
+    computeTitle: "حوسبة PYRAX Compute",
     price: "السعر",
     poolBudget: "ميزانية المجمّع",
     jobCap: "سقف المهمة",
-    neuraxLink: "كيف تعمل NEURAX →",
+    computeLink: "كيف تعمل PYRAX Compute →",
     ctaWhitepaper: "اقرأ الورقة البيضاء كاملة →",
     ctaExplorer: "افتح المستكشف",
   },
@@ -301,7 +301,7 @@ export const ar: LocaleDict = {
 
     roadmap1P: "الآن",
     roadmap1Title: "PYRAX Seed نشطة",
-    roadmap1Body: "محاكاة أمينة للبروتوكول الكامل — GhostDAG، والمجمّع المحميّ، والعقود متعدّدة الأجهزة الافتراضية، وNEURAX — تعمل اليوم بوصفها بيئة تطوير دائمة.",
+    roadmap1Body: "محاكاة أمينة للبروتوكول الكامل — GhostDAG، والمجمّع المحميّ، والعقود متعدّدة الأجهزة الافتراضية، وPYRAX Compute — تعمل اليوم بوصفها بيئة تطوير دائمة.",
     roadmap2P: "التالي",
     roadmap2Title: "PYRAX Forge · ألفا مغلقة",
     roadmap2Body: "يُفتَح مسار إجماع الإنتاج (TriStream حقيقي بخمس ممرّات + نهائية BLS) لمختبِرين مدعوّين بمدقّقين مزروعين.",
@@ -341,7 +341,7 @@ export const ar: LocaleDict = {
     path4Title: "ابنِ dApp محميًّا",
     path4Desc: "استخدم التحويلات المحميّة ومفاتيح العرض بحيث يكون مستخدموك خاصّين افتراضيًا ويظلّ لدى مدقّقيك إثبات للقراءة فقط.",
     path5Title: "اشترِ حوسبة قابلة للتحقق",
-    path5Desc: "ضَع مهمة NEURAX في الضمان، واحصل على ComputeReceipt، وادفع لكل وحدة حوسبة — استدلال وتدريب ذكاء اصطناعي بإثبات، لا بثقة.",
+    path5Desc: "ضَع مهمة PYRAX Compute في الضمان، واحصل على ComputeReceipt، وادفع لكل وحدة حوسبة — استدلال وتدريب ذكاء اصطناعي بإثبات، لا بثقة.",
     path6Title: "شغّل عقدة",
     path6Desc: "انضمّ إلى الشبكة بعقدة Inferno، وعدّن تدفّقًا، أو ارهن حصة للتدقيق — دون الحاجة إلى خادم إقلاع.",
     pathsTitle: "اختر مسارك",
@@ -390,15 +390,15 @@ export const ar: LocaleDict = {
     readWhitepaper: "اقرأ الورقة البيضاء →",
     learnMore: "اعرف المزيد →",
 
-    // NEURAX section
-    neuraxHeading: "بطاقات GPU الخاملة تتحوّل إلى سوق حوسبة قابل للتحقق",
-    neuraxParagraph: "العتاد نفسه الذي يعدّن Stream B يشغّل مهام ذكاء اصطناعي وحوسبة مدفوعة، تُسوَّى على السلسلة وتُسعَّر بسعر ثابت قدره 8 PYRX لكل وحدة حوسبة. سلّم تحقّق من أربع درجات — التكرار، وإثباتات الاحتيال، والنزاع التفاعلي، وشهادة TEE — يستبدل الثقة العمياء بإثبات تشفيري.",
-    neuraxHowItWorks: "كيف تعمل NEURAX",
-    neuraxIndustries: "قطاعات الذكاء الاصطناعي والحوسبة →",
-    neuraxTile1L: "لكل وحدة حوسبة (ساعة RTX-4090 واحدة)",
-    neuraxTile2L: "مجمّع حوسبة الذكاء الاصطناعي بـ PYRX",
-    neuraxTile3L: "سلّم التحقّق",
-    neuraxTile4L: "GPU أساسي محلّي أولًا",
+    // PYRAX Compute section
+    computeHeading: "بطاقات GPU الخاملة تتحوّل إلى سوق حوسبة قابل للتحقق",
+    computeParagraph: "العتاد نفسه الذي يعدّن Stream B يشغّل مهام ذكاء اصطناعي وحوسبة مدفوعة، تُسوَّى على السلسلة وتُسعَّر بسعر ثابت قدره 8 PYRX لكل وحدة حوسبة. سلّم تحقّق من أربع درجات — التكرار، وإثباتات الاحتيال، والنزاع التفاعلي، وشهادة TEE — يستبدل الثقة العمياء بإثبات تشفيري.",
+    computeHowItWorks: "كيف تعمل PYRAX Compute",
+    computeIndustries: "قطاعات الذكاء الاصطناعي والحوسبة →",
+    computeTile1L: "لكل وحدة حوسبة (ساعة RTX-4090 واحدة)",
+    computeTile2L: "مجمّع حوسبة الذكاء الاصطناعي بـ PYRX",
+    computeTile3L: "سلّم التحقّق",
+    computeTile4L: "GPU أساسي محلّي أولًا",
 
     // industries teaser
     businessTypes: "أنواع الأعمال",
@@ -445,8 +445,8 @@ export const ar: LocaleDict = {
     techPrivacyDesc: "تحويلات محميّة بإثباتات ZK دون إعداد موثوق.",
     techVmsName: "متعدّدة الأجهزة الافتراضية (EVM/WASM/Cairo)",
     techVmsDesc: "ثلاثة أجهزة افتراضية، واستدعاءات متبادلة، وسلسلة واحدة.",
-    techNeuraxName: "سوق حوسبة NEURAX",
-    techNeuraxDesc: "ذكاء اصطناعي وحوسبة GPU قابلان للتحقق ومُسوَّيان على السلسلة.",
+    techComputeName: "سوق حوسبة PYRAX Compute",
+    techComputeDesc: "ذكاء اصطناعي وحوسبة GPU قابلان للتحقق ومُسوَّيان على السلسلة.",
     techSecurityName: "الأمان والتدقيقات",
     techSecurityDesc: "ثوابت شكلية، ونموذج تهديد، وبوابة تدقيق خارجي.",
     techWhitepaperName: "الورقة البيضاء v4",
@@ -526,7 +526,7 @@ export const ar: LocaleDict = {
     fact4Label: "بروتوكول نواة مفتوحة",
 
     missionTitle: "مهمّتنا",
-    missionPara1: "فرضت البلوكشين العامة خيارًا زائفًا: شفافية تسرّب حياتك المالية كاملة، أو أدوات خصوصية مُلحَقة كفكرة لاحقة. ترفض PYRAX هذه المفاضلة. بنية GhostDAG تمنح إنتاجية العمل المتوازي؛ والتحويلات المحميّة افتراضيًا تمنح الخصوصية دون طلب؛ وطبقة تنفيذ متعدّدة الأجهزة الافتراضية تلتقي بالمطوّرين حيث هم؛ وNEURAX تحوّل بطاقات GPU الخاملة إلى سوق حوسبة يمكنك التحقّق منه فعلًا.",
+    missionPara1: "فرضت البلوكشين العامة خيارًا زائفًا: شفافية تسرّب حياتك المالية كاملة، أو أدوات خصوصية مُلحَقة كفكرة لاحقة. ترفض PYRAX هذه المفاضلة. بنية GhostDAG تمنح إنتاجية العمل المتوازي؛ والتحويلات المحميّة افتراضيًا تمنح الخصوصية دون طلب؛ وطبقة تنفيذ متعدّدة الأجهزة الافتراضية تلتقي بالمطوّرين حيث هم؛ وPYRAX Compute تحوّل بطاقات GPU الخاملة إلى سوق حوسبة يمكنك التحقّق منه فعلًا.",
     missionPara2: "نحن متعمّدون في كوننا غير برّاقين بشأن المسار: محاكاة أمينة تعمل اليوم، وألفا مغلقة، وشبكة اختبارية عامة، وتدقيق خارجي واحد قبل أن يحمل أي شيء قيمة حقيقية.",
 
     believeTitle: "بمَ نؤمن",
@@ -585,7 +585,7 @@ export const ar: LocaleDict = {
     toc8: "الشبكات: دون إقلاع",
     toc9: "خصوصية البيانات الوصفية والخدمات المجهولة",
     toc10: "الحالة والتخزين والإثباتات",
-    toc11: "NEURAX — حوسبة قابلة للتحقق",
+    toc11: "PYRAX Compute — حوسبة قابلة للتحقق",
     toc12: "Crucible — تعدين دون رسوم",
     toc13: "NOVA — عمليات ذاتية التشغيل",
     toc14: "اقتصاد الرمز",
@@ -626,7 +626,7 @@ export const ar: LocaleDict = {
     kickerSolution: "الحل",
     kickerTechnology: "التقنية",
     kickerMarket: "لماذا الآن",
-    kickerNeurax: "نقطة الاختراق",
+    kickerCompute: "نقطة الاختراق",
     kickerTraction: "الزخم",
     kickerTokenomics: "اقتصاد الرمز",
     kickerRoadmap: "خارطة الطريق",
@@ -661,7 +661,7 @@ export const ar: LocaleDict = {
     techCard2Desc: "أوراق بأسلوب Orchard وإثباتات zk-SNARK عَودية دون إعداد موثوق؛ مفاتيح عرض للرقابة.",
     techCard3Title: "L2 متعدّدة الأجهزة الافتراضية + L3 من نوع ZK-rollup",
     techCard3Desc: "EVM وWASM وCairo مع استدعاءات متبادلة؛ آلاف الإثباتات تنطوي في واحد.",
-    techCard4Title: "سوق حوسبة NEURAX",
+    techCard4Title: "سوق حوسبة PYRAX Compute",
     techCard4Desc: "بطاقات GPU الخاملة تشغّل مهام ذكاء اصطناعي قابلة للتحقق، تُسوَّى على السلسلة، وتُسعَّر بسعر ثابت قدره 8 PYRX لكل وحدة حوسبة.",
     techFootnotePre: "مقاومة هجوم 51% عبر ",
     techFootnoteEmph: "ثلاثة موارد غير مترابطة",
@@ -681,14 +681,14 @@ export const ar: LocaleDict = {
     marketRef4Label: "أنواع أعمال تربطها PYRAX مباشرةً",
     marketRef4Source: "هذا الموقع",
 
-    // neurax slide
-    neuraxTitle: "NEURAX — حوسبة قابلة للتحقق",
-    neuraxBody: "بطاقات GPU نفسها التي تؤمّن السلسلة تشغّل مهام ذكاء اصطناعي وحوسبة مدفوعة. سلّم تحقّق من أربع درجات يستبدل الثقة العمياء — والطلب ينفجر.",
-    neuraxTile1Label: "لكل وحدة حوسبة (ثابت)",
-    neuraxTile2Label: "مجمّع حوسبة الإقلاع",
-    neuraxTile3Label: "سلّم التحقّق",
-    neuraxTile4Label: "GPU أساسي محلّي أولًا",
-    neuraxFooter: "شبكة حوسبة ذكاء اصطناعي اقتصادية-تشفيرية تدفع للمزوّدين بالرمز نفسه الذي يؤمّن الإجماع — دولاب طيّار يعزّز نفسه ذاتيًا.",
+    // PYRAX Compute slide
+    computeTitle: "PYRAX Compute — حوسبة قابلة للتحقق",
+    computeBody: "بطاقات GPU نفسها التي تؤمّن السلسلة تشغّل مهام ذكاء اصطناعي وحوسبة مدفوعة. سلّم تحقّق من أربع درجات يستبدل الثقة العمياء — والطلب ينفجر.",
+    computeTile1Label: "لكل وحدة حوسبة (ثابت)",
+    computeTile2Label: "مجمّع حوسبة الإقلاع",
+    computeTile3Label: "سلّم التحقّق",
+    computeTile4Label: "GPU أساسي محلّي أولًا",
+    computeFooter: "شبكة حوسبة ذكاء اصطناعي اقتصادية-تشفيرية تدفع للمزوّدين بالرمز نفسه الذي يؤمّن الإجماع — دولاب طيّار يعزّز نفسه ذاتيًا.",
 
     // traction slide
     tractionTitle: "مبنية، لا مخطَّطة",
@@ -722,7 +722,7 @@ export const ar: LocaleDict = {
     askUseOfFunds: "أوجه استخدام الأموال",
     askFund1: "التدقيق الخارجي + مراسم جينيسيس الشبكة الرئيسية",
     askFund2: "النظام البيئي، والسيولة، ومنح ماراثونات البناء",
-    askFund3: "بناء حوسبة NEURAX وحوافز المزوّدين",
+    askFund3: "بناء حوسبة PYRAX Compute وحوافز المزوّدين",
     askFund4: "البروتوكول الأساسي، والتطبيقات، والفريق العالمي",
     askEmailButton: "invest@pyrax.org",
     askLiveButton: "شاهدها مباشرةً",
@@ -742,7 +742,7 @@ export const ar: LocaleDict = {
     alloc2Label: "النظام البيئي والسيولة",
     alloc2Note: "40% عند TGE + 60% خطيًّا على مدى 24 شهرًا",
     alloc3Label: "مجمّع حوسبة الذكاء الاصطناعي",
-    alloc3Note: "يُبثّ على مدى 48 شهرًا؛ يموّل مدفوعات NEURAX",
+    alloc3Note: "يُبثّ على مدى 48 شهرًا؛ يموّل مدفوعات PYRAX Compute",
     alloc4Label: "الفريق والمستشارون",
     alloc4Note: "فترة توقّف 12 شهرًا، ثم 36 شهرًا خطيًّا",
     alloc5Label: "خزينة DAO والاحتياطي",
@@ -786,3 +786,5 @@ export const ar: LocaleDict = {
     computeTransition: "الإقلاع من مجمّع 4B → مموَّل بالإيرادات مع ارتفاع التغطية → غير المنفَق يعود إلى DAO",
   },
 };
+
+

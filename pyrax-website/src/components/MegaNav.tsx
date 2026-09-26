@@ -7,7 +7,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CATEGORIES } from "../lib/industries";
-import { localizePath } from "../i18n/config";
+import { LOCALES, localizePath } from "../i18n/config";
 import { DOMAINS, SOCIAL } from "../lib/endpoints";
 import { NETWORKS } from "../lib/networks";
 import { useT } from "../i18n";
@@ -44,6 +44,7 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobile, setMobile] = useState(false);
   const [netOpen, setNetOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const [net, setNet] = useState<any>(null); // /api/net payload
   const closeTimer = useRef<number | null>(null);
 
@@ -62,6 +63,23 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
   const pickNet = (chainId: number) => { document.cookie = `pyrax_net=${chainId}; path=/; max-age=31536000; samesite=lax`; location.reload(); };
   // Per-network stage label shown next to the name in the selector.
   const STAGE: Record<string, string> = { seed: "Simulated Sandbox", forge: "Closed Alpha Testing", rise: "Public Testnet", one: "Production" };
+
+  const langHref = (code: string) => {
+    return code === "en" ? "?" : `?lang=${code}`;
+  };
+
+  const switchLang = (code: string, e?: React.MouseEvent) => {
+    e?.preventDefault();
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (code === "en") {
+      url.searchParams.delete("lang");
+    } else {
+      url.searchParams.set("lang", code);
+    }
+    document.cookie = `pyrax_lang=${code}; path=/; max-age=31536000; samesite=lax`;
+    window.location.assign(url.toString());
+  };
 
   const topItems: { key: PanelKey; label: string }[] = [
     { key: "products", label: t("nav.products") },
@@ -96,7 +114,7 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
           <div className="ml-auto flex items-center gap-1.5">
             {/* network selector */}
             <div className="relative hidden sm:block">
-              <button onClick={() => setNetOpen((v) => !v)} className="flex items-center gap-2 rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-[color:#34405a] hover:text-ink">
+              <button onClick={() => { setNetOpen((v) => !v); setLangOpen(false); }} className="flex items-center gap-2 rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-[color:#34405a] hover:text-ink">
                 <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full" style={{ background: selected?.simulated ? "#5cbace" : selected?.online ? "#34d399" : "#fb6f73", boxShadow: selected?.online || selected?.simulated ? "0 0 8px currentColor" : "none" }} /></span>
                 {selected?.name || "PYRAX Seed"}
                 <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" {...P}><path d="m6 9 6 6 6-6"/></svg>
@@ -114,6 +132,28 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
                           <span className="block truncate text-[0.68rem] text-faint">{n.online || n.simulated ? `#${Number(n.height || 0).toLocaleString()} · ${n.peers ?? 0} peers${n.simulated ? " · simulated" : ""}` : "offline"}</span>
                         </span>
                       </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* language switcher */}
+            <div className="relative hidden md:block">
+              <button onClick={() => { setLangOpen((v) => !v); setNetOpen(false); }} className="flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1.5 text-xs font-semibold text-muted transition hover:border-[color:#34405a] hover:text-ink" aria-label="Language">
+                <svg viewBox="0 0 24 24" className="h-4 w-4" {...P}><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+                {lang.toUpperCase()}
+                <svg viewBox="0 0 24 24" className="h-3 w-3 opacity-60" {...P}><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <AnimatePresence>
+                {langOpen && (
+                  <motion.div initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 6, scale: 0.98 }} transition={{ duration: 0.16 }}
+                    className="absolute right-0 mt-2 max-h-[70vh] w-56 overflow-y-auto rounded-2xl border border-line bg-[rgba(10,12,19,0.98)] p-1.5 shadow-2xl backdrop-blur-xl">
+                    <div className="px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wider text-faint">{t("footer.selectLanguage")}</div>
+                    {LOCALES.map((lc) => (
+                      <a key={lc.code} href={langHref(lc.code)} onClick={(e) => switchLang(lc.code, e)} className={`flex items-center justify-between rounded-xl px-3 py-2 text-sm transition hover:bg-[rgba(255,255,255,0.04)] ${lc.code === lang ? "font-semibold text-[color:var(--color-brand)]" : "text-ink"}`}>
+                        <span>{lc.native}</span><span className="text-[0.62rem] uppercase text-faint">{lc.code}</span>
+                      </a>
                     ))}
                   </motion.div>
                 )}
@@ -173,6 +213,16 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
                 <a href={L("/pitch")} className="mobile-top">{t("nav.pitch")}</a>
               </div>
               <a href={DOMAINS.explorer} className="mt-5 block rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-4 py-2.5 text-center text-sm font-bold text-[#1a0f06]">{t("nav.launchApp")}</a>
+              <div className="mt-5 border-t border-line-soft pt-4">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-faint">{t("footer.selectLanguage")}</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {LOCALES.map((lc) => (
+                    <a key={lc.code} href={langHref(lc.code)} onClick={(e) => switchLang(lc.code, e)} className={`rounded-full border px-2.5 py-1 text-xs transition ${lc.code === lang ? "border-[color:var(--color-brand)] bg-[rgba(245,134,34,0.12)] font-semibold text-[color:var(--color-brand)]" : "border-line text-muted hover:border-line-soft hover:text-ink"}`}>
+                      {lc.native}
+                    </a>
+                  ))}
+                </div>
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -244,7 +294,7 @@ function TechnologyPanel({ t, L }: any) {
     { icon: "layers", name: t("navPanels.techConsensusName", "GhostDAG + TriStream"), desc: t("navPanels.techConsensusDesc", "A DAG ordered by GhostDAG; three streams, five seal lanes."), href: L("/technology#consensus") },
     { icon: "lock", name: t("navPanels.techPrivacyName", "Private by default"), desc: t("navPanels.techPrivacyDesc", "Shielded transfers with no-trusted-setup ZK proofs."), href: L("/technology#privacy") },
     { icon: "chip", name: t("navPanels.techVmsName", "Multi-VM (EVM/WASM/Cairo)"), desc: t("navPanels.techVmsDesc", "Three virtual machines, cross-VM calls, one chain."), href: L("/technology#vms") },
-    { icon: "chip", name: t("navPanels.techNeuraxName", "NEURAX compute market"), desc: t("navPanels.techNeuraxDesc", "Verifiable, on-chain-settled AI & GPU compute."), href: L("/technology#neurax") },
+    { icon: "node", name: t("navPanels.techNetworkName", "Sphinx onion mixnet"), desc: t("navPanels.techNetworkDesc", "Bootstrapless P2P with uniform packet mixnet."), href: L("/technology#network") },
     { icon: "shield", name: t("navPanels.techSecurityName", "Security & audits"), desc: t("navPanels.techSecurityDesc", "Formal invariants, threat model, external audit gate."), href: L("/technology#security") },
     { icon: "book", name: t("navPanels.techWhitepaperName", "Whitepaper v4"), desc: t("navPanels.techWhitepaperDesc", "The full technical + plain-English papers."), href: L("/whitepaper") },
   ];

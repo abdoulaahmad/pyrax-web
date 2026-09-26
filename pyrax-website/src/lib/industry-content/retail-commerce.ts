@@ -35,7 +35,7 @@ export const content: CategoryContent = {
         how: "Parallel throughput absorbs flash-sale and holiday peaks - millions of orders per hour - without congestion pricing or checkout timeouts.",
       },
       {
-        feature: "NEURAX verifiable AI recommendations",
+        feature: "PYRAX Compute verifiable AI recommendations",
         how: "Product recommendations run on cryptographically verifiable compute against data the shopper controls, delivering personalization without harvesting a behavioral profile.",
       },
       {
@@ -46,7 +46,7 @@ export const content: CategoryContent = {
     dapps: [
       { name: "ShieldCheckout", desc: "Drop-in shielded checkout widget that settles orders in one block with no card data, no processor, and no chargeback exposure.", tags: ["Shielded", "Finality"] },
       { name: "CertifyCart", desc: "Attaches a multi-VM NFT authenticity certificate to every SKU so buyers verify origin before purchase and it transfers on resale.", tags: ["NFT", "EVM"] },
-      { name: "PrivateRec", desc: "NEURAX recommendation engine that personalizes on shopper-owned data with a verifiable-compute proof and zero tracking.", tags: ["NEURAX", "Shielded"] },
+      { name: "PrivateRec", desc: "PYRAX Compute recommendation engine that personalizes on shopper-owned data with a verifiable-compute proof and zero tracking.", tags: ["Compute", "Shielded"] },
       { name: "FlashScale", desc: "Flash-sale order pipeline built on GhostDAG parallelism to clear millions of micro-orders without congestion.", tags: ["GhostDAG", "EVM"] },
       { name: "AdMix", desc: "Mixnet-routed advertising exchange that targets by cohort without surveilling individuals.", tags: ["Mixnet", "Privacy"] },
       { name: "ReturnEscrow", desc: "On-chain escrow that holds payment until a delivery or return window closes, releasing funds atomically.", tags: ["Escrow", "EVM"] },
@@ -143,7 +143,7 @@ export const content: CategoryContent = {
         how: "A member's point balance and redemption history stay private on-chain, with a viewing key for the program operator's own analytics and audit.",
       },
       {
-        feature: "NEURAX verifiable personalization",
+        feature: "PYRAX Compute verifiable personalization",
         how: "Reward offers are targeted by verifiable AI on member-controlled data, so a customer gets relevant perks without the brand assembling a surveillance profile.",
       },
     ],
@@ -152,7 +152,7 @@ export const content: CategoryContent = {
       { name: "CoalitionSwap", desc: "Cross-brand point exchange with programmable, on-chain conversion rates and instant settlement.", tags: ["Loyalty", "Finality"] },
       { name: "TierEngine", desc: "Smart-contract tiering and multiplier logic that is transparent and can't be silently changed.", tags: ["EVM", "Gov"] },
       { name: "NoBreakage", desc: "Points issued as durable on-chain tokens that never expire without an explicit, auditable rule.", tags: ["Loyalty", "WASM"] },
-      { name: "PerkMatch", desc: "NEURAX offer engine that personalizes rewards on member-owned data with a verifiable-compute proof.", tags: ["NEURAX", "Shielded"] },
+      { name: "PerkMatch", desc: "PYRAX Compute offer engine that personalizes rewards on member-owned data with a verifiable-compute proof.", tags: ["Compute", "Shielded"] },
       { name: "GiftBridge", desc: "Converts loyalty points to and from gift cards and stablecoin value in one atomic transaction.", tags: ["Escrow", "EVM"] },
       { name: "RewardStream", desc: "Streams micro-rewards per interaction (visit, referral, review) via GhostDAG micro-payments.", tags: ["GhostDAG", "Loyalty"] },
       { name: "ClaimProof", desc: "Verified-action rewards where only wallets that provably completed an action can claim, blocking fraud.", tags: ["EVM", "Reputation"] },
@@ -195,7 +195,7 @@ export const content: CategoryContent = {
         how: "Service, repair, and authentication events append to the item's on-chain history at scale, building a complete, verifiable lifetime record for each piece.",
       },
       {
-        feature: "NEURAX verifiable authentication AI",
+        feature: "PYRAX Compute verifiable authentication AI",
         how: "AI authentication of images and materials produces a verifiable proof attached to the certificate, so a resale platform can trust the grade without re-inspecting.",
       },
     ],
@@ -204,7 +204,7 @@ export const content: CategoryContent = {
       { name: "ResaleRoyalty", desc: "Encodes a programmable brand royalty that auto-pays on every certified secondary-market resale.", tags: ["EVM", "NFT"] },
       { name: "DiscreetOwn", desc: "Shielded ownership records that keep the collector private while preserving verifiable provenance.", tags: ["Shielded", "NFT"] },
       { name: "LifeLog", desc: "Append-only service, repair, and authentication history for each piece across its lifetime.", tags: ["Provenance", "WASM"] },
-      { name: "AuthAI", desc: "NEURAX visual authenticator that grades an item and attaches a verifiable proof to its certificate.", tags: ["NEURAX", "ZK"] },
+      { name: "AuthAI", desc: "PYRAX Compute visual authenticator that grades an item and attaches a verifiable proof to its certificate.", tags: ["Compute", "ZK"] },
       { name: "VaultBox", desc: "Custody and insurance registry linking a physical vault or authenticator to the on-chain certificate.", tags: ["Escrow", "EVM"] },
       { name: "GreyGuard", desc: "Grey-market detector that flags certificates surfacing in unauthorized channels.", tags: ["Provenance", "Oracle"] },
       { name: "CollectorClub", desc: "Certificate-gated membership and drops for verified owners of a maison's authenticated pieces.", tags: ["NFT", "Loyalty"] },
@@ -247,7 +247,7 @@ export const content: CategoryContent = {
         how: "Direct-to-consumer sales settle privately with instant finality and no chargebacks, protecting both margin and customer data.",
       },
       {
-        feature: "NEURAX verifiable styling AI",
+        feature: "PYRAX Compute verifiable styling AI",
         how: "Size and style recommendations run on verifiable compute over shopper-owned measurements, cutting returns without building an invasive profile.",
       },
     ],
@@ -255,7 +255,7 @@ export const content: CategoryContent = {
       { name: "ThreadPass", desc: "Mints a digital product passport per garment with materials, factory, and origin for instant authenticity checks.", tags: ["NFT", "Provenance"] },
       { name: "Reworn", desc: "Peer-to-peer resale marketplace where the passport transfers and pays the brand a royalty automatically.", tags: ["NFT", "Escrow"] },
       { name: "FiberTrace", desc: "Farm-to-fiber provenance anchoring sourcing events with independently verifiable eth_getProof.", tags: ["Provenance", "Oracle"] },
-      { name: "FitAI", desc: "NEURAX size-and-fit recommender on shopper-owned measurements to cut returns, with a compute proof.", tags: ["NEURAX", "Shielded"] },
+      { name: "FitAI", desc: "PYRAX Compute size-and-fit recommender on shopper-owned measurements to cut returns, with a compute proof.", tags: ["Compute", "Shielded"] },
       { name: "DropShield", desc: "Shielded limited-drop checkout that clears in one block with anti-bot, verified-buyer gating.", tags: ["Shielded", "Finality"] },
       { name: "GreenClaim", desc: "Verifiable sustainability-claim registry mapping certifications to on-chain sourcing evidence.", tags: ["Provenance", "EVM"] },
       { name: "WearRewards", desc: "Loyalty tied to owned passports, unlocking perks and drops for verified garment owners.", tags: ["Loyalty", "NFT"] },
@@ -351,14 +351,14 @@ export const content: CategoryContent = {
         how: "Component sourcing and distribution are anchored on-chain and provable, exposing grey-market diversion and conflict-mineral gaps.",
       },
       {
-        feature: "NEURAX verifiable diagnostics AI",
+        feature: "PYRAX Compute verifiable diagnostics AI",
         how: "AI grading of a used device's condition produces a verifiable proof attached to its certificate, so refurbished listings carry a trusted, tamper-proof grade.",
       },
     ],
     dapps: [
       { name: "DeviceCert", desc: "Mints an authenticity-and-warranty certificate per device bound to its serial and model.", tags: ["NFT", "Provenance"] },
       { name: "WarrantyChain", desc: "On-chain warranty that transfers with the device and auto-validates claims against its terms.", tags: ["EVM", "NFT"] },
-      { name: "RefurbGrade", desc: "NEURAX diagnostic grader that attaches a verifiable condition proof to a used device's certificate.", tags: ["NEURAX", "ZK"] },
+      { name: "RefurbGrade", desc: "PYRAX Compute diagnostic grader that attaches a verifiable condition proof to a used device's certificate.", tags: ["Compute", "ZK"] },
       { name: "SecureBuy", desc: "Shielded high-value checkout with one-block finality and zero chargeback exposure.", tags: ["Shielded", "Finality"] },
       { name: "PartsTrace", desc: "Component provenance anchoring sourcing via eth_getProof to expose grey-market diversion.", tags: ["Provenance", "Oracle"] },
       { name: "RepairLog", desc: "Append-only repair and service history that follows the device across owners.", tags: ["Provenance", "WASM"] },
@@ -403,7 +403,7 @@ export const content: CategoryContent = {
         how: "Sub-cent fees make low-value and micro-item marketplaces viable, and support per-transaction platform fees measured in fractions of a percent.",
       },
       {
-        feature: "NEURAX verifiable trust scoring",
+        feature: "PYRAX Compute verifiable trust scoring",
         how: "Fraud and quality scoring runs on verifiable compute, so a listing's risk grade or a dispute outcome can be proven fair rather than dictated by a black-box platform.",
       },
     ],
@@ -413,7 +413,7 @@ export const content: CategoryContent = {
       { name: "OpenBazaar", desc: "Peer-to-peer marketplace where the platform is a smart contract with sub-percent fees.", tags: ["EVM", "GhostDAG"] },
       { name: "DisputeDAO", desc: "Decentralized dispute resolution with staked arbiters and transparent, on-chain outcomes.", tags: ["Gov", "Escrow"] },
       { name: "ShieldPay", desc: "Shielded marketplace settlement with instant finality and no chargeback exposure.", tags: ["Shielded", "Finality"] },
-      { name: "FraudScore", desc: "NEURAX listing-and-buyer risk engine emitting a verifiable proof with each score.", tags: ["NEURAX", "Reputation"] },
+      { name: "FraudScore", desc: "PYRAX Compute listing-and-buyer risk engine emitting a verifiable proof with each score.", tags: ["Compute", "Reputation"] },
       { name: "MicroMart", desc: "Micro-item marketplace made viable by GhostDAG sub-cent payment rails.", tags: ["GhostDAG", "EVM"] },
       { name: "VerifyList", desc: "Provenance-linked listings where goods carry an authenticity certificate the buyer can check.", tags: ["NFT", "Provenance"] },
     ],
@@ -455,7 +455,7 @@ export const content: CategoryContent = {
         how: "Tiers, trials, proration, pauses, and upgrades are encoded in transparent contracts, so billing behavior is predictable and auditable to the customer.",
       },
       {
-        feature: "NEURAX verifiable churn/personalization",
+        feature: "PYRAX Compute verifiable churn/personalization",
         how: "Retention offers and plan recommendations run on verifiable compute over customer-owned data, improving fit without surveilling subscribers.",
       },
     ],
@@ -465,7 +465,7 @@ export const content: CategoryContent = {
       { name: "ShieldSub", desc: "Shielded subscription settlement clearing each cycle privately with no chargebacks.", tags: ["Shielded", "Finality"] },
       { name: "PlanForge", desc: "Programmable tiers, trials, and proration encoded in transparent, auditable contracts.", tags: ["WASM", "EVM"] },
       { name: "PauseKit", desc: "Customer-controlled pause, downgrade, and resume logic executed on-chain.", tags: ["EVM", "Gov"] },
-      { name: "ChurnAI", desc: "NEURAX retention engine personalizing win-back offers on subscriber-owned data with a proof.", tags: ["NEURAX", "Shielded"] },
+      { name: "ChurnAI", desc: "PYRAX Compute retention engine personalizing win-back offers on subscriber-owned data with a proof.", tags: ["Compute", "Shielded"] },
       { name: "BoxDrop", desc: "Subscription-box logistics linking each cycle's shipment to on-chain fulfillment and delivery proof.", tags: ["Provenance", "Escrow"] },
       { name: "GiftSub", desc: "Prepaid, transferable gift subscriptions minted on-chain and redeemable by the recipient.", tags: ["NFT", "EVM"] },
     ],
@@ -523,3 +523,4 @@ export const content: CategoryContent = {
     ],
   },
 };
+

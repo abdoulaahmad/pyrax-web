@@ -39,7 +39,7 @@ export const content: CategoryContent = {
         how: "Program overdraft rules, standing orders, round-up savings, and interest accrual in Solidity or Rust so account logic is transparent, testable, and upgradeable.",
       },
       {
-        feature: "NEURAX verifiable AI/compute",
+        feature: "PYRAX Compute verifiable AI/compute",
         how: "Run fraud-scoring and credit-decision models with cryptographically verifiable outputs, so a declined transaction or flagged account can be proven fair and reproducible to a regulator.",
       },
     ],
@@ -47,7 +47,7 @@ export const content: CategoryContent = {
       { name: "ShieldLedger", desc: "Privacy-preserving deposit accounts where balances are ZK-shielded and each account issues a scoped viewing key for the bank’s compliance desk.", tags: ["Shielded", "ZK"] },
       { name: "InstaClear", desc: "Interbank retail settlement network that finalizes consumer transfers in one block with BLS finality, retiring end-of-day netting.", tags: ["Finality", "EVM"] },
       { name: "RoundVault", desc: "Automated round-up savings contract that sweeps transaction remainders into a yield or reserve pool on every purchase.", tags: ["WASM", "EVM"] },
-      { name: "FraudProof", desc: "NEURAX-backed fraud scorer that attaches a verifiable proof to each decline so disputes can be adjudicated on-chain.", tags: ["NEURAX", "ZK"] },
+      { name: "FraudProof", desc: "PYRAX Compute-backed fraud scorer that attaches a verifiable proof to each decline so disputes can be adjudicated on-chain.", tags: ["Compute", "ZK"] },
       { name: "OverdraftDAO", desc: "Programmable overdraft and fee logic governed by transparent, on-chain parameters instead of opaque core-banking rules.", tags: ["EVM", "Gov"] },
       { name: "KYCVault", desc: "Reusable, shielded KYC attestations that customers present to new services via selective-disclosure viewing keys.", tags: ["Shielded", "Cairo"] },
       { name: "PayrollRail", desc: "Bulk salary disbursement that fans out thousands of shielded credits in parallel and settles them with instant finality.", tags: ["Shielded", "Finality"] },
@@ -102,14 +102,14 @@ export const content: CategoryContent = {
       { name: "MixPay", desc: "Metadata-private consumer wallet routing payments through the Sphinx mixnet to defeat corridor traffic analysis.", tags: ["Mixnet", "Shielded"] },
       { name: "SplitFlow", desc: "Programmable payment splitter that fans a single incoming transfer across multiple recipients (payroll, marketplaces, tips).", tags: ["WASM", "EVM"] },
       { name: "StreamPay", desc: "Continuous streaming payments for gig work and subscriptions, metered per block and cancellable anytime.", tags: ["EVM", "Escrow"] },
-      { name: "AMLSight", desc: "NEURAX transaction-risk engine that scores flows and produces verifiable AML evidence via scoped viewing keys.", tags: ["NEURAX", "Shielded"] },
+      { name: "AMLSight", desc: "PYRAX Compute transaction-risk engine that scores flows and produces verifiable AML evidence via scoped viewing keys.", tags: ["Compute", "Shielded"] },
       { name: "RefundGuard", desc: "Escrow-backed conditional payment that auto-refunds if delivery conditions are not met within a deadline.", tags: ["Escrow", "EVM"] },
     ],
   },
 
   "lending-credit": {
     overview:
-      "Lending and credit - from consumer loans to institutional facilities - is slowed by manual underwriting, opaque collateral, and settlement risk between originators and buyers. PYRAX turns loan lifecycles into programmable, instantly-settled contracts with shielded borrower data and viewing-key auditability, plus verifiable AI underwriting through NEURAX.",
+      "Lending and credit - from consumer loans to institutional facilities - is slowed by manual underwriting, opaque collateral, and settlement risk between originators and buyers. PYRAX turns loan lifecycles into programmable, instantly-settled contracts with shielded borrower data and viewing-key auditability, plus verifiable AI underwriting through PYRAX Compute.",
     marketSize: "$11.3T (2024)",
     projection: "$25.4T by 2032 · ~10.7% CAGR",
     source: "Precedence Research, 2024",
@@ -127,7 +127,7 @@ export const content: CategoryContent = {
     ],
     solutions: [
       {
-        feature: "NEURAX verifiable AI/compute",
+        feature: "PYRAX Compute verifiable AI/compute",
         how: "Credit-scoring and affordability models run with cryptographic proofs of the exact model and inputs used, giving borrowers and regulators a fairness-auditable underwriting trail.",
       },
       {
@@ -148,13 +148,13 @@ export const content: CategoryContent = {
       },
     ],
     dapps: [
-      { name: "ProofLend", desc: "Underwriting dApp that issues loans on NEURAX-verified affordability scores with a proof attached to every decision.", tags: ["NEURAX", "EVM"] },
+      { name: "ProofLend", desc: "Underwriting dApp that issues loans on PYRAX Compute-verified affordability scores with a proof attached to every decision.", tags: ["Compute", "EVM"] },
       { name: "CollateralVault", desc: "Escrow-locked collateral with on-chain, verifiable state so secondary buyers can audit LTV in real time.", tags: ["Escrow", "ZK"] },
       { name: "SyndiFlow", desc: "Loan syndication and participation transfers that settle atomically with BLS finality across lender cohorts.", tags: ["Finality", "EVM"] },
       { name: "ShieldScore", desc: "Privacy-preserving credit profile where the borrower shares income and history via scoped viewing keys, not raw data.", tags: ["Shielded", "ZK"] },
       { name: "RepayWaterfall", desc: "Programmable repayment splitter that routes principal and interest to tranches per a coded waterfall.", tags: ["WASM", "Escrow"] },
       { name: "SMECredit", desc: "Under-served small-business lending pool with pooled staking capital and automated draw/repay logic.", tags: ["Stake", "EVM"] },
-      { name: "DefaultProof", desc: "Delinquency and default oracle that publishes verifiable performance data for loan buyers.", tags: ["ZK", "NEURAX"] },
+      { name: "DefaultProof", desc: "Delinquency and default oracle that publishes verifiable performance data for loan buyers.", tags: ["ZK", "PYRAX Compute"] },
       { name: "InvoiceLine", desc: "Revolving credit line secured by shielded, escrowed receivables that release on invoice payment.", tags: ["Escrow", "Shielded"] },
     ],
   },
@@ -247,7 +247,7 @@ export const content: CategoryContent = {
         how: "Any LP or auditor can cryptographically verify the fund’s token supply, holdings, and fee accruals against chain state - no trust in the administrator’s spreadsheet.",
       },
       {
-        feature: "NEURAX verifiable AI/compute",
+        feature: "PYRAX Compute verifiable AI/compute",
         how: "Quant and risk models execute with verifiable outputs, so factor exposures and risk limits can be proven to investors and compliance without revealing the model.",
       },
     ],
@@ -256,16 +256,16 @@ export const content: CategoryContent = {
       { name: "ShieldBook", desc: "Shielded portfolio ledger that hides live allocations from the market while exposing them to auditors via viewing keys.", tags: ["Shielded", "ZK"] },
       { name: "FeeAccrue", desc: "Automated management- and performance-fee accrual with a verifiable high-water-mark calculation.", tags: ["WASM", "EVM"] },
       { name: "RebalanceBot", desc: "On-chain rebalancing engine that executes target-weight trades atomically at each strike.", tags: ["EVM", "Escrow"] },
-      { name: "ProofNAV", desc: "Independently verifiable NAV oracle backed by eth_getProof state proofs of holdings.", tags: ["ZK", "NEURAX"] },
+      { name: "ProofNAV", desc: "Independently verifiable NAV oracle backed by eth_getProof state proofs of holdings.", tags: ["ZK", "PYRAX Compute"] },
       { name: "RedeemGate", desc: "Redemption-queue contract enforcing gates, lock-ups, and pro-rata fills transparently.", tags: ["EVM", "Gov"] },
-      { name: "RiskProof", desc: "NEURAX risk engine publishing verifiable VaR and factor-exposure attestations to LPs.", tags: ["NEURAX", "Shielded"] },
+      { name: "RiskProof", desc: "PYRAX Compute risk engine publishing verifiable VaR and factor-exposure attestations to LPs.", tags: ["Compute", "Shielded"] },
       { name: "StakeYield", desc: "Fund that allocates idle cash into on-chain staking with transparent, coded yield distribution.", tags: ["Stake", "EVM"] },
     ],
   },
 
   "insurance": {
     overview:
-      "Insurance spans underwriting, premium collection, claims, and reinsurance, all bogged down by manual claims, fraud, and slow payouts. PYRAX enables parametric and escrow-backed policies that pay automatically on verifiable triggers, keeps policyholder data shielded, and uses NEURAX for auditable fraud and risk models.",
+      "Insurance spans underwriting, premium collection, claims, and reinsurance, all bogged down by manual claims, fraud, and slow payouts. PYRAX enables parametric and escrow-backed policies that pay automatically on verifiable triggers, keeps policyholder data shielded, and uses PYRAX Compute for auditable fraud and risk models.",
     marketSize: "$7.5T (2024)",
     projection: "$11.5T by 2032 · ~5.5% CAGR",
     source: "Statista / Swiss Re Institute, 2024",
@@ -287,7 +287,7 @@ export const content: CategoryContent = {
         how: "Premiums fund escrowed policy reserves that release payouts automatically when a coded claim condition is met - no manual adjudication for parametric cover.",
       },
       {
-        feature: "NEURAX verifiable AI/compute",
+        feature: "PYRAX Compute verifiable AI/compute",
         how: "Fraud-detection and risk-pricing models produce cryptographic proofs, so a denied claim or premium loading can be shown to be fair and reproducible.",
       },
       {
@@ -305,7 +305,7 @@ export const content: CategoryContent = {
     ],
     dapps: [
       { name: "ParaPay", desc: "Parametric insurance that auto-pays escrowed claims when an oracle confirms a trigger (flight delay, weather, quake).", tags: ["Escrow", "EVM"] },
-      { name: "ClaimProof", desc: "NEURAX fraud scorer that attaches a verifiable proof to every claim decision for dispute resolution.", tags: ["NEURAX", "ZK"] },
+      { name: "ClaimProof", desc: "PYRAX Compute fraud scorer that attaches a verifiable proof to every claim decision for dispute resolution.", tags: ["Compute", "ZK"] },
       { name: "ShieldPolicy", desc: "Shielded policy ledger where health and PII stay private and adjusters access only via scoped viewing keys.", tags: ["Shielded", "ZK"] },
       { name: "ReTreaty", desc: "On-chain reinsurance treaty that automates cessions and settles premium/claim flows between cedent and reinsurer.", tags: ["EVM", "Finality"] },
       { name: "PoolStake", desc: "Community risk pool capitalized by stakers, with transparent premium intake and coded loss sharing.", tags: ["Stake", "Escrow"] },
@@ -410,7 +410,7 @@ export const content: CategoryContent = {
     dapps: [
       { name: "PrivatePortfolio", desc: "Shielded managed account where the client alone (plus their auditor) can read holdings via viewing keys.", tags: ["Shielded", "ZK"] },
       { name: "GlidePath", desc: "Automated model-portfolio and glide-path engine that rebalances toward target allocations each period.", tags: ["EVM", "WASM"] },
-      { name: "ProofStatement", desc: "Verifiable client statement backed by eth_getProof, so every holding and fee is independently checkable.", tags: ["ZK", "NEURAX"] },
+      { name: "ProofStatement", desc: "Verifiable client statement backed by eth_getProof, so every holding and fee is independently checkable.", tags: ["ZK", "PYRAX Compute"] },
       { name: "TaxHarvest", desc: "Tax-loss-harvesting contract that identifies and executes offsetting trades automatically.", tags: ["EVM", "Escrow"] },
       { name: "EstateFlow", desc: "Escrow-based estate and trust distribution that releases assets to heirs on coded conditions.", tags: ["Escrow", "Gov"] },
       { name: "FeeClear", desc: "Transparent advisory-fee accrual and billing with a client-verifiable calculation trail.", tags: ["WASM", "EVM"] },
@@ -467,7 +467,7 @@ export const content: CategoryContent = {
       { name: "ShieldAccount", desc: "Privacy-first consumer account with shielded balances and a scoped compliance viewing key.", tags: ["Shielded", "ZK"] },
       { name: "OnboardKey", desc: "Reusable KYC attestation flow that shares verified identity via selective disclosure, not raw documents.", tags: ["Shielded", "Cairo"] },
       { name: "RewardLoop", desc: "Programmable cashback and rewards engine paying instant, sub-cent-fee incentives per transaction.", tags: ["EVM", "Finality"] },
-      { name: "FraudGuardAI", desc: "NEURAX real-time fraud model with verifiable decisions embedded in the payment flow.", tags: ["NEURAX", "ZK"] },
+      { name: "FraudGuardAI", desc: "PYRAX Compute real-time fraud model with verifiable decisions embedded in the payment flow.", tags: ["Compute", "ZK"] },
     ],
   },
 
@@ -523,3 +523,4 @@ export const content: CategoryContent = {
     ],
   },
 };
+

@@ -187,7 +187,7 @@ export const content: CategoryContent = {
         how: "Withholding, VAT, and installment payments are escrowed and settled automatically at the point of transaction, and verified refunds release directly to the taxpayer without fraud-prone manual disbursement.",
       },
       {
-        feature: "NEURAX verifiable public-sector AI",
+        feature: "PYRAX Compute verifiable public-sector AI",
         how: "Fraud-detection and risk-scoring models run with cryptographic proofs, so a flagged return or denied refund can be shown to be fair, reproducible, and non-arbitrary to an appeals body.",
       },
       {
@@ -203,7 +203,7 @@ export const content: CategoryContent = {
       { name: "ShieldFile", desc: "Privacy-preserving tax filing where returns are shielded and the agency audits only via scoped viewing keys.", tags: ["Shielded", "ZK"] },
       { name: "AutoWithhold", desc: "Point-of-transaction withholding and VAT collection that escrows and remits tax automatically in one block.", tags: ["Escrow", "EVM"] },
       { name: "RefundDirect", desc: "Fraud-resistant refund engine that verifies eligibility and releases funds directly to the taxpayer.", tags: ["Escrow", "Finality"] },
-      { name: "FairAudit", desc: "NEURAX risk model that attaches a verifiable proof to every audit selection to prove non-arbitrary treatment.", tags: ["NEURAX", "ZK"] },
+      { name: "FairAudit", desc: "PYRAX Compute risk model that attaches a verifiable proof to every audit selection to prove non-arbitrary treatment.", tags: ["Compute", "ZK"] },
       { name: "VATChain", desc: "Real-time VAT/GST ledger that kills carousel fraud by making each input credit verifiable and unique.", tags: ["EVM", "ZK"] },
       { name: "CreditProof", desc: "ZK eligibility proofs for tax credits and exemptions without disclosing full income and family data.", tags: ["ZK", "Cairo"] },
       { name: "AppealTrail", desc: "Transparent, recomputable assessment record that gives taxpayers a verifiable basis for appeals.", tags: ["Gov", "ZK"] },
@@ -247,7 +247,7 @@ export const content: CategoryContent = {
         how: "Uniqueness-enforced state prevents duplicate enrollment and double-dipping across programs, which auditors can verify cryptographically instead of cross-matching siloed databases.",
       },
       {
-        feature: "NEURAX verifiable public-sector AI",
+        feature: "PYRAX Compute verifiable public-sector AI",
         how: "Fraud and eligibility models produce verifiable outputs, so an approval or denial is provably fair and consistent - reducing wrongful denials and defensible on appeal.",
       },
     ],
@@ -256,7 +256,7 @@ export const content: CategoryContent = {
       { name: "QualifyProof", desc: "ZK means-test that proves income and eligibility below a threshold without revealing exact figures.", tags: ["ZK", "Cairo"] },
       { name: "DignityCard", desc: "Shielded benefits account keeping recipient status private while auditors verify via viewing keys.", tags: ["Shielded", "ZK"] },
       { name: "NoDoubleDip", desc: "Cross-program uniqueness registry that prevents duplicate enrollment, verifiable via eth_getProof.", tags: ["ZK", "EVM"] },
-      { name: "FairDecision", desc: "NEURAX eligibility model attaching a verifiable proof to each approval or denial for appeals.", tags: ["NEURAX", "ZK"] },
+      { name: "FairDecision", desc: "PYRAX Compute eligibility model attaching a verifiable proof to each approval or denial for appeals.", tags: ["Compute", "ZK"] },
       { name: "VoucherFlow", desc: "Programmable, purpose-restricted voucher (food, housing, transit) spendable only at eligible vendors.", tags: ["EVM", "Escrow"] },
       { name: "ReliefRapid", desc: "Disaster-relief payout dApp that fans direct aid to affected residents in parallel with instant finality.", tags: ["Finality", "Escrow"] },
       { name: "EnrollEasy", desc: "One-tap enrollment that auto-checks eligibility via selective disclosure to lift uptake among the unserved.", tags: ["ZK", "Gov"] },
@@ -403,7 +403,7 @@ export const content: CategoryContent = {
         how: "Scholarship, grant, and student-aid funds are escrowed and released against verified enrollment and progress milestones, ensuring accountable, direct disbursement.",
       },
       {
-        feature: "NEURAX verifiable public-sector AI",
+        feature: "PYRAX Compute verifiable public-sector AI",
         how: "AI tutoring and assessment models run with verifiable outputs, so grading assistance and adaptive learning decisions can be shown to be fair, consistent, and reproducible.",
       },
     ],
@@ -413,7 +413,7 @@ export const content: CategoryContent = {
       { name: "ShieldRecord", desc: "Shielded student-record store private to learners and guardians, with viewing keys for accreditors.", tags: ["Shielded", "ZK"] },
       { name: "GrantEscrow", desc: "Scholarship and grant disbursement escrowed against verified enrollment and progress milestones.", tags: ["Escrow", "Finality"] },
       { name: "SkillBadge", desc: "Verifiable micro-credential and skill-badge issuer for lifelong-learning and workforce pathways.", tags: ["EVM", "Gov"] },
-      { name: "FairGrade", desc: "NEURAX assessment assistant that attaches a verifiable fairness proof to AI-supported grading.", tags: ["NEURAX", "ZK"] },
+      { name: "FairGrade", desc: "PYRAX Compute assessment assistant that attaches a verifiable fairness proof to AI-supported grading.", tags: ["Compute", "ZK"] },
       { name: "AttendProof", desc: "Privacy-preserving attendance and completion proofs for funding and compliance reporting.", tags: ["ZK", "Gov"] },
       { name: "AidDirect", desc: "Direct student-aid rail that pays tuition and stipends to verified students with instant finality.", tags: ["Escrow", "EVM"] },
     ],
@@ -467,7 +467,7 @@ export const content: CategoryContent = {
       { name: "DecreeExec", desc: "Consent-decree contract that self-executes obligations and reports compliance verifiably.", tags: ["EVM", "Gov"] },
       { name: "ChainOfCustody", desc: "Cross-agency custody ledger tracking exhibits from seizure to trial with immutable timestamps.", tags: ["ZK", "Gov"] },
       { name: "BondVault", desc: "Bail- and surety-bond escrow with coded release and forfeiture conditions.", tags: ["Escrow", "EVM"] },
-      { name: "NotarizeAI", desc: "NEURAX-assisted document analysis with verifiable outputs for authenticity and consistency review.", tags: ["NEURAX", "ZK"] },
+      { name: "NotarizeAI", desc: "PYRAX Compute-assisted document analysis with verifiable outputs for authenticity and consistency review.", tags: ["Compute", "ZK"] },
     ],
   },
 
@@ -523,3 +523,4 @@ export const content: CategoryContent = {
     ],
   },
 };
+

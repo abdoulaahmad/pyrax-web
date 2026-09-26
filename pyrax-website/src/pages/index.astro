@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Site from "../layouts/Site.astro";
 import Hero from "../components/Hero.tsx";
-import { DEFAULT_LOCALE, localizePath } from "../i18n/config";
+import { DEFAULT_LOCALE, localizePath, resolveLocale } from "../i18n/config";
 import { useT } from "../i18n";
 import { CATEGORIES } from "../lib/industries";
 import { DOMAINS } from "../lib/endpoints";
 
-const lang = DEFAULT_LOCALE;
+const lang = resolveLocale(Astro.url, Astro.cookies);
 const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 
@@ -128,27 +128,27 @@ const industryPhotos = CATEGORIES.map((c, i) => ({ ...c, img: `https://images.un
     </div>
   </section>
 
-  <!-- NEURAX — full color-block -->
+  <!-- PYRAX COMPUTE — GPU MARKETPLACE -->
   <section class="relative overflow-hidden border-b border-line bg-[linear-gradient(150deg,#0c2744_0%,#123a63_55%,#0e2c4d_100%)]">
-    <div class="ghost-index absolute -top-10 right-0 text-[16rem] sm:text-[22rem]" style="-webkit-text-stroke: 1px rgba(255,255,255,0.09)">AI</div>
+    <div class="ghost-index absolute -top-10 right-0 text-[16rem] sm:text-[22rem]" style="-webkit-text-stroke: 1px rgba(255,255,255,0.09)">GPU</div>
     <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1600&auto=format&fit=crop" alt="" class="absolute inset-0 h-full w-full object-cover opacity-[0.14] saturate-[0.3]" />
     <div class="relative mx-auto max-w-6xl px-5 py-24 sm:px-10">
       <div class="grid gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div>
-          <div class="eyebrow" style="color:var(--color-bolt-bright)">03 / NEURAX · Stream B</div>
-          <h2 class="mt-4 text-2xl uppercase sm:text-4xl">Idle GPUs become a <span class="outline-text" style="-webkit-text-stroke: 1.2px rgba(254,210,60,0.9)">verifiable</span> compute market.</h2>
-          <p class="mt-6 max-w-lg text-[0.95rem] leading-relaxed text-white/75">{t("homeExtra.neuraxParagraph", "The same hardware that mines Stream B runs paid AI and compute jobs, settled on-chain at a fixed 8 PYRX per compute unit. A four-rung verification ladder — redundancy, fraud proofs, interactive dispute, and TEE attestation — replaces blind trust with cryptographic proof.")}</p>
+          <div class="eyebrow" style="color:var(--color-bolt-bright)">{t("homeExtra.computeEyebrow", "03 / PYRAX Compute · GPU Marketplace")}</div>
+          <h2 class="mt-4 text-2xl uppercase sm:text-4xl">Verifiable GPU compute. <br /><span class="outline-text" style="-webkit-text-stroke: 1.2px rgba(254,210,60,0.9)">Decentralized</span> on-chain.</h2>
+          <p class="mt-6 max-w-lg text-[0.95rem] leading-relaxed text-white/75">{t("homeExtra.computeParagraph", "PYRAX Compute turns global GPU hardware into an open, verifiable marketplace. Run AI inference, fine-tuning, and rendering settled on-chain through cryptographic execution receipts — replacing centralized cloud monopolies with permissionless, escrow-backed compute.")}</p>
           <div class="mt-8 flex flex-wrap gap-3">
-            <a href={L("/technology#neurax")} class="rounded-full bg-white px-6 py-3.5 text-sm font-bold text-[#0c2744]">{t("homeExtra.neuraxHowItWorks", "How NEURAX works")}</a>
-            <a href={L("/industries/ai-data-compute")} class="rounded-full border border-white/35 px-6 py-3.5 text-sm font-semibold text-white transition hover:border-[color:var(--color-gold)] hover:text-[color:var(--color-gold)]">{t("homeExtra.neuraxIndustries", "AI & compute industries →")}</a>
+            <a href={L("/industries/ai-data-compute")} class="rounded-full bg-white px-6 py-3.5 text-sm font-bold text-[#0c2744]">{t("homeExtra.computeHowItWorks", "Explore PYRAX Compute")}</a>
+            <a href={L("/technology#consensus")} class="rounded-full border border-white/35 px-6 py-3.5 text-sm font-semibold text-white transition hover:border-[color:var(--color-gold)] hover:text-[color:var(--color-gold)]">{t("homeExtra.computeIndustries", "Mining & compute architecture →")}</a>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3.5">
           {[
-            { n: "8 PYRX", l: t("homeExtra.neuraxTile1L", "per compute unit (1 RTX-4090-hour)") },
-            { n: "4B", l: t("homeExtra.neuraxTile2L", "PYRX AI-compute pool") },
-            { n: "4-rung", l: t("homeExtra.neuraxTile3L", "verification ladder") },
-            { n: "RTX 3060", l: t("homeExtra.neuraxTile4L", "local-first baseline GPU") },
+            { n: "8 PYRX", l: t("homeExtra.computeTile1L", "per compute unit (1 RTX-4090-hour)") },
+            { n: "Escrow", l: t("homeExtra.computeTile2L", "trustless on-chain job settlement") },
+            { n: "4-rung", l: t("homeExtra.computeTile3L", "verification & dispute ladder") },
+            { n: "Global", l: t("homeExtra.computeTile4L", "distributed provider network") },
           ].map((x) => (
             <div class="rounded-2xl border border-white/[0.14] bg-[rgba(5,6,9,0.5)] p-6 backdrop-blur-sm">
               <div class="font-display text-2xl font-semibold leading-none text-[color:var(--color-gold)]">{x.n}</div>

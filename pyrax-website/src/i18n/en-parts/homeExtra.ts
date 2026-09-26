@@ -34,7 +34,18 @@ export const homeExtra = {
   readWhitepaper: 'Read the whitepaper →',
   learnMore: 'Learn more →',
 
-  // NEURAX section
+  // PYRAX Compute / GPU Marketplace section
+  computeEyebrow: '03 / PYRAX Compute · GPU Marketplace',
+  computeHeading: 'Verifiable GPU compute. Decentralized on-chain.',
+  computeParagraph: 'PYRAX Compute turns global GPU hardware into an open, verifiable marketplace. Run AI inference, fine-tuning, and rendering settled on-chain through cryptographic execution receipts — replacing centralized cloud monopolies with permissionless, escrow-backed compute.',
+  computeHowItWorks: 'Explore PYRAX Compute',
+  computeIndustries: 'Mining & compute architecture →',
+  computeTile1L: 'per compute unit (1 RTX-4090-hour)',
+  computeTile2L: 'trustless on-chain job settlement',
+  computeTile3L: 'verification & dispute ladder',
+  computeTile4L: 'distributed provider network',
+
+  // Legacy aliases
   neuraxHeading: 'Idle GPUs become a verifiable compute market',
   neuraxParagraph: 'The same hardware that mines Stream B runs paid AI and compute jobs, settled on-chain and priced at a fixed 8 PYRX per compute unit. A four-rung verification ladder — redundancy, fraud proofs, interactive dispute, and TEE attestation — replaces blind trust with cryptographic proof.',
   neuraxHowItWorks: 'How NEURAX works',
