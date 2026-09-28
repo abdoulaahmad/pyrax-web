@@ -41,7 +41,7 @@
   --color-offline: #5b6270;
 
   --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Unbounded", "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Xolonium", "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", monospace;
 
   --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -75,7 +75,7 @@
       radial-gradient(1200px 800px at 50% 120%, rgba(246,138,36,0.05), transparent 60%);
     background-attachment: fixed;
   }
-  /* Unbounded display type. Uppercase is opt-in per heading (utility class) — the brand system
+  /* Xolonium display type. Uppercase is opt-in per heading (utility class) — the brand system
      reserves it for marketing-forward H1s/section titles, not documentation-style section headers. */
   h1, h2 { font-family: var(--font-display); letter-spacing: -0.02em; font-weight: 600; line-height: 1.04; }
   h3 { font-family: var(--font-display); letter-spacing: -0.01em; font-weight: 500; }
