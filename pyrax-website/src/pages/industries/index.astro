@@ -6,6 +6,7 @@ import { useT } from "../../i18n";
 import { CATEGORIES, TOTAL_INDUSTRIES } from "../../lib/industries";
 
 import IndustryIcon from '../../components/IndustryIcon.astro';
+import { headline } from "../../lib/headline";
 
 const lang = resolveLocale(Astro.url, Astro.cookies);
 const t = useT(lang);
@@ -15,7 +16,7 @@ const L = (p: string) => localizePath(lang, p);
   <section class="relative overflow-hidden border-b border-line">
     <div class="mx-auto max-w-7xl px-6 py-20 text-center">
       <div class="eyebrow eyebrow-rule text-[color:var(--color-brand)]">{t("industriesUi.eyebrow", "Industries")}</div>
-      <h1 class="mx-auto mt-3 max-w-4xl font-display text-4xl font-extrabold uppercase sm:text-6xl">{t("industriesUi.h1Lead", "PYRAX blockchain solutions for ")}<span class="flame-text">{t("industriesUi.h1Highlight", "every industry")}</span></h1>
+      <h1 class="mx-auto mt-3 max-w-4xl font-display text-4xl font-extrabold uppercase sm:text-6xl">{headline(t("industriesUi.h1Lead", "PYRAX blockchain solutions for "))}<span class="flame-text">{headline(t("industriesUi.h1Highlight", "every industry"))}</span></h1>
       <p class="mx-auto mt-5 max-w-2xl text-lg text-muted">{CATEGORIES.length} {t("industriesUi.subtitleCategories", "categories")} · {TOTAL_INDUSTRIES} {t("industriesUi.subtitleBusinessTypes", "business types.")}{t("industriesUi.subtitleTail", " Each with current market projections, concrete PYRAX integrations, and buildathon-ready dApp ideas.")}</p>
     </div>
   </section>

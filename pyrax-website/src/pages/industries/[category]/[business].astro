@@ -6,6 +6,7 @@ import { useT } from "../../../i18n";
 import { categoryBySlug, businessBySlug } from "../../../lib/industries";
 import { contentFor } from "../../../lib/industry-content";
 import { DOMAINS } from "../../../lib/endpoints";
+import { headline } from "../../../lib/headline";
 
 const lang = resolveLocale(Astro.url, Astro.cookies);
 const { category = "", business = "" } = Astro.params;
@@ -28,7 +29,7 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
         <a href={L(`/industries/${cat.slug}`)} class="hover:text-ink" style={`color:${cat.color}`}>{cat.name}</a><span class="text-faint">/</span>
         <span class="text-ink">{biz.name}</span>
       </div>
-      <h1 class="mt-4 font-display text-4xl font-extrabold uppercase sm:text-5xl">{biz.name} <span class="text-faint normal-case">{t("industriesUi.onPyrax", "on PYRAX")}</span></h1>
+      <h1 class="mt-4 font-display text-4xl font-extrabold uppercase sm:text-5xl">{headline(biz.name)} <span class="text-faint normal-case">{headline(t("industriesUi.onPyrax", "on PYRAX"))}</span></h1>
       <p class="mt-4 max-w-3xl text-lg text-muted">{c?.overview ?? biz.hook}</p>
       {c && (
         <div class="mt-6 flex flex-wrap gap-3">
@@ -43,7 +44,7 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
     <div class="mx-auto max-w-5xl px-6 py-14">
       <!-- market -->
       <section>
-        <h2 class="font-display text-2xl font-extrabold">{t("industriesUi.theMarket", "The market")}</h2>
+        <h2 class="font-display text-2xl font-extrabold">{headline(t("industriesUi.theMarket", "The market"))}</h2>
         <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {c.stats.map((s) => (
             <div class="rounded-2xl border border-line bg-[color:var(--color-surface)] p-5">
@@ -57,7 +58,7 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
 
       <!-- pain points -->
       <section class="mt-12">
-        <h2 class="font-display text-2xl font-extrabold">{t("industriesUi.whatsBroken", "What's broken today")}</h2>
+        <h2 class="font-display text-2xl font-extrabold">{headline(t("industriesUi.whatsBroken", "What's broken today"))}</h2>
         <div class="mt-5 grid gap-3 sm:grid-cols-2">
           {c.painPoints.map((p) => (
             <div class="flex gap-3 rounded-2xl border border-line bg-[color:var(--color-surface)] p-4">
@@ -70,7 +71,7 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
 
       <!-- PYRAX solutions -->
       <section class="mt-12">
-        <h2 class="font-display text-2xl font-extrabold">{t("industriesUi.howPyraxTransforms", "How PYRAX transforms it")}</h2>
+        <h2 class="font-display text-2xl font-extrabold">{headline(t("industriesUi.howPyraxTransforms", "How PYRAX transforms it"))}</h2>
         <p class="mt-1 text-muted">{t("industriesUi.solutionsSubtitle", "Concrete network elements mapped to this business.")}</p>
         <div class="mt-5 grid gap-3 md:grid-cols-2">
           {c.solutions.map((s) => (
@@ -85,7 +86,7 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
       <!-- dApp ideas / buildathon -->
       <section class="mt-12">
         <div class="flex items-end justify-between">
-          <div><h2 class="font-display text-2xl font-extrabold">{t("industriesUi.buildathonTitle", "Buildathon: dApp ideas")}</h2><p class="mt-1 text-muted">{t("industriesUi.buildathonSubtitlePrefix", "Ship-ready concepts for ")}{biz.name.toLowerCase()}{t("industriesUi.buildathonSubtitleSuffix", " on PYRAX.")}</p></div>
+          <div><h2 class="font-display text-2xl font-extrabold">{headline(t("industriesUi.buildathonTitle", "Buildathon: dApp ideas"))}</h2><p class="mt-1 text-muted">{t("industriesUi.buildathonSubtitlePrefix", "Ship-ready concepts for ")}{biz.name.toLowerCase()}{t("industriesUi.buildathonSubtitleSuffix", " on PYRAX.")}</p></div>
           <a href={DOMAINS.explorer} class="hidden shrink-0 rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a] sm:inline">{t("industriesUi.startBuilding", "Start building →")}</a>
         </div>
         <div class="mt-5 grid gap-3 sm:grid-cols-2">
@@ -105,7 +106,7 @@ const prev = cat.businesses[(idx - 1 + cat.businesses.length) % cat.businesses.l
   ) : (
     <div class="mx-auto max-w-3xl px-6 py-20 text-center">
       <div class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-10">
-        <h2 class="font-display text-2xl font-extrabold">{t("industriesUi.briefInProgress", "Detailed brief in progress")}</h2>
+        <h2 class="font-display text-2xl font-extrabold">{headline(t("industriesUi.briefInProgress", "Detailed brief in progress"))}</h2>
         <p class="mt-3 text-muted">{biz.hook}{t("industriesUi.briefBodyPrefix", " The full market analysis, PYRAX integration map, and buildathon dApp ideas for ")}<span class="text-ink">{biz.name}</span>{t("industriesUi.briefBodySuffix", " are being finalized.")}</p>
         <a href={L(`/industries/${cat.slug}`)} class="mt-6 inline-flex rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("industriesUi.backToPrefix", "Back to ")}{cat.name}{t("industriesUi.backToSuffix", " →")}</a>
       </div>

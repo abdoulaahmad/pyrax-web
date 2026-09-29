@@ -5,6 +5,7 @@ import { DEFAULT_LOCALE, localizePath, resolveLocale } from "../i18n/config";
 import { useT } from "../i18n";
 import { TOKEN, ALLOCATIONS, GENESIS, EMISSIONS, FEES, STAKING, GOVERNANCE, COMPUTE, fmt } from "../lib/tokenomics";
 import { DOMAINS } from "../lib/endpoints";
+import { headline } from "../lib/headline";
 
 const lang = resolveLocale(Astro.url, Astro.cookies);
 const t = useT(lang);
@@ -39,7 +40,7 @@ const emVals = [EMISSIONS.initialSubsidy, EMISSIONS.halving, EMISSIONS.cap, EMIS
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20">
       <div class="eyebrow eyebrow-rule text-[color:var(--color-gold)]">{t("tokenPage.eyebrow", "Tokenomics")}</div>
-      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">{t("tokenPage.economyPre", "The ")}<span class="flame-text">PYRX</span>{t("tokenPage.economyPost", " economy")}</h1>
+      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold sm:text-6xl">{headline(t("tokenPage.economyPre", "The "))}<span class="flame-text">PYRX</span>{headline(t("tokenPage.economyPost", " economy"))}</h1>
       <p class="mt-5 max-w-2xl text-lg text-muted">{t("tokenPage.heroSubtitle", "A fixed 50-billion supply enforced in consensus, a transparent premine, mining that runs for a quarter-century, and a fee split no one — not even a governance vote — can ever change.")}</p>
       <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {heroStats.map((s, i) => (
@@ -69,7 +70,7 @@ const emVals = [EMISSIONS.initialSubsidy, EMISSIONS.halving, EMISSIONS.cap, EMIS
         </div>
       </div>
       <div>
-        <h2 class="font-display text-3xl font-extrabold">{t("tokenPage.distributionTitle", "Genesis distribution")}</h2>
+        <h2 class="font-display text-3xl font-extrabold">{headline(t("tokenPage.distributionTitle", "Genesis distribution"))}</h2>
         <p class="mt-2 max-w-2xl text-muted">{t("tokenPage.distributionBody", "Every pool is seeded into a reserved, credit-only system account at genesis. The 12.5B mining share is the only supply not present at launch — it is minted to block producers over ~26 years.")}</p>
         <div class="mt-6 space-y-2">
           {ALLOCATIONS.map((a, i) => (
@@ -109,7 +110,7 @@ const emVals = [EMISSIONS.initialSubsidy, EMISSIONS.halving, EMISSIONS.cap, EMIS
     <div class="mx-auto max-w-7xl px-6 py-16">
       <div class="grid gap-10 lg:grid-cols-2">
         <div data-reveal>
-          <h2 class="font-display text-2xl font-extrabold">{t("tokenPage.emissionsTitle", "Emissions")}</h2>
+          <h2 class="font-display text-2xl font-extrabold">{headline(t("tokenPage.emissionsTitle", "Emissions"))}</h2>
           <p class="mt-2 text-muted">{t("tokenPage.emissionsIntro", "Bitcoin-style, but four-year halvings and a hard mining cap. After the cap, block producers are paid entirely by fees.")}</p>
           <dl class="mt-6 space-y-3">
             {[
@@ -126,7 +127,7 @@ const emVals = [EMISSIONS.initialSubsidy, EMISSIONS.halving, EMISSIONS.cap, EMIS
           </dl>
         </div>
         <div data-reveal data-reveal-delay="2">
-          <h2 class="font-display text-2xl font-extrabold">{t("tokenPage.feesTitle", "Fees")} <span class="text-sm font-normal text-faint">{t("tokenPage.feesSub", "· EIP-1559, consensus-frozen")}</span></h2>
+          <h2 class="font-display text-2xl font-extrabold">{headline(t("tokenPage.feesTitle", "Fees"))} <span class="text-sm font-normal text-faint">{headline(t("tokenPage.feesSub", "· EIP-1559, consensus-frozen"))}</span></h2>
           <p class="mt-2 text-muted">{t("tokenPage.feesIntro", "The split is frozen in consensus — no governance vote can ever touch it.")}</p>
           <div class="mt-6 space-y-6">
             <div>
@@ -155,7 +156,7 @@ const emVals = [EMISSIONS.initialSubsidy, EMISSIONS.halving, EMISSIONS.cap, EMIS
     <div class="mx-auto max-w-7xl px-6 py-20">
       <div data-reveal class="mx-auto mb-14 max-w-2xl text-center">
         <div class="eyebrow text-[color:var(--color-brand)]">{t("tokenPage.participate", "Put PYRX to work")}</div>
-        <h2 class="mt-3 font-display text-3xl font-extrabold sm:text-4xl">{t("tokenPage.participateTitle", "Staking, governance & fee burns")}</h2>
+        <h2 class="mt-3 font-display text-3xl font-extrabold sm:text-4xl">{headline(t("tokenPage.participateTitle", "Staking, governance & fee burns"))}</h2>
         <p class="mx-auto mt-3 max-w-xl text-muted">{t("tokenPage.participateBody", "Three pillars of token utility: secure finality by staking, steer the protocol by voting, and permanent supply reduction through continuous fee burns.")}</p>
       </div>
 

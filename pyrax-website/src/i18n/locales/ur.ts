@@ -585,7 +585,6 @@ export const ur: LocaleDict = {
     coverTitleFlame: 'مستقبل کے تقاضوں',
     coverSubtitle: 'بطورِ ڈیفالٹ نجی۔ بہ لحاظِ ڈیزائن متوازی۔ بہ ذریعہ ثبوت قابلِ تصدیق۔ AI کمپیوٹ کے لیے ایک بلٹ-اِن مارکیٹ کے ساتھ ایک نئے سرے سے تیار کردہ Layer-1۔',
     coverInvestorDeck: 'سرمایہ کار ڈیک',
-    coverConfidential: 'خفیہ',
 
     kickerProblem: 'مسئلہ',
     kickerSolution: 'حل',

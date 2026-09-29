@@ -585,7 +585,6 @@ export const vi: LocaleDict = {
     coverTitleFlame: 'tương lai đòi hỏi',
     coverSubtitle: 'Riêng tư theo mặc định. Song song theo thiết kế. Có thể kiểm chứng bằng bằng chứng. Một Layer-1 xây từ đầu với một thị trường điện toán AI tích hợp sẵn.',
     coverInvestorDeck: 'Bộ slide nhà đầu tư',
-    coverConfidential: 'Bảo mật',
 
     kickerProblem: 'Vấn đề',
     kickerSolution: 'Giải pháp',

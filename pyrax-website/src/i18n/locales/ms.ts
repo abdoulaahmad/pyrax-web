@@ -596,7 +596,6 @@ export const ms: LocaleDict = {
     coverTitleFlame: 'tuntutan masa depan',
     coverSubtitle: 'Peribadi secara lalai. Selari mengikut reka bentuk. Boleh disahkan melalui bukti. Sebuah Layer-1 dari-awal dengan pasaran terbina-dalam untuk pengkomputeran AI.',
     coverInvestorDeck: 'Deck Pelabur',
-    coverConfidential: 'Sulit',
 
     kickerProblem: 'Masalahnya',
     kickerSolution: 'Penyelesaiannya',

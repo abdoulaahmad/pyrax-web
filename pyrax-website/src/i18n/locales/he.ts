@@ -585,7 +585,6 @@ export const he: LocaleDict = {
     coverTitleFlame: 'העתיד דורש',
     coverSubtitle: 'פרטי כברירת מחדל. מקבילי בעיצובו. בר-אימות בהוכחה. Layer-1 שנבנתה מאפס עם שוק מובנה למחשוב AI.',
     coverInvestorDeck: 'מצגת משקיעים',
-    coverConfidential: 'חסוי',
 
     kickerProblem: 'הבעיה',
     kickerSolution: 'הפתרון',

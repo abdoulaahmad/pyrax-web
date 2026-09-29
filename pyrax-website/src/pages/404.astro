@@ -3,6 +3,7 @@
 import Site from "../layouts/Site.astro";
 import { DEFAULT_LOCALE, localizePath, resolveLocale } from "../i18n/config";
 import { useT } from "../i18n";
+import { headline } from "../lib/headline";
 const lang = resolveLocale(Astro.url, Astro.cookies);
 const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
@@ -18,7 +19,7 @@ const links = [
   <section class="relative flex min-h-[70vh] items-center justify-center overflow-hidden px-6">
     <div class="relative text-center">
       <div class="font-display text-8xl font-extrabold flame-text sm:text-9xl">404</div>
-      <h1 class="mt-4 font-display text-2xl font-extrabold sm:text-3xl">{t("notFound.heading", "This block was orphaned")}</h1>
+      <h1 class="mt-4 font-display text-2xl font-extrabold sm:text-3xl">{headline(t("notFound.heading", "This block was orphaned"))}</h1>
       <p class="mx-auto mt-3 max-w-md text-muted">{t("notFound.body", "The page you're looking for isn't in the DAG. Let's get you back to a confirmed path.")}</p>
       <div class="mt-8 flex flex-wrap items-center justify-center gap-2">
         {links.map((l) => (<a href={l.href} class="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{l.t}</a>))}

@@ -585,7 +585,6 @@ export const nl: LocaleDict = {
     coverTitleFlame: 'toekomst het vereist',
     coverSubtitle: 'Standaard privé. Parallel van opzet. Verifieerbaar door bewijs. Een volledig nieuw opgebouwde Layer-1 met een ingebouwde markt voor AI-compute.',
     coverInvestorDeck: 'Investeerdersdeck',
-    coverConfidential: 'Vertrouwelijk',
 
     kickerProblem: 'Het probleem',
     kickerSolution: 'De oplossing',

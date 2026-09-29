@@ -585,7 +585,6 @@ export const uk: LocaleDict = {
     coverTitleFlame: 'вимагає майбутнє',
     coverSubtitle: 'Приватний за замовчуванням. Паралельний за задумом. Верифікований доказом. Layer-1 з нуля з вбудованим ринком для AI-обчислень.',
     coverInvestorDeck: 'Презентація для інвесторів',
-    coverConfidential: 'Конфіденційно',
 
     kickerProblem: 'Проблема',
     kickerSolution: 'Рішення',

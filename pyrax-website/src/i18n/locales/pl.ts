@@ -585,7 +585,6 @@ export const pl: LocaleDict = {
     coverTitleFlame: 'wymaga tego przyszłość',
     coverSubtitle: 'Prywatny domyślnie. Równoległy z założenia. Weryfikowalny dowodem. Zbudowany od podstaw Layer-1 z wbudowanym rynkiem obliczeń AI.',
     coverInvestorDeck: 'Prezentacja dla inwestorów',
-    coverConfidential: 'Poufne',
 
     kickerProblem: 'Problem',
     kickerSolution: 'Rozwiązanie',

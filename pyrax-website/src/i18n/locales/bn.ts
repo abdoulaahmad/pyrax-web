@@ -715,7 +715,6 @@ export const bn: LocaleDict = {
     coverSubtitle:
       "ডিফল্টভাবে ব্যক্তিগত। নকশায় প্যারালাল। প্রমাণে যাচাইযোগ্য। AI কম্পিউটের জন্য একটি বিল্ট-ইন মার্কেট সহ একটি from-scratch Layer-1।",
     coverInvestorDeck: "বিনিয়োগকারী ডেক",
-    coverConfidential: "গোপনীয়",
 
     // kickers
     kickerProblem: "সমস্যা",

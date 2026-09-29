@@ -619,7 +619,6 @@ export const ar: LocaleDict = {
     coverTitleFlame: "يتطلّبه المستقبل",
     coverSubtitle: "خاص افتراضيًا. متوازٍ بالتصميم. قابل للتحقق بالإثبات. شبكة Layer-1 مبنية من الصفر مع سوق مدمج لحوسبة الذكاء الاصطناعي.",
     coverInvestorDeck: "عرض المستثمرين",
-    coverConfidential: "سرّي",
 
     // kickers
     kickerProblem: "المشكلة",

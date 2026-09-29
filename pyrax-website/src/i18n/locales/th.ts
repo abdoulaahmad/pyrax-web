@@ -551,7 +551,6 @@ export const th: LocaleDict = {
     coverTitleFlame: "อนาคตต้องการ",
     coverSubtitle: "เป็นส่วนตัวโดยค่าเริ่มต้น ทำงานแบบขนานโดยการออกแบบ ตรวจสอบได้ด้วยพิสูจน์ Layer-1 ที่สร้างขึ้นใหม่ตั้งแต่ต้นพร้อมตลาดการประมวลผล AI ในตัว",
     coverInvestorDeck: "เด็คนักลงทุน",
-    coverConfidential: "เป็นความลับ",
     kickerProblem: "ปัญหา",
     kickerSolution: "ทางแก้",
     kickerTechnology: "เทคโนโลยี",

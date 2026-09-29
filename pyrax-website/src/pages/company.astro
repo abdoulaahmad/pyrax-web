@@ -4,6 +4,7 @@ import Site from "../layouts/Site.astro";
 import { DEFAULT_LOCALE, localizePath, resolveLocale } from "../i18n/config";
 import { useT } from "../i18n";
 import { DOMAINS, SOCIAL } from "../lib/endpoints";
+import { headline } from "../lib/headline";
 
 const lang = resolveLocale(Astro.url, Astro.cookies);
 const t = useT(lang);
@@ -28,7 +29,7 @@ const facts = [
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20">
       <div class="eyebrow eyebrow-rule text-[color:var(--color-brand)]">{t("companyPage.eyebrow", "Company")}</div>
-      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold uppercase sm:text-6xl">{t("companyPage.headingPre", "Money that is ")}<span class="flame-text">{t("companyPage.headingWord1", "private")}</span>{t("companyPage.headingMid", ", infrastructure that is ")}<span class="water-text">{t("companyPage.headingWord2", "unstoppable")}</span></h1>
+      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold uppercase sm:text-6xl">{headline(t("companyPage.headingPre", "Money that is "))}<span class="flame-text">{headline(t("companyPage.headingWord1", "private"))}</span>{headline(t("companyPage.headingMid", ", infrastructure that is "))}<span class="water-text">{headline(t("companyPage.headingWord2", "unstoppable"))}</span></h1>
       <p class="mt-5 max-w-2xl text-lg text-muted">{t("companyPage.subtitle", "PYRAX exists to make private, high-throughput, verifiable value transfer the default — and to put a verifiable compute economy on the same rails. We build in the open and gate ourselves to mainnet with an external audit.")}</p>
     </div>
   </section>
@@ -37,7 +38,7 @@ const facts = [
   <section class="mx-auto max-w-7xl px-6 py-16">
     <div class="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-center">
       <div data-reveal>
-        <h2 class="font-display text-3xl font-extrabold">{t("companyPage.missionTitle", "Our mission")}</h2>
+        <h2 class="font-display text-3xl font-extrabold">{headline(t("companyPage.missionTitle", "Our mission"))}</h2>
         <p class="mt-4 text-muted">{t("companyPage.missionPara1", "Public blockchains forced a false choice: transparency that leaks your whole financial life, or privacy tools bolted on as an afterthought. PYRAX rejects the trade-off. A GhostDAG gives the throughput of parallel work; shielded-by-default transfers give privacy without asking; a multi-VM execution layer meets developers where they are; and PYRAX Compute turns global GPUs into a verifiable compute market settled on-chain.")}</p>
         <p class="mt-4 text-muted">{t("companyPage.missionPara2", "We are deliberately unglamorous about the path: a faithful simulation running today, a closed alpha, a public testnet, and a single external audit before anything carries real value.")}</p>
       </div>
@@ -55,7 +56,7 @@ const facts = [
   <!-- PRINCIPLES -->
   <section class="border-y border-line bg-[color:var(--color-bg-2)]">
     <div class="mx-auto max-w-7xl px-6 py-16">
-      <div data-reveal><h2 class="font-display text-2xl font-extrabold">{t("companyPage.believeTitle", "What we believe")}</h2></div>
+      <div data-reveal><h2 class="font-display text-2xl font-extrabold">{headline(t("companyPage.believeTitle", "What we believe"))}</h2></div>
       <div class="mt-8 grid gap-4 sm:grid-cols-2">
         {principles.map((p, i) => (
           <div data-reveal data-reveal-delay={String((i % 4) + 1)} class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">

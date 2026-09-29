@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useT } from "../i18n";
 import { localizePath } from "../i18n/config";
 import { DOMAINS } from "../lib/endpoints";
+import { headline } from "../lib/headline";
 import LiveStats from "./LiveStats.tsx";
 
 function DagCanvas() {
@@ -164,10 +165,10 @@ export default function Hero({ lang = "en" }: { lang?: string }) {
             <>
               The blockchain<br />
               <span className="outline-text">built like the</span><br />
-              <span className="flame-text">future demands<span className="text-ink" style={{ WebkitTextStroke: 0 }}>.</span></span>
+              <span className="flame-text">future demands</span>
             </>
           ) : (
-            <span className="flame-text">{t("hero.title")}</span>
+            <span className="flame-text">{headline(t("hero.title"))}</span>
           )}
         </motion.h1>
 

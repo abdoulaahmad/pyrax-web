@@ -619,7 +619,6 @@ export const zhTW: LocaleDict = {
     coverTitleFlame: "未來所要求",
     coverSubtitle: "預設隱私。設計即並行。以證明可驗證。一條從零打造、內建 AI 算力市場的 Layer-1。",
     coverInvestorDeck: "投資人簡報",
-    coverConfidential: "機密",
 
     // kickers
     kickerProblem: "問題",

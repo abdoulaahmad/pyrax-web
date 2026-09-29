@@ -585,7 +585,6 @@ export const hi: LocaleDict = {
     coverTitleFlame: 'भविष्य की माँग',
     coverSubtitle: 'डिफ़ॉल्ट रूप से निजी। डिज़ाइन से समानांतर। प्रमाण से सत्यापन-योग्य। AI कंप्यूट के लिए एक अंतर्निर्मित मार्केट के साथ एक शुरुआत-से Layer-1।',
     coverInvestorDeck: 'निवेशक डेक',
-    coverConfidential: 'गोपनीय',
 
     kickerProblem: 'समस्या',
     kickerSolution: 'समाधान',

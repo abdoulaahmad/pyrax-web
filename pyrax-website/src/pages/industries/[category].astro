@@ -6,6 +6,7 @@ import { useT } from "../../i18n";
 import { categoryBySlug } from "../../lib/industries";
 
 import IndustryIcon from '../../components/IndustryIcon.astro';
+import { headline } from "../../lib/headline";
 
 const lang = resolveLocale(Astro.url, Astro.cookies);
 const { category = "" } = Astro.params;
@@ -24,7 +25,7 @@ const L = (p: string) => localizePath(lang, p);
         </span>
         <div>
           <div class="eyebrow" style={`color:${cat.color}`}>{cat.tagline}</div>
-          <h1 class="mt-1 font-display text-3xl font-extrabold uppercase sm:text-5xl">{cat.name}</h1>
+          <h1 class="mt-1 font-display text-3xl font-extrabold uppercase sm:text-5xl">{headline(cat.name)}</h1>
         </div>
       </div>
       <p class="mt-5 max-w-3xl text-lg text-muted">{cat.blurb}</p>

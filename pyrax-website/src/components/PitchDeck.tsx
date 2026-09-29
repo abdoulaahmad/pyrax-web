@@ -11,6 +11,7 @@ import { CATEGORIES, TOTAL_INDUSTRIES } from "../lib/industries";
 import { NETWORKS } from "../lib/networks";
 import { DOMAINS } from "../lib/endpoints";
 import { useT } from "../i18n";
+import { headline } from "../lib/headline";
 
 type T = (key: string, fallback?: string) => string;
 
@@ -21,8 +22,8 @@ const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transiti
 const Kicker = ({ children, color }: { children: React.ReactNode; color?: string }) => (
   <motion.div variants={item} className="eyebrow" style={color ? { color } : undefined}>{children}</motion.div>
 );
-const Title = ({ children }: { children: React.ReactNode }) => (
-  <motion.h2 variants={item} className="mt-3 font-display text-3xl font-semibold uppercase leading-[1.02] sm:text-5xl">{children}</motion.h2>
+const Title = ({ children }: { children: string }) => (
+  <motion.h2 variants={item} className="mt-3 font-display text-3xl font-semibold uppercase leading-[1.02] sm:text-5xl">{headline(children)}</motion.h2>
 );
 
 // ---- slides -------------------------------------------------------------------------------------
@@ -50,9 +51,9 @@ const SLIDES: Slide[] = [
     render: (t) => (
       <motion.div variants={stagger} initial="hidden" animate="show" className="flex h-full flex-col items-center justify-center text-center">
         <motion.img variants={item} src="/brand/logo-horizontal.svg" alt="PYRAX" className="nodrag h-16 w-auto sm:h-24" />
-        <motion.h1 variants={item} className="mt-8 max-w-4xl font-display text-4xl font-extrabold uppercase leading-tight sm:text-6xl">{t("pitch.coverTitlePre", "The blockchain built like the ")}<span className="flame-text">{t("pitch.coverTitleFlame", "future demands")}</span></motion.h1>
+        <motion.h1 variants={item} className="mt-8 max-w-4xl font-display text-4xl font-extrabold uppercase leading-tight sm:text-6xl">{headline(t("pitch.coverTitlePre", "The blockchain built like the "))}<span className="flame-text">{headline(t("pitch.coverTitleFlame", "future demands"))}</span></motion.h1>
         <motion.p variants={item} className="mt-5 max-w-2xl text-lg text-muted">{t("pitch.coverSubtitle", "Private by default. Parallel by design. Verifiable by proof. A from-scratch Layer-1 with a built-in market for AI compute.")}</motion.p>
-        <motion.div variants={item} className="mt-8 flex items-center gap-3 rounded-full border border-line bg-[color:var(--color-surface)] px-5 py-2 text-sm text-muted">{t("pitch.coverInvestorDeck", "Investor Deck")} <span className="text-faint">·</span> <span className="text-ink">{t("pitch.coverConfidential", "Confidential")}</span></motion.div>
+        <motion.div variants={item} className="mt-8 flex items-center gap-3 rounded-full border border-line bg-[color:var(--color-surface)] px-5 py-2 text-sm text-muted">{t("pitch.coverInvestorDeck", "Investor Deck")}</motion.div>
       </motion.div>
     ),
   },

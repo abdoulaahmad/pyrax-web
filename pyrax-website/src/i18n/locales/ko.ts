@@ -585,7 +585,6 @@ export const ko: LocaleDict = {
     coverTitleFlame: '블록체인',
     coverSubtitle: '기본값으로 프라이빗. 설계상 병렬. 증명으로 검증 가능. AI 컴퓨트를 위한 내장 마켓을 갖춘, 처음부터 새로 만든 Layer-1.',
     coverInvestorDeck: '투자자 덱',
-    coverConfidential: '대외비',
 
     kickerProblem: '문제',
     kickerSolution: '해법',

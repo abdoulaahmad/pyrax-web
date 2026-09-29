@@ -9,7 +9,6 @@ export const pitch = {
   coverTitleFlame: 'future demands',
   coverSubtitle: 'Private by default. Parallel by design. Verifiable by proof. A from-scratch Layer-1 with a built-in market for AI compute.',
   coverInvestorDeck: 'Investor Deck',
-  coverConfidential: 'Confidential',
 
   // kickers
   kickerProblem: 'The problem',

@@ -596,7 +596,6 @@ export const id: LocaleDict = {
     coverTitleFlame: 'tuntutan masa depan',
     coverSubtitle: 'Privat secara bawaan. Paralel secara desain. Dapat diverifikasi lewat bukti. Sebuah Layer-1 dari-nol dengan pasar bawaan untuk komputasi AI.',
     coverInvestorDeck: 'Deck Investor',
-    coverConfidential: 'Rahasia',
 
     kickerProblem: 'Masalahnya',
     kickerSolution: 'Solusinya',

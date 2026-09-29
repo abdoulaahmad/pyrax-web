@@ -619,7 +619,6 @@ export const fa: LocaleDict = {
     coverTitleFlame: "آینده می‌طلبد",
     coverSubtitle: "خصوصی به‌صورت پیش‌فرض. موازی از طریق طراحی. قابل‌اثبات با اثبات. یک Layer-1 از پایه با یک بازار درون‌ساخت برای محاسبات هوش مصنوعی.",
     coverInvestorDeck: "ارائه سرمایه‌گذاری",
-    coverConfidential: "محرمانه",
 
     // kickers
     kickerProblem: "مسئله",

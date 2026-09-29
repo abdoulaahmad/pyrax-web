@@ -6,6 +6,7 @@ import { DEFAULT_LOCALE, localizePath, resolveLocale } from "../i18n/config";
 import { useT } from "../i18n";
 import { CATEGORIES } from "../lib/industries";
 import { DOMAINS } from "../lib/endpoints";
+import { headline } from "../lib/headline";
 
 const lang = resolveLocale(Astro.url, Astro.cookies);
 const t = useT(lang);
@@ -74,7 +75,7 @@ const industryPhotos = CATEGORIES.map((c, i) => ({ ...c, img: `https://images.un
       <div class="mb-14 max-w-2xl">
         <div class="eyebrow text-[color:var(--color-brand)]">01 / Invariants</div>
         <h2 class="mt-4 text-3xl uppercase sm:text-5xl">
-          {lang === "en" ? (<>Four invariants, <span class="outline-text">not features.</span></>) : t("pillars.title")}
+          {lang === "en" ? (<>Four invariants <span class="outline-text">not features</span></>) : headline(t("pillars.title"))}
         </h2>
         <p class="mt-6 max-w-sm text-sm leading-relaxed text-muted">{t("pillars.subtitle")}</p>
       </div>
@@ -100,7 +101,7 @@ const industryPhotos = CATEGORIES.map((c, i) => ({ ...c, img: `https://images.un
       <div class="mb-10 grid gap-8 lg:grid-cols-2 lg:items-end">
         <div>
           <div class="eyebrow text-[color:var(--color-bolt-bright)]">02 / Built, not planned</div>
-          <h2 class="mt-4 text-2xl uppercase sm:text-4xl">A real, tested<br /><span class="outline-text">Layer-1 — today.</span></h2>
+          <h2 class="mt-4 text-2xl uppercase sm:text-4xl">A real tested<br /><span class="outline-text">Layer-1 — today</span></h2>
         </div>
         <p class="text-sm leading-relaxed text-muted">{t("homeExtra.techParagraph", "One binary, four chainspecs: a faithful simulation on real primitives, with the production consensus path wired end-to-end and gated to mainnet by external audit.")} <a href={L("/whitepaper")} class="font-semibold text-[color:var(--color-brand)]">{t("homeExtra.readWhitepaper", "Read the whitepaper →")}</a></p>
       </div>
@@ -136,7 +137,7 @@ const industryPhotos = CATEGORIES.map((c, i) => ({ ...c, img: `https://images.un
       <div class="grid gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div>
           <div class="eyebrow" style="color:var(--color-bolt-bright)">{t("homeExtra.computeEyebrow", "03 / PYRAX Compute · GPU Marketplace")}</div>
-          <h2 class="mt-4 text-2xl uppercase sm:text-4xl">Verifiable GPU compute. <br /><span class="outline-text" style="-webkit-text-stroke: 1.2px rgba(254,210,60,0.9)">Decentralized</span> on-chain.</h2>
+          <h2 class="mt-4 text-2xl uppercase sm:text-4xl">Verifiable GPU compute <br /><span class="outline-text" style="-webkit-text-stroke: 1.2px rgba(254,210,60,0.9)">Decentralized</span> on-chain</h2>
           <p class="mt-6 max-w-lg text-[0.95rem] leading-relaxed text-white/75">{t("homeExtra.computeParagraph", "PYRAX Compute turns global GPU hardware into an open, verifiable marketplace. Run AI inference, fine-tuning, and rendering settled on-chain through cryptographic execution receipts — replacing centralized cloud monopolies with permissionless, escrow-backed compute.")}</p>
           <div class="mt-8 flex flex-wrap gap-3">
             <a href={L("/industries/ai-data-compute")} class="rounded-full bg-white px-6 py-3.5 text-sm font-bold text-[#0c2744]">{t("homeExtra.computeHowItWorks", "Explore PYRAX Compute")}</a>
@@ -166,7 +167,7 @@ const industryPhotos = CATEGORIES.map((c, i) => ({ ...c, img: `https://images.un
       <div class="mb-11 flex flex-wrap items-end justify-between gap-4">
         <div>
           <div class="eyebrow text-[color:var(--color-brand)]">04 / Industries</div>
-          <h2 class="mt-4 text-2xl uppercase sm:text-4xl">PYRAX for<br /><span class="outline-text">your industry.</span></h2>
+          <h2 class="mt-4 text-2xl uppercase sm:text-4xl">PYRAX for<br /><span class="outline-text">your industry</span></h2>
         </div>
         <p class="max-w-sm text-sm leading-relaxed text-muted">{t("cta.industriesBody")}</p>
       </div>

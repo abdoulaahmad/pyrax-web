@@ -585,7 +585,6 @@ export const tr: LocaleDict = {
     coverTitleFlame: 'blok zinciri',
     coverSubtitle: 'Varsayılan olarak gizli. Tasarım gereği paralel. Kanıtla doğrulanabilir. AI hesaplaması için yerleşik bir pazara sahip, sıfırdan inşa edilmiş bir Layer-1.',
     coverInvestorDeck: 'Yatırımcı Sunumu',
-    coverConfidential: 'Gizli',
 
     kickerProblem: 'Sorun',
     kickerSolution: 'Çözüm',

@@ -619,7 +619,6 @@ export const de: LocaleDict = {
     coverTitleFlame: "Zukunft verlangt",
     coverSubtitle: "Standardmäßig privat. Parallel im Design. Verifizierbar durch Beweis. Eine von Grund auf neu entwickelte Layer-1 mit einem eingebauten Markt für KI-Rechenleistung.",
     coverInvestorDeck: "Investoren-Deck",
-    coverConfidential: "Vertraulich",
 
     // kickers
     kickerProblem: "Das Problem",

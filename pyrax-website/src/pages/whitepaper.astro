@@ -3,6 +3,7 @@
 import Site from "../layouts/Site.astro";
 import { DEFAULT_LOCALE, localizePath, resolveLocale } from "../i18n/config";
 import { useT } from "../i18n";
+import { headline } from "../lib/headline";
 
 const lang = resolveLocale(Astro.url, Astro.cookies);
 const t = useT(lang);
@@ -28,7 +29,7 @@ const toc = [
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20">
       <div class="flex items-center gap-2 eyebrow eyebrow-rule text-[color:var(--color-gold)]">{t("wpPage.eyebrow", "Whitepaper")} <span class="rounded-full border border-line px-2 py-0.5 text-faint">{t("wpPage.eyebrowVersion", "v4")}</span></div>
-      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold uppercase sm:text-6xl">{t("wpPage.headingPre", "A system that is ")}<span class="flame-text">{t("wpPage.headingWord", "built")}</span>{t("wpPage.headingPost", ", not merely designed")}</h1>
+      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold uppercase sm:text-6xl">{headline(t("wpPage.headingPre", "A system that is "))}<span class="flame-text">{headline(t("wpPage.headingWord", "built"))}</span>{headline(t("wpPage.headingPost", ", not merely designed"))}</h1>
       <p class="mt-5 max-w-3xl text-lg text-muted">{t("wpPage.subtitle", "v4 specifies PYRAX as it is implemented today — one binary across four chainspecs, a faithful simulation on real primitives, with the production consensus path wired end-to-end and honest about what remains gated behind external audit.")}</p>
       <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
         <button type="button" disabled class="cursor-not-allowed inline-flex items-center justify-center gap-2 rounded-full border border-line bg-[rgba(255,255,255,0.03)] px-6 py-3 text-sm font-semibold text-muted opacity-80">
@@ -59,7 +60,7 @@ const toc = [
   <!-- NORTH STARS -->
   <section class="border-y border-line bg-[color:var(--color-bg-2)]">
     <div class="mx-auto max-w-7xl px-6 py-16">
-      <div data-reveal><h2 class="font-display text-2xl font-extrabold">{t("wpPage.northStarsTitle", "Five north stars")}</h2><p class="mt-2 text-muted">{t("wpPage.northStarsSubtitle", "Constraints, not aspirations — the foundation crates encode them so every later layer is built against them.")}</p></div>
+      <div data-reveal><h2 class="font-display text-2xl font-extrabold">{headline(t("wpPage.northStarsTitle", "Five north stars"))}</h2><p class="mt-2 text-muted">{t("wpPage.northStarsSubtitle", "Constraints, not aspirations — the foundation crates encode them so every later layer is built against them.")}</p></div>
       <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {northStars.map((s, i) => (
           <div data-reveal data-reveal-delay={String((i % 5) + 1)} class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
@@ -76,7 +77,7 @@ const toc = [
   <section class="mx-auto max-w-7xl px-6 py-16">
     <div class="grid gap-10 lg:grid-cols-[1fr_1.4fr]">
       <div data-reveal>
-        <h2 class="font-display text-2xl font-extrabold">{t("wpPage.editionsTitle", "Two editions")}</h2>
+        <h2 class="font-display text-2xl font-extrabold">{headline(t("wpPage.editionsTitle", "Two editions"))}</h2>
         <p class="mt-3 text-muted">{t("wpPage.editionsBody", "The technical paper is the full specification. The plain-English edition explains the same system without the mathematics — start there if PYRAX is new to you.")}</p>
         <div class="mt-6 space-y-3">
           <div class="flex items-center justify-between rounded-2xl border border-line bg-[color:var(--color-surface)] p-4 opacity-80">

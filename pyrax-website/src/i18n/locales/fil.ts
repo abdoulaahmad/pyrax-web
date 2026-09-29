@@ -506,7 +506,6 @@ export const fil: LocaleDict = {
     coverTitleFlame: 'hinihingi ng hinaharap',
     coverSubtitle: 'Pribado bilang default. Parallel ayon sa disenyo. Verifiable sa pamamagitan ng patunay. Isang from-scratch na Layer-1 na may built-in na market para sa AI compute.',
     coverInvestorDeck: 'Investor Deck',
-    coverConfidential: 'Kumpidensyal',
 
     kickerProblem: 'Ang problema',
     kickerSolution: 'Ang solusyon',

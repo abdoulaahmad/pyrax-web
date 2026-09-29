@@ -585,7 +585,6 @@ export const zhCN: LocaleDict = {
     coverTitleFlame: '未来所要求',
     coverSubtitle: '默认隐私。设计即并行。以证明可验证。一条从零构建、内置 AI 算力市场的 Layer-1。',
     coverInvestorDeck: '投资者演示',
-    coverConfidential: '机密',
 
     kickerProblem: '问题',
     kickerSolution: '解决方案',

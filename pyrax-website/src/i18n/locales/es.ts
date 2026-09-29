@@ -619,7 +619,6 @@ export const es: LocaleDict = {
     coverTitleFlame: 'exige el futuro',
     coverSubtitle: 'Privada por defecto. Paralela por diseño. Verificable por prueba. Una Layer-1 creada desde cero con un mercado integrado de cómputo de IA.',
     coverInvestorDeck: 'Deck de inversores',
-    coverConfidential: 'Confidencial',
 
     // kickers
     kickerProblem: 'El problema',

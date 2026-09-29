@@ -540,7 +540,6 @@ export const ja: LocaleDict = {
     coverTitleFlame: '未来が求める',
     coverSubtitle: 'デフォルトでプライベート。設計から並列。証明で検証可能。AI コンピュートのための市場を組み込んだ、ゼロから作られた Layer-1。',
     coverInvestorDeck: '投資家向けデック',
-    coverConfidential: '社外秘',
     kickerProblem: '課題',
     kickerSolution: '解決策',
     kickerTechnology: 'テクノロジー',

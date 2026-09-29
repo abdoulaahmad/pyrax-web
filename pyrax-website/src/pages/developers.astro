@@ -5,6 +5,7 @@ import { DEFAULT_LOCALE, localizePath, resolveLocale } from "../i18n/config";
 import { useT } from "../i18n";
 import { DOMAINS, SOCIAL } from "../lib/endpoints";
 import { NETWORKS } from "../lib/networks";
+import { headline } from "../lib/headline";
 
 const lang = resolveLocale(Astro.url, Astro.cookies);
 const t = useT(lang);
@@ -42,7 +43,7 @@ const ICON: Record<string, string> = {
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
     <div class="relative mx-auto max-w-7xl px-6 py-20">
       <div class="eyebrow eyebrow-rule text-[color:var(--color-bolt-bright)]">{t("devPage.eyebrow", "Developers")}</div>
-      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold uppercase sm:text-6xl">{t("devPage.headingPre", "Build with the tools you ")}<span class="flame-text">{t("devPage.headingEmphasis", "already know")}</span></h1>
+      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold uppercase sm:text-6xl">{headline(t("devPage.headingPre", "Build with the tools you "))}<span class="flame-text">{headline(t("devPage.headingEmphasis", "already know"))}</span></h1>
       <p class="mt-5 max-w-2xl text-lg text-muted">{t("devPage.subtitle", "Ship Solidity today against the full Ethereum RPC, or reach for Rust, Cairo, shielded transfers, and verifiable compute when you need them. Start free on the always-on Seed sandbox.")}</p>
       <div class="mt-8 flex flex-wrap gap-3">
         <a href={DOMAINS.docs || DOMAINS.site} class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">{t("devPage.ctaDocs", "Read the docs →")}</a>
@@ -55,7 +56,7 @@ const ICON: Record<string, string> = {
   <section class="mx-auto max-w-7xl px-6 py-16">
     <div class="grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
       <div data-reveal>
-        <h2 class="font-display text-2xl font-extrabold">{t("devPage.connectTitle", "Connect in one step")}</h2>
+        <h2 class="font-display text-2xl font-extrabold">{headline(t("devPage.connectTitle", "Connect in one step"))}</h2>
         <p class="mt-2 text-muted">{t("devPage.connectBody", "The Seed network speaks the standard Ethereum JSON-RPC. Add it to any EVM wallet or framework and you are building — play-money, no signup, always on.")}</p>
         <dl class="mt-5 space-y-2 text-sm">
           <div class="flex justify-between gap-3 border-b border-line-soft pb-2"><dt class="text-faint">{t("devPage.connectNetwork", "Network")}</dt><dd class="font-mono text-ink">{seed.name}</dd></div>
@@ -87,7 +88,7 @@ await contract.waitForDeployment();`}</code></pre>
   <!-- BUILD PATHS -->
   <section class="border-y border-line bg-[color:var(--color-bg-2)]">
     <div class="mx-auto max-w-7xl px-6 py-16">
-      <div data-reveal><h2 class="font-display text-2xl font-extrabold">{t("devPage.pathsTitle", "Pick your path")}</h2><p class="mt-2 max-w-2xl text-muted">{t("devPage.pathsSubtitle", "Six ways to build on PYRAX — from a familiar Solidity deploy to shielded dApps and verifiable AI.")}</p></div>
+      <div data-reveal><h2 class="font-display text-2xl font-extrabold">{headline(t("devPage.pathsTitle", "Pick your path"))}</h2><p class="mt-2 max-w-2xl text-muted">{t("devPage.pathsSubtitle", "Six ways to build on PYRAX — from a familiar Solidity deploy to shielded dApps and verifiable AI.")}</p></div>
       <div class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {paths.map((p, i) => (
           <div data-reveal data-reveal-delay={String((i % 3) + 1)} class="group rounded-3xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:-translate-y-1 hover:border-[color:#34405a]">
@@ -102,7 +103,7 @@ await contract.waitForDeployment();`}</code></pre>
 
   <!-- RESOURCES -->
   <section class="mx-auto max-w-7xl px-6 py-16">
-    <div data-reveal><h2 class="font-display text-2xl font-extrabold">{t("devPage.resourcesTitle", "Resources")}</h2></div>
+    <div data-reveal><h2 class="font-display text-2xl font-extrabold">{headline(t("devPage.resourcesTitle", "Resources"))}</h2></div>
     <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {resources.map((r, i) => (
         <a data-reveal data-reveal-delay={String((i % 3) + 1)} href={r.href} class="group flex items-start gap-4 rounded-3xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:-translate-y-1 hover:border-[color:#34405a]">

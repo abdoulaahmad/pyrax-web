@@ -585,7 +585,6 @@ export const ru: LocaleDict = {
     coverTitleFlame: 'требует будущее',
     coverSubtitle: 'Приватный по умолчанию. Параллельный по замыслу. Проверяемый доказательством. Созданный с нуля Layer-1 со встроенным рынком AI-вычислений.',
     coverInvestorDeck: 'Презентация для инвесторов',
-    coverConfidential: 'Конфиденциально',
 
     kickerProblem: 'Проблема',
     kickerSolution: 'Решение',
