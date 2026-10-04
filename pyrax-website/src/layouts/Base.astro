@@ -7,9 +7,9 @@ import { isRtl } from "../i18n/config";
 interface Props { title: string; description?: string; lang?: string; ogImage?: string }
 const { title, description, lang = "en", ogImage = "/brand/pyrax-icon.png" } = Astro.props;
 const dir = isRtl(lang) ? "rtl" : "ltr";
-const fullTitle = title.includes("PYRAX") ? title : `${title} | PYRAX™ Network`;
+const fullTitle = title.includes("PYRAX") ? title : `${title} | PYRAX Network`;
 const desc = description ?? "PYRAX — a high-throughput, multi-VM Layer-1 with GhostDAG consensus, hybrid TriStream mining, and a verifiable AI compute marketplace.";
-const canonical = new URL(Astro.url.pathname, 'https://pyraxnetwork.org');
+const canonical = new URL(Astro.url.pathname, Astro.url.origin);
 // Single-language (English) for now — served at plain, locale-free URLs; hreflang alternates return
 // when the multi-locale routing is re-enabled.
 ---
@@ -29,7 +29,7 @@ const canonical = new URL(Astro.url.pathname, 'https://pyraxnetwork.org');
     <meta name="theme-color" content="#050609" />
     <!-- Open Graph / Twitter -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="PYRAX™ Network" />
+    <meta property="og:site_name" content="PYRAX Network" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={desc} />
     <meta property="og:image" content={ogImage} />
@@ -41,6 +41,29 @@ const canonical = new URL(Astro.url.pathname, 'https://pyraxnetwork.org');
   </head>
   <body class="min-h-screen bg-[color:var(--color-bg)] text-ink antialiased selection:bg-[rgba(245,134,34,0.25)]">
     <slot />
+    <script is:inline>
+      // Self-extract current domain to dynamically adapt explorer links across any domain
+      (() => {
+        const syncDynamicLinks = () => {
+          try {
+            const host = window.location.hostname;
+            if (!host || host === 'localhost' || host === '127.0.0.1' || /^(\d{1,3}\.){3}\d{1,3}$/.test(host)) return;
+            const base = host.replace(/^www\./, '');
+            document.querySelectorAll('a[href*="explorer."]').forEach((a) => {
+              try {
+                const u = new URL(a.href);
+                if (u.hostname.startsWith('explorer.')) {
+                  u.hostname = 'explorer.' + base;
+                  a.href = u.toString();
+                }
+              } catch (_) {}
+            });
+          } catch (_) {}
+        };
+        document.addEventListener("astro:page-load", syncDynamicLinks);
+        if (document.readyState !== "loading") syncDynamicLinks(); else document.addEventListener("DOMContentLoaded", syncDynamicLinks);
+      })();
+    </script>
     <script is:inline>
       // Progressive scroll-reveal — re-armed on every view-transition navigation.
       (() => {
