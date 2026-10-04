@@ -23,7 +23,7 @@ export const devPage = {
   path3Title: 'Prove with Cairo',
   path3Desc: 'Move heavy computation off-chain and verify a STARK proof on-chain via the Cairo VM.',
   path4Title: 'Build a shielded dApp',
-  path4Desc: 'Use shielded transfers and viewing keys so your users are private by default and your auditors still have read-only proof.',
+  path4Desc: 'Use shielded transfers and viewing keys so your users have confidential transfers and your auditors still have read-only proof.',
   path5Title: 'PYRAX Compute SDK',
   path5Desc: 'Programmatically escrow and run decentralized GPU workloads — AI inference, training, and rendering with cryptographic execution receipts.',
   path6Title: 'Run a node',

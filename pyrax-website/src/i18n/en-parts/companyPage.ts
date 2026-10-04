@@ -8,10 +8,10 @@ export const companyPage = {
   headingWord1: 'private',
   headingMid: ', infrastructure that is ',
   headingWord2: 'unstoppable',
-  subtitle: 'PYRAX exists to make private, high-throughput, verifiable value transfer the default — and to put a verifiable compute economy on the same rails. We build in the open and gate ourselves to mainnet with an external audit.',
+  subtitle: 'PYRAX exists to make high-throughput, verifiable value transfer with opt-in privacy the standard — and to put a verifiable compute economy on the same rails. We build in the open, advancing across development network stages toward comprehensive external audits before mainnet genesis.',
 
-  principle1Title: 'Private by default',
-  principle1Desc: 'Financial privacy is a right, not a premium feature. Every transfer is shielded unless a user chooses otherwise — and auditors can still verify with viewing keys.',
+  principle1Title: 'Opt-in privacy, auditable by choice',
+  principle1Desc: 'Financial privacy is available when needed, transparent by default for native liquidity. Shielded pools protect balances and counterparties, while cryptographic viewing keys enable selective disclosure for compliance and audits.',
   principle2Title: 'Decentralized for real',
   principle2Desc: 'No company-run bootstrap server, no privileged keys on mainnet. If PYRAX matters, it has to survive without us.',
   principle3Title: 'Prove, don\'t promise',
@@ -25,8 +25,8 @@ export const companyPage = {
   fact4Label: 'open-core protocol',
 
   missionTitle: 'Our mission',
-  missionPara1: 'Public blockchains forced a false choice: transparency that leaks your whole financial life, or privacy tools bolted on as an afterthought. PYRAX rejects the trade-off. A GhostDAG gives the throughput of parallel work; shielded-by-default transfers give privacy without asking; a multi-VM execution layer meets developers where they are; and PYRAX Compute turns global GPUs into a verifiable compute market settled on-chain.',
-  missionPara2: 'We are deliberately unglamorous about the path: a faithful simulation running today, a closed alpha, a public testnet, and a single external audit before anything carries real value.',
+  missionPara1: 'Public blockchains forced a false choice: transparency that leaks your whole financial life, or privacy tools bolted on as an afterthought. PYRAX rejects the trade-off. A GhostDAG gives the throughput of parallel work; opt-in shielded transfers provide privacy without compromising compliance; a multi-VM execution layer meets developers where they are; and PYRAX Compute turns global GPUs into a verifiable compute market settled on-chain.',
+  missionPara2: 'We are deliberately unglamorous about the path: a faithful simulation running today, a closed alpha, an incentivized public testnet, and comprehensive independent audits before anything carries real value.',
 
   believeTitle: 'What we believe',
 

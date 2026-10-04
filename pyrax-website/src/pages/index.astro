@@ -14,9 +14,9 @@ const L = (p: string) => localizePath(lang, p);
 
 const invariants = [
   { t: t("pillars.throughputT"), d: t("pillars.throughputD"), c: "#f68a24", n: "500k+", nl: "TPS TARGET" },
-  { t: t("pillars.privacyT"), d: t("pillars.privacyD"), c: "#5cbace", n: "ZK", nl: "NO TRUSTED SETUP" },
-  { t: t("pillars.decentralT"), d: t("pillars.decentralD"), c: "#3ddc84", n: "3+2", nl: "STREAMS · FINALITY" },
-  { t: t("pillars.ispT"), d: t("pillars.ispD"), c: "#5cbace", n: "Sphinx", nl: "ONION MIXNET" },
+  { t: t("pillars.multiVmT", "Multi-VM execution"), d: t("pillars.multiVmD"), c: "#5cbace", n: "3 VMs", nl: "EVM · WASM · CAIRO" },
+  { t: t("pillars.decentralT", "Hybrid consensus"), d: t("pillars.decentralD"), c: "#3ddc84", n: "3+2", nl: "STREAMS · FINALITY" },
+  { t: t("pillars.aiComputeT", "Verifiable AI & GPU compute"), d: t("pillars.aiComputeD"), c: "#fed23c", n: "AI / GPU", nl: "COMPUTE MARKETPLACE" },
 ];
 const tickerItems = [
   { k: "500k+", v: t("homeExtra.tickerTps", "TPS target") },
@@ -38,10 +38,10 @@ const techStats = [
 const techCards = [
   { tag: "CONSENSUS", t: t("homeExtra.techCard1T", "GhostDAG"), d: t("homeExtra.techCard1D", "A multi-parent web of blocks ordered by GhostDAG (k-cluster blue set), so honest parallel work is included, not orphaned."), href: L("/technology#consensus"), c: "#f68a24" },
   { tag: "MINING", t: t("homeExtra.techCard2T", "TriStream mining"), d: t("homeExtra.techCard2D", "Three streams over five seal lanes — BLAKE3 + SHA-256d (ASIC), kHeavyHash + Argon2id (GPU/CPU), and BLS proof-of-stake finality."), href: L("/technology#consensus"), c: "#5cbace" },
-  { tag: "PRIVACY", t: t("homeExtra.techCard3T", "Shielded by default"), d: t("homeExtra.techCard3D", "Every transfer hides sender, receiver, and amount with plonky2 proofs — no trusted setup, and the circuit is default-on today."), href: L("/technology#privacy"), c: "#fed23c" },
+  { tag: "PRIVACY", t: t("homeExtra.techCard3T", "Opt-in shielded transfers"), d: t("homeExtra.techCard3D", "Transparent by default for universal exchange and tooling compatibility, with optional zero-knowledge shielded transfers and viewing keys when confidentiality is needed."), href: L("/technology#privacy"), c: "#fed23c" },
   { tag: "EXECUTION", t: t("homeExtra.techCard4T", "Multi-VM L2 + ZK-rollup L3"), d: t("homeExtra.techCard4D", "EVM (revm), WASM (wasmtime), and Cairo with cross-VM calls; a recursive ZK-rollup folds thousands of proofs into one."), href: L("/technology#vms"), c: "#3ddc84" },
-  { tag: "NETWORK", t: t("homeExtra.techCard5T", "Bootstrapless & ISP-resistant"), d: t("homeExtra.techCard5D", "No company-run starter server; traffic rides an onion Sphinx mixnet so an on-path observer sees only uniform encrypted flows."), href: L("/technology#network"), c: "#3983c3" },
-  { tag: "SECURITY", t: t("homeExtra.techCard6T", "Audit-gated to mainnet"), d: t("homeExtra.techCard6D", "Formal invariants, a documented threat model, and a single external audit of consensus + ZK + bridge before PYRAX One."), href: L("/technology#security"), c: "#fed23c" },
+  { tag: "DEVELOPERS", t: t("homeExtra.techCard5T", "Multi-language dApp support"), d: t("homeExtra.techCard5D", "Write smart contracts in Solidity, Rust, Vyper, or Cairo with unified JSON-RPC tooling, full EVM equivalence, and native WebAssembly execution."), href: L("/developers"), c: "#3983c3" },
+  { tag: "COMPUTE", t: t("homeExtra.techCard6T", "Verifiable AI & GPU compute"), d: t("homeExtra.techCard6D", "An on-chain decentralized marketplace turning GPU hardware into verified compute for AI inference, training, and rendering with trustless escrow settlement."), href: L("/industries/ai-data-compute"), c: "#fed23c" },
 ];
 
 // Curated per-category photography for the industries teaser (same order as CATEGORIES).
@@ -96,14 +96,15 @@ const industryPhotos = CATEGORIES.map((c, i) => ({ ...c, img: `https://images.un
   </section>
 
   <!-- BUILT NOT PLANNED -->
-  <section class="border-b border-line bg-[color:var(--color-bg-2)] px-5 py-24 sm:px-10">
-    <div class="mx-auto max-w-6xl">
+  <section class="relative overflow-hidden border-b border-line bg-[color:var(--color-bg-2)] px-5 py-24 sm:px-10">
+    <div class="ghost-index absolute right-6 top-8 text-[9rem] sm:text-[12rem]">02</div>
+    <div class="relative mx-auto max-w-6xl">
       <div class="mb-10 grid gap-8 lg:grid-cols-2 lg:items-end">
         <div>
-          <div class="eyebrow text-[color:var(--color-bolt-bright)]">02 / Built, not planned</div>
-          <h2 class="mt-4 text-2xl uppercase sm:text-4xl">A real tested<br /><span class="outline-text">Layer-1 — today</span></h2>
+          <div class="eyebrow text-[color:var(--color-bolt-bright)]">{t("homeExtra.techEyebrow", "02 / The Architecture")}</div>
+          <h2 class="mt-4 text-2xl uppercase sm:text-4xl">A next-generation<br /><span class="outline-text">Layer-1 in the making</span></h2>
         </div>
-        <p class="text-sm leading-relaxed text-muted">{t("homeExtra.techParagraph", "One binary, four chainspecs: a faithful simulation on real primitives, with the production consensus path wired end-to-end and gated to mainnet by external audit.")} <a href={L("/whitepaper")} class="font-semibold text-[color:var(--color-brand)]">{t("homeExtra.readWhitepaper", "Read the whitepaper →")}</a></p>
+        <p class="text-sm leading-relaxed text-muted">{t("homeExtra.techParagraph", "Architected from the ground up for high throughput, opt-in privacy, and verifiable GPU compute.")} <a href={L("/whitepaper")} class="font-semibold text-[color:var(--color-brand)]">{t("homeExtra.readWhitepaper", "Read the whitepaper →")}</a></p>
       </div>
       <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {techStats.map((s) => (
@@ -130,8 +131,8 @@ const industryPhotos = CATEGORIES.map((c, i) => ({ ...c, img: `https://images.un
   </section>
 
   <!-- PYRAX COMPUTE — GPU MARKETPLACE -->
-  <section class="relative overflow-hidden border-b border-line bg-[linear-gradient(150deg,#0c2744_0%,#123a63_55%,#0e2c4d_100%)]">
-    <div class="ghost-index absolute -top-10 right-0 text-[16rem] sm:text-[22rem]" style="-webkit-text-stroke: 1px rgba(255,255,255,0.09)">GPU</div>
+  <section id="compute" class="scroll-mt-20 relative overflow-hidden border-b border-line bg-[linear-gradient(150deg,#0c2744_0%,#123a63_55%,#0e2c4d_100%)]">
+    <div class="ghost-index absolute right-6 top-8 text-[9rem] sm:text-[12rem]" style="-webkit-text-stroke: 1px rgba(255,255,255,0.09)">03</div>
     <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1600&auto=format&fit=crop" alt="" class="absolute inset-0 h-full w-full object-cover opacity-[0.14] saturate-[0.3]" />
     <div class="relative mx-auto max-w-6xl px-5 py-24 sm:px-10">
       <div class="grid gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
@@ -146,7 +147,7 @@ const industryPhotos = CATEGORIES.map((c, i) => ({ ...c, img: `https://images.un
         </div>
         <div class="grid grid-cols-2 gap-3.5">
           {[
-            { n: "8 PYRX", l: t("homeExtra.computeTile1L", "per compute unit (1 RTX-4090-hour)") },
+            { n: "On-Demand", l: t("homeExtra.computeTile1L", "metered compute units settled on-chain") },
             { n: "Escrow", l: t("homeExtra.computeTile2L", "trustless on-chain job settlement") },
             { n: "4-rung", l: t("homeExtra.computeTile3L", "verification & dispute ladder") },
             { n: "Global", l: t("homeExtra.computeTile4L", "distributed provider network") },
@@ -162,8 +163,9 @@ const industryPhotos = CATEGORIES.map((c, i) => ({ ...c, img: `https://images.un
   </section>
 
   <!-- INDUSTRIES TEASER (photography) -->
-  <section class="border-b border-line px-5 py-24 sm:px-10">
-    <div class="mx-auto max-w-6xl">
+  <section class="relative overflow-hidden border-b border-line px-5 py-24 sm:px-10">
+    <div class="ghost-index absolute right-6 top-8 text-[9rem] sm:text-[12rem]">04</div>
+    <div class="relative mx-auto max-w-6xl">
       <div class="mb-11 flex flex-wrap items-end justify-between gap-4">
         <div>
           <div class="eyebrow text-[color:var(--color-brand)]">04 / Industries</div>
@@ -190,8 +192,9 @@ const industryPhotos = CATEGORIES.map((c, i) => ({ ...c, img: `https://images.un
   </section>
 
   <!-- DUAL CTA -->
-  <section class="px-5 py-20 sm:px-10">
-    <div class="mx-auto grid max-w-6xl gap-4 lg:grid-cols-2">
+  <section class="relative overflow-hidden px-5 py-20 sm:px-10">
+    <div class="ghost-index absolute right-6 top-8 text-[9rem] sm:text-[12rem]">05</div>
+    <div class="relative mx-auto grid max-w-6xl gap-4 lg:grid-cols-2">
       <a href={L("/developers")} class="group relative overflow-hidden rounded-[1.25rem] border border-[rgba(246,138,36,0.3)] bg-[linear-gradient(140deg,rgba(218,84,39,0.14),var(--color-surface)_60%)] p-10 transition hover:border-[color:var(--color-brand)]">
         <div class="eyebrow text-[color:var(--color-brand)]">{t("nav.developers")}</div>
         <h3 class="mt-4 text-xl normal-case">{t("cta.buildTitle")}</h3>

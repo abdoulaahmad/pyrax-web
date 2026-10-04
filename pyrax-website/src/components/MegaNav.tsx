@@ -93,8 +93,8 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
       <header className={`fixed inset-x-0 top-0 z-50 border-b border-[color:var(--color-line)] bg-[rgba(5,6,9,0.96)] backdrop-blur-xl transition-shadow duration-300 ${scrolled || open ? "shadow-[0_12px_32px_rgba(0,0,0,0.28)]" : ""}`} onMouseLeave={leave}>
         <nav className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:px-6">
           {/* logo */}
-          <a href={L("/")} className="flex shrink-0 items-center" aria-label="PYRAX Network — home">
-            <img src="/brand/logo-horizontal.svg" alt="PYRAX™ Network" className="nodrag h-8 w-auto sm:h-9" />
+          <a href={L("/")} className="flex shrink-0 items-center py-1" aria-label="PYRAX Network — home">
+            <img src="/brand/logo-horizontal.svg" alt="PYRAX Network" className="nodrag h-10 w-auto sm:h-11 md:h-12 transition-transform duration-200 hover:scale-[1.02]" />
           </a>
 
           {/* desktop top-level */}
@@ -192,7 +192,7 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
             <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 400, damping: 40 }}
               className="absolute right-0 top-0 h-full w-[86%] max-w-sm overflow-y-auto border-l border-line bg-[rgba(8,10,17,0.99)] p-5">
               <div className="flex items-center justify-between">
-                <img src="/brand/logo-horizontal.svg" alt="PYRAX™ Network" className="nodrag h-8 w-auto" />
+                <img src="/brand/logo-horizontal.svg" alt="PYRAX Network" className="nodrag h-10 w-auto" />
                 <button onClick={() => setMobile(false)} className="grid h-9 w-9 place-items-center rounded-lg text-muted"><svg viewBox="0 0 24 24" className="h-5 w-5" {...P}><path d="M6 6l12 12M18 6 6 18"/></svg></button>
               </div>
               <div className="mt-5 space-y-1">
@@ -262,7 +262,7 @@ function ProductsPanel({ t, L }: any) {
         ))}
       </div>
       <a href={L("/network")} className={`${featTone} flex flex-col justify-between`}>
-        <div><div className="eyebrow text-[color:var(--color-brand)]">{t("navPanels.productsFeatureEyebrow", "Network")}</div><div className="mt-2 font-display text-xl font-extrabold">{t("navPanels.productsFeatureTitle", "One binary, four networks")}</div><p className="mt-1.5 text-sm text-muted">{t("navPanels.productsFeatureBody", "Seed, Forge, Rise, and One — a faithful simulation on real primitives, gated to mainnet by external audit.")}</p></div>
+        <div><div className="eyebrow text-[color:var(--color-brand)]">{t("navPanels.productsFeatureEyebrow", "Network")}</div><div className="mt-2 font-display text-xl font-extrabold">{t("navPanels.productsFeatureTitle", "One binary, four networks")}</div><p className="mt-1.5 text-sm text-muted">{t("navPanels.productsFeatureBody", "Seed, Forge, Rise, and One — four development stages to mainnet, gated by external audit.")}</p></div>
         <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--color-brand)]">{t("navPanels.productsFeatureLink", "Explore the network →")}</span>
       </a>
     </div>
@@ -292,9 +292,9 @@ function IndustriesPanel({ t, L }: any) {
 function TechnologyPanel({ t, L }: any) {
   const items = [
     { icon: "layers", name: t("navPanels.techConsensusName", "GhostDAG + TriStream"), desc: t("navPanels.techConsensusDesc", "A DAG ordered by GhostDAG; three streams, five seal lanes."), href: L("/technology#consensus") },
-    { icon: "lock", name: t("navPanels.techPrivacyName", "Private by default"), desc: t("navPanels.techPrivacyDesc", "Shielded transfers with no-trusted-setup ZK proofs."), href: L("/technology#privacy") },
+    { icon: "lock", name: t("navPanels.techPrivacyName", "Opt-in privacy"), desc: t("navPanels.techPrivacyDesc", "Shielded transfers with auditor viewing keys."), href: L("/technology#privacy") },
     { icon: "chip", name: t("navPanels.techVmsName", "Multi-VM (EVM/WASM/Cairo)"), desc: t("navPanels.techVmsDesc", "Three virtual machines, cross-VM calls, one chain."), href: L("/technology#vms") },
-    { icon: "node", name: t("navPanels.techNetworkName", "Sphinx onion mixnet"), desc: t("navPanels.techNetworkDesc", "Bootstrapless P2P with uniform packet mixnet."), href: L("/technology#network") },
+    { icon: "node", name: t("navPanels.techComputeName", "PYRAX Compute"), desc: t("navPanels.techComputeDesc", "On-demand verifiable GPU compute & 4-rung ladder."), href: L("/technology#compute") },
     { icon: "shield", name: t("navPanels.techSecurityName", "Security & audits"), desc: t("navPanels.techSecurityDesc", "Formal invariants, threat model, external audit gate."), href: L("/technology#security") },
     { icon: "book", name: t("navPanels.techWhitepaperName", "Whitepaper v4"), desc: t("navPanels.techWhitepaperDesc", "The full technical + plain-English papers."), href: L("/whitepaper") },
   ];

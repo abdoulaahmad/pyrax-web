@@ -8,7 +8,7 @@ interface Props { title: string; description?: string; lang?: string; ogImage?: 
 const { title, description, lang = "en", ogImage = "/brand/pyrax-icon.png" } = Astro.props;
 const dir = isRtl(lang) ? "rtl" : "ltr";
 const fullTitle = title.includes("PYRAX") ? title : `${title} | PYRAX™ Network`;
-const desc = description ?? "PYRAX — a private-by-default, fully decentralized, ISP-resistant Layer-1 with a GhostDAG and a verifiable AI compute marketplace.";
+const desc = description ?? "PYRAX — a high-throughput, multi-VM Layer-1 with GhostDAG consensus, hybrid TriStream mining, and a verifiable AI compute marketplace.";
 const canonical = new URL(Astro.url.pathname, 'https://pyraxnetwork.org');
 // Single-language (English) for now — served at plain, locale-free URLs; hreflang alternates return
 // when the multi-locale routing is re-enabled.

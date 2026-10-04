@@ -12,7 +12,7 @@ export const navPanels = {
   // ProductsPanel — feature card
   productsFeatureEyebrow: 'Network',
   productsFeatureTitle: 'One binary, four networks',
-  productsFeatureBody: 'Seed, Forge, Rise, and One — a faithful simulation on real primitives, gated to mainnet by external audit.',
+  productsFeatureBody: 'Seed, Forge, Rise, and One — four development stages to mainnet, gated by external audit.',
   productsFeatureLink: 'Explore the network →',
 
   // IndustriesPanel
@@ -22,14 +22,14 @@ export const navPanels = {
   // TechnologyPanel — item names + descriptions
   techConsensusName: 'GhostDAG + TriStream',
   techConsensusDesc: 'A DAG ordered by GhostDAG; three streams, five seal lanes.',
-  techPrivacyName: 'Private by default',
-  techPrivacyDesc: 'Shielded transfers with no-trusted-setup ZK proofs.',
+  techPrivacyName: 'Opt-in privacy',
+  techPrivacyDesc: 'Shielded transfers with auditor viewing keys.',
   techVmsName: 'Multi-VM (EVM/WASM/Cairo)',
   techVmsDesc: 'Three virtual machines, cross-VM calls, one chain.',
-  techNetworkName: 'Sphinx onion mixnet',
-  techNetworkDesc: 'Bootstrapless P2P with uniform packet mixnet.',
-  techComputeName: 'PYRAX Compute market',
-  techComputeDesc: 'Verifiable, on-chain-settled AI & GPU compute.',
+  techNetworkName: 'PYRAX Compute',
+  techNetworkDesc: 'On-demand verifiable GPU compute & 4-rung ladder.',
+  techComputeName: 'PYRAX Compute',
+  techComputeDesc: 'On-demand verifiable GPU compute & 4-rung ladder.',
   techNeuraxName: 'NEURAX compute market',
   techNeuraxDesc: 'Verifiable, on-chain-settled AI & GPU compute.',
   techSecurityName: 'Security & audits',

@@ -40,7 +40,7 @@ const built = (t: T) => [
   { n: "4", l: t("pitch.builtLabel1", "networks from one Rust binary") },
   { n: "3 VMs", l: t("pitch.builtLabel2", "EVM · WASM · Cairo, cross-VM") },
   { n: "500k", l: t("pitch.builtLabel3", "TPS design target (GhostDAG)") },
-  { n: "ZK", l: t("pitch.builtLabel4", "shielded by default, no trusted setup") },
+  { n: "ZK", l: t("pitch.builtLabel4", "opt-in shielded pools, no trusted setup") },
   { n: "100", l: t("pitch.builtLabel5", "industry playbooks + dApp ideas") },
   { n: "Apps", l: t("pitch.builtLabel6", "node, wallet, CLI, explorer — live") },
 ];
@@ -52,7 +52,7 @@ const SLIDES: Slide[] = [
       <motion.div variants={stagger} initial="hidden" animate="show" className="flex h-full flex-col items-center justify-center text-center">
         <motion.img variants={item} src="/brand/logo-horizontal.svg" alt="PYRAX" className="nodrag h-16 w-auto sm:h-24" />
         <motion.h1 variants={item} className="mt-8 max-w-4xl font-display text-4xl font-extrabold uppercase leading-tight sm:text-6xl">{headline(t("pitch.coverTitlePre", "The blockchain built like the "))}<span className="flame-text">{headline(t("pitch.coverTitleFlame", "future demands"))}</span></motion.h1>
-        <motion.p variants={item} className="mt-5 max-w-2xl text-lg text-muted">{t("pitch.coverSubtitle", "Private by default. Parallel by design. Verifiable by proof. A from-scratch Layer-1 with a built-in market for AI compute.")}</motion.p>
+        <motion.p variants={item} className="mt-5 max-w-2xl text-lg text-muted">{t("pitch.coverSubtitle", "Transparent rails with opt-in privacy. Parallel by design. Verifiable by proof. A from-scratch Layer-1 with a built-in market for AI compute.")}</motion.p>
         <motion.div variants={item} className="mt-8 flex items-center gap-3 rounded-full border border-line bg-[color:var(--color-surface)] px-5 py-2 text-sm text-muted">{t("pitch.coverInvestorDeck", "Investor Deck")}</motion.div>
       </motion.div>
     ),
@@ -85,12 +85,12 @@ const SLIDES: Slide[] = [
       <motion.div variants={stagger} initial="hidden" animate="show" className="mx-auto max-w-4xl">
         <Kicker>{t("pitch.kickerSolution", "The solution")}</Kicker>
         <Title>{t("pitch.solutionTitle", "PYRAX refuses the trade-off")}</Title>
-        <motion.p variants={item} className="mt-4 max-w-2xl text-lg text-muted">{t("pitch.solutionBody", "A GhostDAG for parallel throughput, shielded-by-default privacy with auditor viewing keys, three virtual machines, and a verifiable compute market — enforced as invariants in the lowest-level types.")}</motion.p>
+        <motion.p variants={item} className="mt-4 max-w-2xl text-lg text-muted">{t("pitch.solutionBody", "A GhostDAG for parallel throughput, opt-in shielded privacy with auditor viewing keys, three virtual machines, and verifiable AI compute — enforced as invariants in the lowest-level types.")}</motion.p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { t: t("pitch.solutionCard1Title", "Parallel"), d: t("pitch.solutionCard1Desc", "GhostDAG includes honest work instead of orphaning it."), c: "#f68a24" },
-            { t: t("pitch.solutionCard2Title", "Private"), d: t("pitch.solutionCard2Desc", "Every transfer hides sender, receiver, amount — by default."), c: "#7c5cff" },
-            { t: t("pitch.solutionCard3Title", "Decentralized"), d: t("pitch.solutionCard3Desc", "No bootstrap server. ISP-resistant Sphinx mixnet."), c: "#5cbace" },
+            { t: t("pitch.solutionCard2Title", "Private"), d: t("pitch.solutionCard2Desc", "Optional shielded pools hide sender, receiver, and amount on demand."), c: "#7c5cff" },
+            { t: t("pitch.solutionCard3Title", "Decentralized"), d: t("pitch.solutionCard3Desc", "Bootstrapless peer-to-peer discovery. Pure client-driven gossip with no corporate choke point."), c: "#5cbace" },
             { t: t("pitch.solutionCard4Title", "Verifiable"), d: t("pitch.solutionCard4Desc", "Open-core, audit-gated, proofs over promises."), c: "#34d399" },
           ].map((x) => (
             <motion.div key={x.t} variants={item} className="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
@@ -112,9 +112,9 @@ const SLIDES: Slide[] = [
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
           {[
             { t: t("pitch.techCard1Title", "GhostDAG + TriStream"), d: t("pitch.techCard1Desc", "Three streams over five seal lanes — ASIC, GPU, CPU — plus BLS proof-of-stake finality.") },
-            { t: t("pitch.techCard2Title", "Shielded by default"), d: t("pitch.techCard2Desc", "Orchard-style notes and recursive zk-SNARKs with no trusted setup; viewing keys for oversight.") },
+            { t: t("pitch.techCard2Title", "Opt-in shielded privacy"), d: t("pitch.techCard2Desc", "Optional Orchard-style notes and recursive zk-SNARKs with no trusted setup; viewing keys for oversight.") },
             { t: t("pitch.techCard3Title", "Multi-VM L2 + ZK-rollup L3"), d: t("pitch.techCard3Desc", "EVM, WASM, and Cairo with cross-VM calls; thousands of proofs fold into one.") },
-            { t: t("pitch.techCard4Title", "Sphinx onion mixnet"), d: t("pitch.techCard4Desc", "Bootstrapless peer routing and uniform packet encryption ensure zero network-level metadata leakage.") },
+            { t: t("pitch.techCard4Title", "Verifiable AI & GPU compute"), d: t("pitch.techCard4Desc", "On-chain marketplace turning GPU hardware into verified compute for AI models, secured by a 4-rung verification ladder.") },
           ].map((x) => (
             <motion.div key={x.t} variants={item} className="rounded-2xl border border-line bg-[color:var(--color-surface)] p-5">
               <h3 className="font-bold text-ink">{x.t}</h3>
@@ -156,11 +156,11 @@ const SLIDES: Slide[] = [
       <motion.div variants={stagger} initial="hidden" animate="show" className="mx-auto max-w-4xl">
         <Kicker>{t("pitch.kickerCompliance", "The moat")}</Kicker>
         <Title>{t("pitch.complianceTitle", "Enterprise privacy & compliance")}</Title>
-        <motion.p variants={item} className="mt-4 max-w-2xl text-muted">{t("pitch.complianceBody", "Shielded pools hide amounts, senders, and receivers by default — while cryptographic viewing keys enable selective, read-only disclosure for audits and regulatory oversight without compromising spending keys.")}</motion.p>
+        <motion.p variants={item} className="mt-4 max-w-2xl text-muted">{t("pitch.complianceBody", "Optional shielded pools hide amounts, senders, and receivers on demand — while cryptographic viewing keys enable selective, read-only disclosure for audits and regulatory oversight without compromising spending keys.")}</motion.p>
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { n: "Plonky2", l: t("pitch.complianceTile1Label", "zero-setup SNARK circuits") },
-            { n: "100%", l: t("pitch.complianceTile2Label", "default-on shielded transfers") },
+            { n: "100%", l: t("pitch.complianceTile2Label", "opt-in shielded transfers") },
             { n: "Audit Keys", l: t("pitch.complianceTile3Label", "selective cryptographic compliance") },
             { n: "0-Leak", l: t("pitch.complianceTile4Label", "amount, sender & receiver hidden") },
           ].map((x) => (
@@ -175,12 +175,36 @@ const SLIDES: Slide[] = [
     ),
   },
   {
+    id: "compute", label: "Compute",
+    render: (t) => (
+      <motion.div variants={stagger} initial="hidden" animate="show" className="mx-auto max-w-4xl">
+        <Kicker>{t("pitch.kickerCompute", "The wedge")}</Kicker>
+        <Title>{t("pitch.computeTitle", "PYRAX Compute — verifiable compute")}</Title>
+        <motion.p variants={item} className="mt-4 max-w-2xl text-muted">{t("pitch.computeBody", "The same GPUs that secure the chain run paid AI and compute jobs. A four-rung verification ladder replaces blind trust — and the demand is exploding.")}</motion.p>
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { n: "On-Demand", l: t("pitch.computeTile1Label", "metered compute units settled on-chain") },
+            { n: "Escrow", l: t("pitch.computeTile2Label", "trustless on-chain job settlement") },
+            { n: "4-Rung", l: t("pitch.computeTile3Label", "verification & dispute ladder") },
+            { n: "Pooled", l: t("pitch.computeTile4Label", "GPU miners double as compute nodes") },
+          ].map((x) => (
+            <motion.div key={x.l} variants={item} className="rounded-3xl border border-line bg-[rgba(254,210,60,0.06)] p-6">
+              <div className="font-mono text-2xl font-extrabold text-[color:var(--color-gold)]">{x.n}</div>
+              <div className="mt-1 text-xs text-muted">{x.l}</div>
+            </motion.div>
+          ))}
+        </div>
+        <motion.p variants={item} className="mt-4 text-sm text-faint">{t("pitch.computeFooter", "A crypto-economic AI-compute network that pays providers in the same token that secures consensus — a self-reinforcing flywheel.")}</motion.p>
+      </motion.div>
+    ),
+  },
+  {
     id: "traction", label: "Traction",
     render: (t) => (
       <motion.div variants={stagger} initial="hidden" animate="show" className="mx-auto max-w-4xl">
         <Kicker>{t("pitch.kickerTraction", "Traction")}</Kicker>
-        <Title>{t("pitch.tractionTitle", "Built, not planned")}</Title>
-        <motion.p variants={item} className="mt-4 max-w-2xl text-muted">{t("pitch.tractionBody", "The v4 whitepaper describes a system that is substantially implemented and tested — running today as a faithful simulation on real primitives, with the production consensus path wired end-to-end.")}</motion.p>
+        <Title>{t("pitch.tractionTitle", "Active Development")}</Title>
+        <motion.p variants={item} className="mt-4 max-w-2xl text-muted">{t("pitch.tractionBody", "The v4 whitepaper specifies a system actively being engineered and tested — advancing across development network stages with production consensus and cryptographic paths wired end-to-end.")}</motion.p>
         <div className="mt-8 grid gap-3 sm:grid-cols-3">
           {built(t).map((x) => (
             <motion.div key={x.l} variants={item} className="rounded-2xl border border-line bg-[color:var(--color-surface)] p-5 text-center">

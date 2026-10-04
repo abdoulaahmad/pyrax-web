@@ -39,7 +39,7 @@ export const networkPage = {
   roadmap3Body: 'Open, incentivized testnet with the emission ramp — the audit-facing rehearsal, load-tested in the open.',
   roadmap4P: 'Gate',
   roadmap4Title: 'External audit',
-  roadmap4Body: 'A single independent audit of consensus, the ZK circuits, and the bridge. Nothing reaches mainnet before it clears.',
+  roadmap4Body: 'Comprehensive independent audits of consensus, multi-VM execution, and bridge contracts. Nothing reaches mainnet before clearing.',
   roadmap5P: 'Launch',
   roadmap5Title: 'PYRAX One · mainnet',
   roadmap5Body: 'The genesis ceremony, the 50B hard cap enforced in consensus, and real value — after the gate.',

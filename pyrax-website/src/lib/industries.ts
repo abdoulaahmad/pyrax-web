@@ -26,7 +26,7 @@ export const CATEGORIES: IndustryCategory[] = [
   {
     slug: "finance-banking", name: "Finance & Banking", tagline: "Programmable, private, instant money",
     icon: "bank", color: "#f68a24",
-    blurb: "Settlement in seconds, privacy by default, and compliance you can prove — DeFi rails, payments, lending, and capital markets on one chain.",
+    blurb: "Settlement in seconds, opt-in privacy, and compliance you can prove — DeFi rails, payments, lending, and capital markets on one chain.",
     businesses: [
       { slug: "retail-banking", name: "Retail Banking", hook: "Shielded accounts, instant transfers, and audited reserves." },
       { slug: "payments-remittances", name: "Payments & Remittances", hook: "Sub-cent cross-border transfers that settle in seconds." },

@@ -11,7 +11,7 @@ const t = useT(lang);
 const L = (p: string) => localizePath(lang, p);
 
 const principles = [
-  { t: t("companyPage.principle1Title", "Private by default"), d: t("companyPage.principle1Desc", "Financial privacy is a right, not a premium feature. Every transfer is shielded unless a user chooses otherwise — and auditors can still verify with viewing keys."), c: "#7c5cff" },
+  { t: t("companyPage.principle1Title", "Opt-in privacy, auditable by choice"), d: t("companyPage.principle1Desc", "Financial privacy is available when needed, transparent by default for native liquidity. Shielded pools protect balances and counterparties, while cryptographic viewing keys enable selective disclosure for compliance and audits."), c: "#7c5cff" },
   { t: t("companyPage.principle2Title", "Decentralized for real"), d: t("companyPage.principle2Desc", "No company-run bootstrap server, no privileged keys on mainnet. If PYRAX matters, it has to survive without us."), c: "#5cbace" },
   { t: t("companyPage.principle3Title", "Prove, don't promise"), d: t("companyPage.principle3Desc", "Claims on this site map to code you can read. The supply cap is enforced in consensus; results come with cryptographic proof."), c: "#34d399" },
   { t: t("companyPage.principle4Title", "Open-core"), d: t("companyPage.principle4Desc", "The protocol, node, and SDK are Apache-2.0. We compete on execution and ecosystem, not on secrecy."), c: "#f68a24" },
@@ -24,73 +24,119 @@ const facts = [
   { n: "100%", l: t("companyPage.fact4Label", "open-core protocol") },
 ];
 ---
-<Site title="Company — PYRAX™ Network" description="PYRAX is building a private-by-default, fully decentralized, audit-gated Layer-1 with a verifiable AI compute market. Our mission, principles, and how to reach us." lang={lang}>
-  <section class="relative overflow-hidden border-b border-line">
+<Site title={t("companyPage.eyebrow", "Company") + " — PYRAX™ Network"} description={t("companyPage.subtitle", "PYRAX exists to make high-throughput, verifiable value transfer with opt-in privacy the standard — and to put a verifiable compute economy on the same rails.")} lang={lang}>
+  
+  <!-- HERO -->
+  <section class="relative overflow-hidden border-b border-line px-5 py-24 sm:px-10">
+    <div class="ghost-index absolute right-6 top-8 text-[9rem] sm:text-[14rem]" style="-webkit-text-stroke: 1px rgba(255,255,255,0.07)">CORP</div>
     <div class="grid-backdrop absolute inset-0 opacity-40"></div>
-    <div class="relative mx-auto max-w-7xl px-6 py-20">
-      <div class="eyebrow eyebrow-rule text-[color:var(--color-brand)]">{t("companyPage.eyebrow", "Company")}</div>
-      <h1 class="mt-3 max-w-4xl font-display text-4xl font-extrabold uppercase sm:text-6xl">{headline(t("companyPage.headingPre", "Money that is "))}<span class="flame-text">{headline(t("companyPage.headingWord1", "private"))}</span>{headline(t("companyPage.headingMid", ", infrastructure that is "))}<span class="water-text">{headline(t("companyPage.headingWord2", "unstoppable"))}</span></h1>
-      <p class="mt-5 max-w-2xl text-lg text-muted">{t("companyPage.subtitle", "PYRAX exists to make private, high-throughput, verifiable value transfer the default — and to put a verifiable compute economy on the same rails. We build in the open and gate ourselves to mainnet with an external audit.")}</p>
-    </div>
-  </section>
-
-  <!-- MISSION -->
-  <section class="mx-auto max-w-7xl px-6 py-16">
-    <div class="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-center">
-      <div data-reveal>
-        <h2 class="font-display text-3xl font-extrabold">{headline(t("companyPage.missionTitle", "Our mission"))}</h2>
-        <p class="mt-4 text-muted">{t("companyPage.missionPara1", "Public blockchains forced a false choice: transparency that leaks your whole financial life, or privacy tools bolted on as an afterthought. PYRAX rejects the trade-off. A GhostDAG gives the throughput of parallel work; shielded-by-default transfers give privacy without asking; a multi-VM execution layer meets developers where they are; and PYRAX Compute turns global GPUs into a verifiable compute market settled on-chain.")}</p>
-        <p class="mt-4 text-muted">{t("companyPage.missionPara2", "We are deliberately unglamorous about the path: a faithful simulation running today, a closed alpha, a public testnet, and a single external audit before anything carries real value.")}</p>
-      </div>
-      <div data-reveal data-reveal-delay="1" class="grid grid-cols-2 gap-3">
-        {facts.map((f) => (
-          <div class="rounded-2xl border border-line bg-[color:var(--color-surface)] p-5">
-            <div class="font-mono text-2xl font-extrabold flame-text">{f.n}</div>
-            <div class="mt-1 text-xs text-muted">{f.l}</div>
-          </div>
-        ))}
+    <div class="relative mx-auto max-w-6xl">
+      <div class="max-w-3xl">
+        <div class="eyebrow eyebrow-rule text-[color:var(--color-brand)]">{t("companyPage.eyebrow", "Company")}</div>
+        <h1 class="mt-4 max-w-4xl font-display text-3xl font-extrabold uppercase sm:text-5xl lg:text-6xl tracking-tight leading-[1.04]">
+          {headline(t("companyPage.headingPre", "Money that is "))}<span class="flame-text">{headline(t("companyPage.headingWord1", "private"))}</span>, <br />
+          <span class="outline-text">Infrastructure that is {headline(t("companyPage.headingWord2", "unstoppable"))}</span>
+        </h1>
+        <p class="mt-6 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+          {t("companyPage.subtitle", "PYRAX exists to make high-throughput, verifiable value transfer with opt-in privacy the standard — and to put a verifiable compute economy on the same rails. We build in the open, advancing across development network stages toward comprehensive external audits before mainnet genesis.")}
+        </p>
       </div>
     </div>
   </section>
 
-  <!-- PRINCIPLES -->
-  <section class="border-y border-line bg-[color:var(--color-bg-2)]">
-    <div class="mx-auto max-w-7xl px-6 py-16">
-      <div data-reveal><h2 class="font-display text-2xl font-extrabold">{headline(t("companyPage.believeTitle", "What we believe"))}</h2></div>
-      <div class="mt-8 grid gap-4 sm:grid-cols-2">
+  <!-- 01 · MISSION & TRACTION -->
+  <section class="scroll-mt-32 relative overflow-hidden border-b border-line px-5 py-24 sm:px-10">
+    <div class="ghost-index absolute right-6 top-8 text-[9rem] sm:text-[12rem]" style="-webkit-text-stroke: 1px rgba(255,255,255,0.06)">01</div>
+    <div class="relative mx-auto max-w-6xl">
+      <div class="grid gap-12 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+        <div data-reveal class="max-w-2xl">
+          <div class="eyebrow text-[color:var(--color-brand)]">01 / Mission & Traction</div>
+          <h2 class="mt-4 text-2xl uppercase sm:text-4xl font-display font-extrabold">{headline(t("companyPage.missionTitle", "Our mission"))}</h2>
+          <p class="mt-4 text-sm leading-relaxed text-muted">{t("companyPage.missionPara1", "Public blockchains forced a false choice: transparency that leaks your whole financial life, or privacy tools bolted on as an afterthought. PYRAX rejects the trade-off. A GhostDAG gives the throughput of parallel work; opt-in shielded transfers provide privacy without compromising compliance; a multi-VM execution layer meets developers where they are; and PYRAX Compute turns global GPUs into a verifiable compute market settled on-chain.")}</p>
+          <p class="mt-4 text-sm leading-relaxed text-muted">{t("companyPage.missionPara2", "We are deliberately unglamorous about the path: a faithful simulation running today, a closed alpha, an incentivized public testnet, and comprehensive independent audits before anything carries real value.")}</p>
+        </div>
+        <div data-reveal data-reveal-delay="1" class="grid grid-cols-2 gap-3.5">
+          {facts.map((f) => (
+            <div class="relative rounded-2xl border border-line bg-[color:var(--color-surface)] p-5">
+              <span class="absolute -top-px left-3.5 h-px w-6 bg-[color:var(--color-brand)]"></span>
+              <div class="font-mono text-2xl font-extrabold flame-text">{f.n}</div>
+              <div class="mt-2 font-mono text-[0.62rem] leading-tight text-faint">{f.l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 · CORE PRINCIPLES -->
+  <section class="scroll-mt-32 relative overflow-hidden border-b border-line bg-[color:var(--color-bg-2)] px-5 py-24 sm:px-10">
+    <div class="ghost-index absolute right-6 top-8 text-[9rem] sm:text-[12rem]" style="-webkit-text-stroke: 1px rgba(255,255,255,0.06)">02</div>
+    <div class="relative mx-auto max-w-6xl">
+      <div data-reveal class="max-w-2xl">
+        <div class="eyebrow text-[#a78bfa]">02 / Core Principles</div>
+        <h2 class="mt-4 text-2xl uppercase sm:text-4xl font-display font-extrabold">{headline(t("companyPage.believeTitle", "What we believe"))}</h2>
+      </div>
+      <div class="mt-10 grid gap-4 sm:grid-cols-2">
         {principles.map((p, i) => (
-          <div data-reveal data-reveal-delay={String((i % 4) + 1)} class="rounded-3xl border border-line bg-[color:var(--color-surface)] p-6">
-            <div class="h-1 w-10 rounded-full" style={`background:${p.c}`}></div>
-            <h3 class="mt-4 text-lg font-bold text-ink">{p.t}</h3>
-            <p class="mt-2 text-sm text-muted">{p.d}</p>
+          <div data-reveal data-reveal-delay={String((i % 4) + 1)} class="relative rounded-2xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:border-[color:var(--color-line-soft)]">
+            <span class="absolute -top-px left-4 h-px w-6" style={`background:${p.c}`}></span>
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-[0.62rem] text-faint">PRINCIPLE 0{i + 1}</span>
+              <span class="h-1.5 w-1.5 rounded-full" style={`background:${p.c}`}></span>
+            </div>
+            <h3 class="mt-4 font-display text-base font-bold text-ink">{p.t}</h3>
+            <p class="mt-2 text-xs leading-relaxed text-muted">{p.d}</p>
           </div>
         ))}
       </div>
     </div>
   </section>
 
-  <!-- CONTACT -->
-  <section class="mx-auto max-w-7xl px-6 py-16">
-    <div class="grid gap-4 lg:grid-cols-3">
-      <a href={DOMAINS.teamPortal} class="group rounded-3xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:-translate-y-1 hover:border-[color:#34405a]">
-        <h3 class="font-display text-xl font-extrabold">{t("companyPage.contactTeamTitle", "Team & careers")}</h3>
-        <p class="mt-2 text-sm text-muted">{t("companyPage.contactTeamBody", "The gated team portal — for contributors and collaborators building PYRAX.")}</p>
-        <span class="mt-4 inline-flex text-sm font-semibold text-[color:var(--color-brand)]">{t("companyPage.contactTeamLink", "Team portal →")}</span>
-      </a>
-      <a href="mailto:hello@pyrax.org" class="group rounded-3xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:-translate-y-1 hover:border-[color:#34405a]">
-        <h3 class="font-display text-xl font-extrabold">{t("companyPage.contactGetInTouchTitle", "Get in touch")}</h3>
-        <p class="mt-2 text-sm text-muted">{t("companyPage.contactGetInTouchBody", "Partnerships, press, and ecosystem enquiries.")}</p>
-        <span class="mt-4 inline-flex text-sm font-semibold text-[color:var(--color-brand)]">{t("companyPage.contactGetInTouchLink", "hello@pyrax.org →")}</span>
-      </a>
-      <a href={SOCIAL.github} class="group rounded-3xl border border-line bg-[radial-gradient(120%_120%_at_100%_0%,rgba(245,134,34,0.12),transparent_60%)] p-6 transition hover:-translate-y-1 hover:border-[color:#34405a]">
-        <h3 class="font-display text-xl font-extrabold">{t("companyPage.contactSourceTitle", "Read the source")}</h3>
-        <p class="mt-2 text-sm text-muted">{t("companyPage.contactSourceBody", "Everything on this site maps to open-core code. Verify it.")}</p>
-        <span class="mt-4 inline-flex text-sm font-semibold text-[color:var(--color-brand)]">{t("companyPage.contactSourceLink", "GitHub →")}</span>
-      </a>
-    </div>
-    <div class="mt-10 flex flex-wrap items-center gap-3">
-      <a href={L("/pitch")} class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">{t("companyPage.ctaPitch", "See the investor pitch →")}</a>
-      <a href={L("/whitepaper")} class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("companyPage.ctaWhitepaper", "Read the whitepaper")}</a>
+  <!-- 03 · ENGAGE & CONTRIBUTE -->
+  <section class="scroll-mt-32 relative overflow-hidden px-5 py-24 sm:px-10">
+    <div class="ghost-index absolute right-6 top-8 text-[9rem] sm:text-[12rem]" style="-webkit-text-stroke: 1px rgba(255,255,255,0.06)">03</div>
+    <div class="relative mx-auto max-w-6xl">
+      <div data-reveal class="max-w-2xl">
+        <div class="eyebrow text-[color:var(--color-gold)]">03 / Engage & Contribute</div>
+        <h2 class="mt-4 text-2xl uppercase sm:text-4xl font-display font-extrabold">Connect with the Protocol</h2>
+      </div>
+
+      <div class="mt-10 grid gap-4 lg:grid-cols-3">
+        <a href={DOMAINS.teamPortal} class="group relative rounded-2xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:border-[color:var(--color-line-soft)] hover:bg-[color:var(--color-elevated)]">
+          <div class="flex items-center justify-between">
+            <span class="font-mono text-[0.65rem] uppercase tracking-wider text-[color:var(--color-brand)]">PORTAL</span>
+            <span class="text-sm text-faint transition group-hover:translate-x-1 group-hover:text-ink">→</span>
+          </div>
+          <h3 class="mt-4 font-display text-lg font-bold text-ink">{t("companyPage.contactTeamTitle", "Team & careers")}</h3>
+          <p class="mt-2 text-xs leading-relaxed text-muted">{t("companyPage.contactTeamBody", "The gated team portal — for contributors and collaborators building PYRAX.")}</p>
+          <span class="mt-4 inline-flex items-center text-xs font-semibold text-[color:var(--color-brand)]">{t("companyPage.contactTeamLink", "Team portal →")}</span>
+        </a>
+
+        <a href="mailto:hello@pyrax.org" class="group relative rounded-2xl border border-line bg-[color:var(--color-surface)] p-6 transition hover:border-[color:var(--color-line-soft)] hover:bg-[color:var(--color-elevated)]">
+          <div class="flex items-center justify-between">
+            <span class="font-mono text-[0.65rem] uppercase tracking-wider text-[color:var(--color-gold)]">CONTACT</span>
+            <span class="text-sm text-faint transition group-hover:translate-x-1 group-hover:text-ink">→</span>
+          </div>
+          <h3 class="mt-4 font-display text-lg font-bold text-ink">{t("companyPage.contactGetInTouchTitle", "Get in touch")}</h3>
+          <p class="mt-2 text-xs leading-relaxed text-muted">{t("companyPage.contactGetInTouchBody", "Partnerships, press, and ecosystem enquiries.")}</p>
+          <span class="mt-4 inline-flex items-center text-xs font-semibold text-[color:var(--color-brand)]">{t("companyPage.contactGetInTouchLink", "hello@pyrax.org →")}</span>
+        </a>
+
+        <a href={SOCIAL.github} class="group relative rounded-2xl border border-line bg-[radial-gradient(120%_120%_at_100%_0%,rgba(245,134,34,0.08),transparent_60%)] p-6 transition hover:border-[color:var(--color-line-soft)] hover:bg-[color:var(--color-elevated)]">
+          <div class="flex items-center justify-between">
+            <span class="font-mono text-[0.65rem] uppercase tracking-wider text-[color:var(--color-positive)]">SOURCE</span>
+            <span class="text-sm text-faint transition group-hover:translate-x-1 group-hover:text-ink">→</span>
+          </div>
+          <h3 class="mt-4 font-display text-lg font-bold text-ink">{t("companyPage.contactSourceTitle", "Read the source")}</h3>
+          <p class="mt-2 text-xs leading-relaxed text-muted">{t("companyPage.contactSourceBody", "Everything on this site maps to open-core code. Verify it.")}</p>
+          <span class="mt-4 inline-flex items-center text-xs font-semibold text-[color:var(--color-brand)]">{t("companyPage.contactSourceLink", "GitHub →")}</span>
+        </a>
+      </div>
+
+      <div class="mt-12 flex flex-wrap items-center gap-3">
+        <a href={L("/pitch")} class="rounded-full bg-gradient-to-r from-[color:var(--color-gold)] via-[color:var(--color-brand)] to-[color:var(--color-ember)] px-6 py-3 text-sm font-bold text-[#1a0f06] transition hover:brightness-110">{t("companyPage.ctaPitch", "See the investor pitch →")}</a>
+        <a href={L("/whitepaper")} class="rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition hover:border-[color:#34405a]">{t("companyPage.ctaWhitepaper", "Read the whitepaper")}</a>
+      </div>
     </div>
   </section>
 </Site>
