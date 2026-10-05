@@ -206,6 +206,7 @@ export default function MegaNav({ lang = "en" }: { lang?: string }) {
                   <a href={L("/industries")} className="mobile-link text-[color:var(--color-brand)]">{t("nav.exploreIndustries")}</a>
                 </MobileGroup>
                 <a href={L("/technology")} className="mobile-top">{t("nav.technology")}</a>
+                <a href={L("/neurax")} className="mobile-top">Neurax AI</a>
                 <a href={L("/token")} className="mobile-top">{t("nav.token")}</a>
                 <a href={L("/network")} className="mobile-top">{t("nav.network")}</a>
                 <a href={L("/developers")} className="mobile-top">{t("nav.developers")}</a>
@@ -295,6 +296,7 @@ function TechnologyPanel({ t, L }: any) {
     { icon: "lock", name: t("navPanels.techPrivacyName", "Opt-in privacy"), desc: t("navPanels.techPrivacyDesc", "Shielded transfers with auditor viewing keys."), href: L("/technology#privacy") },
     { icon: "chip", name: t("navPanels.techVmsName", "Multi-VM (EVM/WASM/Cairo)"), desc: t("navPanels.techVmsDesc", "Three virtual machines, cross-VM calls, one chain."), href: L("/technology#vms") },
     { icon: "node", name: t("navPanels.techComputeName", "PYRAX Compute"), desc: t("navPanels.techComputeDesc", "On-demand verifiable GPU compute & 4-rung ladder."), href: L("/technology#compute") },
+    { icon: "node", name: t("navPanels.techNeuraxName", "NEURAX compute market"), desc: t("navPanels.techNeuraxDesc", "Verifiable, on-chain-settled AI & GPU compute."), href: L("/neurax") },
     { icon: "shield", name: t("navPanels.techSecurityName", "Security & audits"), desc: t("navPanels.techSecurityDesc", "Formal invariants, threat model, external audit gate."), href: L("/technology#security") },
     { icon: "book", name: t("navPanels.techWhitepaperName", "Whitepaper v4"), desc: t("navPanels.techWhitepaperDesc", "The full technical + plain-English papers."), href: L("/whitepaper") },
   ];

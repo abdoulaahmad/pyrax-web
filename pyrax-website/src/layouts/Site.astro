@@ -2,14 +2,25 @@
 // SPDX-License-Identifier: LicenseRef-Proprietary
 import Base from "./Base.astro";
 import MegaNav from "../components/MegaNav.tsx";
+import NeuraxNav from "../components/NeuraxNav.tsx";
 import Footer from "../components/Footer.astro";
-interface Props { title: string; description?: string; lang?: string; ogImage?: string }
-const { title, description, lang = "en", ogImage } = Astro.props;
+interface Props {
+  title: string;
+  description?: string;
+  lang?: string;
+  ogImage?: string;
+  navVariant?: "default" | "neurax";
+}
+const { title, description, lang = "en", ogImage, navVariant = "default" } = Astro.props;
 ---
 <Base title={title} description={description} lang={lang} ogImage={ogImage}>
-  <MegaNav client:load lang={lang} transition:persist="pyrax-nav" />
+  {navVariant === "neurax" ? (
+    <NeuraxNav client:load lang={lang} transition:persist="neurax-nav" />
+  ) : (
+    <MegaNav client:load lang={lang} transition:persist="pyrax-nav" />
+  )}
   <main>
     <slot />
   </main>
-  <Footer lang={lang} />
+  <Footer lang={lang} variant={navVariant} />
 </Base>

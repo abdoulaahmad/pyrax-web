@@ -1,0 +1,1862 @@
+---
+// SPDX-License-Identifier: LicenseRef-Proprietary
+import Site from "../layouts/Site.astro";
+import { resolveLocale, localizePath } from "../i18n/config";
+import { useT } from "../i18n";
+
+const lang = resolveLocale(Astro.url, Astro.cookies);
+const t = useT(lang);
+const L = (p: string) => localizePath(lang, p);
+
+const subnav = [
+  { id: "overview", label: "Overview" },
+  { id: "marketplace", label: "Sovereign Shift" },
+  { id: "native", label: "Native L1" },
+  { id: "sidecars", label: "Dual-Vault Security" },
+];
+---
+
+<Site
+  title="Neurax AI — Native Layer-1 Verifiable Compute & GPU Marketplace"
+  description="Neurax is Pyrax's native verifiable AI compute layer and decentralized GPU marketplace. Routes heavy inference workloads to idle Stream B miners with on-chain Cohort pHash consensus and air-gapped zero-egress sidecars."
+  lang={lang}
+  navVariant="neurax"
+>
+  <!-- HERO SECTION -->
+  <div class="relative overflow-hidden border-b border-[color:var(--color-line)]">
+    <!-- Hero-Confined Vertical Rails -->
+    <div class="absolute inset-y-0 left-0 hidden w-16 items-center justify-center border-r border-[color:var(--color-line)] xl:flex z-20 pointer-events-none select-none">
+      <span class="whitespace-nowrap font-mono text-[9px] tracking-[0.4em] text-faint vertical-rail">STREAM B AI COMPUTE MARKETPLACE · PYRAXNETWORK.ORG</span>
+    </div>
+    <div class="absolute inset-y-0 right-0 hidden w-16 items-center justify-center border-l border-[color:var(--color-line)] xl:flex z-20 pointer-events-none select-none">
+      <span class="whitespace-nowrap font-mono text-[9px] tracking-[0.4em] text-faint vertical-rail">VERIFIABLE INTELLIGENCE LAYER · NEURAX 0.9.42</span>
+    </div>
+
+    <section id="overview" class="relative z-10 pt-24 pb-24 px-6 max-w-7xl mx-auto overflow-hidden">
+      <!-- Background Compute DAG Network SVG -->
+      <div class="absolute inset-0 pointer-events-none opacity-20">
+        <svg class="w-full h-full" viewBox="0 0 800 400">
+          <circle cx="200" cy="100" r="4" fill="#f68a24" class="dag-node"></circle>
+          <circle cx="400" cy="200" r="4" fill="#5cbace" class="dag-node"></circle>
+          <circle cx="300" cy="300" r="4" fill="#fed23c" class="dag-node"></circle>
+          <circle cx="600" cy="150" r="4" fill="#f68a24" class="dag-node"></circle>
+          <circle cx="680" cy="280" r="4" fill="#3ddc84" class="dag-node"></circle>
+          <path d="M200 100 L400 200 L600 150 M300 300 L400 200 M600 150 L680 280" stroke="currentColor" stroke-width="0.5" class="text-[#232838]" fill="none"></path>
+        </svg>
+      </div>
+
+      <div class="flex flex-col items-center text-center relative z-20">
+        <!-- Convergence Eyebrow Tag -->
+        <div class="inline-flex items-center gap-3 px-3.5 py-1.5 mb-8 border border-[color:var(--color-line)] bg-[#0c0e16]/80 text-[10px] font-mono tracking-[0.25em] uppercase text-muted rounded-full">
+          <span class="w-2 h-2 rounded-full bg-[color:var(--color-brand)] animate-pulse"></span>
+          <span>Pyrax L1 Native AI // Stream B GPU Marketplace</span>
+        </div>
+
+        <!-- High-Impact Editorial Heading -->
+        <h1 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-[0.98] tracking-[-0.04em] mb-8 text-[#f2f4f8] max-w-5xl">
+          Native L1 Intelligence.<br />
+          <span class="shimmer-text uppercase">Verifiable GPU Marketplace.</span>
+        </h1>
+
+        <!-- Core Convergence Narrative -->
+        <p class="max-w-3xl mx-auto text-muted text-base md:text-lg font-light leading-relaxed mb-10">
+          Neurax hardcodes decentralized machine intelligence directly into Pyrax Layer-1 consensus. By harnessing the idle GPU cycles of Stream B mining nodes between block rounds, production AI inference runs natively on bare-metal silicon. Builders secure permissionless, cryptographically verified compute at electricity cost—while miners unlock automated dual-yield in native $PYRX.
+        </p>
+
+
+
+        <!-- ==================== PROTOCOL FLOW NAVIGATION & WIDE ARCHITECTURAL CARDS ==================== -->
+        <div class="w-full max-w-6xl xl:max-w-7xl mx-auto mt-10 sm:mt-12">
+          <!-- Section Divider: INFERENCE SUBMISSION // PROTOCOL FLOW -->
+          <div class="w-full flex items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-10 select-none">
+            <!-- Left glowing node and connecting line -->
+            <div class="flex items-center flex-1 min-w-[30px] sm:min-w-[60px]">
+              <div class="w-2 h-2 rounded-full bg-[#FF6A00] shadow-[0_0_8px_#FF6A00] flex-shrink-0"></div>
+              <div class="h-[1px] bg-gradient-to-r from-[#FF6A00] via-[#2a3344] to-[#18202d] flex-1"></div>
+            </div>
+
+            <!-- Center label -->
+            <span class="font-mono text-[10px] sm:text-xs tracking-[0.25em] text-[#7C8796] uppercase px-2 text-center whitespace-nowrap">
+              INFERENCE SUBMISSION <span class="text-[#454f60] mx-1">//</span> PROTOCOL FLOW
+            </span>
+
+            <!-- Right line and glowing node -->
+            <div class="flex items-center flex-1 min-w-[30px] sm:min-w-[60px]">
+              <div class="h-[1px] bg-gradient-to-l from-[#FF6A00] via-[#2a3344] to-[#18202d] flex-1"></div>
+              <div class="w-2 h-2 rounded-full bg-[#FF6A00] shadow-[0_0_8px_#FF6A00] flex-shrink-0"></div>
+            </div>
+          </div>
+
+          <!-- Three Wide Horizontal Protocol Cards (Desktop: 3 wide horizontal cards) -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-5 xl:gap-6 w-full text-left items-stretch">
+
+            <!-- ==================== CARD 01: TARGET SILICON (ORANGE #FF6A00) ==================== -->
+            <div class="group relative rounded-xl border border-[#FF6A00]/30 bg-[#080B0F] overflow-hidden flex flex-row items-stretch min-h-[220px] sm:min-h-[235px] lg:min-h-[220px] xl:min-h-[235px] hover:border-[#FF6A00]/70 hover:-translate-y-0.5 transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+              <!-- Left Accent Rail -->
+              <div class="w-20 sm:w-24 lg:w-20 xl:w-24 flex-shrink-0 border-r border-[#1a2332] flex flex-col justify-between items-stretch">
+                <!-- Upper Section: Diagonal Hatch Pattern -->
+                <div class="flex-1 w-full relative overflow-hidden bg-[#0c0d13] min-h-[110px]">
+                  <div class="absolute inset-0 vault-hatch-orange opacity-85 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+                <!-- Lower Section: Solid Orange Block with Black 01 -->
+                <div class="h-20 sm:h-24 bg-[#FF6A00] flex items-center justify-center p-2 select-none flex-shrink-0">
+                  <span class="font-display font-black text-3xl sm:text-4xl text-black leading-none tracking-tight">
+                    01
+                  </span>
+                </div>
+              </div>
+
+              <!-- Main Middle Content Area -->
+              <div class="flex-1 p-4 sm:p-5 flex flex-col justify-between min-w-0 bg-[#080B0F] z-10">
+                <div>
+                  <!-- Category & Accent Status Node -->
+                  <div class="flex items-center gap-2 mb-2 sm:mb-2.5">
+                    <span class="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-[#8A95A5]">
+                      TARGET SILICON
+                    </span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00] shadow-[0_0_6px_#FF6A00] flex-shrink-0"></span>
+                    <div class="h-[1px] bg-gradient-to-r from-[#FF6A00]/60 to-transparent w-10 sm:w-16"></div>
+                  </div>
+
+                  <!-- Main Title -->
+                  <h4 class="font-display font-bold text-lg sm:text-xl xl:text-[22px] text-white leading-tight">
+                    Stream B<br />Commodity GPUs
+                  </h4>
+
+                  <!-- Supporting Description -->
+                  <p class="text-[11px] sm:text-xs text-[#7C8796] leading-relaxed mt-2 sm:mt-2.5">
+                    CUDA &amp; ROCm Bare-Metal Node Fleet
+                  </p>
+                </div>
+              </div>
+
+              <!-- Upper-Right Dark Metallic Geometric Square with Orange Reflection -->
+              <div class="w-20 sm:w-24 lg:w-22 xl:w-24 h-20 sm:h-24 lg:h-22 xl:h-24 rounded-xl overflow-hidden border border-[#FF6A00]/30 relative flex-shrink-0 self-start mt-3.5 sm:mt-4 mr-3.5 sm:mr-4.5 shadow-lg group-hover:border-[#FF6A00]/60 transition-all duration-300 bg-[#0a0705]">
+                <img
+                  src="/images/cards/silver.png"
+                  alt="Target Silicon Metallic Plate"
+                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 brightness-90 contrast-125"
+                  loading="lazy"
+                />
+                <!-- Orange Ambient & Specular Lighting Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-tr from-[#FF6A00]/60 via-[#FF6A00]/25 to-transparent mix-blend-color pointer-events-none"></div>
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#FF6A00]/15 to-[#080B0F]/70 pointer-events-none"></div>
+                <div class="absolute inset-0 ring-1 ring-inset ring-white/15 rounded-xl pointer-events-none"></div>
+              </div>
+            </div>
+
+            <!-- ==================== CARD 02: CONSENSUS ROLE (ELECTRIC BLUE #168BFF) ==================== -->
+            <div class="group relative rounded-xl border border-[#168BFF]/30 bg-[#080B0F] overflow-hidden flex flex-row items-stretch min-h-[220px] sm:min-h-[235px] lg:min-h-[220px] xl:min-h-[235px] hover:border-[#168BFF]/70 hover:-translate-y-0.5 transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+              <!-- Left Accent Rail -->
+              <div class="w-20 sm:w-24 lg:w-20 xl:w-24 flex-shrink-0 border-r border-[#1a2332] flex flex-col justify-between items-stretch">
+                <!-- Upper Section: Diagonal Hatch Pattern -->
+                <div class="flex-1 w-full relative overflow-hidden bg-[#0c0d13] min-h-[110px]">
+                  <div class="absolute inset-0 vault-hatch-blue opacity-85 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+                <!-- Lower Section: Solid Blue Block with Black 02 -->
+                <div class="h-20 sm:h-24 bg-[#168BFF] flex items-center justify-center p-2 select-none flex-shrink-0">
+                  <span class="font-display font-black text-3xl sm:text-4xl text-black leading-none tracking-tight">
+                    02
+                  </span>
+                </div>
+              </div>
+
+              <!-- Main Middle Content Area -->
+              <div class="flex-1 p-4 sm:p-5 flex flex-col justify-between min-w-0 bg-[#080B0F] z-10">
+                <div>
+                  <!-- Category & Accent Status Node -->
+                  <div class="flex items-center gap-2 mb-2 sm:mb-2.5">
+                    <span class="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-[#8A95A5]">
+                      CONSENSUS ROLE
+                    </span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#168BFF] shadow-[0_0_6px_#168BFF] flex-shrink-0"></span>
+                    <div class="h-[1px] bg-gradient-to-r from-[#168BFF]/60 to-transparent w-10 sm:w-16"></div>
+                  </div>
+
+                  <!-- Main Title -->
+                  <h4 class="font-display font-bold text-lg sm:text-xl xl:text-[22px] text-white leading-tight">
+                    Tri-Stream<br />Multiplex
+                  </h4>
+
+                  <!-- Supporting Description -->
+                  <p class="text-[11px] sm:text-xs text-[#7C8796] leading-relaxed mt-2 sm:mt-2.5">
+                    PoW Mining + Verifiable AI Compute
+                  </p>
+                </div>
+              </div>
+
+              <!-- Upper-Right Dark Metallic Geometric Square with Blue Reflection -->
+              <div class="w-20 sm:w-24 lg:w-22 xl:w-24 h-20 sm:h-24 lg:h-22 xl:h-24 rounded-xl overflow-hidden border border-[#168BFF]/30 relative flex-shrink-0 self-start mt-3.5 sm:mt-4 mr-3.5 sm:mr-4.5 shadow-lg group-hover:border-[#168BFF]/60 transition-all duration-300 bg-[#050812]">
+                <img
+                  src="/images/cards/silver-4.png"
+                  alt="Tri-Stream Multiplex Liquid Silicon"
+                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 brightness-90 contrast-125"
+                  loading="lazy"
+                />
+                <!-- Blue Ambient & Specular Lighting Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-tr from-[#168BFF]/60 via-[#168BFF]/25 to-transparent mix-blend-color pointer-events-none"></div>
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#168BFF]/15 to-[#080B0F]/70 pointer-events-none"></div>
+                <div class="absolute inset-0 ring-1 ring-inset ring-white/15 rounded-xl pointer-events-none"></div>
+              </div>
+            </div>
+
+            <!-- ==================== CARD 03: ECONOMIC ESCROW (GOLD/AMBER #D9A52E) ==================== -->
+            <div class="group relative rounded-xl border border-[#D9A52E]/30 bg-[#080B0F] overflow-hidden flex flex-row items-stretch min-h-[220px] sm:min-h-[235px] lg:min-h-[220px] xl:min-h-[235px] hover:border-[#D9A52E]/70 hover:-translate-y-0.5 transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+              <!-- Left Accent Rail -->
+              <div class="w-20 sm:w-24 lg:w-20 xl:w-24 flex-shrink-0 border-r border-[#1a2332] flex flex-col justify-between items-stretch">
+                <!-- Upper Section: Diagonal Hatch Pattern -->
+                <div class="flex-1 w-full relative overflow-hidden bg-[#0c0d13] min-h-[110px]">
+                  <div class="absolute inset-0 vault-hatch-gold opacity-85 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+                <!-- Lower Section: Solid Gold Block with Black 03 -->
+                <div class="h-20 sm:h-24 bg-[#D9A52E] flex items-center justify-center p-2 select-none flex-shrink-0">
+                  <span class="font-display font-black text-3xl sm:text-4xl text-black leading-none tracking-tight">
+                    03
+                  </span>
+                </div>
+              </div>
+
+              <!-- Main Middle Content Area -->
+              <div class="flex-1 p-4 sm:p-5 flex flex-col justify-between min-w-0 bg-[#080B0F] z-10">
+                <div>
+                  <!-- Category & Accent Status Node -->
+                  <div class="flex items-center gap-2 mb-2 sm:mb-2.5">
+                    <span class="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-[#8A95A5]">
+                      ECONOMIC ESCROW
+                    </span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#D9A52E] shadow-[0_0_6px_#D9A52E] flex-shrink-0"></span>
+                    <div class="h-[1px] bg-gradient-to-r from-[#D9A52E]/60 to-transparent w-10 sm:w-16"></div>
+                  </div>
+
+                  <!-- Main Title -->
+                  <h4 class="font-display font-bold text-lg sm:text-xl xl:text-[22px] text-white leading-tight">
+                    Native $PYRX<br />Settlement
+                  </h4>
+
+                  <!-- Supporting Description -->
+                  <p class="text-[11px] sm:text-xs text-[#7C8796] leading-relaxed mt-2 sm:mt-2.5">
+                    Automated payout & stake slashing
+                  </p>
+                </div>
+              </div>
+
+              <!-- Upper-Right Dark Metallic Geometric Square with Gold Reflection -->
+              <div class="w-20 sm:w-24 lg:w-22 xl:w-24 h-20 sm:h-24 lg:h-22 xl:h-24 rounded-xl overflow-hidden border border-[#D9A52E]/30 relative flex-shrink-0 self-start mt-3.5 sm:mt-4 mr-3.5 sm:mr-4.5 shadow-lg group-hover:border-[#D9A52E]/60 transition-all duration-300 bg-[#0c0904]">
+                <img
+                  src="/images/cards/silver-3.png"
+                  alt="Native Settlement Liquid Chrome"
+                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 brightness-90 contrast-125"
+                  loading="lazy"
+                />
+                <!-- Gold Ambient & Specular Lighting Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-tr from-[#D9A52E]/65 via-[#D9A52E]/30 to-transparent mix-blend-color pointer-events-none"></div>
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#D9A52E]/15 to-[#080B0F]/70 pointer-events-none"></div>
+                <div class="absolute inset-0 ring-1 ring-inset ring-white/15 rounded-xl pointer-events-none"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- IN-PAGE SUBNAV DIVIDER BAR (Static, non-sticky) -->
+  <div class="relative z-10 border-b border-[color:var(--color-line)] bg-[#080B0F]/90 backdrop-blur-md">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5 sm:px-6">
+      <div class="flex items-center gap-3">
+        <a href="#overview" class="flex items-center group py-0.5" aria-label="Neurax Overview">
+          <img src="/brand/neurax-logo.png" alt="Neurax Logo" class="h-6 sm:h-7 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.03]" />
+        </a>
+      </div>
+
+      <nav class="hidden lg:flex items-center gap-2 overflow-x-auto">
+        {subnav.map((s, idx) => (
+          <a
+            href={`#${s.id}`}
+            class="shrink-0 rounded-full border border-transparent px-3 py-1 font-mono text-xs text-muted transition hover:border-[color:var(--color-line)] hover:bg-[rgba(255,255,255,0.03)] hover:text-white"
+          >
+            <span class="mr-1 text-[color:var(--color-brand)]">0{idx + 1}</span> · {s.label}
+          </a>
+        ))}
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <a
+          href="#marketplace"
+          class="relative group p-[1px] rounded-full overflow-hidden transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]"
+        >
+          <span class="absolute inset-[-100%] animate-[spin_3.5s_linear_infinite] bg-[conic-gradient(from_0deg_at_50%_50%,#FF6A00_0%,#fed23c_30%,transparent_60%,#FF6A00_100%)] opacity-80 group-hover:opacity-100 transition-opacity"></span>
+          <span class="relative flex items-center gap-2 rounded-full bg-[#090C12] px-3.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-white group-hover:bg-[#0e121a] transition-colors">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00] animate-pulse"></span>
+            <span class="bg-gradient-to-r from-white to-[#FFA040] bg-clip-text text-transparent">Explore Market</span>
+            <span class="text-[#FF6A00] text-[10px] group-hover:translate-x-0.5 transition-transform">→</span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 01: THE SOVEREIGN SHIFT & 1-LINE PROTOCOL CIRCUIT -->
+  <section id="marketplace" class="relative z-10 py-24 sm:py-28 px-4 sm:px-6 max-w-[1440px] mx-auto border-b border-[color:var(--color-line)]">
+    <!-- Section Header -->
+    <div class="mb-14 relative">
+      <span class="outline-ghost absolute -top-24 -left-12 pointer-events-none select-none">01</span>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[color:var(--color-line)] bg-[color:var(--color-surface)]/60 text-[10px] font-mono tracking-[0.25em] text-[#8B93A1] uppercase mb-4">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00]"></span>
+        <span>SECTION 01 // DECENTRALIZED COMPUTE ECONOMICS</span>
+      </div>
+      <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight font-display text-white leading-[1.05]">
+        Pure Silicon Execution.<br />
+        <span class="bg-gradient-to-r from-white via-[#f2f4f8] to-[#FF6A00] bg-clip-text text-transparent">Zero Cloud Monopolies.</span>
+      </h2>
+      <p class="text-xs sm:text-sm font-mono tracking-[0.18em] text-[#8B93A1] uppercase mt-4 max-w-3xl leading-relaxed">
+        Centralized cloud providers lock builders into opaque black boxes, predatory margins, and arbitrary rate limits. Neurax dissolves the hyperscaler middleman—routing production AI inference straight to bare-metal mining silicon backed by trustless on-chain escrow.
+      </p>
+    </div>
+
+    <!-- The 1-Line Protocol Circuit Pipeline -->
+    <div class="mb-14 p-6 sm:p-8 lg:p-9 rounded-2xl lg:rounded-3xl border border-[#1a1f2e] bg-[#080B0F] shadow-[0_4px_32px_rgba(0,0,0,0.6)] relative overflow-hidden">
+      <!-- Circuit Header Bar -->
+      <div class="text-[11px] sm:text-xs font-mono uppercase tracking-[0.2em] pb-6 mb-7 border-b border-[#1a1f2e] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5 font-bold text-white">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#FF6A00] flex-shrink-0"></span>
+          <span>THE 1-LINE PROTOCOL CIRCUIT <span class="text-[#565e6d] mx-1">//</span> LIFECYCLE PIPELINE</span>
+        </div>
+        <div class="flex items-center gap-2.5 font-bold text-[#00C878] tracking-wider">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#00C878] flex-shrink-0 animate-pulse"></span>
+          <span>SUB-SECOND ON-CHAIN ESCROW SETTLEMENT <span class="text-[#565e6d] mx-1.5">|</span> &lt; 400ms</span>
+        </div>
+      </div>
+
+      <!-- 4 Connected Pipeline Stages (Horizontal on Desktop) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-3 xl:gap-4 relative items-stretch">
+
+        <!-- ==================== STAGE 01: DISPATCH (ORANGE #FF6A00) ==================== -->
+        <div class="relative group">
+          <div class="rounded-xl border border-[#FF6A00]/30 bg-[#090C11] flex flex-row overflow-hidden hover:border-[#FF6A00]/60 transition-all duration-300 shadow-md h-full">
+            <!-- Left Architectural Pillar -->
+            <div class="w-16 sm:w-20 flex-shrink-0 border-r border-[#1a1f2e] bg-[#07090e] p-2.5 sm:p-3 flex flex-col justify-between items-center text-center">
+              <div>
+                <span class="font-display font-black text-3xl sm:text-4xl lg:text-[34px] leading-none text-[#FF6A00] block select-none">
+                  01
+                </span>
+                <span class="font-mono text-[9px] text-[#FF6A00] font-bold uppercase tracking-wider mt-1 block">
+                  DISPATCH
+                </span>
+              </div>
+              <!-- Diagonal Hatch -->
+              <div class="vault-hatch-orange w-full h-16 sm:h-20 my-2 rounded border-y border-[#1a1f2e]"></div>
+              <!-- Technology Badge -->
+              <span class="font-mono text-[9px] text-[#FF6A00] font-bold uppercase leading-tight text-center">
+                EVM /<br />WASM
+              </span>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 p-4 sm:p-5 flex flex-col justify-center min-w-0">
+              <!-- Upper: Title + Metallic Conical Visual -->
+              <div class="flex items-start justify-between gap-2.5">
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-display font-bold text-base sm:text-lg text-white leading-tight">
+                    Contract<br />Request
+                  </h4>
+                  <p class="text-[11px] text-[#7E8A9A] leading-relaxed mt-2 sm:mt-2.5">
+                    JobKind submitted with $PYRX locked in L1 Escrow state.
+                  </p>
+                </div>
+                <!-- Conical Brushed Orange Metal Aperture -->
+                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-[#FF6A00]/30 relative flex-shrink-0 shadow-md group-hover:border-[#FF6A00]/60 transition-all duration-300 bg-[#0a0705]">
+                  <img
+                    src="/images/cards/silver.png"
+                    alt="Dispatch Silicon Metal Aperture"
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 brightness-90 contrast-125"
+                    loading="lazy"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-tr from-[#FF6A00]/65 via-[#FF6A00]/25 to-transparent mix-blend-color pointer-events-none"></div>
+                  <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#FF6A00]/15 to-[#080B0F]/70 pointer-events-none"></div>
+                  <div class="absolute inset-0 ring-1 ring-inset ring-white/15 rounded-xl pointer-events-none"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Desktop Interconnect Connector (Pointing to Stage 02) -->
+          <div class="hidden lg:flex items-center absolute -right-2.5 xl:-right-3 top-1/2 -translate-y-1/2 z-30 pointer-events-none">
+            <div class="flex items-center">
+              <div class="w-1.5 h-1.5 rounded-full bg-[#FF6A00] shadow-[0_0_6px_#FF6A00]"></div>
+              <div class="w-2.5 xl:w-3.5 h-[1px] bg-gradient-to-r from-[#FF6A00] to-white/40"></div>
+              <svg viewBox="0 0 6 10" class="w-1.5 h-2.5 text-white/70 -ml-0.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 1l4 4-4 4" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== STAGE 02: SILICON (ELECTRIC BLUE #168BFF) ==================== -->
+        <div class="relative group">
+          <div class="rounded-xl border border-[#168BFF]/30 bg-[#090C11] flex flex-row overflow-hidden hover:border-[#168BFF]/60 transition-all duration-300 shadow-md h-full">
+            <!-- Left Architectural Pillar -->
+            <div class="w-16 sm:w-20 flex-shrink-0 border-r border-[#1a1f2e] bg-[#07090e] p-2.5 sm:p-3 flex flex-col justify-between items-center text-center">
+              <div>
+                <span class="font-display font-black text-3xl sm:text-4xl lg:text-[34px] leading-none text-[#168BFF] block select-none">
+                  02
+                </span>
+                <span class="font-mono text-[9px] text-[#168BFF] font-bold uppercase tracking-wider mt-1 block">
+                  SILICON
+                </span>
+              </div>
+              <!-- Diagonal Hatch -->
+              <div class="vault-hatch-blue w-full h-16 sm:h-20 my-2 rounded border-y border-[#1a1f2e]"></div>
+              <!-- Technology Badge -->
+              <span class="font-mono text-[9px] text-[#168BFF] font-bold uppercase leading-tight text-center">
+                STREAM B<br />NODE
+              </span>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 p-4 sm:p-5 flex flex-col justify-center min-w-0">
+              <!-- Upper: Title + Metallic Conical Visual -->
+              <div class="flex items-start justify-between gap-2.5">
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-display font-bold text-base sm:text-lg text-white leading-tight">
+                    Idle GPU<br />Execution
+                  </h4>
+                  <p class="text-[11px] text-[#7E8A9A] leading-relaxed mt-2 sm:mt-2.5">
+                    Air-gapped sidecar runs inference between PoW block rounds.
+                  </p>
+                </div>
+                <!-- Conical Brushed Blue Metal Aperture -->
+                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-[#168BFF]/30 relative flex-shrink-0 shadow-md group-hover:border-[#168BFF]/60 transition-all duration-300 bg-[#050812]">
+                  <img
+                    src="/images/cards/silver-4.png"
+                    alt="Silicon Idle GPU Fluid Metal"
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 brightness-90 contrast-125"
+                    loading="lazy"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-tr from-[#168BFF]/65 via-[#168BFF]/25 to-transparent mix-blend-color pointer-events-none"></div>
+                  <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#168BFF]/15 to-[#080B0F]/70 pointer-events-none"></div>
+                  <div class="absolute inset-0 ring-1 ring-inset ring-white/15 rounded-xl pointer-events-none"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Desktop Interconnect Connector (Pointing to Stage 03) -->
+          <div class="hidden lg:flex items-center absolute -right-2.5 xl:-right-3 top-1/2 -translate-y-1/2 z-30 pointer-events-none">
+            <div class="flex items-center">
+              <div class="w-1.5 h-1.5 rounded-full bg-[#168BFF] shadow-[0_0_6px_#168BFF]"></div>
+              <div class="w-2.5 xl:w-3.5 h-[1px] bg-gradient-to-r from-[#168BFF] to-white/40"></div>
+              <svg viewBox="0 0 6 10" class="w-1.5 h-2.5 text-white/70 -ml-0.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 1l4 4-4 4" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== STAGE 03: QUORUM (VIOLET/PURPLE #8B5CF6) ==================== -->
+        <div class="relative group">
+          <div class="rounded-xl border border-[#8B5CF6]/30 bg-[#090C11] flex flex-row overflow-hidden hover:border-[#8B5CF6]/60 transition-all duration-300 shadow-md h-full">
+            <!-- Left Architectural Pillar -->
+            <div class="w-16 sm:w-20 flex-shrink-0 border-r border-[#1a1f2e] bg-[#07090e] p-2.5 sm:p-3 flex flex-col justify-between items-center text-center">
+              <div>
+                <span class="font-display font-black text-3xl sm:text-4xl lg:text-[34px] leading-none text-[#8B5CF6] block select-none">
+                  03
+                </span>
+                <span class="font-mono text-[9px] text-[#8B5CF6] font-bold uppercase tracking-wider mt-1 block">
+                  QUORUM
+                </span>
+              </div>
+              <!-- Diagonal Hatch -->
+              <div class="vault-hatch-purple w-full h-16 sm:h-20 my-2 rounded border-y border-[#1a1f2e]"></div>
+              <!-- Technology Badge -->
+              <span class="font-mono text-[10px] text-[#8B5CF6] font-bold lowercase leading-tight text-center">
+                phash.rs
+              </span>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 p-4 sm:p-5 flex flex-col justify-center min-w-0">
+              <!-- Upper: Title + Metallic Conical Visual -->
+              <div class="flex items-start justify-between gap-2.5">
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-display font-bold text-base sm:text-lg text-white leading-tight">
+                    Perceptual<br />Proof
+                  </h4>
+                  <p class="text-[11px] text-[#7E8A9A] leading-relaxed mt-2 sm:mt-2.5">
+                    3-node Cohort attestation confirms perceptual match.
+                  </p>
+                </div>
+                <!-- Conical Brushed Purple Metal Aperture -->
+                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-[#8B5CF6]/30 relative flex-shrink-0 shadow-md group-hover:border-[#8B5CF6]/60 transition-all duration-300 bg-[#0a0614]">
+                  <img
+                    src="/images/cards/silver-3.png"
+                    alt="Quorum Perceptual Metal Wave"
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 brightness-90 contrast-125"
+                    loading="lazy"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-tr from-[#8B5CF6]/65 via-[#8B5CF6]/25 to-transparent mix-blend-color pointer-events-none"></div>
+                  <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#8B5CF6]/15 to-[#080B0F]/70 pointer-events-none"></div>
+                  <div class="absolute inset-0 ring-1 ring-inset ring-white/15 rounded-xl pointer-events-none"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Desktop Interconnect Connector (Pointing to Stage 04) -->
+          <div class="hidden lg:flex items-center absolute -right-2.5 xl:-right-3 top-1/2 -translate-y-1/2 z-30 pointer-events-none">
+            <div class="flex items-center">
+              <div class="w-1.5 h-1.5 rounded-full bg-[#8B5CF6] shadow-[0_0_6px_#8B5CF6]"></div>
+              <div class="w-2.5 xl:w-3.5 h-[1px] bg-gradient-to-r from-[#8B5CF6] to-white/40"></div>
+              <svg viewBox="0 0 6 10" class="w-1.5 h-2.5 text-white/70 -ml-0.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 1l4 4-4 4" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== STAGE 04: SETTLEMENT (GREEN #00C878) ==================== -->
+        <div class="relative group">
+          <div class="rounded-xl border border-[#00C878]/35 bg-[#090C11] flex flex-row overflow-hidden hover:border-[#00C878]/70 transition-all duration-300 shadow-md h-full">
+            <!-- Left Architectural Pillar -->
+            <div class="w-16 sm:w-20 flex-shrink-0 border-r border-[#1a1f2e] bg-[#07090e] p-2.5 sm:p-3 flex flex-col justify-between items-center text-center">
+              <div>
+                <span class="font-display font-black text-3xl sm:text-4xl lg:text-[34px] leading-none text-[#00C878] block select-none">
+                  04
+                </span>
+                <span class="font-mono text-[8px] text-[#00C878] font-bold uppercase tracking-wider mt-1 block">
+                  SETTLEMENT
+                </span>
+              </div>
+              <!-- Diagonal Hatch -->
+              <div class="vault-hatch-green w-full h-16 sm:h-20 my-2 rounded border-y border-[#1a1f2e]"></div>
+              <!-- Technology Badge -->
+              <span class="font-mono text-[9px] text-[#00C878] font-bold uppercase leading-tight text-center">
+                INSTANT<br />L1
+              </span>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 p-4 sm:p-5 flex flex-col justify-center min-w-0">
+              <!-- Upper: Title + Metallic Conical Visual -->
+              <div class="flex items-start justify-between gap-2.5">
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-display font-bold text-base sm:text-lg text-white leading-tight">
+                    Bounty<br />Released
+                  </h4>
+                  <p class="text-[11px] text-[#7E8A9A] leading-relaxed mt-2 sm:mt-2.5">
+                    Output delivered on-chain; miner rewarded in native $PYRX.
+                  </p>
+                </div>
+                <!-- Conical Brushed Green Metal Aperture -->
+                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-[#00C878]/35 relative flex-shrink-0 shadow-md group-hover:border-[#00C878]/70 transition-all duration-300 bg-[#040d08]">
+                  <img
+                    src="/images/cards/silver-2.png"
+                    alt="Settlement Conical Starburst Aperture"
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 brightness-90 contrast-125"
+                    loading="lazy"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-tr from-[#00C878]/65 via-[#00C878]/25 to-transparent mix-blend-color pointer-events-none"></div>
+                  <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#00C878]/15 to-[#080B0F]/70 pointer-events-none"></div>
+                  <div class="absolute inset-0 ring-1 ring-inset ring-white/15 rounded-xl pointer-events-none"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- The Sovereign Contrast Matrix (Old Cloud Monopolies vs Neurax L1) -->
+    <div class="rounded-2xl lg:rounded-3xl border border-[#1a1f2e] bg-[#080B0F] p-6 sm:p-8 lg:p-9 shadow-[0_4px_32px_rgba(0,0,0,0.6)] overflow-hidden relative">
+      <!-- Matrix Header Bar -->
+      <div class="pb-6 sm:pb-7 border-b border-[#1a1f2e] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 class="font-display font-black text-2xl sm:text-3xl lg:text-[34px] uppercase tracking-wider text-white leading-tight">
+            THE SOVEREIGN <span class="text-[#FF6A00]">PARADIGM SHIFT</span>
+          </h3>
+          <p class="text-xs sm:text-sm text-[#7E8A9A] font-mono mt-2">
+            Comparing traditional cloud monopolies with Neurax Layer-1 native compute.
+          </p>
+        </div>
+        <div class="flex items-center gap-3 self-start sm:self-auto flex-shrink-0">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#FF334F]/10 border border-[#FF334F]/40 text-[#FF334F] text-[11px] font-mono font-bold uppercase tracking-wider">
+            <span class="text-xs leading-none">&times;</span> LEGACY CENTRALIZED
+          </span>
+          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#FF6A00]/10 border border-[#FF6A00]/40 text-[#FF6A00] text-[11px] font-mono font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-[#FF6A00]"></span> NEURAX NATIVE L1
+          </span>
+        </div>
+      </div>
+
+      <!-- Architectural 3-Column Table -->
+      <div class="mt-2 divide-y divide-[#18202d] border border-[#18202d] rounded-xl overflow-hidden bg-[#080B0F]">
+        <!-- Row 01: IDENTITY & ACCESS -->
+        <div class="flex flex-col lg:flex-row items-stretch border-b border-[#18202d] last:border-b-0 relative group">
+          <!-- Column 1: Dimension (26%) -->
+          <div class="w-full lg:w-[26%] p-5 sm:p-6 lg:p-7 flex items-center gap-4 lg:gap-5 relative border-b border-[#18202d] lg:border-b-0 bg-[#080B0F]">
+            <!-- Numeral & Hatch -->
+            <div class="flex flex-col items-start flex-shrink-0">
+              <span class="font-display font-black text-4xl sm:text-5xl text-[#FF6A00] leading-none select-none group-hover:brightness-125 transition-all">
+                01
+              </span>
+              <div class="mt-2.5">
+                <svg viewBox="0 0 54 14" class="w-11 sm:w-13 h-3 sm:h-3.5 text-[#FF6A00] opacity-80" fill="currentColor">
+                  <path d="M4 14L10 0h3L7 14H4z M12 14L18 0h3L15 14H12z M20 14L26 0h3L23 14H20z M28 14L34 0h3L31 14H28z M36 14L42 0h3L39 14H36z M44 14L50 0h3L47 14H44z" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Metadata & Title -->
+            <div class="flex-1 min-w-0">
+              <span class="font-mono text-[9px] sm:text-[10px] text-[#7E8A9A] font-bold uppercase tracking-widest block">
+                DIMENSION 01
+              </span>
+              <h4 class="font-display font-bold text-white text-sm sm:text-base lg:text-[15px] tracking-wide uppercase mt-1 leading-snug">
+                IDENTITY & ACCESS
+              </h4>
+              <span class="text-[#FF6A00] text-sm font-mono mt-1.5 block select-none">
+                &rarr;
+              </span>
+            </div>
+          </div>
+
+          <!-- Column 2: Legacy Centralized (37%) -->
+          <div class="w-full lg:w-[37%] p-5 sm:p-6 lg:p-7 flex items-start gap-3.5 sm:gap-4 relative border-b border-[#18202d] lg:border-b-0 lg:border-l border-[#18202d] bg-[#080B0F] group/legacy hover:bg-[#FF334F]/[0.02] transition-colors">
+            <!-- Red Cross Icon Box -->
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-[#FF334F]/40 bg-[#160a0d] flex items-center justify-center flex-shrink-0 text-[#FF334F] shadow-sm mt-0.5">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-mono font-bold text-xs sm:text-[13px] tracking-wider text-[#FF334F] uppercase leading-tight">
+                CORPORATE ACCOUNTS & LOCK-IN
+              </div>
+              <p class="text-[11px] sm:text-xs text-[#7E8A9A] leading-relaxed mt-1.5">
+                Mandatory KYC, credit card requirements, and centralized IAM (Identity and Access Management).
+              </p>
+            </div>
+
+            <!-- Architectural Center Orange Line & Node (Divider between Col 2 and Col 3) -->
+            <div class="hidden lg:block absolute right-0 top-0 bottom-0 w-[1px] bg-[#FF6A00] z-20 pointer-events-none"></div>
+            <div class="hidden lg:block absolute right-0 top-0 translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#FF6A00] shadow-[0_0_8px_#FF6A00] z-30"></div>
+          </div>
+
+          <!-- Mobile Transition Indicator -->
+          <div class="lg:hidden flex items-center justify-center py-2 px-5 bg-[#06080d] border-b border-[#18202d] text-[10px] font-mono uppercase tracking-widest text-[#FF6A00] gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00]"></span>
+            <span>CENTRALIZED &nbsp;&rarr;&nbsp; NATIVE L1</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00]"></span>
+          </div>
+
+          <!-- Column 3: Neurax Native L1 (37%) -->
+          <div class="w-full lg:w-[37%] p-5 sm:p-6 lg:p-7 flex items-start gap-3.5 sm:gap-4 relative bg-[#080B0F] group/native hover:bg-[#00D084]/[0.02] transition-colors">
+            <!-- Green Check Icon Box -->
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-[#00D084]/40 bg-[#071912] flex items-center justify-center flex-shrink-0 text-[#00D084] shadow-sm mt-0.5">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-mono font-bold text-xs sm:text-[13px] tracking-wider text-[#00D084] uppercase leading-tight">
+                ZERO-COINFRICTION
+              </div>
+              <p class="text-[11px] sm:text-xs text-[#C5D1DE] leading-relaxed mt-1.5">
+                Zero KYC, pseudonymous Wallets. Accessed by native $PYRX on-chain accounts with mathematical capital-based access.
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Row 02: HARDWARE & COST -->
+        <div class="flex flex-col lg:flex-row items-stretch border-b border-[#18202d] last:border-b-0 relative group">
+          <!-- Column 1: Dimension (26%) -->
+          <div class="w-full lg:w-[26%] p-5 sm:p-6 lg:p-7 flex items-center gap-4 lg:gap-5 relative border-b border-[#18202d] lg:border-b-0 bg-[#080B0F]">
+            <!-- Numeral & Hatch -->
+            <div class="flex flex-col items-start flex-shrink-0">
+              <span class="font-display font-black text-4xl sm:text-5xl text-[#FF6A00] leading-none select-none group-hover:brightness-125 transition-all">
+                02
+              </span>
+              <div class="mt-2.5">
+                <svg viewBox="0 0 54 14" class="w-11 sm:w-13 h-3 sm:h-3.5 text-[#FF6A00] opacity-80" fill="currentColor">
+                  <path d="M4 14L10 0h3L7 14H4z M12 14L18 0h3L15 14H12z M20 14L26 0h3L23 14H20z M28 14L34 0h3L31 14H28z M36 14L42 0h3L39 14H36z M44 14L50 0h3L47 14H44z" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Metadata & Title -->
+            <div class="flex-1 min-w-0">
+              <span class="font-mono text-[9px] sm:text-[10px] text-[#7E8A9A] font-bold uppercase tracking-widest block">
+                DIMENSION 02
+              </span>
+              <h4 class="font-display font-bold text-white text-sm sm:text-base lg:text-[15px] tracking-wide uppercase mt-1 leading-snug">
+                HARDWARE & COST
+              </h4>
+              <span class="text-[#FF6A00] text-sm font-mono mt-1.5 block select-none">
+                &rarr;
+              </span>
+            </div>
+          </div>
+
+          <!-- Column 2: Legacy Centralized (37%) -->
+          <div class="w-full lg:w-[37%] p-5 sm:p-6 lg:p-7 flex items-start gap-3.5 sm:gap-4 relative border-b border-[#18202d] lg:border-b-0 lg:border-l border-[#18202d] bg-[#080B0F] group/legacy hover:bg-[#FF334F]/[0.02] transition-colors">
+            <!-- Red Cross Icon Box -->
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-[#FF334F]/40 bg-[#160a0d] flex items-center justify-center flex-shrink-0 text-[#FF334F] shadow-sm mt-0.5">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-mono font-bold text-xs sm:text-[13px] tracking-wider text-[#FF334F] uppercase leading-tight">
+                ON-DEMAND MONTHLY MARKUP
+              </div>
+              <p class="text-[11px] sm:text-xs text-[#7E8A9A] leading-relaxed mt-1.5">
+                Massive corporate cloud overhead. Infrastructure margins billed directly to consumers at premium reserved rates.
+              </p>
+            </div>
+
+            <!-- Architectural Center Orange Line & Node (Divider between Col 2 and Col 3) -->
+            <div class="hidden lg:block absolute right-0 top-0 bottom-0 w-[1px] bg-[#FF6A00] z-20 pointer-events-none"></div>
+            <div class="hidden lg:block absolute right-0 top-0 translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#FF6A00] shadow-[0_0_8px_#FF6A00] z-30"></div>
+          </div>
+
+          <!-- Mobile Transition Indicator -->
+          <div class="lg:hidden flex items-center justify-center py-2 px-5 bg-[#06080d] border-b border-[#18202d] text-[10px] font-mono uppercase tracking-widest text-[#FF6A00] gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00]"></span>
+            <span>CENTRALIZED &nbsp;&rarr;&nbsp; NATIVE L1</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00]"></span>
+          </div>
+
+          <!-- Column 3: Neurax Native L1 (37%) -->
+          <div class="w-full lg:w-[37%] p-5 sm:p-6 lg:p-7 flex items-start gap-3.5 sm:gap-4 relative bg-[#080B0F] group/native hover:bg-[#00D084]/[0.02] transition-colors">
+            <!-- Green Check Icon Box -->
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-[#00D084]/40 bg-[#071912] flex items-center justify-center flex-shrink-0 text-[#00D084] shadow-sm mt-0.5">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-mono font-bold text-xs sm:text-[13px] tracking-wider text-[#00D084] uppercase leading-tight">
+                COST-TO-MINE PRICING
+              </div>
+              <p class="text-[11px] sm:text-xs text-[#C5D1DE] leading-relaxed mt-1.5">
+                Taps existing Silicon in $PYRX miners during idle intervals between block hash calculations. Zero-bottom economic cost at marginal miner cost.
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Row 03: EXECUTION INTEGRITY -->
+        <div class="flex flex-col lg:flex-row items-stretch border-b border-[#18202d] last:border-b-0 relative group">
+          <!-- Column 1: Dimension (26%) -->
+          <div class="w-full lg:w-[26%] p-5 sm:p-6 lg:p-7 flex items-center gap-4 lg:gap-5 relative border-b border-[#18202d] lg:border-b-0 bg-[#080B0F]">
+            <!-- Numeral & Hatch -->
+            <div class="flex flex-col items-start flex-shrink-0">
+              <span class="font-display font-black text-4xl sm:text-5xl text-[#FF6A00] leading-none select-none group-hover:brightness-125 transition-all">
+                03
+              </span>
+              <div class="mt-2.5">
+                <svg viewBox="0 0 54 14" class="w-11 sm:w-13 h-3 sm:h-3.5 text-[#FF6A00] opacity-80" fill="currentColor">
+                  <path d="M4 14L10 0h3L7 14H4z M12 14L18 0h3L15 14H12z M20 14L26 0h3L23 14H20z M28 14L34 0h3L31 14H28z M36 14L42 0h3L39 14H36z M44 14L50 0h3L47 14H44z" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Metadata & Title -->
+            <div class="flex-1 min-w-0">
+              <span class="font-mono text-[9px] sm:text-[10px] text-[#7E8A9A] font-bold uppercase tracking-widest block">
+                DIMENSION 03
+              </span>
+              <h4 class="font-display font-bold text-white text-sm sm:text-base lg:text-[15px] tracking-wide uppercase mt-1 leading-snug">
+                EXECUTION INTEGRITY
+              </h4>
+              <span class="text-[#FF6A00] text-sm font-mono mt-1.5 block select-none">
+                &rarr;
+              </span>
+            </div>
+          </div>
+
+          <!-- Column 2: Legacy Centralized (37%) -->
+          <div class="w-full lg:w-[37%] p-5 sm:p-6 lg:p-7 flex items-start gap-3.5 sm:gap-4 relative border-b border-[#18202d] lg:border-b-0 lg:border-l border-[#18202d] bg-[#080B0F] group/legacy hover:bg-[#FF334F]/[0.02] transition-colors">
+            <!-- Red Cross Icon Box -->
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-[#FF334F]/40 bg-[#160a0d] flex items-center justify-center flex-shrink-0 text-[#FF334F] shadow-sm mt-0.5">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-mono font-bold text-xs sm:text-[13px] tracking-wider text-[#FF334F] uppercase leading-tight">
+                THIRD-PARTY BLACK BOX
+              </div>
+              <p class="text-[11px] sm:text-xs text-[#7E8A9A] leading-relaxed mt-1.5">
+                No cryptographic proof that models run the same code. Identity of the compute vendor is hidden and non-verifiable.
+              </p>
+            </div>
+
+            <!-- Architectural Center Orange Line & Node (Divider between Col 2 and Col 3) -->
+            <div class="hidden lg:block absolute right-0 top-0 bottom-0 w-[1px] bg-[#FF6A00] z-20 pointer-events-none"></div>
+            <div class="hidden lg:block absolute right-0 top-0 translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#FF6A00] shadow-[0_0_8px_#FF6A00] z-30"></div>
+          </div>
+
+          <!-- Mobile Transition Indicator -->
+          <div class="lg:hidden flex items-center justify-center py-2 px-5 bg-[#06080d] border-b border-[#18202d] text-[10px] font-mono uppercase tracking-widest text-[#FF6A00] gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00]"></span>
+            <span>CENTRALIZED &nbsp;&rarr;&nbsp; NATIVE L1</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00]"></span>
+          </div>
+
+          <!-- Column 3: Neurax Native L1 (37%) -->
+          <div class="w-full lg:w-[37%] p-5 sm:p-6 lg:p-7 flex items-start gap-3.5 sm:gap-4 relative bg-[#080B0F] group/native hover:bg-[#00D084]/[0.02] transition-colors">
+            <!-- Green Check Icon Box -->
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-[#00D084]/40 bg-[#071912] flex items-center justify-center flex-shrink-0 text-[#00D084] shadow-sm mt-0.5">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-mono font-bold text-xs sm:text-[13px] tracking-wider text-[#00D084] uppercase leading-tight">
+                ON-CHAIN CRYPTOGRAPHIC PROOFS
+              </div>
+              <p class="text-[11px] sm:text-xs text-[#C5D1DE] leading-relaxed mt-1.5">
+                3-node perceptual hash (phash) quorum and cryptographic fraud proofs backed by a decentralized on-chain reputation slashing.
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Row 04: SMART CONTRACT NATIVE -->
+        <div class="flex flex-col lg:flex-row items-stretch border-b border-[#18202d] last:border-b-0 relative group">
+          <!-- Column 1: Dimension (26%) -->
+          <div class="w-full lg:w-[26%] p-5 sm:p-6 lg:p-7 flex items-center gap-4 lg:gap-5 relative border-b border-[#18202d] lg:border-b-0 bg-[#080B0F]">
+            <!-- Numeral & Hatch -->
+            <div class="flex flex-col items-start flex-shrink-0">
+              <span class="font-display font-black text-4xl sm:text-5xl text-[#FF6A00] leading-none select-none group-hover:brightness-125 transition-all">
+                04
+              </span>
+              <div class="mt-2.5">
+                <svg viewBox="0 0 54 14" class="w-11 sm:w-13 h-3 sm:h-3.5 text-[#FF6A00] opacity-80" fill="currentColor">
+                  <path d="M4 14L10 0h3L7 14H4z M12 14L18 0h3L15 14H12z M20 14L26 0h3L23 14H20z M28 14L34 0h3L31 14H28z M36 14L42 0h3L39 14H36z M44 14L50 0h3L47 14H44z" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Metadata & Title -->
+            <div class="flex-1 min-w-0">
+              <span class="font-mono text-[9px] sm:text-[10px] text-[#7E8A9A] font-bold uppercase tracking-widest block">
+                DIMENSION 04
+              </span>
+              <h4 class="font-display font-bold text-white text-sm sm:text-base lg:text-[15px] tracking-wide uppercase mt-1 leading-snug">
+                SMART CONTRACT NATIVE
+              </h4>
+              <span class="text-[#FF6A00] text-sm font-mono mt-1.5 block select-none">
+                &rarr;
+              </span>
+            </div>
+          </div>
+
+          <!-- Column 2: Legacy Centralized (37%) -->
+          <div class="w-full lg:w-[37%] p-5 sm:p-6 lg:p-7 flex items-start gap-3.5 sm:gap-4 relative border-b border-[#18202d] lg:border-b-0 lg:border-l border-[#18202d] bg-[#080B0F] group/legacy hover:bg-[#FF334F]/[0.02] transition-colors">
+            <!-- Red Cross Icon Box -->
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-[#FF334F]/40 bg-[#160a0d] flex items-center justify-center flex-shrink-0 text-[#FF334F] shadow-sm mt-0.5">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-mono font-bold text-xs sm:text-[13px] tracking-wider text-[#FF334F] uppercase leading-tight">
+                SILOED WEB2 REST ENDPOINTS
+              </div>
+              <p class="text-[11px] sm:text-xs text-[#7E8A9A] leading-relaxed mt-1.5">
+                Standalone APIs with centralized rate-limits. Results require off-chain verification. No native on-chain composability.
+              </p>
+            </div>
+
+            <!-- Architectural Center Orange Line & Node (Divider between Col 2 and Col 3) -->
+            <div class="hidden lg:block absolute right-0 top-0 bottom-0 w-[1px] bg-[#FF6A00] z-20 pointer-events-none"></div>
+            <div class="hidden lg:block absolute right-0 top-0 translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#FF6A00] shadow-[0_0_8px_#FF6A00] z-30"></div>
+          </div>
+
+          <!-- Mobile Transition Indicator -->
+          <div class="lg:hidden flex items-center justify-center py-2 px-5 bg-[#06080d] border-b border-[#18202d] text-[10px] font-mono uppercase tracking-widest text-[#FF6A00] gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00]"></span>
+            <span>CENTRALIZED &nbsp;&rarr;&nbsp; NATIVE L1</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00]"></span>
+          </div>
+
+          <!-- Column 3: Neurax Native L1 (37%) -->
+          <div class="w-full lg:w-[37%] p-5 sm:p-6 lg:p-7 flex items-start gap-3.5 sm:gap-4 relative bg-[#080B0F] group/native hover:bg-[#00D084]/[0.02] transition-colors">
+            <!-- Green Check Icon Box -->
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-[#00D084]/40 bg-[#071912] flex items-center justify-center flex-shrink-0 text-[#00D084] shadow-sm mt-0.5">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-mono font-bold text-xs sm:text-[13px] tracking-wider text-[#00D084] uppercase leading-tight">
+                FIRST-CLASS L1 PRIMITIVE
+              </div>
+              <p class="text-[11px] sm:text-xs text-[#C5D1DE] leading-relaxed mt-1.5">
+                Directly callable by Pyrax EVM, WASM, and Cairo smart contracts as an opcode. Deterministic state transition.
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Row 05: SETTLEMENT SPEED -->
+        <div class="flex flex-col lg:flex-row items-stretch border-b border-[#18202d] last:border-b-0 relative group">
+          <!-- Column 1: Dimension (26%) -->
+          <div class="w-full lg:w-[26%] p-5 sm:p-6 lg:p-7 flex items-center gap-4 lg:gap-5 relative border-b border-[#18202d] lg:border-b-0 bg-[#080B0F]">
+            <!-- Numeral & Hatch -->
+            <div class="flex flex-col items-start flex-shrink-0">
+              <span class="font-display font-black text-4xl sm:text-5xl text-[#FF6A00] leading-none select-none group-hover:brightness-125 transition-all">
+                05
+              </span>
+              <div class="mt-2.5">
+                <svg viewBox="0 0 54 14" class="w-11 sm:w-13 h-3 sm:h-3.5 text-[#FF6A00] opacity-80" fill="currentColor">
+                  <path d="M4 14L10 0h3L7 14H4z M12 14L18 0h3L15 14H12z M20 14L26 0h3L23 14H20z M28 14L34 0h3L31 14H28z M36 14L42 0h3L39 14H36z M44 14L50 0h3L47 14H44z" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Metadata & Title -->
+            <div class="flex-1 min-w-0">
+              <span class="font-mono text-[9px] sm:text-[10px] text-[#7E8A9A] font-bold uppercase tracking-widest block">
+                DIMENSION 05
+              </span>
+              <h4 class="font-display font-bold text-white text-sm sm:text-base lg:text-[15px] tracking-wide uppercase mt-1 leading-snug">
+                SETTLEMENT SPEED
+              </h4>
+              <span class="text-[#FF6A00] text-sm font-mono mt-1.5 block select-none">
+                &rarr;
+              </span>
+            </div>
+          </div>
+
+          <!-- Column 2: Legacy Centralized (37%) -->
+          <div class="w-full lg:w-[37%] p-5 sm:p-6 lg:p-7 flex items-start gap-3.5 sm:gap-4 relative border-b border-[#18202d] lg:border-b-0 lg:border-l border-[#18202d] bg-[#080B0F] group/legacy hover:bg-[#FF334F]/[0.02] transition-colors">
+            <!-- Red Cross Icon Box -->
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-[#FF334F]/40 bg-[#160a0d] flex items-center justify-center flex-shrink-0 text-[#FF334F] shadow-sm mt-0.5">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-mono font-bold text-xs sm:text-[13px] tracking-wider text-[#FF334F] uppercase leading-tight">
+                NET-30 / NET-60 BILLING
+              </div>
+              <p class="text-[11px] sm:text-xs text-[#7E8A9A] leading-relaxed mt-1.5">
+                Wire transfer fees, payment gateway exits, and manual contract changes lock in positive for compute providers.
+              </p>
+            </div>
+
+            <!-- Architectural Center Orange Line & Node (Divider between Col 2 and Col 3) -->
+            <div class="hidden lg:block absolute right-0 top-0 bottom-0 w-[1px] bg-[#FF6A00] z-20 pointer-events-none"></div>
+            <div class="hidden lg:block absolute right-0 top-0 translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#FF6A00] shadow-[0_0_8px_#FF6A00] z-30"></div>
+            <div class="hidden lg:block absolute right-0 bottom-0 translate-x-1/2 translate-y-1/2 w-2 h-2 rounded-full bg-[#FF6A00] shadow-[0_0_8px_#FF6A00] z-30"></div>
+          </div>
+
+          <!-- Mobile Transition Indicator -->
+          <div class="lg:hidden flex items-center justify-center py-2 px-5 bg-[#06080d] border-b border-[#18202d] text-[10px] font-mono uppercase tracking-widest text-[#FF6A00] gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00]"></span>
+            <span>CENTRALIZED &nbsp;&rarr;&nbsp; NATIVE L1</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00]"></span>
+          </div>
+
+          <!-- Column 3: Neurax Native L1 (37%) -->
+          <div class="w-full lg:w-[37%] p-5 sm:p-6 lg:p-7 flex items-start gap-3.5 sm:gap-4 relative bg-[#080B0F] group/native hover:bg-[#00D084]/[0.02] transition-colors">
+            <!-- Green Check Icon Box -->
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-[#00D084]/40 bg-[#071912] flex items-center justify-center flex-shrink-0 text-[#00D084] shadow-sm mt-0.5">
+              <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-mono font-bold text-xs sm:text-[13px] tracking-wider text-[#00D084] uppercase leading-tight">
+                INSTANT PROGRAMMATIC PAYOUTS
+              </div>
+              <p class="text-[11px] sm:text-xs text-[#C5D1DE] leading-relaxed mt-1.5">
+                Escrow release automatically to the miner wallet within the exact block the 3-node quorum completes verification.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </section>
+
+
+  <!-- SECTION 02: LAYER-1 PROTOCOL ARCHITECTURE -->
+  <section id="native" class="relative z-10 py-24 sm:py-28 px-4 sm:px-6 max-w-[1440px] mx-auto border-b border-[color:var(--color-line)]">
+    <div class="mb-14 relative">
+      <span class="outline-ghost absolute -top-24 -left-12 pointer-events-none select-none">02</span>
+      <div class="text-[10px] font-mono tracking-[0.3em] text-[color:var(--color-gold)] uppercase mb-2">Layer-1 Protocol Architecture</div>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold uppercase relative z-10">Why "Native" Beats Off-Chain Networks</h2>
+      <p class="text-muted max-w-3xl font-light text-base leading-relaxed mt-3">
+        Most Web3 AI networks are off-chain Web2 middleman databases with a crypto token bolted on. Neurax is natively hardcoded into Pyrax Core, deriving security from the Layer-1 consensus itself.
+      </p>
+    </div>
+
+    <!-- The 3-Panel Connected Architecture -->
+    <div class="space-y-6 lg:space-y-8">
+
+      <!-- TOP ROW: CARDS 01 & 02 (SIDE-BY-SIDE) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+
+        <!-- ==================== CARD 01: POW SECURITY + AI INFERENCE ==================== -->
+        <div class="group relative rounded-2xl border border-[#FF6A00]/30 bg-[#080B0F] flex flex-row overflow-hidden hover:border-[#FF6A00]/60 transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+          <!-- Left Architectural Pillar -->
+          <div class="w-20 sm:w-24 md:w-28 flex-shrink-0 flex flex-col justify-between border-r border-[#1a1f2e] p-3.5 sm:p-4 bg-[#06080c]">
+            <div>
+              <span class="font-display font-black text-4xl sm:text-5xl lg:text-[54px] tracking-tight leading-none text-[#FF6A00] block select-none">
+                01
+              </span>
+              <div class="font-mono text-[9px] sm:text-[10px] tracking-[0.16em] uppercase text-[#FF6A00] font-bold mt-2 leading-tight">
+                PILLAR<br />DUAL-YIELD
+              </div>
+              <div class="text-[#FF6A00] mt-3 sm:mt-4">
+                <svg viewBox="0 0 24 24" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="4" y1="12" x2="20" y2="12"></line>
+                  <polyline points="14 6 20 12 14 18"></polyline>
+                </svg>
+              </div>
+            </div>
+            <!-- Bottom Diagonal Hatch -->
+            <div class="h-20 sm:h-24 md:h-28 rounded-b-lg border-t border-[#1a1f2e] vault-hatch-orange w-full"></div>
+          </div>
+
+          <!-- Main Content Area -->
+          <div class="flex-1 p-5 sm:p-6 lg:p-7 flex flex-col justify-between min-w-0">
+            <div>
+              <!-- Top Row: Title + Status + Low-Poly Vector Graphic -->
+              <div class="flex items-start justify-between gap-3 mb-6">
+                <div>
+                  <h3 class="text-xl sm:text-2xl lg:text-[25px] font-black uppercase tracking-tight text-white leading-[1.1] font-display">
+                    POW SECURITY<br />
+                    <span class="text-[#FF6A00]">+ AI</span> INFERENCE
+                  </h3>
+                </div>
+
+                <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded border border-[#FF6A00]/40 bg-[#FF6A00]/10 text-[9px] sm:text-[10px] font-mono tracking-widest text-[#FF6A00] uppercase font-bold">
+                    MULTIPLEX
+                  </span>
+                  <!-- Metallic Image Aperture (Card 01 - Orange) -->
+                  <div class="w-20 h-14 sm:w-28 sm:h-16 rounded-xl overflow-hidden border border-[#FF6A00]/30 relative flex-shrink-0 shadow-md group-hover:border-[#FF6A00]/60 transition-all duration-300 bg-[#0a0705]">
+                    <img
+                      src="/images/cards/silver.png"
+                      alt="PoW Security Hardware Silicon"
+                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 brightness-90 contrast-125"
+                      loading="lazy"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-tr from-[#FF6A00]/65 via-[#FF6A00]/25 to-transparent mix-blend-color pointer-events-none"></div>
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#FF6A00]/15 to-[#080B0F]/70 pointer-events-none"></div>
+                    <div class="absolute inset-0 ring-1 ring-inset ring-white/15 rounded-xl pointer-events-none"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Feature Rows (2 Rows) -->
+              <div class="space-y-3">
+                <!-- Feature 1: Dual Monetization -->
+                <div class="p-3 sm:p-3.5 rounded-xl border border-[#1b1f2c] bg-[#0c0e15]/70 hover:bg-[#121622] transition-colors">
+                  <div class="flex items-start gap-3">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#12151f] border border-[#FF6A00]/30 flex items-center justify-center flex-shrink-0 text-[#FF6A00] shadow-sm">
+                      <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-baseline justify-between gap-2 mb-0.5">
+                        <h4 class="text-xs sm:text-sm font-semibold text-white tracking-wide truncate">
+                          Dual Monetization
+                        </h4>
+                        <span class="font-mono text-[9px] sm:text-[10px] font-bold text-[#FF6A00] uppercase tracking-wider text-right flex-shrink-0 leading-tight">
+                          BLOCK REWARDS<br />+ COMPUTE BOUNTIES
+                        </span>
+                      </div>
+                      <p class="text-[11px] text-[#8B93A1] leading-relaxed">
+                        Miners earn standard PoW block rewards + bonus $PYRX compute bounties during idle intervals.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Feature 2: Zero Token Inflation -->
+                <div class="p-3 sm:p-3.5 rounded-xl border border-[#1b1f2c] bg-[#0c0e15]/70 hover:bg-[#121622] transition-colors">
+                  <div class="flex items-start gap-3">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#12151f] border border-[#FF6A00]/30 flex items-center justify-center flex-shrink-0 text-[#FF6A00] shadow-sm">
+                      <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-baseline justify-between gap-2 mb-0.5">
+                        <h4 class="text-xs sm:text-sm font-semibold text-white tracking-wide truncate">
+                          Zero Token Inflation
+                        </h4>
+                        <span class="font-mono text-[9px] sm:text-[10px] font-bold text-[#FF6A00] uppercase tracking-wider text-right flex-shrink-0 leading-tight">
+                          NO INFLATION<br />PHYSICAL SILICON
+                        </span>
+                      </div>
+                      <p class="text-[11px] text-[#8B93A1] leading-relaxed">
+                        Taps pre-funded physical silicon with zero treasury dilution or inflationary minting.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== CARD 02: ZERO-CUSTODY CAPITAL LOCKING ==================== -->
+        <div class="group relative rounded-2xl border border-[#168BFF]/30 bg-[#080B0F] flex flex-row overflow-hidden hover:border-[#168BFF]/60 transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+          <!-- Left Architectural Pillar -->
+          <div class="w-20 sm:w-24 md:w-28 flex-shrink-0 flex flex-col justify-between border-r border-[#1a1f2e] p-3.5 sm:p-4 bg-[#06080c]">
+            <div>
+              <span class="font-display font-black text-4xl sm:text-5xl lg:text-[54px] tracking-tight leading-none text-[#168BFF] block select-none">
+                02
+              </span>
+              <div class="font-mono text-[9px] sm:text-[10px] tracking-[0.16em] uppercase text-[#168BFF] font-bold mt-2 leading-tight">
+                PILLAR<br />KERNEL ESCROW
+              </div>
+              <div class="text-[#168BFF] mt-3 sm:mt-4">
+                <svg viewBox="0 0 24 24" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="4" y1="12" x2="20" y2="12"></line>
+                  <polyline points="14 6 20 12 14 18"></polyline>
+                </svg>
+              </div>
+            </div>
+            <!-- Bottom Diagonal Hatch -->
+            <div class="h-20 sm:h-24 md:h-28 rounded-b-lg border-t border-[#1a1f2e] vault-hatch-blue w-full"></div>
+          </div>
+
+          <!-- Main Content Area -->
+          <div class="flex-1 p-5 sm:p-6 lg:p-7 flex flex-col justify-between min-w-0">
+            <div>
+              <!-- Top Row: Title + Status + Blue Crystal Mesh -->
+              <div class="flex items-start justify-between gap-3 mb-6">
+                <div>
+                  <h3 class="text-xl sm:text-2xl lg:text-[25px] font-black uppercase tracking-tight text-white leading-[1.1] font-display">
+                    ZERO-CUSTODY<br />
+                    <span class="text-[#168BFF]">CAPITAL LOCKING</span>
+                  </h3>
+                </div>
+
+                <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded border border-[#168BFF]/40 bg-[#168BFF]/10 text-[9px] sm:text-[10px] font-mono tracking-widest text-[#168BFF] uppercase font-bold">
+                    ZERO CUSTODY
+                  </span>
+                  <!-- Metallic Image Aperture (Card 02 - Electric Blue) -->
+                  <div class="w-20 h-14 sm:w-28 sm:h-16 rounded-xl overflow-hidden border border-[#168BFF]/30 relative flex-shrink-0 shadow-md group-hover:border-[#168BFF]/60 transition-all duration-300 bg-[#050812]">
+                    <img
+                      src="/images/cards/silver-4.png"
+                      alt="Zero Custody Liquid Metal"
+                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 brightness-90 contrast-125"
+                      loading="lazy"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-tr from-[#168BFF]/65 via-[#168BFF]/25 to-transparent mix-blend-color pointer-events-none"></div>
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#168BFF]/15 to-[#080B0F]/70 pointer-events-none"></div>
+                    <div class="absolute inset-0 ring-1 ring-inset ring-white/15 rounded-xl pointer-events-none"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Feature Rows (2 Rows) -->
+              <div class="space-y-3">
+                <!-- Feature 1: L1 Escrow State -->
+                <div class="p-3 sm:p-3.5 rounded-xl border border-[#1b1f2c] bg-[#0c0e15]/70 hover:bg-[#121622] transition-colors">
+                  <div class="flex items-start gap-3">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#12151f] border border-[#168BFF]/30 flex items-center justify-center flex-shrink-0 text-[#168BFF] shadow-sm">
+                      <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <path d="m9 12 2 2 4-4"></path>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-baseline justify-between gap-2 mb-0.5">
+                        <h4 class="text-xs sm:text-sm font-semibold text-white tracking-wide truncate">
+                          L1 Escrow State
+                        </h4>
+                        <span class="font-mono text-[9px] sm:text-[10px] font-bold text-[#168BFF] uppercase tracking-wider text-right flex-shrink-0 leading-tight">
+                          ON-CHAIN ESCROW<br />HARD CODED
+                        </span>
+                      </div>
+                      <p class="text-[11px] text-[#8B93A1] leading-relaxed">
+                        Hardcoded directly into <code class="text-white">escrow.rs</code>, eliminating multi-sig bridges and third-party custody risks.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Feature 2: Mempool Slashing -->
+                <div class="p-3 sm:p-3.5 rounded-xl border border-[#1b1f2c] bg-[#0c0e15]/70 hover:bg-[#121622] transition-colors">
+                  <div class="flex items-start gap-3">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#12151f] border border-[#168BFF]/30 flex items-center justify-center flex-shrink-0 text-[#168BFF] shadow-sm">
+                      <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="m14 13-7.5 7.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L11 10"></path>
+                        <path d="m16 16 6-6"></path>
+                        <path d="m8 8 6-6"></path>
+                        <path d="m9 7 8 8"></path>
+                        <path d="m21 11-8-8"></path>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-baseline justify-between gap-2 mb-0.5">
+                        <h4 class="text-xs sm:text-sm font-semibold text-white tracking-wide truncate">
+                          Mempool Slashing
+                        </h4>
+                        <span class="font-mono text-[9px] sm:text-[10px] font-bold text-[#168BFF] uppercase tracking-wider text-right flex-shrink-0 leading-tight">
+                          AUTOMATIC SLASHING<br />DISPUTE PROOF
+                        </span>
+                      </div>
+                      <p class="text-[11px] text-[#8B93A1] leading-relaxed">
+                        Malicious nodes lose their staked security deposit instantaneously upon cryptographic dispute proof.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== CARD 03: NATIVE SMART CONTRACT INVOCATIONS (HORIZONTAL PANEL) ==================== -->
+      <div class="group relative rounded-2xl border border-[#F0B83F]/35 bg-[#080B0F] flex flex-row overflow-hidden hover:border-[#F0B83F]/65 transition-all duration-300 shadow-[0_4px_28px_rgba(0,0,0,0.5)]">
+        <!-- Left Architectural Pillar -->
+        <div class="w-20 sm:w-24 md:w-28 flex-shrink-0 flex flex-col justify-between border-r border-[#1a1f2e] p-3.5 sm:p-4 bg-[#06080c]">
+          <div>
+            <span class="font-display font-black text-4xl sm:text-5xl lg:text-[54px] tracking-tight leading-none text-[#F0B83F] block select-none">
+              03
+            </span>
+            <div class="font-mono text-[9px] sm:text-[10px] tracking-[0.16em] uppercase text-[#F0B83F] font-bold mt-2 leading-tight">
+              PILLAR<br />MULTI-VM DISPATCH
+            </div>
+            <div class="text-[#F0B83F] mt-3 sm:mt-4">
+              <svg viewBox="0 0 24 24" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" y1="12" x2="20" y2="12"></line>
+                <polyline points="14 6 20 12 14 18"></polyline>
+              </svg>
+            </div>
+          </div>
+          <!-- Bottom Diagonal Hatch -->
+          <div class="h-24 sm:h-28 md:h-32 rounded-b-lg border-t border-[#1a1f2e] vault-hatch-gold w-full"></div>
+        </div>
+
+        <!-- Main Horizontal Content Area -->
+        <div class="flex-1 flex flex-col lg:flex-row items-stretch justify-between min-w-0">
+          <!-- Text and Technical Details (Left ~75%) -->
+          <div class="flex-1 p-5 sm:p-7 flex flex-col justify-between min-w-0">
+            <div>
+              <!-- Top Row: Title + Status -->
+              <div class="flex items-start justify-between gap-4 mb-4">
+                <h3 class="text-xl sm:text-2xl lg:text-[28px] font-black uppercase tracking-tight text-white leading-[1.1] font-display">
+                  NATIVE SMART<br />
+                  <span class="text-[#F0B83F]">CONTRACT INVOCATIONS</span>
+                </h3>
+
+                <span class="inline-flex items-center px-3 py-1 rounded border border-[#F0B83F]/40 bg-[#F0B83F]/10 text-[9px] sm:text-[10px] font-mono tracking-widest text-[#F0B83F] uppercase font-bold flex-shrink-0">
+                  NATIVE OPCODE
+                </span>
+              </div>
+
+              <!-- VM Technology Modules Row -->
+              <div class="flex items-center gap-2 sm:gap-3 my-4 flex-wrap">
+                <!-- EVM Block -->
+                <div class="px-3.5 sm:px-4 py-2 rounded-xl border border-[#232a3d] bg-[#0c0e15] flex items-center gap-2.5 font-mono text-xs font-bold text-white shadow-sm hover:border-[#F0B83F]/50 transition-colors">
+                  <svg viewBox="0 0 24 24" class="w-4 h-4 text-[#F0B83F]" fill="currentColor">
+                    <path d="M12 1.5l-6.5 10.8 6.5 3.8 6.5-3.8L12 1.5zM5.5 13.5L12 22.5l6.5-9-6.5 3.8-6.5-3.8z" />
+                  </svg>
+                  <span>EVM</span>
+                </div>
+                <span class="text-[#F0B83F] font-bold text-base select-none">·</span>
+
+                <!-- WASM Block -->
+                <div class="px-3.5 sm:px-4 py-2 rounded-xl border border-[#232a3d] bg-[#0c0e15] flex items-center gap-2.5 font-mono text-xs font-bold text-white shadow-sm hover:border-[#F0B83F]/50 transition-colors">
+                  <div class="w-4 h-4 rounded bg-[#F0B83F]/20 text-[#F0B83F] font-mono text-[8px] font-black flex items-center justify-center border border-[#F0B83F]/40">
+                    WA
+                  </div>
+                  <span>WASM</span>
+                </div>
+                <span class="text-[#F0B83F] font-bold text-base select-none">·</span>
+
+                <!-- CAIRO Block -->
+                <div class="px-3.5 sm:px-4 py-2 rounded-xl border border-[#232a3d] bg-[#0c0e15] flex items-center gap-2.5 font-mono text-xs font-bold text-white shadow-sm hover:border-[#F0B83F]/50 transition-colors">
+                  <svg viewBox="0 0 24 24" class="w-4 h-4 text-[#F0B83F]" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 20L12 4l8 16M7 14h10" />
+                  </svg>
+                  <span>CAIRO</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Information Areas (Split into 2 Columns) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 pt-4 mt-2 border-t border-[#1a1f2e]">
+              <!-- Left Info Block -->
+              <div class="flex items-start gap-3.5">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#12151f] border border-[#F0B83F]/35 flex items-center justify-center flex-shrink-0 text-[#F0B83F] shadow-sm">
+                  <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-xs sm:text-sm font-semibold text-white tracking-wide mb-1">
+                    EVM · WASM · CAIRO
+                  </h4>
+                  <p class="text-[11px] sm:text-xs text-[#8B93A1] leading-relaxed">
+                    One unified compute registry callable directly from Solidity, Rust, and Cairo smart contracts.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Right Info Block -->
+              <div class="border-t md:border-t-0 md:border-l border-[#1a1f2e] pt-4 md:pt-0 md:pl-6 flex items-start gap-3.5">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#12151f] border border-[#F0B83F]/35 flex items-center justify-center flex-shrink-0 text-[#F0B83F] shadow-sm">
+                  <svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-xs sm:text-sm font-semibold text-white tracking-wide mb-1">
+                    Autonomous Execution
+                  </h4>
+                  <p class="text-[11px] sm:text-xs text-[#8B93A1] leading-relaxed">
+                    Generate images, process embeddings, or run AI agents directly from on-chain transactions.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Machined Gold Radial Metallic Core (Rightmost ~20-25%) -->
+          <div class="hidden lg:flex w-64 xl:w-80 self-stretch relative overflow-hidden items-center justify-center border-l border-[#1a1f2e] bg-[#07090e] select-none group/machined">
+            <img
+              src="/images/cards/silver-2.png"
+              alt="Multi-VM Dispatch Machined Gold Conical Aperture"
+              class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 brightness-90 contrast-125"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-gradient-to-tr from-[#F0B83F]/70 via-[#D9A52E]/35 to-transparent mix-blend-color pointer-events-none"></div>
+            <div class="absolute inset-0 bg-radial from-[#fde047]/30 to-[#07090e]/75 mix-blend-screen pointer-events-none"></div>
+            <div class="absolute inset-0 ring-1 ring-inset ring-white/15 pointer-events-none"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- SECTION 03: ZERO-TRUST AIR-GAPPED DUAL-VAULT ARCHITECTURE -->
+  <section id="sidecars" class="relative z-10 py-24 sm:py-28 px-4 sm:px-6 bg-[color:var(--color-bg)]">
+    <!-- Ambient Technical Grid Pattern -->
+    <div class="max-w-[1440px] mx-auto text-center mb-16">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[color:var(--color-line)] bg-[color:var(--color-surface)]/60 text-[10px] font-mono tracking-[0.25em] text-[#8B93A1] uppercase mb-4">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#FF6A00]"></span>
+        <span>SECTION 03 // ARCHITECTURAL DUAL-VAULT</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-[#3B82F6]"></span>
+      </div>
+      <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight font-display text-white">
+        THE <span class="bg-gradient-to-r from-[#FF6A00] via-[#fed23c] to-[#3B82F6] bg-clip-text text-transparent">DUAL-VAULT</span> ARCHITECTURE
+      </h2>
+      <p class="text-xs sm:text-sm font-mono tracking-[0.2em] text-[#8B93A1] uppercase mt-4 max-w-2xl mx-auto">
+        ZERO PRIVILEGE ESCALATION FOR MINERS. ZERO DATA LEAKAGE FOR BUILDERS.
+      </p>
+    </div>
+
+    <!-- The Two-Card Architectural Grid -->
+    <div class="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
+
+      <!-- ==================== CARD 01: THE MINER'S SHIELD (HOST DEFENSE) ==================== -->
+      <div class="group relative rounded-2xl border border-[#1a1f2e] bg-[#090b10] p-6 sm:p-8 md:p-9 flex flex-col justify-between transition-all duration-300 hover:border-[#FF6A00]/40 hover:shadow-[0_0_35px_rgba(255,106,0,0.07)]">
+        <div class="space-y-8">
+          <!-- Top Area: Header Info + Top-Right Abstract Metallic Shield Graphic -->
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <div class="font-mono text-xs font-bold text-[#FF6A00] tracking-[0.2em] uppercase">
+                01 / HOST DEFENSE
+              </div>
+              <h3 class="text-3xl sm:text-4xl lg:text-[44px] font-black uppercase tracking-tight text-white leading-[1.05] mt-3 font-display">
+                THE MINER'S<br />
+                <span class="text-[#FF6A00]">SHIELD.</span>
+              </h3>
+              <p class="font-mono text-[11px] sm:text-xs text-[#8B93A1] tracking-[0.16em] uppercase mt-3.5 leading-snug">
+                YOUR WALLET &amp; CONSENSUS<br />ARE UNTOUCHABLE.
+              </p>
+              <p class="text-xs text-[#8B93A1] leading-relaxed mt-3 max-w-md hidden sm:block">
+                Running untrusted AI model code will never compromise your node, wallet, or local network. The execution runtime is locked outside the kernel.
+              </p>
+            </div>
+
+            <!-- Top-Right Abstract Metallic Shield Graphic -->
+            <div class="w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-2xl border border-[#1f2434] bg-[#0c0e14] overflow-hidden relative flex-shrink-0 shadow-inner group-hover:border-[#FF6A00]/30 transition-colors">
+              <svg viewBox="0 0 160 160" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <radialGradient id="miner-metal" cx="50%" cy="50%" r="50%" fx="65%" fy="35%">
+                    <stop offset="0%" stop-color="#2a3246" />
+                    <stop offset="45%" stop-color="#141822" />
+                    <stop offset="100%" stop-color="#080a0f" />
+                  </radialGradient>
+                  <linearGradient id="flare-beam" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="transparent" />
+                    <stop offset="60%" stop-color="#FF6A00" stop-opacity="0.85" />
+                    <stop offset="100%" stop-color="#fed23c" />
+                  </linearGradient>
+                  <filter id="glow-orange" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="5" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                <!-- Base Titanium Disc -->
+                <circle cx="80" cy="80" r="74" fill="url(#miner-metal)" stroke="#232a3d" stroke-width="1.5" />
+                <!-- Aperture Segments -->
+                <path d="M80 80 L80 10 A70 70 0 0 1 150 80 Z" fill="#FF6A00" fill-opacity="0.14" />
+                <path d="M80 80 L150 80 A70 70 0 0 1 80 150 Z" fill="#0b0d14" />
+                <path d="M80 80 L80 150 A70 70 0 0 1 10 80 Z" fill="#181d2a" />
+                <path d="M80 80 L10 80 A70 70 0 0 1 80 10 Z" fill="#0f131d" />
+                <!-- Flare Ray in Top-Right Wedge -->
+                <polygon points="80,80 132,18 150,48" fill="url(#flare-beam)" filter="url(#glow-orange)" opacity="0.9" />
+                <!-- Concentric Engineering Reticle Rings -->
+                <circle cx="80" cy="80" r="60" stroke="#2a3246" stroke-width="1" stroke-dasharray="4 3" />
+                <circle cx="80" cy="80" r="40" stroke="rgba(255,255,255,0.09)" stroke-width="1" />
+                <circle cx="80" cy="80" r="20" stroke="#FF6A00" stroke-width="1.5" stroke-opacity="0.6" fill="#090b10" />
+                <!-- Precision Reticle Axes -->
+                <line x1="80" y1="12" x2="80" y2="148" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+                <line x1="12" y1="80" x2="148" y2="80" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+                <!-- Center Core Node -->
+                <circle cx="80" cy="80" r="5" fill="#FF6A00" />
+                <circle cx="80" cy="80" r="1.5" fill="#ffffff" />
+                <!-- Radar Satellite Blip -->
+                <circle cx="118" cy="42" r="3" fill="#fed23c" filter="url(#glow-orange)" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Middle Area: Architectural Pillar (01) + 3 Blueprint Feature Rows -->
+          <div class="flex items-stretch gap-4 sm:gap-6">
+            <!-- Left Architectural Pillar -->
+            <div class="w-20 sm:w-28 md:w-32 flex-shrink-0 flex flex-col rounded-xl overflow-hidden border border-[#232838] group-hover:border-[#FF6A00]/40 transition-colors">
+              <!-- Top Hatched Hazard / Engineering Grid -->
+              <div class="h-28 sm:h-36 vault-hatch-orange border-b border-[#FF6A00]/30 relative">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#090b10]/80"></div>
+              </div>
+              <!-- Bottom Solid Vibrant Orange Block -->
+              <div class="flex-1 bg-[#FF6A00] flex flex-col items-center justify-between p-3 sm:p-4 min-h-[160px]">
+                <span class="text-4xl sm:text-5xl lg:text-6xl font-black font-display text-black tracking-tight pt-2 select-none">
+                  01
+                </span>
+                <!-- Circular Dark Button with Arrow -->
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#0a0c10] text-[#FF6A00] flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-105 group-hover:translate-x-0.5">
+                  <svg viewBox="0 0 24 24" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Blueprint Feature Rows -->
+            <div class="flex-1 min-w-0 space-y-3 sm:space-y-3.5">
+              <!-- Row 1: No CUDA in Consensus Kernel -->
+              <div class="p-3.5 sm:p-4 rounded-xl border border-[#1b1f2c] bg-[#0c0e15]/80 hover:bg-[#121622] hover:border-[#2a3248] transition-all duration-200">
+                <div class="flex items-start gap-3 sm:gap-3.5">
+                  <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#12151f] border border-[#232a3d] flex items-center justify-center flex-shrink-0 text-[#FF6A00] shadow-sm">
+                    <!-- CPU Microchip Icon -->
+                    <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                      <rect x="8" y="8" width="8" height="8" rx="1"></rect>
+                      <path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"></path>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-baseline justify-between gap-2 mb-1">
+                      <h4 class="text-xs sm:text-sm font-semibold text-white tracking-wide truncate">
+                        No CUDA in Consensus Kernel
+                      </h4>
+                      <span class="font-mono text-[10px] sm:text-[11px] font-bold text-[#FF6A00] uppercase tracking-wider flex-shrink-0">
+                        18MB
+                      </span>
+                    </div>
+                    <p class="text-[11px] sm:text-xs text-[#8B93A1] leading-relaxed">
+                      The Rust daemon never loads GPU drivers or heavy execution runtimes into consensus state.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Row 2: Cryptographic Keystore Isolation -->
+              <div class="p-3.5 sm:p-4 rounded-xl border border-[#1b1f2c] bg-[#0c0e15]/80 hover:bg-[#121622] hover:border-[#2a3248] transition-all duration-200">
+                <div class="flex items-start gap-3 sm:gap-3.5">
+                  <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#12151f] border border-[#232a3d] flex items-center justify-center flex-shrink-0 text-[#FF6A00] shadow-sm">
+                    <!-- Keystore Lock Icon -->
+                    <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      <circle cx="12" cy="16" r="1.5" fill="currentColor"></circle>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-baseline justify-between gap-2 mb-1">
+                      <h4 class="text-xs sm:text-sm font-semibold text-white tracking-wide truncate">
+                        Cryptographic Keystore Isolation
+                      </h4>
+                      <span class="font-mono text-[10px] sm:text-[11px] font-bold text-[#FF6A00] uppercase tracking-wider flex-shrink-0">
+                        DENIED
+                      </span>
+                    </div>
+                    <p class="text-[11px] sm:text-xs text-[#8B93A1] leading-relaxed">
+                      Wallet keys and validator seeds reside in air-gapped host memory. The AI sidecar has physically zero filesystem read access to <code class="text-white">~/.pyrax/keys</code>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Row 3: cgroup v2 Hardware Jails -->
+              <div class="p-3.5 sm:p-4 rounded-xl border border-[#1b1f2c] bg-[#0c0e15]/80 hover:bg-[#121622] hover:border-[#2a3248] transition-all duration-200">
+                <div class="flex items-start gap-3 sm:gap-3.5">
+                  <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#12151f] border border-[#232a3d] flex items-center justify-center flex-shrink-0 text-[#FF6A00] shadow-sm">
+                    <!-- 3D Box Container Icon -->
+                    <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                      <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                      <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-baseline justify-between gap-2 mb-1">
+                      <h4 class="text-xs sm:text-sm font-semibold text-white tracking-wide truncate">
+                        cgroup v2 Hardware Jails
+                      </h4>
+                      <span class="font-mono text-[10px] sm:text-[11px] font-bold text-[#FF6A00] uppercase tracking-wider flex-shrink-0">
+                        RAM / VRAM
+                      </span>
+                    </div>
+                    <p class="text-[11px] sm:text-xs text-[#8B93A1] leading-relaxed">
+                      Kernel resource limits prevent rogue models from exhausting system RAM, freezing host drivers, or starving PoW mining.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Area: Footer Runtime Info -->
+        <div class="pt-5 mt-6 border-t border-[#1b1f2c] flex items-center justify-between text-xs font-mono">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded bg-[#12151f] border border-[#232a3d] flex items-center justify-center text-[10px] text-[#FF6A00] font-bold">
+              &gt;_
+            </div>
+            <span class="tracking-wider uppercase text-[11px] text-[#8B93A1]">Host Runtime:</span>
+          </div>
+          <span class="text-[#FF6A00] font-semibold text-[11px] sm:text-xs">
+            pyrax-node-daemon (Rust) · Unprivileged
+          </span>
+        </div>
+      </div>
+
+      <!-- ==================== CARD 02: THE BUILDER'S PRIVACY (WORKLOAD DEFENSE) ==================== -->
+      <div class="group relative rounded-2xl border border-[#1a1f2e] bg-[#090b10] p-6 sm:p-8 md:p-9 flex flex-col justify-between transition-all duration-300 hover:border-[#3B82F6]/40 hover:shadow-[0_0_35px_rgba(59,130,246,0.07)]">
+        <div class="space-y-8">
+          <!-- Top Area: Header Info + Top-Right Abstract Isometric Cubes Graphic -->
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <div class="font-mono text-xs font-bold text-[#3B82F6] tracking-[0.2em] uppercase">
+                02 / WORKLOAD DEFENSE
+              </div>
+              <h3 class="text-3xl sm:text-4xl lg:text-[44px] font-black uppercase tracking-tight text-white leading-[1.05] mt-3 font-display">
+                THE BUILDER'S<br />
+                <span class="text-[#3B82F6]">PRIVACY.</span>
+              </h3>
+              <p class="font-mono text-[11px] sm:text-xs text-[#8B93A1] tracking-[0.16em] uppercase mt-3.5 leading-snug">
+                YOUR PROMPTS &amp; DATA<br />NEVER LEAK.
+              </p>
+              <p class="text-xs text-[#8B93A1] leading-relaxed mt-3 max-w-md hidden sm:block">
+                Mining nodes cannot snoop on user input, exfiltrate confidential customer data, or secretly query unauthorized cloud APIs.
+              </p>
+            </div>
+
+            <!-- Top-Right Abstract Isometric Blue Cubes Graphic -->
+            <div class="w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-2xl border border-[#1f2434] bg-[#0c0e14] overflow-hidden relative flex-shrink-0 shadow-inner group-hover:border-[#3B82F6]/30 transition-colors">
+              <svg viewBox="0 0 160 160" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <radialGradient id="builder-space" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#10192e" />
+                    <stop offset="60%" stop-color="#090d18" />
+                    <stop offset="100%" stop-color="#05070c" />
+                  </radialGradient>
+                  <filter id="glow-blue" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="5" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                  <linearGradient id="cube-top-1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.9" />
+                    <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.3" />
+                  </linearGradient>
+                  <linearGradient id="cube-side-1" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#1e293b" />
+                    <stop offset="100%" stop-color="#090d16" />
+                  </linearGradient>
+                </defs>
+                <!-- Deep Space Base -->
+                <circle cx="80" cy="80" r="74" fill="url(#builder-space)" stroke="#232a3d" stroke-width="1.5" />
+                <!-- Grid Lines -->
+                <path d="M20 50 L140 110 M20 110 L140 50" stroke="rgba(59,130,246,0.15)" stroke-width="1" stroke-dasharray="3 3" />
+                
+                <!-- Isometric Cube 1 (Main Front / Top-Right) -->
+                <polygon points="105,28 140,48 105,68 70,48" fill="url(#cube-top-1)" stroke="#60a5fa" stroke-width="1.5" filter="url(#glow-blue)" />
+                <polygon points="70,48 105,68 105,108 70,88" fill="url(#cube-side-1)" stroke="#3B82F6" stroke-width="1" />
+                <polygon points="105,68 140,48 140,88 105,108" fill="#0c101d" stroke="#1d4ed8" stroke-width="1" />
+
+                <!-- Isometric Cube 2 (Lower Left) -->
+                <polygon points="55,68 90,88 55,108 20,88" fill="#1e293b" stroke="#3B82F6" stroke-width="1.2" />
+                <polygon points="20,88 55,108 55,142 20,122" fill="#0f172a" stroke="#1e293b" stroke-width="1" />
+                <polygon points="55,108 90,88 90,122 55,142" fill="#080c14" stroke="#1d4ed8" stroke-width="1" />
+
+                <!-- Isometric Cube 3 (Back Accent) -->
+                <polygon points="60,22 85,36 60,50 35,36" fill="#172554" stroke="#2563eb" stroke-width="1" opacity="0.7" />
+                <polygon points="35,36 60,50 60,74 35,60" fill="#090d18" stroke="#1e293b" stroke-width="0.8" opacity="0.7" />
+
+                <!-- Glowing Vertex Nodes -->
+                <circle cx="105" cy="28" r="2.5" fill="#93c5fd" filter="url(#glow-blue)" />
+                <circle cx="140" cy="48" r="2" fill="#60a5fa" />
+                <circle cx="70" cy="48" r="2" fill="#60a5fa" />
+                <circle cx="105" cy="68" r="3" fill="#60a5fa" filter="url(#glow-blue)" />
+                <circle cx="55" cy="68" r="2" fill="#3B82F6" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Middle Area: Architectural Pillar (02) + 3 Blueprint Feature Rows -->
+          <div class="flex items-stretch gap-4 sm:gap-6">
+            <!-- Left Architectural Pillar -->
+            <div class="w-20 sm:w-28 md:w-32 flex-shrink-0 flex flex-col rounded-xl overflow-hidden border border-[#232838] group-hover:border-[#3B82F6]/40 transition-colors">
+              <!-- Top Hatched Hazard / Engineering Grid -->
+              <div class="h-28 sm:h-36 vault-hatch-blue border-b border-[#3B82F6]/30 relative">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#090b10]/80"></div>
+              </div>
+              <!-- Bottom Solid Vibrant Blue Block -->
+              <div class="flex-1 bg-[#3B82F6] flex flex-col items-center justify-between p-3 sm:p-4 min-h-[160px]">
+                <span class="text-4xl sm:text-5xl lg:text-6xl font-black font-display text-black tracking-tight pt-2 select-none">
+                  02
+                </span>
+                <!-- Circular Dark Button with Arrow -->
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#0a0c10] text-[#3B82F6] flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-105 group-hover:translate-x-0.5">
+                  <svg viewBox="0 0 24 24" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Blueprint Feature Rows -->
+            <div class="flex-1 min-w-0 space-y-3 sm:space-y-3.5">
+              <!-- Row 1: Permanently Severed Network Egress -->
+              <div class="p-3.5 sm:p-4 rounded-xl border border-[#1b1f2c] bg-[#0c0e15]/80 hover:bg-[#121622] hover:border-[#2a3248] transition-all duration-200">
+                <div class="flex items-start gap-3 sm:gap-3.5">
+                  <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#12151f] border border-[#232a3d] flex items-center justify-center flex-shrink-0 text-[#3B82F6] shadow-sm">
+                    <!-- Network Share / Disconnect Icon -->
+                    <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <circle cx="18" cy="5" r="3"></circle>
+                      <circle cx="6" cy="12" r="3"></circle>
+                      <circle cx="18" cy="19" r="3"></circle>
+                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-baseline justify-between gap-2 mb-1">
+                      <h4 class="text-xs sm:text-sm font-semibold text-white tracking-wide truncate">
+                        Permanently Severed Network Egress
+                      </h4>
+                      <span class="font-mono text-[10px] sm:text-[11px] font-bold text-[#fb6f73] uppercase tracking-wider flex-shrink-0">
+                        NO OUTBOUND
+                      </span>
+                    </div>
+                    <p class="text-[11px] sm:text-xs text-[#8B93A1] leading-relaxed">
+                      Containers execute with all network sockets disabled. The worker physically cannot "phone home", upload logs, or call third-party APIs.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Row 2: Ephemeral Memory Sanitization -->
+              <div class="p-3.5 sm:p-4 rounded-xl border border-[#1b1f2c] bg-[#0c0e15]/80 hover:bg-[#121622] hover:border-[#2a3248] transition-all duration-200">
+                <div class="flex items-start gap-3 sm:gap-3.5">
+                  <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#12151f] border border-[#232a3d] flex items-center justify-center flex-shrink-0 text-[#3B82F6] shadow-sm">
+                    <!-- Memory Cylinder Stack Icon -->
+                    <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-baseline justify-between gap-2 mb-1">
+                      <h4 class="text-xs sm:text-sm font-semibold text-white tracking-wide truncate">
+                        Ephemeral Memory Sanitization
+                      </h4>
+                      <span class="font-mono text-[10px] sm:text-[11px] font-bold text-[#3B82F6] uppercase tracking-wider flex-shrink-0">
+                        PURGED ON EXIT
+                      </span>
+                    </div>
+                    <p class="text-[11px] sm:text-xs text-[#8B93A1] leading-relaxed">
+                      All GPU VRAM allocations, KV caches, and intermediate activation weights are zeroed and destroyed instantly upon job settlement.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Row 3: Read-Only Model Weights Mounting -->
+              <div class="p-3.5 sm:p-4 rounded-xl border border-[#1b1f2c] bg-[#0c0e15]/80 hover:bg-[#121622] hover:border-[#2a3248] transition-all duration-200">
+                <div class="flex items-start gap-3 sm:gap-3.5">
+                  <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#12151f] border border-[#232a3d] flex items-center justify-center flex-shrink-0 text-[#3B82F6] shadow-sm">
+                    <!-- Read-Only Eye / Cryptographic Seal Icon -->
+                    <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-baseline justify-between gap-2 mb-1">
+                      <h4 class="text-xs sm:text-sm font-semibold text-white tracking-wide truncate">
+                        Read-Only Model Weights Mounting
+                      </h4>
+                      <span class="font-mono text-[10px] sm:text-[11px] font-bold text-[#3B82F6] uppercase tracking-wider flex-shrink-0">
+                        IMMUTABLE SHA-256
+                      </span>
+                    </div>
+                    <p class="text-[11px] sm:text-xs text-[#8B93A1] leading-relaxed">
+                      Checkpoints are mounted as read-only volumes. The worker cannot tamper with weights or inject prompt-injection backdoors.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Area: Footer Runtime Info -->
+        <div class="pt-5 mt-6 border-t border-[#1b1f2c] flex items-center justify-between text-xs font-mono">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded bg-[#12151f] border border-[#232a3d] flex items-center justify-center text-[10px] text-[#3B82F6] font-bold">
+              &gt;_
+            </div>
+            <span class="tracking-wider uppercase text-[11px] text-[#8B93A1]">Worker Runtime:</span>
+          </div>
+          <span class="text-[#3B82F6] font-semibold text-[11px] sm:text-xs">
+            pyrax-node-suite/sidecars · Sandboxed Subprocess
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</Site>
+
+<style>
+  .shimmer-text {
+    background: linear-gradient(90deg, #fed23c 0%, #f68a24 35%, #ffffff 55%, #5cbace 100%);
+    background-size: 200% auto;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: shimmer 8s linear infinite;
+  }
+  @keyframes shimmer {
+    to {
+      background-position: 200% center;
+    }
+  }
+  @keyframes spin-conic {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .shiny-border-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    transform: translate(-50%, -50%);
+    background: conic-gradient(from 0deg, transparent 0%, #f68a24 40%, #5cbace 50%, #fed23c 60%, transparent 70%);
+    animation: spin-conic 4s linear infinite;
+  }
+  .outline-ghost {
+    -webkit-text-stroke: 1px var(--color-line);
+    color: transparent;
+    opacity: 0.15;
+    font-size: 180px;
+    font-family: var(--font-display);
+    line-height: 1;
+  }
+  .vertical-rail {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+  .dag-node {
+    animation: node-pulse 3s infinite ease-in-out;
+  }
+  @keyframes node-pulse {
+    0%, 100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1.15);
+    }
+  }
+  .circuit-trace {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: dash 10s linear forwards infinite;
+  }
+  @keyframes dash {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  .bus-glow {
+    filter: drop-shadow(0 0 8px var(--color-brand));
+  }
+  .vault-hatch-orange {
+    background: repeating-linear-gradient(45deg, rgba(255, 106, 0, 0.18) 0px, rgba(255, 106, 0, 0.18) 2px, transparent 2px, transparent 9px);
+    background-color: #0b0e15;
+  }
+  .vault-hatch-blue {
+    background: repeating-linear-gradient(45deg, rgba(59, 130, 246, 0.18) 0px, rgba(59, 130, 246, 0.18) 2px, transparent 2px, transparent 9px);
+    background-color: #0b0e15;
+  }
+  .vault-hatch-gold {
+    background: repeating-linear-gradient(45deg, rgba(240, 184, 63, 0.18) 0px, rgba(240, 184, 63, 0.18) 2px, transparent 2px, transparent 9px);
+    background-color: #0b0e15;
+  }
+  .vault-hatch-purple {
+    background: repeating-linear-gradient(45deg, rgba(139, 92, 246, 0.18) 0px, rgba(139, 92, 246, 0.18) 2px, transparent 2px, transparent 9px);
+    background-color: #0b0e15;
+  }
+  .vault-hatch-green {
+    background: repeating-linear-gradient(45deg, rgba(0, 200, 120, 0.18) 0px, rgba(0, 200, 120, 0.18) 2px, transparent 2px, transparent 9px);
+    background-color: #0b0e15;
+  }
+</style>
